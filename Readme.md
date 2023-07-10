@@ -1,38 +1,38 @@
 # UltraHLE
 
-UltraHLE - классический эмулятор Nintendo 64. Шедевр.
+UltraHLE is a classic Nintendo 64 emulator. A masterpiece.
 
 ![mario](mario.png)
 
-Исходники взяты отсюда: https://code.google.com/archive/p/ultrahle/downloads
+The sources are taken from here: https://code.google.com/archive/p/ultrahle/downloads
 
-Приведены в порядок для сборки под Visual Studio 2022.
+Tidied up for building under Visual Studio 2022.
 
-## Структура директорий
+## Directory structure
 
-- src: оригинальные слегка модифцированные исходники
-- Build: сюда будет собираться исполняемый файл
-- Scripts: проект для VS2022, который ссылками тянет исходники и всё остальное из оригинальной папки src
+- src: original slightly modified sources
+- Build: this is where the executable will be built
+- Scripts: project for VS2022, which pulls sources and everything else from the original src folder by links.
 
-## Как модифицированы исходники
+## How the sources are modified
 
-- Добавлен макрос `_CRT_SECURE_NO_WARNINGS` для unsafe вызовов
-- Для сборки Release необходимо определить макрос `RELEASE=1`, иначе код консоли будет падать сразу после запуска эмулятора
-- `stricmp` заменена на `_stricmp`
-- `memicmp` заменена на `_memicmp`
-- `strlwr` заменена на `_strlwr`
-- Unicode: Not Set (UltraHLE не использует Unicode)
-- Незначительные исправления в UltraHLE.rc и RESOURCE.H
-- MAIN.C: Запуск эмуляции производится командой `sgo` (`breakcommand("sgo");`), без использования рекомпилятора. В 2023 году спокойно можно использовать интерпретатор для N64.
+- Added `_CRT_SECURE_NO_WARNINGS` macro for unsafe calls
+- The `RELEASE=1` macro must be defined for Release builds, otherwise the console code will crash immediately after starting the emulator
+- `stricmp` replaced by `_stricmp`
+- `memicmp` replaced by `_memicmp`
+- `strlwr` replaced by `_strlwr`.
+- Unicode: Not Set (UltraHLE does not use Unicode)
+- Minor fixes in UltraHLE.rc and RESOURCE.H
+- MAIN.C: Emulation is started with the command `sgo` (`breakcommand("sgo");`), without using the recompiler. It is safe to use the interpreter for N64 in 2023.
 
-## Сборка
+## Build
 
-Особенно ничего делать не требуется. Собирать можно в конфигурации Debug/Release x86.
+You don't need to do anything special. You can build in Debug/Release x86 configuration.
 
-x64 сборка не поддерживается, т.к. UltraHLE использует inline ассемблер в .C файлах, который нельзя использовать в x64.
+x64 build is not supported because UltraHLE uses inline assembler in .C files, which cannot be used in x64.
 
 ## Glide
 
-UltraHLE требуется устаревший графический API Glide 2.0.
+UltraHLE requires the deprecated Glide 2.0 graphics API.
 
-Враппер можно взять тут: http://www.zeckensack.de/glide/
+Wrapper is available here: http://www.zeckensack.de/glide/
