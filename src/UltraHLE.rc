@@ -1,0 +1,351 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_N64LOGO             ICON    DISCARDABLE     "n64logo.ico"
+IDI_N64CNTRL            ICON    DISCARDABLE     "n64cntrl.ico"
+IDI_DEBUG               ICON    DISCARDABLE     "debug.ico"
+IDI_AUDIO               ICON    DISCARDABLE     "audio.ico"
+IDI_VIDEO               ICON    DISCARDABLE     "video.ico"
+IDI_N64CART             ICON    DISCARDABLE     "n64cart.ico"
+IDI_AUSTRALIA           ICON    DISCARDABLE     "austral.ico"
+IDI_USA                 ICON    DISCARDABLE     "usa.ico"
+IDI_JAPAN               ICON    DISCARDABLE     "japan.ico"
+IDI_GERMANY             ICON    DISCARDABLE     "germany.ico"
+IDI_EUROPE              ICON    DISCARDABLE     "europe.ico"
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+#ifndef _MAC
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,1
+ PRODUCTVERSION 1,0,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x40004L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "080904b0"
+        BEGIN
+            VALUE "Comments", "\0"
+            VALUE "CompanyName", "\0"
+            VALUE "FileDescription", "UltraHLE - Ultra64 High Level Emulator\0"
+            VALUE "FileVersion", "0.7.70\0"
+            VALUE "InternalName", "Ultra\0"
+            VALUE "LegalCopyright", "Copyright © Epsilon and RealityMan, 1998\0"
+            VALUE "LegalTrademarks", "We have no trademarks, legal or otherwise.\0"
+            VALUE "OriginalFilename", "ULTRA.EXE\0"
+            VALUE "PrivateBuild", "\0"
+            VALUE "ProductName", "UltraHLE - Ultra64 High Level Emulator\0"
+            VALUE "ProductVersion", "0.7.70\0"
+            VALUE "SpecialBuild", "\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x809, 1200
+    END
+END
+
+#endif    // !_MAC
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MAINMENU MENU DISCARDABLE 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&Open...\tCtrl+O",            ID_FILE_OPEN
+        MENUITEM SEPARATOR
+        MENUITEM "&Load State\tShift+F9",       IDM_FILE_LOADSTATE
+        MENUITEM "&Save State\tShift+F6",       IDM_FILE_SAVESTATE
+        MENUITEM SEPARATOR
+        MENUITEM "Quicklo&ad 'ultra.sav'   \tF9", IDM_FILE_QUICKLOAD
+        MENUITEM "Quicksa&ve 'ultra.sav'\tF6",  IDM_FILE_QUICKSAVE
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit",                       IDM_FILE_EXIT
+    END
+    POPUP "&Emulation"
+    BEGIN
+        MENUITEM "&Start\tF5",                  IDM_EMULATION_START
+        MENUITEM "S&top\tEsc",                  IDM_EMULATION_STOP
+        MENUITEM "&Pause\tF7",                  IDM_EMULATION_PAUSE
+        MENUITEM "&Reset",                      IDM_EMULATION_RESET
+        MENUITEM "&Unlock",                     IDM_EMULATION_UNLOCK
+    END
+    POPUP "&Options"
+    BEGIN
+        MENUITEM "&Sound Emulation",            IDM_OPTIONS_ENABLESOUND
+        , CHECKED
+        MENUITEM SEPARATOR
+        MENUITEM "&Graphics Emulation",         IDM_OPTIONS_ENABLEGRAPHICS
+        , CHECKED
+        POPUP "Screen &Resolution"
+        BEGIN
+            MENUITEM "&512 x 384",                  IDM_SCREENRES_512x384
+            MENUITEM "&640 x 480",                  IDM_SCREENRES_640x480
+            , CHECKED
+            MENUITEM "&800 x 600",                  IDM_SCREENRES_800x600
+            MENUITEM "&1024 x 768",                 IDM_SCREENRES_1024x768
+        END
+        MENUITEM "&Wireframe\tCtrl + W",        IDM_OPTIONS_WIREFRAME
+        MENUITEM "S&creenshot\tF10",            IDM_OPTIONS_SCREENSHOT
+    END
+    POPUP "&Controllers"
+    BEGIN
+        MENUITEM "&Configure...",               IDM_CONTROLLER_CONFIGURE
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&Help Topics",                IDM_HELP_HELPTOPICS, GRAYED
+        MENUITEM SEPARATOR
+        MENUITEM "&About UltraHLE...",          IDM_HELP_ABOUT
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDR_ACCELERATOR1 ACCELERATORS MOVEABLE PURE 
+BEGIN
+    "O",            IDM_FILE_OPEN,          VIRTKEY, CONTROL, NOINVERT
+    VK_ESCAPE,      IDM_EMULATION_STOP,     VIRTKEY, NOINVERT
+    VK_F10,         IDM_OPTIONS_SCREENSHOT, VIRTKEY, NOINVERT
+    VK_F5,          IDM_EMULATION_START,    VIRTKEY, NOINVERT
+    VK_F6,          IDM_FILE_QUICKSAVE,     VIRTKEY, NOINVERT
+    VK_F6,          IDM_FILE_SAVESTATE,     VIRTKEY, SHIFT, NOINVERT
+    VK_F7,          IDM_EMULATION_PAUSE,    VIRTKEY, NOINVERT
+    VK_F9,          IDM_FILE_QUICKLOAD,     VIRTKEY, NOINVERT
+    VK_F9,          IDM_FILE_LOADSTATE,     VIRTKEY, SHIFT, NOINVERT
+    "W",            IDM_OPTIONS_WIREFRAME,  VIRTKEY, CONTROL, NOINVERT
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUT DIALOGEX 0, 0, 347, 252
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About UltraHLE..."
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,148,231,50,14
+    CTEXT           "UltraHLE - Ultra64 High Level Emulator\n\nCopyright (c) Epsilon and RealityMan, 1999",
+                    IDC_STATIC,79,21,261,27
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,7,66,333,1,
+                    WS_EX_CLIENTEDGE
+    CTEXT           "All references to Nintendo, Nintendo 64 or N64 are the Copyright of Nintendo of America, Inc. and Nintendo of Japan, Inc.  Nintendo 64, N64 and the Nintendo 64 logo are registered trademarks of Nintendo of America, Inc. and Nintendo of Japan, Inc. ",
+                    IDC_STATIC,7,183,333,26
+    CTEXT           "UltraHLE Web Site: http://www.emuunlim.com/UltraHLE\nFor the best in Emulation News go to http://www.emuunlim.com",
+                    IDC_STATIC,7,103,333,18
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,7,129,333,1,
+                    WS_EX_CLIENTEDGE
+    CTEXT           "Greets go to: Fox and _64Bit_ (Emulators Unlimited), JoseQ (EmuViews), Atila (Retrogames), Dextrose, Niki Waibel, Mike Tedder, Anarko, Romberman 64, Brian Faber, Jim at EmuNews and the whole emulation community.",
+                    IDC_STATIC,37,73,272,29
+    CTEXT           "In order to use UltraHLE LEGALLY with commercial rom images, you MUST own the original cartridge ROM.  If you use images which are illegally in your possesion, you are in violation of many United States and international laws.",
+                    IDC_STATIC,7,138,333,26
+    CTEXT           "The authors of UltraHLE DO NOT condone the use of illegally obtained ROMS.",
+                    IDC_STATIC,7,168,333,8
+    CTEXT           "Nintendo is in no way affiliated with the UltraHLE Emulator.",
+                    IDC_STATIC,7,215,333,8
+    CONTROL         131,IDC_STATIC,"Static",SS_BITMAP,7,7,63,54,
+                    WS_EX_CLIENTEDGE
+    LTEXT           "Modifications by freeflow",IDC_STATIC,151,
+                    52,147,11
+END
+
+IDD_CONTROLLER1 DIALOG DISCARDABLE  0, 0, 368, 183
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Controller 1"
+FONT 8, "MS Sans Serif"
+BEGIN
+    ICON            IDI_N64CNTRL,IDC_STATIC,7,7,20,20
+    LTEXT           "For more detailed information on configuring the controllers, see README.TXT.",
+                    IDC_STATIC,64,12,297,10
+    GROUPBOX        " Buttons ",IDC_STATIC,7,31,174,59
+    GROUPBOX        " C-Pad ",IDC_STATIC,7,93,174,47
+    EDITTEXT        IDC_C1_START,43,42,40,12,ES_CENTER | ES_READONLY
+    EDITTEXT        IDC_C1_Z,130,42,40,12,ES_CENTER | ES_READONLY
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDVERT,94,42,1,42
+    EDITTEXT        IDC_C1_A,43,56,40,12,ES_CENTER | ES_READONLY
+    EDITTEXT        IDC_C1_L,130,56,40,12,ES_CENTER | ES_READONLY
+    EDITTEXT        IDC_C1_B,43,70,40,12,ES_CENTER | ES_READONLY
+    EDITTEXT        IDC_C1_R,130,70,40,12,ES_CENTER | ES_READONLY
+    CONTROL         121,IDC_STATIC,"Static",SS_BITMAP,18,43,9,9
+    CONTROL         122,IDC_STATIC,"Static",SS_BITMAP,18,57,9,9
+    CONTROL         123,IDC_STATIC,"Static",SS_BITMAP,18,72,9,9
+    CONTROL         124,IDC_STATIC,"Static",SS_BITMAP,105,43,9,9
+    CONTROL         125,IDC_STATIC,"Static",SS_BITMAP,105,57,9,9
+    CONTROL         126,IDC_STATIC,"Static",SS_BITMAP,106,72,9,9
+    EDITTEXT        IDC_C1_CU,43,105,40,12,ES_CENTER | ES_READONLY
+    EDITTEXT        IDC_C1_CL,130,105,40,12,ES_CENTER | ES_READONLY
+    EDITTEXT        IDC_C1_CD,43,119,40,12,ES_CENTER | ES_READONLY
+    EDITTEXT        IDC_C1_CR,130,119,40,12,ES_CENTER | ES_READONLY
+    CONTROL         117,IDC_STATIC,"Static",SS_BITMAP,18,106,9,9
+    CONTROL         118,IDC_STATIC,"Static",SS_BITMAP,18,121,9,9
+    CONTROL         119,IDC_STATIC,"Static",SS_BITMAP,105,106,9,9
+    CONTROL         120,IDC_STATIC,"Static",SS_BITMAP,106,121,9,9
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDVERT,94,105,1,28
+    GROUPBOX        " Digital Pad ",IDC_STATIC,7,143,354,33
+    EDITTEXT        IDC_C1_DU,43,155,40,12,ES_CENTER | ES_READONLY
+    EDITTEXT        IDC_C1_DL,130,155,40,12,ES_CENTER | ES_READONLY
+    EDITTEXT        IDC_C1_DD,224,155,40,12,ES_CENTER | ES_READONLY
+    EDITTEXT        IDC_C1_DR,310,155,40,12,ES_CENTER | ES_READONLY
+    CONTROL         127,IDC_STATIC,"Static",SS_BITMAP,18,156,9,9
+    CONTROL         128,IDC_STATIC,"Static",SS_BITMAP,198,157,9,9
+    CONTROL         129,IDC_STATIC,"Static",SS_BITMAP,106,156,9,9
+    CONTROL         130,IDC_STATIC,"Static",SS_BITMAP,286,157,9,9
+    GROUPBOX        " Analog Stick ",IDC_STATIC,187,31,174,109
+    EDITTEXT        IDC_C1_AU,310,44,40,12,ES_CENTER | ES_READONLY
+    EDITTEXT        IDC_C1_AD,310,58,40,12,ES_CENTER | ES_READONLY
+    EDITTEXT        IDC_C1_AL,310,72,40,12,ES_CENTER | ES_READONLY
+    EDITTEXT        IDC_C1_AR,310,86,40,12,ES_CENTER | ES_READONLY
+    LTEXT           "Up",IDC_STATIC,286,46,10,8
+    LTEXT           "Down",IDC_STATIC,286,60,20,8
+    LTEXT           "Left",IDC_STATIC,286,74,13,8
+    LTEXT           "Right",IDC_STATIC,286,88,18,8
+    COMBOBOX        IDC_C1_STICK,199,44,78,48,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "Configure Joystick",IDC_C1_JOYSTICK,198,63,78,14
+    PUSHBUTTON      "Configure Mouse",IDC_C1_MOUSE,198,84,78,14
+    EDITTEXT        IDC_C1_MUCHSLOWER,198,119,40,12,ES_CENTER | ES_READONLY
+    LTEXT           "+ Direction (Move Slower)",IDC_STATIC,243,107,112,8
+    LTEXT           "+ Direction (Move Even Slower)",IDC_STATIC,243,119,111,
+                    8
+    EDITTEXT        IDC_C1_SLOWER,198,105,40,12,ES_CENTER | ES_READONLY
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_ABOUT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 340
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 245
+    END
+
+    IDD_CONTROLLER1, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 361
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 176
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_C_UP                BITMAP  DISCARDABLE     "c_up.bmp"
+IDB_C_DOWN              BITMAP  DISCARDABLE     "c_down.bmp"
+IDB_C_LEFT              BITMAP  DISCARDABLE     "c_left.bmp"
+IDB_C_RIGHT             BITMAP  DISCARDABLE     "c_right.bmp"
+IDB_START               BITMAP  DISCARDABLE     "start.bmp"
+IDB_A                   BITMAP  DISCARDABLE     "a.bmp"
+IDB_B                   BITMAP  DISCARDABLE     "b.bmp"
+IDB_Z                   BITMAP  DISCARDABLE     "z.bmp"
+IDB_LEFT                BITMAP  DISCARDABLE     "left.bmp"
+IDB_RIGHT               BITMAP  DISCARDABLE     "right.bmp"
+IDB_D_UP                BITMAP  DISCARDABLE     "d_up.bmp"
+IDB_D_DOWN              BITMAP  DISCARDABLE     "d_down.bmp"
+IDB_D_LEFT              BITMAP  DISCARDABLE     "d_left.bmp"
+IDB_D_RIGHT             BITMAP  DISCARDABLE     "d_right.bmp"
+IDB_NLOGO               BITMAP  DISCARDABLE     "n_logo.bmp"
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
