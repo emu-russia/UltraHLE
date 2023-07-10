@@ -20,3 +20,9 @@ UltraHLE - классический эмулятор Nintendo 64. Шедевр.
 - `strlwr` заменена на `_strlwr`
 - Unicode: Not Set (UltraHLE не использует Unicode)
 - Незначительные исправления в UltraHLE.rc и RESOURCE.H
+
+## Glide
+
+UltraHLE требуется устаревший графический API Glide 2.0.
+
+Враппер можно взять тут: http://www.zeckensack.de/glide/
