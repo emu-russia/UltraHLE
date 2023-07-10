@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\src\A.BMP" />
+    <Image Include="..\src\AUDIO.ICO" />
+    <Image Include="..\src\AUSTRAL.ICO" />
+    <Image Include="..\src\B.BMP" />
+    <Image Include="..\src\C_DOWN.BMP" />
+    <Image Include="..\src\C_LEFT.BMP" />
+    <Image Include="..\src\C_RIGHT.BMP" />
+    <Image Include="..\src\C_UP.BMP" />
+    <Image Include="..\src\DEBUG.ICO" />
+    <Image Include="..\src\D_DOWN.BMP" />
+    <Image Include="..\src\D_LEFT.BMP" />
+    <Image Include="..\src\D_RIGHT.BMP" />
+    <Image Include="..\src\D_UP.BMP" />
+    <Image Include="..\src\EUROPE.ICO" />
+    <Image Include="..\src\GERMANY.ICO" />
+    <Image Include="..\src\JAPAN.ICO" />
+    <Image Include="..\src\LEFT.BMP" />
+    <Image Include="..\src\N64CART.ICO" />
+    <Image Include="..\src\N64CNTRL.ICO" />
+    <Image Include="..\src\N64LOGO.ICO" />
+    <Image Include="..\src\N_LOGO.BMP" />
+    <Image Include="..\src\RIGHT.BMP" />
+    <Image Include="..\src\START.BMP" />
+    <Image Include="..\src\USA.ICO" />
+    <Image Include="..\src\VIDEO.ICO" />
+    <Image Include="..\src\Z.BMP" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\BOOT.C" />
+    <ClCompile Include="..\src\CART.C" />
+    <ClCompile Include="..\src\CMD.C" />
+    <ClCompile Include="..\src\CMD2.C" />
+    <ClCompile Include="..\src\CONSOLE.C" />
+    <ClCompile Include="..\src\CPU.C" />
+    <ClCompile Include="..\src\CPUA.C" />
+    <ClCompile Include="..\src\CPUANEW.C" />
+    <ClCompile Include="..\src\CPUAOLD.C" />
+    <ClCompile Include="..\src\CPUAUTIL.C" />
+    <ClCompile Include="..\src\CPUC.C" />
+    <ClCompile Include="..\src\CPUG.C">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\DEBUGUI.C" />
+    <ClCompile Include="..\src\DISASM.C" />
+    <ClCompile Include="..\src\DISASM86.C" />
+    <ClCompile Include="..\src\DLIST.C" />
+    <ClCompile Include="..\src\HW.C" />
+    <ClCompile Include="..\src\INIFILE.C" />
+    <ClCompile Include="..\src\LISTVIEW.C" />
+    <ClCompile Include="..\src\LOADSAVE.C" />
+    <ClCompile Include="..\src\LOG.C" />
+    <ClCompile Include="..\src\MAIN.C" />
+    <ClCompile Include="..\src\MEM.C" />
+    <ClCompile Include="..\src\OS.C" />
+    <ClCompile Include="..\src\PAD.C" />
+    <ClCompile Include="..\src\PADOLD.C">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\PATCH.C" />
+    <ClCompile Include="..\src\RDP.C" />
+    <ClCompile Include="..\src\SLIST.C" />
+    <ClCompile Include="..\src\SOUND.C" />
+    <ClCompile Include="..\src\SYM.C" />
+    <ClCompile Include="..\src\SYMFIND.C" />
+    <ClCompile Include="..\src\SYNC.C" />
+    <ClCompile Include="..\src\TIMER.C" />
+    <ClCompile Include="..\src\Ultrahle.c" />
+    <ClCompile Include="..\src\ZLIST.C" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\CONSOLE.H" />
+    <ClInclude Include="..\src\CPUA.H" />
+    <ClInclude Include="..\src\CPUAG.H" />
+    <ClInclude Include="..\src\LISTVIEW.H" />
+    <ClInclude Include="..\src\LOADSAVE.H" />
+    <ClInclude Include="..\src\MAIN.H" />
+    <ClInclude Include="..\src\NOC.H" />
+    <ClInclude Include="..\src\OLDVER.H" />
+    <ClInclude Include="..\src\OPDEFS_C.H" />
+    <ClInclude Include="..\src\OS.H" />
+    <ClInclude Include="..\src\OSCALL.H" />
+    <ClInclude Include="..\src\Osignore.h" />
+    <ClInclude Include="..\src\OSPATCH.H" />
+    <ClInclude Include="..\src\RDP.H" />
+    <ClInclude Include="..\src\RESOURCE.H" />
+    <ClInclude Include="..\src\SOUND.H" />
+    <ClInclude Include="..\src\STDSDK.H" />
+    <ClInclude Include="..\src\TIMER.H" />
+    <ClInclude Include="..\src\ULTRA.H" />
+    <ClInclude Include="..\src\ULTRAHLE.H" />
+    <ClInclude Include="..\src\VERSION.H" />
+    <ClInclude Include="..\src\X.H" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="..\src\GLIDE2X.LIB" />
+    <Library Include="..\src\XGLIDE.LIB" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\src\UltraHLE.rc" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{6b989bdf-61f5-4dd7-8a01-63fc57bcad8b}</ProjectGuid>
+    <RootNamespace>UltraHLE</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)..\Build</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)..\Build</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)..\Build</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)..\Build</OutDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

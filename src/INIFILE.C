@@ -1,7 +1,7 @@
 #include "stdsdk.h"
 extern ROMLIST romList;
 
-#define IFIS(x,str) if(!memicmp(x,str,sizeof(str)-1))
+#define IFIS(x,str) if(!_memicmp(x,str,sizeof(str)-1))
 
 #define PATCH_DONE    0
 #define PATCH_RESCAN  1
@@ -299,7 +299,7 @@ void inifile_read(char *cartnamep)
     int   sectionok;
 
     strcpy(cartname,cartnamep);
-    strlwr(cartname);
+    _strlwr(cartname);
 
     strcpy(inifile,init.rootpath);
     strcat(inifile,"ultra.ini");
@@ -351,10 +351,10 @@ void inifile_read(char *cartnamep)
             }
             section[i]=0;
             strcpy(sectionorg,section);
-            strlwr(section);
+            _strlwr(section);
 
             sectionok=0;
-            if(!stricmp(section,"default"))
+            if(!_stricmp(section,"default"))
             {
                 // always read defaults
                 sectionok=1;

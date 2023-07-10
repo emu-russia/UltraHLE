@@ -2,6 +2,11 @@
 // Microsoft Developer Studio generated include file.
 // Used by ULTRAHLE.RC
 //
+
+#ifndef IDC_STATIC
+#define IDC_STATIC -1
+#endif
+
 #define IDI_N64LOGO                     101
 #define IDI_N64CART                     102
 #define IDI_N64CNTRL                    103

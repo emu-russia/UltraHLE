@@ -114,7 +114,7 @@ int sym_add(int addr,char *text0,int patch)
 
     for(i=0;disablepatches[i];i++)
     {
-        if(!memicmp(disablepatches[i],text0,strlen(disablepatches[i])))
+        if(!_memicmp(disablepatches[i],text0,strlen(disablepatches[i])))
         {
             patch=0;
             break;
@@ -253,7 +253,7 @@ void sym_patchnames(void)
             for(j=0;ospatch[j];j++)
             {
                 if(strlen(sym[i].text)<ospatchlen[j]) continue;
-                if(memicmp(sym[i].text,ospatch[j],ospatchlen[j])) continue;
+                if(_memicmp(sym[i].text,ospatch[j],ospatchlen[j])) continue;
                 if(!ospatchwild[j] && sym[i].text[ospatchlen[j]]>32) continue;
                 // match
                 {

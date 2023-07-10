@@ -7,8 +7,8 @@ extern int command_2(char *,char *);
 
 static byte *snap; 
 
-#define IFIS(x,str) if(!stricmp(x,str))
-#define IS(x,str) !stricmp(x,str)
+#define IFIS(x,str) if(!_stricmp(x,str))
+#define IS(x,str) !_stricmp(x,str)
 
 char *param(char **tp)
 {

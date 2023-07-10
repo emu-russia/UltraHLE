@@ -295,7 +295,7 @@ static percent(char c, char t);
 void uprintf(char *s,...)
 {
 	va_list va;
-	va=va_start(va,s);
+	va_start(va,s);
 	vsprintf(ubufp,s,va);
 	while(*ubufp) ubufp++;
 	va_end(va);

@@ -2,8 +2,8 @@
 
 // copies/refs to cmd.c
 
-#define IFIS(x,str) if(!stricmp(x,str))
-#define IS(x,str) !stricmp(x,str)
+#define IFIS(x,str) if(!_stricmp(x,str))
+#define IS(x,str) !_stricmp(x,str)
 
 extern void setaddress(char *text,int *addr);
 extern char *param(char **tp);
