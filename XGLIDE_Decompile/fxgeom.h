@@ -6,7 +6,7 @@ void dumpmatrix(float* a1, int a2);
 int recalc_projection(int a1);
 void vertexdata(xt_data* a1);
 void xform(int a1, xt_pos* a2, int a3, char* a4);
-int* setuprvx(int a1, int a2);
+int setuprvx(int a1, int a2);
 void x_vxrel(float* a1, float* a2);
 int clear();
 int doclipvertex(signed int a1, int a2, int a3);

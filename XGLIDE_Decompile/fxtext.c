@@ -1,5 +1,7 @@
 #include "pch.h"
 
+int g_lasttexture;
+
 int newblock(int a1)
 {
 	signed int v1; // edx
@@ -309,7 +311,7 @@ signed int fxloadtexturepart(DWORD *a1, int a2)
 	{
 		grTexDownloadMipMap(v2, a1[a2 + 22], v3, a1 + 13);
 		a1[12] = 0;
-		g_stats[7] += a1[a2 + 18];
+		g_stats.text_uploaded += a1[a2 + 18];
 	}
 	grTexSource(v2, a1[a2 + 22], v3, a1 + 13);
 	result = 0;
@@ -412,14 +414,14 @@ signed int *text_init()
 	int v4; // eax
 
 	x_log("Texture memory TMU0: ");
-	v0 = grTexMaxAddress(0);
-	v1 = grTexMinAddress(0);
+	v0 = grTexMaxAddress(GR_TMU0);
+	v1 = grTexMinAddress(GR_TMU0);
 	mem_S1205[0] = (int)memory_create(v1 + 256, v0);
 	x_log("Texture memory TMU1: ");
 	if ( g_state.tmus >= 2 )
 	{
-		v3 = grTexMaxAddress(1);
-		v4 = grTexMinAddress(1);
+		v3 = grTexMaxAddress(GR_TMU1);
+		v4 = grTexMinAddress(GR_TMU1);
 		result = memory_create(v4 + 256, v3);
 	}
 	else
@@ -856,9 +858,9 @@ int text_frameend()
 	signed int v4; // edx
 
 	result = 0;
-	g_stats[8] = 0;
+	g_stats.text_resident = 0;
 	v1 = 1;
-	g_stats[9] = 0;
+	g_stats.text_used = 0;
 	if ( g_lasttexture >= 1 )
 	{
 		v2 = (DWORD *)((char *)&g_texture + 152);
@@ -870,12 +872,12 @@ int text_frameend()
 				v4 = 4;
 				do
 				{
-					g_stats[8] += *(v3 - 16);
+					g_stats.text_resident += *(v3 - 16);
 					result = g_state.frame - 1;
 					if ( result <= v2[11] )
 					{
 						result = *v3;
-						g_stats[9] += *v3;
+						g_stats.text_used += *v3;
 					}
 					*v3 = 0;
 					++v3;

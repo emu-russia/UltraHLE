@@ -1,6 +1,7 @@
 #include "pch.h"
 
 xt_state g_state;
+xt_stats g_stats;
 
 void zerobase()
 {

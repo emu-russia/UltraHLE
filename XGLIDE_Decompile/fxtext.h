@@ -1,6 +1,8 @@
 
 #pragma once
 
+extern int g_lasttexture;
+
 int newblock(int a1);
 DWORD* addbefore(DWORD* a1, DWORD* a2);
 int addafter(int a1, DWORD* a2);

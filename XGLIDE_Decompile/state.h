@@ -14,7 +14,7 @@ typedef struct
 	int buffers;	// 165
 	int vsync;		// 166
 	int frame;		// 167
-//error
+	uint32_t error;		// 168
 //matrix
 //xform
 //camxform
@@ -34,27 +34,27 @@ typedef struct
 //invznear
 	int xformmode;		// 246
 //usexformmode
-//view_x0
-//view_x1
-//view_y0
-//view_y1
+	int view_x0;		// 248
+	int view_x1;		// 249
+	int view_y0;		// 250
+	int view_y1;		// 251
 //projxmul
 //projxadd
 //projymul
 //projyadd
 //texturexmul
 //textureymul
-//send
-//geometryon
-//geometryoff
+	uint32_t send;		//  258  - wtf? ("s"omething end?)
+	int geometryon;		// 259
+	int geometryoff;	// 260
 //currentmode
 //active
 //setnew
 	int changed;	// 290   -- mode changed
 	int mask;		// 291
 	int masktst;	// 292
-//colortext1
-//text1text2
+	int colortext1;		// 293
+	int text1text2;		// 294
 //zbias
 	int fogtype;	// 296
 	float fogmin;	// 297
@@ -64,19 +64,13 @@ typedef struct
 	int src;		// g_state[304]
 	int dst;		// g_state[305]
 	int sametex;	// g_state[306]
-//stwhint
+	FxU32 stwhint;		// 307
 	float alphatest;	// g_state[308]
 //textures
-//text1
-//text2
-//envc
-//env
-//geometry
-
-	//int x_envcolor(float r, float g, float b, float a)
-	//	*(float*)&g_state[313] = r;
-	//	*(float*)&g_state[314] = g;
-	//	*(float*)&g_state[315] = b;
-	//	*(float*)&g_state[316] = a;
+	int text1;			// 310
+	int text2;			// 311
+	uint32_t envc;		// 312 - combined env color (buggy)
+	float env[4];		// 313(r), 314(g), 315(b), 316(a)
+	int geometry;		// 317
 
 } xt_state;

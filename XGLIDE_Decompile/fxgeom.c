@@ -1,22 +1,24 @@
 #include "pch.h"
 
-//.data:00000000 _debugcount$S1205 dd 0
-//.data:00000004 _posarrayallocsize$S1222 dd 0           ; DATA XREF: _x_vxarray+24↓r
-//.data:00000004                                         ; _x_vxarray+38↓w ...
-//.data:00000008 _posarraysize$S1223 dd 0                ; DATA XREF: _x_vxa+A↓r
-//.data:00000008                                         ; _x_vxarray+7B↓w ...
-//.data:0000005C $SG1260         dd offset loc_2076+5    ; DATA XREF: _dumpmatrix:loc_2BA↓o
-//.data:00000068 $SG1265         dd offset loc_A78+5     ; DATA XREF: _dumpmatrix+4B↓o
-//.data:00000190 $SG1494         dd offset loc_A22+1     ; DATA XREF: _setuprvx:loc_15FB↓o
-//.data:000001AD                 align 10h
-//.data:00000219 _data           ends
-
 static float identmatrix[4 * 4] = {
 	1.0f, 0.0f, 0.0f, 0.0f,
 	0.0f, 1.0f, 0.0f, 0.0f,
 	0.0f, 0.0f, 1.0f, 0.0f,
 	0.0f, 0.0f, 0.0f, 1.0f,
 };
+
+static int flip;
+static int allxformed;
+static int state;
+static int mode;		// x_begin type
+
+static int16_t debugcount = 0;
+static int posarrayallocsize = 0;
+static int posarraysize = 0;
+
+static int vertices;
+static int vertices_base;
+static int vertices_lastnonrel;
 
 void geom_init()
 {
@@ -57,7 +59,6 @@ LABEL_10:
 	}
 }
 
-
 void x_getmatrix(void *a1)
 {
 	memcpy(a1, &g_state[169], 0x40u);
@@ -76,7 +77,7 @@ void dumpmatrix(float *a1, int a2)
 	do
 	{
 		v4 = 4;
-		x_log((const char *)&_SG1260);
+		x_log(" {");
 		do
 		{
 			v5 = *v3;
@@ -85,7 +86,7 @@ void dumpmatrix(float *a1, int a2)
 			--v4;
 		}
 		while ( v4 );
-		x_log((const char *)&_SG1265);
+		x_log("}\n");
 		--v2;
 	}
 	while ( v2 );
@@ -209,12 +210,12 @@ void x_matrix(void *a1)
 			v12 += 4;
 		}
 		while ( v12 < (float *)&g_state[233] );
-		if ( g_state[317] & 0x20 )
+		if ( g_state.geometry & X_DUMPDATA)
 		{
 			dumpmatrix(v21, "Modelview");
 			dumpmatrix((float *)&g_state[217], "Projection");
 			dumpmatrix((float *)&g_state[185], "Combined");
-			x_log("Xformmode: %i Znear: %f Zfar: %f\n", g_state.xformmode, (_QWORD)g_state[241], (_QWORD)g_state[242]);
+			x_log("Xformmode: %i Znear: %f Zfar: %f\n", g_state.xformmode, g_state.znear, g_state.zfar);
 		}
 	}
 }
@@ -277,18 +278,18 @@ int recalc_projection(int a1)
 	return result;
 }
 
-int x_begin(int a1)
+void x_begin(int a1)
 {
 	int result; // eax
 
 	if ( g_state.changed || g_state.projchanged )
 		x_flush();
-	mode_S1225 = a1;
+	mode = a1;
 	result = 0;
-	vertices_base_S1217 = vertices_S1216;
+	vertices_base_S1217 = vertices;
 	corners_base_S1221 = corners_S1220;
-	state_S1226 = 0;
-	flip_S1227 = 0;
+	state = 0;
+	flip = 0;
 	return result;
 }
 
@@ -296,7 +297,7 @@ void x_end()
 {
 	int v0; // eax
 
-	if ( mode_S1225 == 9 )
+	if (mode == 9 )
 	{
 		v0 = corners_S1220 - corners_base_S1221 - 1;
 		if ( v0 >= 3 )
@@ -306,11 +307,11 @@ void x_end()
 		else
 		{
 			corners_S1220 = corners_base_S1221;
-			vertices_S1216 = vertices_base_S1217;
+			vertices = vertices_base_S1217;
 		}
 	}
-	mode_S1225 = 0;
-	if (vertices_S1216 > 127) {
+	mode = 0;
+	if (vertices > 127) {
 		x_flush();
 	}
 }
@@ -356,11 +357,11 @@ void vertexdata(xt_data* a1)
 
 	v35 = *(float *)&g_state[256];
 	v36 = *(float *)&g_state[257];
-	if ( !mode_S1225 )
+	if ( !mode)
 		x_fatal("vertex without begin");
-	if ( g_state[258] & 1 )
+	if ( g_state.send & 1 )
 	{
-		v1 = 15 * vertices_S1216;
+		v1 = 15 * vertices;
 		v2 = a1;
 		flt_2A30[v1] = a1->r * 256.0;
 		flt_2A34[v1] = a1->g * 256.0;
@@ -371,92 +372,92 @@ void vertexdata(xt_data* a1)
 	{
 		v2 = a1;
 	}
-	if ( g_state[258] & 2 )
+	if ( g_state.send & 2 )
 	{
 		if ( g_state[289] & 0x10 )
 		{
-			v3 = 2 * vertices_S1216;
+			v3 = 2 * vertices;
 			texp_S1211[v3] = *((DWORD *)v2 + 7);
 			tex_S1209[v3] = v2[5] * v2[7] * v35;
 			v4 = v2[6] * v2[7];
 		}
 		else
 		{
-			v3 = 2 * vertices_S1216;
-			tex_S1209[2 * vertices_S1216] = v2[5] * v35;
+			v3 = 2 * vertices;
+			tex_S1209[2 * vertices] = v2[5] * v35;
 			v4 = v2[6];
 		}
 		flt_E230[v3] = v4 * v36;
 	}
-	if ( g_state[258] & 4 )
+	if ( g_state.send & 4 )
 	{
-		v5 = 2 * vertices_S1216;
+		v5 = 2 * vertices;
 		tex2_S1210[v5] = v2[8] * v35;
 		flt_F440[v5] = v2[9] * v36;
 	}
-	result = mode_S1225 - 1;
-	switch ( mode_S1225 )
+	result = mode - 1;
+	switch (mode)
 	{
 		case 1:
-			v7 = vertices_S1216;
+			v7 = vertices;
 			result = 4 * corners_S1220;
 			corners_S1220 += 2;
 			*(int *)((char *)corner_S1219 + result) = 1;
 			*(int *)((char *)&dword_A228 + result) = v7;
 			break;
 		case 2:
-			if ( state_S1226 >= 2 )
+			if (state >= 2 )
 			{
 				v8 = corners_S1220++;
 				corner_S1219[v8] = 3;
 				v9 = corners_S1220++;
-				corner_S1219[v9] = vertices_S1216 - 2;
-				state_S1226 = 0;
-				corner_S1219[corners_S1220++] = vertices_S1216 - 1;
-				result = vertices_S1216;
+				corner_S1219[v9] = vertices - 2;
+				state = 0;
+				corner_S1219[corners_S1220++] = vertices - 1;
+				result = vertices;
 				v10 = corners_S1220++;
-				corner_S1219[v10] = vertices_S1216;
+				corner_S1219[v10] = vertices;
 			}
 			else
 			{
-				++state_S1226;
+				++state;
 			}
 			break;
 		case 3:
 		case 8:
-			if ( state_S1226 >= 2 )
+			if (state >= 2 )
 			{
 				v11 = corners_S1220++;
 				corner_S1219[v11] = 3;
-				if ( flip_S1227 )
+				if (flip)
 				{
 					v12 = corners_S1220++;
-					v13 = vertices_S1216;
-					corner_S1219[v12] = vertices_S1216 - 1;
+					v13 = vertices;
+					corner_S1219[v12] = vertices - 1;
 					v14 = corners_S1220++;
-					corner_S1219[v14] = vertices_S1216 - 2;
+					corner_S1219[v14] = vertices - 2;
 					result = corners_S1220;
 					corner_S1219[corners_S1220] = v13;
 				}
 				else
 				{
 					v15 = corners_S1220++;
-					corner_S1219[v15] = vertices_S1216 - 2;
+					corner_S1219[v15] = vertices - 2;
 					v16 = corners_S1220++;
-					corner_S1219[v16] = vertices_S1216 - 1;
-					result = vertices_S1216;
-					corner_S1219[corners_S1220] = vertices_S1216;
+					corner_S1219[v16] = vertices - 1;
+					result = vertices;
+					corner_S1219[corners_S1220] = vertices;
 				}
-				flip_S1227 ^= 1u;
+				flip ^= 1u;
 				++corners_S1220;
 			}
 			else
 			{
-				++state_S1226;
+				++state;
 			}
 			break;
 		case 4:
-			if ( state_S1226 >= 2 )
+			if (state >= 2 )
 			{
 				v17 = corners_S1220;
 				v18 = vertices_base_S1217;
@@ -465,80 +466,80 @@ void vertexdata(xt_data* a1)
 				v19 = corners_S1220++;
 				corner_S1219[v19] = v18;
 				v20 = corners_S1220++;
-				corner_S1219[v20] = vertices_S1216 - 1;
-				result = vertices_S1216;
+				corner_S1219[v20] = vertices - 1;
+				result = vertices;
 				v21 = corners_S1220++;
-				corner_S1219[v21] = vertices_S1216;
+				corner_S1219[v21] = vertices;
 			}
 			else
 			{
-				++state_S1226;
+				++state;
 			}
 			break;
 		case 5:
-			if ( state_S1226 >= 3 )
+			if (state >= 3 )
 			{
 				v22 = corners_S1220++;
 				corner_S1219[v22] = 4;
 				v23 = corners_S1220++;
-				corner_S1219[v23] = vertices_S1216 - 3;
+				corner_S1219[v23] = vertices - 3;
 				v24 = corners_S1220++;
-				corner_S1219[v24] = vertices_S1216 - 2;
+				corner_S1219[v24] = vertices - 2;
 				v25 = corners_S1220++;
-				state_S1226 = 0;
-				corner_S1219[v25] = vertices_S1216 - 1;
-				result = vertices_S1216;
+				state = 0;
+				corner_S1219[v25] = vertices - 1;
+				result = vertices;
 				v26 = corners_S1220++;
-				corner_S1219[v26] = vertices_S1216;
+				corner_S1219[v26] = vertices;
 			}
 			else
 			{
-				++state_S1226;
+				++state;
 			}
 			break;
 		case 6:
-			if ( state_S1226 >= 1 )
+			if (state >= 1 )
 			{
 				v27 = corners_S1220++;
 				corner_S1219[v27] = 2;
 				v28 = corners_S1220++;
-				corner_S1219[v28] = vertices_S1216 - 1;
-				result = vertices_S1216;
+				corner_S1219[v28] = vertices - 1;
+				result = vertices;
 				v29 = corners_S1220++;
-				corner_S1219[v29] = vertices_S1216;
+				corner_S1219[v29] = vertices;
 			}
 			else
 			{
-				++state_S1226;
+				++state;
 			}
 			break;
 		case 7:
-			if ( state_S1226 >= 1 )
+			if (state >= 1 )
 			{
 				v30 = corners_S1220++;
 				corner_S1219[v30] = 2;
 				v31 = corners_S1220++;
-				state_S1226 = 0;
-				corner_S1219[v31] = vertices_S1216 - 1;
-				result = vertices_S1216;
+				state = 0;
+				corner_S1219[v31] = vertices - 1;
+				result = vertices;
 				v32 = corners_S1220++;
-				corner_S1219[v32] = vertices_S1216;
+				corner_S1219[v32] = vertices;
 			}
 			else
 			{
-				++state_S1226;
+				++state;
 			}
 			break;
 		case 9:
-			if ( !state_S1226 )
+			if ( !state)
 			{
 				v33 = corners_S1220;
-				++state_S1226;
+				++state;
 				++corners_S1220;
 				corner_S1219[v33] = 1;
 			}
 			v34 = corners_S1220++;
-			corner_S1219[v34] = vertices_S1216;
+			corner_S1219[v34] = vertices;
 			result = corners_base_S1221 + 64;
 			if ( corners_base_S1221 + 64 < corners_S1220 )
 				x_fatal("xgeom: too large X_POLYGON!\n");
@@ -546,7 +547,7 @@ void vertexdata(xt_data* a1)
 		default:
 			break;
 	}
-	if ( ++vertices_S1216 >= 191 && (!state_S1226 || vertices_S1216 >= 256) )
+	if ( ++vertices >= 191 && (!state || vertices >= 256) )
 		x_flush();
 }
 
@@ -884,7 +885,7 @@ LABEL_92:
 	}
 }
 
-int * setuprvx(int a1, int a2)
+int setuprvx(int a1, int a2)
 {
 	float *v2; // esi
 	float *v3; // ebx
@@ -927,7 +928,7 @@ int * setuprvx(int a1, int a2)
 		v7 = a2;
 		if ( a2 > 0 )
 		{
-			result = (int *)(&debugcount_S1205 + 2);
+			result = debugcount;
 			do
 			{
 				*v3 = *v2 * v21 + v19;
@@ -940,13 +941,13 @@ int * setuprvx(int a1, int a2)
 				v3[1] = v3[1] - 786432.0;
 				v9 = *((DWORD *)v3 + 8);
 				v16 = v3[8];
-				if ( g_state[258] & 2 )
+				if ( g_state.send & 2 )
 				{
 					v3[9] = *v4 * v16;
 					v3[10] = v4[1] * v16;
 					*((DWORD *)v3 + 11) = v9;
 				}
-				if ( g_state[258] & 4 )
+				if ( g_state.send & 4 )
 				{
 					v3[12] = *v5 * v16;
 					v3[13] = v5[1] * v16;
@@ -982,31 +983,31 @@ int * setuprvx(int a1, int a2)
 				v17 = v3[8];
 				if ( g_state[289] & 0x10 )
 				{
-					if ( g_state[258] & 2 )
+					if ( g_state.send & 2 )
 					{
 						v3[9] = *v4 * v17;
 						v3[10] = v4[1] * v17;
 						v3[11] = *v24 * v17;
 					}
-					if ( !(g_state[258] & 4) )
+					if ( !(g_state.send & 4) )
 						goto LABEL_23;
 				}
 				else
 				{
-					if ( g_state[258] & 2 )
+					if ( g_state.send & 2 )
 					{
 						v3[9] = *v4 * v17;
 						v3[10] = v4[1] * v17;
 						*((DWORD *)v3 + 11) = result;
 					}
-					if ( !(g_state[258] & 4) )
+					if ( !(g_state.send & 4) )
 						goto LABEL_23;
 				}
 				v3[12] = *v5 * v17;
 				v3[13] = v5[1] * v17;
 			}
 LABEL_23:
-			if ( g_state[317] & 0x20 )
+			if ( g_state.geometry & X_DUMPDATA)
 			{
 				x_log(
 					"#x_vx[ %13.5f %13.5f %13.5f ]\n",
@@ -1019,7 +1020,7 @@ LABEL_23:
 					x_log("#clip[ %13.5f %13.5f %13.5f   w:%13.5f ]\n", *v2, v2[1], v2[2], (double)(1.0 / v2[3]));
 				if ( !*((DWORD *)v2 + 4) )
 					x_log("#scrn[ %13.5f %13.5f %13.5f oow:%13.5f ]\n", *v3, v3[1], v3[2], v3[8]);
-				x_log((const char *)&_SG1494);
+				x_log("#\n");
 			}
 			v5 += 2;
 			v4 += 2;
@@ -1035,7 +1036,7 @@ LABEL_23:
 		v13 = a2;
 		if ( a2 <= 0 )
 			return result;
-		result = (int *)(&debugcount_S1205 + 2);
+		result = debugcount;
 		while ( 1 )
 		{
 			if ( !*((DWORD *)v2 + 4) )
@@ -1052,24 +1053,24 @@ LABEL_23:
 				v18 = v3[8];
 				if ( g_state[289] & 0x10 )
 				{
-					if ( g_state[258] & 2 )
+					if ( g_state.send & 2 )
 					{
 						v3[9] = *v4 * v18;
 						v3[10] = v4[1] * v18;
 						v3[11] = *v24 * v18;
 					}
-					if ( !(g_state[258] & 4) )
+					if ( !(g_state.send & 4) )
 						goto LABEL_55;
 				}
 				else
 				{
-					if ( g_state[258] & 2 )
+					if ( g_state.send & 2 )
 					{
 						v3[9] = *v4 * v18;
 						v3[10] = v4[1] * v18;
 						*((DWORD *)v3 + 11) = v15;
 					}
-					if ( !(g_state[258] & 4) )
+					if ( !(g_state.send & 4) )
 						goto LABEL_55;
 				}
 				v3[12] = *v5 * v18;
@@ -1101,12 +1102,12 @@ LABEL_55:
 				*v3 = v12 - 786432.0;
 				v3[1] = v3[1] + 786432.0;
 				v3[1] = v3[1] - 786432.0;
-				if ( g_state[258] & 2 )
+				if ( g_state.send & 2 )
 				{
 					v3[9] = *v4 * v3[8];
 					v3[10] = v4[1] * v3[8];
 				}
-				if ( g_state[258] & 4 )
+				if ( g_state.send & 4 )
 				{
 					v3[12] = *v5 * v3[8];
 					v3[13] = v5[1] * v3[8];
@@ -1128,14 +1129,14 @@ void x_vx(xt_pos* a1, xt_data* a2)
 	float *v2; // edx
 	int v3; // edx
 
-	vertices_lastnonrel_S1218 = vertices_S1216;
-	v2 = &pos_S1208[3 * vertices_S1216];
+	vertices_lastnonrel = vertices;
+	v2 = &pos_S1208[3 * vertices];
 	v2[0] = a1->v[0];
 	v2[1] = a1->v[1];
 	v2[2] = a1->v[2];
-	v3 = vertices_S1216;
-	allxformed_S1215 = 0;
-	++g_stats[1];
+	v3 = vertices;
+	allxformed = 0;
+	++g_stats.in_vx;
 	xformed_S1214[v3] = 0;
 	vertexdata(a2);
 }
@@ -1144,12 +1145,12 @@ void x_vxa(int a1, xt_data* a2)
 {
 	int v2; // ecx
 
-	if ( a1 < 0 || a1 >= posarraysize_S1223 )
+	if ( a1 < 0 || a1 >= posarraysize)
 		x_fatal("invalid vertex for x_vxa");
-	vertices_lastnonrel_S1218 = vertices_S1216;
-	memcpy(&xfpos_S1212[5 * vertices_S1216], (const void *)(posarray_S1224 + 20 * a1), 0x14u);
-	v2 = vertices_S1216;
-	++g_stats[1];
+	vertices_lastnonrel = vertices;
+	memcpy(&xfpos_S1212[5 * vertices], (const void *)(posarray_S1224 + 20 * a1), 0x14u);
+	v2 = vertices;
+	++g_stats.in_vx;
 	xformed_S1214[v2] = 1;
 	vertexdata(a2);
 }
@@ -1160,14 +1161,14 @@ void x_vxrel(float *a1, float *a2)
 	int v3; // eax
 	int v4; // ecx
 
-	v2 = &pos_S1208[3 * vertices_S1216];
+	v2 = &pos_S1208[3 * vertices];
 	*v2 = *a1;
 	v2[1] = a1[1];
-	v3 = vertices_S1216;
+	v3 = vertices;
 	v4 = *((DWORD *)a1 + 2);
-	allxformed_S1215 = 0;
+	allxformed = 0;
 	*((DWORD *)v2 + 2) = v4;
-	xformed_S1214[v3] = vertices_S1216 - vertices_lastnonrel_S1218 + 16;
+	xformed_S1214[v3] = vertices - vertices_lastnonrel + 16;
 	vertexdata(a2);
 }
 
@@ -1178,28 +1179,28 @@ void x_vxarray(xt_pos* a1, int a2, char* a3)
 	if ( a1 && a2 )
 	{
 		x_begin(0);
-		if ( posarrayallocsize_S1222 < a2 )
+		if (posarrayallocsize < a2 )
 		{
 			v3 = a2 + 256;
-			posarrayallocsize_S1222 = a2 + 256;
+			posarrayallocsize = a2 + 256;
 			if ( posarray_S1224 )
 			{
 				x_free(posarray_S1224);
-				v3 = posarrayallocsize_S1222;
+				v3 = posarrayallocsize;
 			}
-			posarrayallocsize_S1222 = v3;
+			posarrayallocsize = v3;
 			posarray_S1224 = x_allocfast(20 * v3);
 			if ( !posarray_S1224 )
 				x_fatal("out of memory");
 		}
-		posarraysize_S1223 = a2;
+		posarraysize = a2;
 		x_fastfpu(1);
 		xform(posarray_S1224, a1, a2, a3);
 		x_fastfpu(0);
 	}
 	else
 	{
-		posarraysize_S1223 = 0;
+		posarraysize = 0;
 	}
 }
 
@@ -1207,10 +1208,10 @@ int clear()
 {
 	int result; // eax
 
-	allxformed_S1215 = 1;
+	allxformed = 1;
 	result = 0;
-	state_S1226 = 0;
-	vertices_S1216 = 0;
+	state = 0;
+	vertices = 0;
 	corners_S1220 = 0;
 	return result;
 }
@@ -1307,7 +1308,7 @@ LABEL_5:
 	v23 = v22 / v24;
 	xfpos_S1212[v5] = (xfpos_S1212[5 * v4] - xfpos_S1212[5 * v3]) * v23 + xfpos_S1212[5 * v3];
 	flt_11450[v5] = (flt_11450[5 * v4] - flt_11450[5 * v3]) * v23 + flt_11450[5 * v3];
-	v6 = (g_state[258] & 1) == 0;
+	v6 = (g_state.send & 1) == 0;
 	v25 = (flt_11454[5 * v4] - flt_11454[5 * v3]) * v23 + flt_11454[5 * v3];
 	flt_11454[v5] = v25;
 	if ( !v6 )
@@ -1318,7 +1319,7 @@ LABEL_5:
 		flt_2A38[v7] = (flt_2A38[15 * v4] - flt_2A38[15 * v3]) * v23 + flt_2A38[15 * v3];
 		flt_2A40[v7] = (flt_2A40[15 * v4] - flt_2A40[15 * v3]) * v23 + flt_2A40[15 * v3];
 	}
-	if ( g_state[258] & 2 )
+	if ( g_state.send & 2 )
 	{
 		v8 = 2 * clipnewvx;
 		v6 = (g_state[289] & 0x10) == 0;
@@ -1328,7 +1329,7 @@ LABEL_5:
 			*(float *)&texp_S1211[v8] = (*(float *)&texp_S1211[2 * v4] - *(float *)&texp_S1211[2 * v3]) * v23
 																+ *(float *)&texp_S1211[2 * v3];
 	}
-	if ( g_state[258] & 4 )
+	if ( g_state.send & 4 )
 	{
 		v9 = 2 * v4;
 		v10 = 2 * clipnewvx;
@@ -1413,10 +1414,10 @@ signed int clipfinish(DWORD *a1)
 	DWORD *v6; // ecx
 
 	v1 = -1;
-	if ( vertices_S1216 < clipnewvx )
+	if (vertices < clipnewvx )
 	{
-		v2 = &dword_1145C[5 * vertices_S1216];
-		v3 = clipnewvx - vertices_S1216;
+		v2 = &dword_1145C[5 * vertices];
+		v3 = clipnewvx - vertices;
 		while ( 1 )
 		{
 			v1 &= *v2;
@@ -1432,7 +1433,7 @@ signed int clipfinish(DWORD *a1)
 	}
 	if ( v1 )
 		return 0;
-	setuprvx(vertices_S1216, clipnewvx - vertices_S1216);
+	setuprvx(vertices, clipnewvx - vertices);
 	v6 = a1;
 	result = 0;
 	do
@@ -1456,7 +1457,7 @@ signed int clippoly(int a1, int a2, int *a3, DWORD *a4)
 
 	v4 = (int *)&clipbuf1;
 	clipor = a1;
-	clipnewvx = vertices_S1216;
+	clipnewvx = vertices;
 	v5 = a2;
 	clipin = &clipbuf1;
 	clipout = &clipbuf2;
@@ -1528,7 +1529,7 @@ signed int clipline(int a1, int a2, DWORD *a3)
 	int v4; // esi
 	int v5; // eax
 
-	clipnewvx = vertices_S1216;
+	clipnewvx = vertices;
 	v3 = docliplineend(a1, a2);
 	v4 = v3;
 	v5 = docliplineend(a2, v3);
@@ -1619,33 +1620,33 @@ void *flush_reordertables()
 	signed int v8; // ebx
 	signed int v9; // [esp+10h] [ebp-4h]
 
-	v0 = mode_S1225;
-	if ( !mode_S1225 )
+	v0 = mode;
+	if ( !mode)
 		return (void *)clear();
-	switch ( mode_S1225 )
+	switch (mode)
 	{
-		case 1:
+		case X_POINTS:
 			v1 = 0;
 			break;
-		case 2:
+		case X_TRIANGLES:
 			v1 = 2;
 			break;
-		case 3:
+		case X_TRISTRIP:
 			v1 = 2;
 			break;
-		case 4:
+		case X_TRIFAN:
 			v1 = 2;
 			break;
-		case 5:
+		case X_QUADS:
 			v1 = 3;
 			break;
-		case 6:
+		case X_POLYLINE:
 			v1 = 1;
 			break;
-		case 9:
+		case X_POLYGON:
 			x_fatal("xgeom: too large X_POLYGON!\n");
 			v1 = v9;
-			v0 = mode_S1225;
+			v0 = mode;
 			break;
 		default:
 			v1 = 0;
@@ -1667,12 +1668,12 @@ void *flush_reordertables()
 		texp_S1211[0] = v5;
 		dword_10448 = v6;
 	}
-	if ( v1 <= vertices_S1216 )
+	if ( v1 <= vertices)
 	{
-		memmove(&xfpos_S1212[5 * v2], &xfpos_S1212[5 * (vertices_S1216 - v1)], 20 * v1);
-		memmove((char *)&grvx_S1213 + 60 * v2, (char *)&grvx_S1213 + 60 * (vertices_S1216 - v1), 60 * v1);
-		memmove(&tex_S1209[2 * v2], &tex_S1209[2 * (vertices_S1216 - v1)], 8 * v1);
-		result = memmove(&texp_S1211[2 * v2], &texp_S1211[2 * (vertices_S1216 - v1)], 8 * v1);
+		memmove(&xfpos_S1212[5 * v2], &xfpos_S1212[5 * (vertices - v1)], 20 * v1);
+		memmove((char *)&grvx_S1213 + 60 * v2, (char *)&grvx_S1213 + 60 * (vertices - v1), 60 * v1);
+		memmove(&tex_S1209[2 * v2], &tex_S1209[2 * (vertices - v1)], 8 * v1);
+		result = memmove(&texp_S1211[2 * v2], &texp_S1211[2 * (vertices - v1)], 8 * v1);
 	}
 	else
 	{
@@ -1684,8 +1685,8 @@ void *flush_reordertables()
 		result = (void *)16843009;
 		memset(xformed_S1214, 1u, v8);
 	}
-	vertices_S1216 = v8;
-	allxformed_S1215 = 1;
+	vertices = v8;
+	allxformed = 1;
 	corners_S1220 = 0;
 	return result;
 }
@@ -1710,18 +1711,18 @@ signed int flush_drawfx()
 	int *v15; // edi
 	DWORD *v16; // [esp+10h] [ebp-4h]
 
-	if ( !allxformed_S1215 )
-		xform((int)xfpos_S1212, pos_S1208, vertices_S1216, xformed_S1214);
+	if ( !allxformed)
+		xform((int)xfpos_S1212, pos_S1208, vertices, xformed_S1214);
 	v0 = &dword_A228;
-	setuprvx(0, vertices_S1216);
+	setuprvx(0, vertices);
 	result = corners_S1220;
 	corner_S1219[corners_S1220] = 0;
 	for ( i = corner_S1219[0]; i; v0 = v15 + 1 )
 	{
 		if ( i < 3 )
-			++g_stats[2];
+			++g_stats.in_tri;
 		else
-			g_stats[2] += i - 2;
+			g_stats.in_tri += i - 2;
 		v5 = 0;
 		result = -1;
 		if ( i > 0 )
@@ -1749,7 +1750,7 @@ signed int flush_drawfx()
 					if ( result >= 2 )
 					{
 						v9 = v16;
-						++g_stats[3];
+						++g_stats.out_tri;
 						grDrawLine((char *)&grvx_S1213 + 60 * *v16, (char *)&grvx_S1213 + 60 * v9[1]);
 					}
 				}
@@ -1760,7 +1761,7 @@ signed int flush_drawfx()
 					if ( result >= 3 )
 					{
 						result -= 2;
-						g_stats[3] += v10 - 2;
+						g_stats.out_tri += v10 - 2;
 						if ( g_state[289] & 1 )
 						{
 							v2 = v10 - 1;
@@ -1802,7 +1803,7 @@ signed int flush_drawfx()
 			v2 = i - 1;
 			result = i - 2;
 			v8 = 0;
-			g_stats[3] += i - 2;
+			g_stats.out_tri += i - 2;
 			if ( i > 0 )
 			{
 				do
@@ -1818,15 +1819,15 @@ signed int flush_drawfx()
 			switch ( i )
 			{
 				case 1:
-					++g_stats[3];
+					++g_stats.out_tri;
 					grDrawPoint(12 * *v0, v1, (char *)&grvx_S1213 + 60 * *v0);
 					break;
 				case 2:
-					++g_stats[3];
+					++g_stats.out_tri;
 					grDrawLine((char *)&grvx_S1213 + 60 * *v0, (char *)&grvx_S1213 + 60 * v0[1]);
 					break;
 				case 3:
-					++g_stats[3];
+					++g_stats.out_tri;
 					grDrawTriangle(
 									12 * *v0,
 									v1,
@@ -1835,7 +1836,7 @@ signed int flush_drawfx()
 									(char *)&grvx_S1213 + 60 * v0[2]);
 					break;
 				default:
-					g_stats[3] += i - 2;
+					g_stats.out_tri += i - 2;
 					grDrawPlanarPolygon(v2, v1, i, v0, &grvx_S1213);
 					break;
 			}
@@ -1851,7 +1852,7 @@ void x_flush(void)
 	int v0; // eax
 
 	v0 = corners_S1220;
-	if ( g_state[317] & 0x20 )
+	if ( g_state.geometry & X_DUMPDATA)
 	{
 		x_log("#flush %i %i %i\n", g_state.projchanged, g_state.changed, corners_S1220);
 		v0 = corners_S1220;
@@ -1892,10 +1893,7 @@ void x_flush(void)
 //.bss:0000CA21                 db    ? ;
 //.bss:0000CA22                 db    ? ;
 //.bss:0000CA23                 db    ? ;
-//.bss:0000CA24 _allxformed$S1215 dd ?                  ; DATA XREF: _x_vx+35↑w
-//.bss:0000CA24                                         ; _x_vxrel+26↑w ...
-//.bss:0000CA28 _state$S1226    dd ?                    ; DATA XREF: _x_begin+3A↑w
-//.bss:0000CA28                                         ; _vertexdata:$L1335↑r ...
+
 //.bss:0000CA2C _pos$S1208      db    ? ;               ; DATA XREF: _setuprvx+263↑o
 //.bss:0000CA2C                                         ; _x_vx+13↑o ...
 //.bss:0000CA2D                 db    ? ;
@@ -1925,10 +1923,7 @@ void x_flush(void)
 //...
 //.bss:0000F432                 db    ? ;
 //.bss:0000F433                 db    ? ;
-//.bss:0000F434 _vertices_base$S1217 dd ?               ; DATA XREF: _x_begin+2E↑w
-//.bss:0000F434                                         ; _x_end+1C↑r ...
-//.bss:0000F438 _vertices_lastnonrel$S1218 dd ?         ; DATA XREF: _x_vx+9↑w
-//.bss:0000F438                                         ; _x_vxa+2C↑w ...
+
 //.bss:0000F43C _tex2$S1210     dd ?                    ; DATA XREF: _vertexdata+F9↑w
 //.bss:0000F43C                                         ; _setuprvx+60↑o ...
 //.bss:0000F440 flt_F440        dd ?                    ; DATA XREF: _vertexdata+106↑w
@@ -1939,12 +1934,7 @@ void x_flush(void)
 //...
 //.bss:0001043A                 db    ? ;
 //.bss:0001043B                 db    ? ;
-//.bss:0001043C _vertices$S1216 dd ?                    ; DATA XREF: _x_begin+1B↑r
-//.bss:0001043C                                         ; _x_end+27↑w ...
-//.bss:00010440                 db    ? ;
-//.bss:00010441                 db    ? ;
-//.bss:00010442                 db    ? ;
-//.bss:00010443                 db    ? ;
+
 //.bss:00010444 _texp$S1211     dd ?                    ; DATA XREF: _vertexdata+A6↑w
 //.bss:00010444                                         ; _setuprvx+6E↑o ...
 //.bss:00010448 dword_10448     dd ?                    ; DATA XREF: _flush_reordertables+EF↑w
@@ -1982,6 +1972,4 @@ void x_flush(void)
 //.bss:00013C4B                 db    ? ;
 //.bss:00013C4C _posarray$S1224 dd ?                    ; DATA XREF: _x_vxa+37↑r
 //.bss:00013C4C                                         ; _x_vxarray+32↑r ...
-//.bss:00013C50 _flip$S1227     dd ?                    ; DATA XREF: _x_begin+3F↑w
-//.bss:00013C50                                         ; _vertexdata+1FB↑r ...
 //.bss:00013C50 _bss            ends

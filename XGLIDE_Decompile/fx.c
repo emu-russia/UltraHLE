@@ -66,7 +66,7 @@ int init_reinit()
 		// 1024x768
 		mode = 12;
 	}
-	grSstWinOpen(g_state.hwnd, mode, GR_REFRESH_60Hz, GR_COLORFORMAT_ABGR, GR_ORIGIN_LOWER_LEFT, g_state.buffers, g_state.vsync);
+	grSstWinOpen((FxU32)g_state.hwnd, mode, GR_REFRESH_60Hz, GR_COLORFORMAT_ABGR, GR_ORIGIN_LOWER_LEFT, g_state.buffers, g_state.vsync);
 	grClipWindow(0, 0, g_state.xs, g_state.ys);
 	x_log("init_reinit: done\n");
 }
@@ -157,18 +157,18 @@ int init_clear(int a1, int a2, float a3, float a4, float a5)
 
 	x_flush(v5, (unsigned __int64)(signed __int64)(a3 * 255.0) >> 32);
 	grClipWindow(
-		(signed __int64)g_state[248],
-		(signed __int64)g_state[250],
-		(signed __int64)g_state[249],
-		(signed __int64)g_state[251]);
+		g_state.view_x0,
+		g_state.view_y0,
+		g_state.view_x1,
+		g_state.view_y1);
 	grColorMask((unsigned int)a1 >= 1, (unsigned int)a1 >= 1);
 	grDepthMask((unsigned int)a2 >= 1);
 	grBufferClear(
 		(unsigned __int8)(signed __int64)(a3 * 255.0) | ((unsigned __int16)(signed __int64)(a4 * 255.0) << 8) & 0xFF00 | ((unsigned __int8)(signed __int64)(a5 * 255.0) << 16),
 		0,
 		0xFFFF);
-	grDepthMask((LODWORD(g_state[291]) & 2u) >> 1);
-	grColorMask(LODWORD(g_state[291]) & 1, LODWORD(g_state[291]) & 1);
+	grDepthMask((g_state.mask & 2u) >> 1);
+	grColorMask(g_state.mask & 1, g_state.mask & 1);
 }
 
 int init_readfb(__int16 a1, int a2, int a3, int a4, int a5, int a6, int a7)
@@ -218,19 +218,20 @@ int init_readfb(__int16 a1, int a2, int a3, int a4, int a5, int a6, int a7)
 
 int init_writefb()
 {
+	// Not implemented
 	return 1;
 }
 
 int mode_init()
 {
-	g_state[307] = 0.0;
+	g_state.stwhint = 0;
 	grDepthBiasLevel(0);
-	grDepthBufferMode(2);
-	grDepthMask(1);
-	grDitherMode(2);
-	grHints(3, 1);
-	grTexFilterMode(0, 1, 1);
-	grTexFilterMode(1, 1, 1);
+	grDepthBufferMode(GR_DEPTHBUFFER_WBUFFER);
+	grDepthMask(FXTRUE);
+	grDitherMode(GR_DITHER_4x4);
+	grHints(GR_HINT_ALLOW_MIPMAP_DITHER, 1);
+	grTexFilterMode(GR_TMU0, GR_TEXTUREFILTER_BILINEAR, GR_TEXTUREFILTER_BILINEAR);
+	grTexFilterMode(GR_TMU1, GR_TEXTUREFILTER_BILINEAR, GR_TEXTUREFILTER_BILINEAR);
 }
 
 int mode_texturemode(int a1, __int16 a2, int a3)
@@ -294,7 +295,7 @@ int mode_loadtexture(int a1)
 			grTexCombine(0, 7, 8, 7, 8, 0, 0);
 			mode_texturemode(0, v4, 0);
 			mode_texturemode(1, v4, 0);
-			result = grTexCombine(1, 1, 0, 1, 0, 0, 0);
+			grTexCombine(1, 1, 0, 1, 0, 0, 0);
 		}
 		else
 		{
@@ -427,14 +428,14 @@ void mode_change()
 
 	if ( g_state.changed & 1 )
 	{
-		v1 = g_state[317];
+		v1 = g_state.geometry;
 		if ( LODWORD(g_state[289]) != LODWORD(v1) )
 		{
 			if ( LOBYTE(v1) & 2 )
 			{
 				grCullMode(1);
 			}
-			else if ( LOBYTE(g_state[317]) & 4 )
+			else if ( g_state.geometry & 4 )
 			{
 				grCullMode(2);
 			}
@@ -442,7 +443,7 @@ void mode_change()
 			{
 				grCullMode(0);
 			}
-			g_state[289] = g_state[317];
+			g_state[289] = g_state.geometry;
 		}
 	}
 	if ( g_state.changed & 8 )
@@ -528,63 +529,63 @@ $L1409:
 			g_state[265] = -6.8056469e38/*NaN*/;
 			g_state[284] = g_state[312];
 		}
-		if ( LODWORD(g_state[293]) != LODWORD(g_state[265]) )
+		if ( g_state.colortext1 != LODWORD(g_state[265]) )
 		{
-			LODWORD(g_state[258]) &= 0xFFFFFFFC;
-			switch ( LODWORD(g_state[293]) & 0xFFFF )
+			g_state.send &= 0xFFFFFFFC;
+			switch ( g_state.colortext1 & 0xFFFF )
 			{
-				case 0x1301:
+				case X_WHITE:
 					grConstantColorValue(2147450879);
 					guColorCombineFunction(1);
 					guAlphaSource(0);
 					break;
-				case 0x1302:
+				case X_COLOR:
 					guColorCombineFunction(2);
 					guAlphaSource(1);
-					LODWORD(g_state[258]) |= 1u;
+					g_state.send |= 1u;
 					break;
-				case 0x1303:
-				case 0x1306:
+				case X_TEXTURE:
+				case X_DECAL:
 					guColorCombineFunction(4);
 					guAlphaSource(2);
 					goto LABEL_49;
-				case 0x1304:
+				case X_ADD:
 					guColorCombineFunction(11);
 					guAlphaSource(2);
 					goto LABEL_48;
-				case 0x1305:
+				case X_MUL:
 					guColorCombineFunction(6);
 					guAlphaSource(3);
 					goto LABEL_48;
-				case 0x1308:
+				case X_TEXTURE_IA:
 					guColorCombineFunction(4);
 					guAlphaSource(1);
 					goto LABEL_48;
-				case 0x1309:
+				case X_MUL_TA:
 					guColorCombineFunction(6);
 					guAlphaSource(2);
 					goto LABEL_48;
-				case 0x130A:
+				case X_MUL_IA:
 					guColorCombineFunction(6);
 					guAlphaSource(1);
 					goto LABEL_48;
-				case 0x130B:
+				case X_TEXTUREBLEND:
 					grColorCombine(7, 4, 0, 1, 0);
 					guAlphaSource(1);
 					goto LABEL_48;
-				case 0x130C:
+				case X_TEXTUREENVA:
 					grColorCombine(7, 4, 1, 0, 0);
 					guAlphaSource(1);
 					goto LABEL_47;
-				case 0x130D:
+				case X_TEXTUREENVC:
 					grColorCombine(7, 5, 1, 0, 0);
 					guAlphaSource(1);
 					goto LABEL_47;
-				case 0x130E:
+				case X_SUB:
 					grColorCombine(6, 8, 0, 1, 0);
 					guAlphaSource(2);
 					goto LABEL_48;
-				case 0x130F:
+				case X_TEXTUREENVCR:
 					grColorCombine(7, 5, 0, 2, 0);
 					guAlphaSource(1);
 					v13 = g_state[284];
@@ -592,77 +593,77 @@ $L1409:
 LABEL_47:
 					grConstantColorValue(LODWORD(g_state[284]));
 LABEL_48:
-					LODWORD(g_state[258]) |= 1u;
+					g_state.send |= 1u;
 LABEL_49:
-					LODWORD(g_state[258]) |= 2u;
+					g_state.send |= 2u;
 					break;
 				default:
 					break;
 			}
-			switch ( SLODWORD(g_state[293]) >> 16 )
+			switch ( g_state.colortext1 >> 16 )
 			{
-				case 0x1302:
+				case X_COLOR:
 					guAlphaSource(1);
-					LODWORD(g_state[258]) |= 1u;
+					g_state.send |= 1u;
 					break;
-				case 0x1303:
-				case 0x1306:
+				case X_TEXTURE:
+				case X_DECAL:
 					guAlphaSource(2);
 					goto LABEL_56;
-				case 0x1304:
+				case X_ADD:
 					guAlphaSource(2);
 					goto LABEL_55;
-				case 0x1305:
+				case X_MUL:
 					guAlphaSource(3);
 LABEL_55:
-					LODWORD(g_state[258]) |= 1u;
+					g_state.send |= 1u;
 LABEL_56:
-					LODWORD(g_state[258]) |= 2u;
+					g_state.send |= 2u;
 					break;
 				default:
 					break;
 			}
-			g_state[265] = g_state[293];
+			g_state[265] = g_state.colortext1;
 		}
-		if ( LODWORD(g_state[294]) != LODWORD(g_state[266]) )
+		if ( g_state.text1text2 != LODWORD(g_state[266]) )
 		{
-			LODWORD(g_state[258]) &= 0xFFFFFFFB;
+			g_state.send &= 0xFFFFFFFB;
 			grTexCombine(1, 1, 0, 1, 0, 0, 0);
-			v14 = LODWORD(g_state[294]);
-			if ( v14 > 4867 )
+			v14 = g_state.text1text2;
+			if ( v14 > X_TEXTURE)
 			{
 				a1 = 0.0;
 				switch ( v14 )
 				{
-					case 4868:
+					case X_ADD:
 						grTexCombine(0, 4, 8, 4, 8, 0, 0);
 						goto LABEL_70;
-					case 4869:
+					case X_MUL:
 						grTexCombine(0, 3, 1, 3, 1, 0, 0);
 						goto LABEL_70;
-					case 4870:
+					case X_DECAL:
 						grTexCombine(0, 7, 11, 7, 11, 0, 0);
 						goto LABEL_70;
-					case 4871:
+					case X_MULADD:
 						grTexCombine(0, 4, 1, 4, 1, 0, 0);
 						goto LABEL_70;
-					case 4878:
+					case X_SUB:
 						grTexCombine(0, 6, 8, 6, 8, 0, 0);
 LABEL_70:
-						LODWORD(g_state[258]) |= 4u;
+						g_state.send |= 4u;
 						break;
 					default:
 						break;
 				}
 			}
-			else if ( v14 >= 4865 || !v14 )
+			else if ( v14 >= X_WHITE || !v14 )
 			{
 				grTexCombine(0, 1, 0, 1, 0, 0, 0);
 				grTexCombine(1, 1, 0, 1, 0, 0, 0);
 			}
-			g_state[266] = g_state[294];
+			g_state[266] = g_state.text1text2;
 		}
-		if ( g_state[280] != g_state[308] )
+		if ( g_state[280] != g_state.alphatest)
 		{
 			if ( SLODWORD(g_state[308]) < 1065353216 && (v15 = g_state[308], LODWORD(v15) | HIDWORD(v15) & 0x7FFFFFFF) )
 			{
@@ -672,42 +673,42 @@ LABEL_70:
 				if ( (signed int)v16 > 255 )
 					LODWORD(v16) = 255;
 				grAlphaTestReferenceValue(LODWORD(a1), HIDWORD(v16), v16);
-				grAlphaTestFunction(4);
+				grAlphaTestFunction(GR_CMP_GREATER);
 			}
 			else
 			{
-				grAlphaTestFunction(7);
+				grAlphaTestFunction(GR_CMP_ALWAYS);
 			}
-			g_state[280] = g_state[308];
+			g_state[280] = g_state.alphatest;
 		}
-		if ( LODWORD(g_state[276]) != LODWORD(g_state[304]) || LODWORD(g_state[305]) != LODWORD(g_state[277]) )
+		if ( LODWORD(g_state[276]) != g_state.src || g_state.dst != LODWORD(g_state[277]) )
 		{
-			switch ( LODWORD(g_state[304]) )
+			switch ( g_state.src)
 			{
-				case 0x1201:
+				case X_ZERO:
 					v17 = 0;
 					v18 = 0;
 					break;
-				case 0x1203:
+				case X_OTHER:
 					v17 = 2;
 					v18 = 3;
 					break;
-				case 0x1204:
+				case X_ALPHA:
 					v17 = 1;
 					v18 = 1;
 					break;
-				case 0x1205:
+				case X_OTHERALPHA:
 					v17 = 3;
 					v18 = 3;
 					break;
-				case 0x1206:
+				case X_INVOTHER:
 					v17 = 6;
 					v18 = 7;
 					break;
-				case 0x1207:
+				case X_INVALPHA:
 					v18 = 5;
 					goto LABEL_93;
-				case 0x1208:
+				case X_INVOTHERALPHA:
 					v18 = 7;
 LABEL_93:
 					v17 = v18;
@@ -717,29 +718,29 @@ LABEL_93:
 					v18 = 4;
 					break;
 			}
-			switch ( LODWORD(g_state[305]) )
+			switch ( g_state.dst)
 			{
-				case 0x1202:
+				case X_ONE:
 					v20 = 4;
 					goto LABEL_103;
-				case 0x1203:
+				case X_OTHER:
 					v19 = 2;
 					v20 = 1;
 					break;
-				case 0x1204:
+				case X_ALPHA:
 					v20 = 3;
 					goto LABEL_103;
-				case 0x1205:
+				case X_OTHERALPHA:
 					v20 = 1;
 					goto LABEL_103;
-				case 0x1206:
+				case X_INVOTHER:
 					v19 = 6;
 					v20 = 5;
 					break;
-				case 0x1207:
+				case X_INVALPHA:
 					v20 = 7;
 					goto LABEL_103;
-				case 0x1208:
+				case X_INVOTHERALPHA:
 					v20 = 5;
 LABEL_103:
 					v19 = v20;
@@ -750,33 +751,33 @@ LABEL_103:
 					break;
 			}
 			grAlphaBlendFunction(v17, v19, v18, v20);
-			v21 = g_state[305];
-			g_state[276] = g_state[304];
+			v21 = g_state.dst;
+			g_state[276] = g_state.src;
 			g_state[277] = v21;
 		}
 		v22 = g_state[303];
 		if ( LODWORD(g_state[275]) != LODWORD(v22) )
 		{
 			if ( v22 == 0.0 )
-				grDitherMode(0);
+				grDitherMode(GR_DITHER_DISABLE);
 			else
-				grDitherMode(2);
+				grDitherMode(GR_DITHER_4x4);
 			g_state[275] = g_state[303];
 		}
 	}
-	if ( LOBYTE(g_state[258]) & 4 )
+	if ( g_state.send & 4 )
 	{
 		LODWORD(g_state[309]) = 2;
 	}
 	else
 	{
-		v23 = (LOBYTE(g_state[258]) & 2) == 0;
+		v23 = (g_state.send & 2) == 0;
 		LODWORD(g_state[309]) = 1;
 		if ( v23 )
-			g_state[309] = 0.0;
+			g_state[309] = 0;
 	}
 	if ( LOBYTE(g_state[289]) & 1 )
-		g_state[309] = 0.0;
+		g_state[309] = 0;
 	if ( LODWORD(g_state[281]) != LODWORD(g_state[309]) )
 	{
 		v24 = g_state[309];
@@ -787,60 +788,53 @@ LABEL_103:
 	}
 	if ( g_state.changed & 2 )
 	{
-		if ( LOBYTE(g_state[317]) & 0x10 )
-			LODWORD(g_state[307]) |= 2u;
+		if ( g_state.geometry & 0x10 )
+			g_state.stwhint |= 2u;
 		else
-			LODWORD(g_state[307]) &= 0xFFFFFFFD;
+			g_state.stwhint &= 0xFFFFFFFD;
 		if ( LODWORD(g_state[309]) == 1 )
 		{
-			LODWORD(g_state[307]) &= 0xFFFFFFEF;
+			g_state.stwhint &= 0xFFFFFFEF;
 			if ( LODWORD(g_state[310]) != LODWORD(g_state[282]) )
 			{
 				mode_loadtexture(LODWORD(g_state[310]));
 				g_state[282] = g_state[310];
-				++g_stats[5];
+				++g_stats.chg_text;
 			}
 		}
 		else if ( LODWORD(g_state[309]) == 2 )
 		{
 			if ( LODWORD(g_state.sametex) )
-				LODWORD(g_state[307]) &= 0xFFFFFFEF;
+				g_state.stwhint &= 0xFFFFFFEF;
 			else
-				LODWORD(g_state[307]) |= 0x10u;
+				g_state.stwhint |= 0x10u;
 			if ( LODWORD(g_state[310]) != LODWORD(g_state[282]) || LODWORD(g_state[311]) != LODWORD(g_state[283]) )
 			{
 				v25 = g_state[311];
 				mode_loadmultitexture(*(_QWORD *)&g_state[310], *(_QWORD *)&g_state[310] >> 32);
 				v26 = g_state[310];
-				g_stats[5] += 2;
+				g_stats.chg_text += 2;
 				g_state[282] = v26;
 			}
 		}
 		g_state[278] = g_state.sametex;
 	}
-	result = g_state[307];
+	result = g_state.stwhint;
 	if ( LODWORD(g_state[279]) != LODWORD(result) )
 	{
-		grHints(0, LODWORD(g_state[307]));
-		result = g_state[307];
+		grHints(GR_HINT_STWHINT, g_state.stwhint);
+		result = g_state.stwhint;
 		g_state[279] = result;
 	}
 	g_state.changed = 0;
-	++g_stats[4];
-	if ( LOBYTE(g_state[317]) & 0x20 )
+	++g_stats.chg_mode;
+	if ( g_state.geometry & X_DUMPDATA)
 	{
 		x_log("#modechange:\n");
-		v28 = (LODWORD(g_state[291]) & 4u) >> 2;
-		v29 = (LODWORD(g_state[291]) & 2u) >> 1;
-		v30 = LODWORD(g_state[291]) & 1;
-		x_log("-mask c=%i z=%i zt=%i\n");
-		v31 = g_state[293];
-		x_log("-colortext1 %08X\n");
-		v32 = g_state[308];
-		x_log("-alphatest %04X\n");
-		v33 = g_state[305];
-		v34 = *(_QWORD *)&g_state[304];
-		x_log("-blend %04X %04X\n");
+		x_log("-mask c=%i z=%i zt=%i\n", (g_state.mask & 4u) >> 2, (g_state.mask & 2u) >> 1, g_state.mask & 1);
+		x_log("-colortext1 %08X\n", g_state.colortext1);
+		x_log("-alphatest %04X\n", (int16_t)g_state.alphatest);
+		x_log("-blend %04X %04X\n", g_state.dst, g_state.src);
 		v35 = g_state[281];
 		v36 = g_state[310];
 		x_log("-texture %i (%i textures)\n");

@@ -12,10 +12,10 @@ typedef unsigned char bool;
 #include "X.H"
 
 #include "state.h"
+#include "main.h"
 #include "api.h"
 #include "fx.h"
 #include "fxgeom.h"
 #include "fxtext.h"
-#include "main.h"
 #include "util.h"
 #include "version.h"

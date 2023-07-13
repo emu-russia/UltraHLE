@@ -122,39 +122,36 @@ void x_close(int which)
 	}
 }
 
-int __cdecl x_getstats(DWORD *a1, unsigned int a2)
+void x_getstats(xt_stats* s, int ssize)
 {
 	static int nowtime = 0;
 	static int lasttime = 0;
 
 	bool v2; // zf
-	int result; // eax
 
 	nowtime = x_timeus();
-	if ( a1 )
+	if ( s )
 	{
-		if ( a2 == 104 )
+		if ( ssize == sizeof(xt_stats))
 		{
-			memcpy(a1, g_stats, 0x68u);
+			memcpy(s, &g_stats, sizeof(xt_stats));
 			v2 = nowtime == lasttime;
-			*a1 = nowtime - lasttime;
+			s->frametime = nowtime - lasttime;
 			if ( v2 )
-				*a1 = 1;
+				s->frametime = 1;
 		}
 		else
 		{
-			memset(a1, 0, a2);
+			memset(s, 0, ssize);
 		}
 	}
-	`x_getstats'::`2'::lasttime = `x_getstats'::`2'::nowtime;
-	result = 0;
-	g_stats[1] = 0;
-	g_stats[2] = 0;
-	g_stats[3] = 0;
-	g_stats[4] = 0;
-	g_stats[5] = 0;
-	g_stats[7] = 0;
-	return result;
+	lasttime = nowtime;
+	g_stats.in_vx = 0;
+	g_stats.in_tri = 0;
+	g_stats.out_tri = 0;
+	g_stats.chg_mode = 0;
+	g_stats.chg_text = 0;
+	g_stats.text_uploaded = 0;
 }
 
 int x_query()
@@ -345,7 +342,7 @@ DWORD *__cdecl texture_get(signed int a1)
 
 	if ( a1 <= 0 || a1 > 1024 )
 	{
-		g_state[168] |= 0x20000000u;
+		g_state.error |= 0x20000000u;
 		result = 0;
 	}
 	else
@@ -355,7 +352,7 @@ DWORD *__cdecl texture_get(signed int a1)
 		{
 			x_log("undefined texture xhandle %i selected\n");
 			result = 0;
-			g_state[168] |= 0x20000000u;
+			g_state.error |= 0x20000000u;
 		}
 	}
 	return result;
@@ -385,7 +382,7 @@ signed int __cdecl x_createtexture(int a1, signed int a2, signed int a3)
 	{
 		x_log("too many textures\n");
 		result = -1;
-		g_state[168] |= 0x10000000u;
+		g_state.error |= 0x10000000u;
 	}
 	else
 	{
@@ -419,7 +416,7 @@ signed int __cdecl x_createtexture(int a1, signed int a2, signed int a3)
 				v6[7] = 1;
 			}
 			text_allocdata(v6);
-			g_stats[6] += v6[6];
+			g_stats.text_total += v6[6];
 			result = v4;
 		}
 		else
@@ -531,8 +528,8 @@ void x_closetexturedata(int a1)
 
 void x_forcegeometry(int forceon, int forceoff)
 {
-	g_state[259] = forceon;
-	g_state[260] = forceoff;
+	g_state.geometryon = forceon;
+	g_state.geometryoff = forceoff;
 	g_state.changed |= 1u;
 }
 
@@ -541,10 +538,10 @@ void x_geometry(int flags)
 	int v1; // ecx
 	int result; // eax
 
-	v1 = g_state[259];
-	result = ~g_state[260];
+	v1 = g_state.geometryon;
+	result = ~g_state.geometryoff;
 	g_state.changed |= 1u;
-	g_state[317] = result & (flags | v1);
+	g_state.geometry = result & (flags | v1);
 }
 
 int x_mask(int colormask, int depthmask, int depthtest)
@@ -607,7 +604,7 @@ int x_blend(int src, int dst)
 
 int x_alphatest(float limit)
 {
-	if ( g_state[317] & 1 )
+	if ( g_state.geometry & 1 )
 		limit = 1.0f;
 	if ( limit < 0.0f || limit > 1.0f)
 		return 1;
@@ -620,28 +617,29 @@ int x_combine(int colortext1)
 {
 	if (colortext1 < 4865 || colortext1 > 4879 )
 		return 1;
-	g_state[294] = 0;
+	g_state.text1text2 = 0;
 	g_state.changed |= 4u;
-	g_state[293] = colortext1;
+	g_state.colortext1 = colortext1;
 	return 0;
 }
 
 int x_procombine(int rgb, int alpha)
 {
-	g_state[294] = 0;
+	g_state.text1text2 = 0;
 	g_state.changed |= 4u;
-	g_state[293] = rgb | (alpha << 16);
+	g_state.colortext1 = rgb | (alpha << 16);
 	return 0;
 }
 
 int x_envcolor(float r, float g, float b, float a)
 {
-	*(float *)&g_state[313] = r;
-	*(float *)&g_state[314] = g;
-	*(float *)&g_state[315] = b;
-	*(float *)&g_state[316] = a;
+	g_state.env[0] = r;
+	g_state.env[1] = g;
+	g_state.env[2] = b;
+	g_state.env[3] = a;
 	g_state.changed |= 4u;
-	g_state[312] = (unsigned __int8)(signed __int64)(r * 255.0) | ((unsigned __int8)(signed __int64)(b * 255.0) << 16) | ((((unsigned int)(signed __int64)(a * 255.0) << 16) | (unsigned __int8)(signed __int64)(g * 255.0)) << 8);
+	// Buggy
+	g_state.envc = (unsigned __int8)(signed __int64)(r * 255.0) | ((unsigned __int8)(signed __int64)(b * 255.0) << 16) | ((((unsigned int)(signed __int64)(a * 255.0) << 16) | (unsigned __int8)(signed __int64)(g * 255.0)) << 8);
 	return 0;
 }
 
@@ -653,9 +651,9 @@ int x_combine2(int colortext1, int text1text2, int sametex)
 		return 1;
 	if (text1text2 < X_FIRSTCOMBINE || text1text2 > X_LASTCOMBINE)
 		return 1;
-	g_state[293] = colortext1;
+	g_state.colortext1 = colortext1;
 	g_state.sametex = sametex;
-	g_state[294] = text1text2;
+	g_state.text1text2 = text1text2;
 	g_state.changed |= 4u;
 	return 0;
 }
@@ -667,8 +665,8 @@ int x_procombine2(int rgb, int alpha, int text1text2, int sametex)
 	if (text1text2 < X_FIRSTCOMBINE || text1text2 > X_LASTCOMBINE)
 		return 1;
 	g_state.sametex = sametex;
-	g_state[293] = rgb | (alpha << 16);
-	g_state[294] = text1text2;
+	g_state.colortext1 = rgb | (alpha << 16);
+	g_state.text1text2 = text1text2;
 	g_state.changed |= 4u;
 	return 0;
 }
@@ -677,9 +675,9 @@ int x_texture(int text1handle)
 {
 	if (text1handle <= 0 )
 		return 1;
-	g_state[311] = 0;
+	g_state.text1 = text1handle;
+	g_state.text2 = 0;
 	g_state.changed |= 2u;
-	g_state[310] = text1handle;
 	return 0;
 }
 
@@ -689,20 +687,20 @@ int x_texture2(int text1handle, int text2handle)
 		return 1;
 	if (text1handle <= 0 || text2handle <= 0 )
 		return 1;
-	g_state[310] = text1handle;
-	g_state[311] = text2handle;
+	g_state.text1 = text1handle;
+	g_state.text2 = text2handle;
 	g_state.changed |= 2u;
 	return 0;
 }
 
 void x_reset(void)
 {
-	x_geometry(4);
-	x_mask(4097, 4097, 4097);
+	x_geometry(X_CULLBACK);
+	x_mask(X_ENABLE, X_ENABLE, X_ENABLE);
 	x_dither(1);
-	x_blend(4610, 4609);
+	x_blend(X_ONE, X_ZERO);
 	x_alphatest(1.0f);
-	x_combine(4866);
+	x_combine(X_COLOR);
 	x_zdecal(1.0f);
 }
 
