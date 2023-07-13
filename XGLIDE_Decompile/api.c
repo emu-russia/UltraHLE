@@ -9,18 +9,14 @@ static float identmatrix[4 * 4] = {
 
 void x_init(void)
 {
-	int v0; // eax
-
 	log_open("wt");
-	v0 = x_version();
-	x_log("Init: %s\n", v0);
+	x_log("Init: %s\n", x_version());
 }
 
 void x_deinit(void)
 {
 	signed int v0; // edi
 	DWORD *v1; // esi
-	int v2; // eax
 
 	v0 = 1;
 	v1 = &g_state[159];
@@ -32,18 +28,14 @@ void x_deinit(void)
 		++v0;
 	}
 	while ( v1 < &g_state[318] );
-	v2 = x_version();
-	x_log("Deinit: %s\n", v2);
+	x_log("Deinit: %s\n", x_version());
 	return log_open(0);
 }
 
 char *x_version()
 {
 	static char version[64];
-	int v0; // eax
-
-	v0 = init_name(g_version, g_datetime);
-	sprintf(version, "%s Build %i (%s)", v0);
+	sprintf(version, "%s Build %i (%s)", init_name(), g_version, g_datetime);
 	return version;
 }
 
