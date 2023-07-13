@@ -103,25 +103,30 @@ void x_free(void *Memory)
 
 void x_fastfpu(int a1)
 {
+	static int state = 0;
+	static int newcontrol;
+	static int originalcontrol;
+	static int initdone;
+
 	int v1; // eax
 	bool v2; // zf
 	unsigned int result; // eax
 
-	v1 = `x_fastfpu'::`2'::state;
+	v1 = state;
 	if ( a1 )
 	{
-		v1 = `x_fastfpu'::`2'::state + 1;
+		v1 = state + 1;
 	}
-	else if ( `x_fastfpu'::`2'::state > 0 )
+	else if ( state > 0 )
 	{
-		v1 = `x_fastfpu'::`2'::state - 1;
+		v1 = state - 1;
 	}
-	`x_fastfpu'::`2'::state = v1;
+	state = v1;
 	v2 = v1 == 0;
-	result = `x_fastfpu'::`2'::originalcontrol;
+	result = originalcontrol;
 	if ( !v2 )
-		result = `x_fastfpu'::`2'::originalcontrol & 0xFFFFFCFF | 0x3F;
-	`x_fastfpu'::`2'::newcontrol = result;
+		result = originalcontrol & 0xFFFFFCFF | 0x3F;
+	newcontrol = result;
 	return result;
 }
 
@@ -154,18 +159,3 @@ int x_timems(void)
 	QueryPerformanceCounter(&PerformanceCount);
 	return 1000 * (PerformanceCount.QuadPart - perf_counter.QuadPart) / perf_freq.QuadPart;
 }
-
-//.bss:000003C8 _bss            segment para public 'BSS' use32
-//.bss:000003C8                 assume cs:_bss
-//.bss:000003C8                 ;org 3C8h
-//.bss:000003C8                 assume es:nothing, ss:nothing, ds:_data, fs:nothing, gs:nothing
-//.bss:000005E0 ; `x_fastfpu'::`2'::newcontrol
-//.bss:000005E0 ?newcontrol@?1??x_fastfpu@@9@9 dd ?     ; DATA XREF: _x_fastfpu+3C↑w
-//.bss:000005E0                                         ; _x_fastfpu+41↑r ...
-//.bss:000005E4 ; `x_fastfpu'::`2'::originalcontrol
-//.bss:000005E4 ?originalcontrol@?1??x_fastfpu@@9@9 dd ?
-//.bss:000005E4                                         ; DATA XREF: _x_fastfpu+9↑w
-//.bss:000005E4                                         ; _x_fastfpu+2D↑r
-//.bss:000005E8 ; `x_fastfpu'::`2'::initdone
-//.bss:000005E8 ?initdone@?1??x_fastfpu@@9@9 dd ?       ; DATA XREF: _x_fastfpu↑r
-//.bss:000005E8 _bss            ends

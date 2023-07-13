@@ -1,52 +1,5 @@
 #include "pch.h"
 
-//.data:00000000 _data           segment dword public 'DATA' use32
-//.data:00000000                 assume cs:_data
-//.data:00000000 ; `picktmu'::`2'::tmupick
-//.data:00000000 ?tmupick@?1??picktmu@@9@9 dd 0          ; DATA XREF: _picktmu:loc_614↓r
-//.data:00000000                                         ; _picktmu+14↓w
-//.data:00000004 $SG1250         db 'allocate %6i bytes: failed',0Ah,0
-//.data:00000004                                         ; DATA XREF: _memory_alloc+33↓o
-//.data:00000020 $SG1262         db '%iMB',0Ah,0         ; DATA XREF: _memory_create+2D↓o
-//.data:00000026                 align 4
-//.data:00000028 $SG1288         db 'texture: makespace %i..%i freed %i bytes',0Ah,0
-//.data:00000028                                         ; DATA XREF: _makespace+59↓o
-//.data:00000052                 align 4
-//.data:00000054 $SG1299         db 'texture: clearspace %i..%i freed all memory',0Ah,0
-//.data:00000054                                         ; DATA XREF: _clearspace+7F↓o
-//.data:00000081                 align 4
-//.data:00000084 $SG1325         db 'texture: zero size for handle %i (part=%i,mask=%i)',0Ah,0
-//.data:00000084                                         ; DATA XREF: _fxloadtexturepart+87↓o
-//.data:000000B8 $SG1345         db 'loadtexture: unable to load texture (single/part %i)!',0Ah,0
-//.data:000000B8                                         ; DATA XREF: _fxloadtexture_single+69↓o
-//.data:000000EF                 align 10h
-//.data:000000F0 $SG1361         db 'loadtexture: unable to load texture (trilin)!',0Ah,0
-//.data:000000F0                                         ; DATA XREF: _fxloadtexture_trilin+6B↓o
-//.data:0000011F                 align 10h
-//.data:00000120 $SG1375         db 'loadtexture: unable to load texture (multi)!',0Ah,0
-//.data:00000120                                         ; DATA XREF: _fxloadtexture_multi+54↓o
-//.data:0000014E                 align 10h
-//.data:00000150 $SG1377         db 'Texture memory TMU0: ',0
-//.data:00000150                                         ; DATA XREF: _text_init↓o
-//.data:00000166                 align 4
-//.data:00000168 $SG1378         db 'Texture memory TMU1: ',0
-//.data:00000168                                         ; DATA XREF: _text_init+2F↓o
-//.data:0000017E                 align 10h
-//.data:00000180 $SG1395         db 'access texture illegal level',0
-//.data:00000180                                         ; DATA XREF: _accesstexture+11↓o
-//.data:0000019D                 align 10h
-//.data:000001A0 $SG1426         db 'Illegal texture size %ix%i',0
-//.data:000001A0                                         ; DATA XREF: _text_allocdata+3B↓o
-//.data:000001BB                 align 4
-//.data:000001BC $SG1437         db 'Illegal texture aspect %i/%i',0
-//.data:000001BC                                         ; DATA XREF: _text_allocdata+11E↓o
-//.data:000001D9                 align 4
-//.data:000001DC $SG1463         db 'Illegal texture small size',0
-//.data:000001DC                                         ; DATA XREF: _text_allocdata:$L1462↓o
-//.data:000001F7                 align 4
-//.data:000001F7 _data           ends
-
-
 int newblock(int a1)
 {
 	signed int v1; // edx
@@ -131,7 +84,7 @@ DWORD * memory_alloc(int a1, int a2, DWORD *a3)
 	if ( a1 - v3 == -8 )
 	{
 LABEL_4:
-		x_log(_SG1250, (a2 + 7) & 0xFFFFFFF8);
+		x_log("allocate %6i bytes: failed\n", (a2 + 7) & 0xFFFFFFF8);
 		*a3 = 0;
 		result = 0;
 	}
@@ -184,7 +137,7 @@ signed int * memory_create(signed int a1, signed int a2)
 	signed int *v3; // ebx
 
 	v2 = a1;
-	x_log(_SG1262, ((a2 - a1) / 1024 + 512) / 1024);
+	x_log("%iMB\n", ((a2 - a1) / 1024 + 512) / 1024);
 	v3 = (signed int *)x_alloc(48);
 	if ( !a1 )
 		v2 = 8;
@@ -201,7 +154,7 @@ signed int * memory_create(signed int a1, signed int a2)
 int memory_delete(int a1)
 {
 	x_free(*(DWORD *)(a1 + 40));
-	return x_free(a1);
+	x_free(a1);
 }
 
 int freetexmem(DWORD *a1)
@@ -262,7 +215,7 @@ int makespace()
 		}
 		while ( v1 <= g_lasttexture );
 	}
-	return x_log(_SG1288, 1, g_lasttexture, v0);
+	x_log("texture: makespace %i..%i freed %i bytes\n", 1, g_lasttexture, v0);
 }
 
 int clearspace()
@@ -291,17 +244,18 @@ int clearspace()
 		}
 		while ( v0 <= g_lasttexture );
 	}
-	return x_log(_SG1299, 1, g_lasttexture);
+	x_log("texture: clearspace %i..%i freed all memory\n", 1, g_lasttexture);
 }
 
 int picktmu()
 {
+	static int tmupick = 0;
 	int result; // eax
 
 	if ( g_state[160] < 2 )
 		return 0;
-	result = `picktmu'::`2'::tmupick ^ 1;
-	`picktmu'::`2'::tmupick ^= 1u;
+	result = tmupick ^ 1;
+	tmupick ^= 1u;
 	return result;
 }
 
@@ -341,7 +295,7 @@ signed int fxloadtexturepart(DWORD *a1, int a2)
 		v7 = grTexTextureMemRequired(v3, a1 + 13);
 		v9 = memory_alloc(mem_S1205[v2], v7, &v8);
 		if ( !v7 )
-			x_fatal(_SG1325, a1[1], a2, v3);
+			x_fatal("texture: zero size for handle %i (part=%i,mask=%i)\n", a1[1], a2, v3);
 		if ( !v9 )
 			return -1;
 		v5 = v9;
@@ -389,7 +343,7 @@ signed int fxloadtexture_single(DWORD *a1)
 		if ( v2 == 1 )
 			clearspace();
 		if ( v2 == 2 )
-			x_fatal(_SG1345, v1);
+			x_fatal("loadtexture: unable to load texture (single/part %i)!\n", v1);
 		++v2;
 	}
 	while ( v2 < 3 );
@@ -419,7 +373,7 @@ int fxloadtexture_trilin(DWORD *a1)
 		if ( v2 == 1 )
 			clearspace();
 		if ( v2 == 2 )
-			x_fatal(_SG1361, 0);
+			x_fatal("loadtexture: unable to load texture (trilin)!\n", 0);
 		++v2;
 	}
 	while ( v2 < 3 );
@@ -442,7 +396,7 @@ int fxloadtexture_multi(DWORD *a1, DWORD *a2)
 		if ( v2 == 1 )
 			clearspace();
 		if ( v2 == 2 )
-			x_fatal(_SG1375);
+			x_fatal("loadtexture: unable to load texture (multi)!\n");
 		++v2;
 	}
 	while ( v2 < 3 );
@@ -457,11 +411,11 @@ signed int *text_init()
 	signed int v3; // ST04_4
 	int v4; // eax
 
-	x_log(_SG1377);
+	x_log("Texture memory TMU0: ");
 	v0 = grTexMaxAddress(0);
 	v1 = grTexMinAddress(0);
 	mem_S1205[0] = (int)memory_create(v1 + 256, v0);
-	x_log(_SG1378);
+	x_log("Texture memory TMU1: ");
 	if ( g_state[160] >= 2 )
 	{
 		v3 = grTexMaxAddress(1);
@@ -497,7 +451,7 @@ int accesstexture(DWORD *a1, int a2, signed int *a3, signed int *a4)
 	__int64 v6; // rax
 
 	if ( a1[7] < a2 )
-		x_fatal(_SG1395);
+		x_fatal("access texture illegal level");
 	v4 = 0;
 	v5 = 0;
 	v6 = 0i64;
@@ -608,7 +562,7 @@ int text_allocdata(int a1)
 				break;
 			default:
 $L1425:
-				x_fatal(_SG1426, v1, v2);
+				x_fatal("Illegal texture size %ix%i", v1, v2);
 				break;
 		}
 	}
@@ -631,7 +585,7 @@ LABEL_28:
 			*(DWORD *)(a1 + 60) = v4;
 			break;
 		default:
-			x_fatal(_SG1437, v1, v2);
+			x_fatal("Illegal texture aspect %i/%i", v1, v2);
 			break;
 	}
 	switch ( *(DWORD *)(a1 + 60) )
@@ -708,7 +662,7 @@ LABEL_37:
 				break;
 			default:
 $L1462:
-				x_fatal(_SG1463);
+				x_fatal("Illegal texture small size");
 				break;
 		}
 	}
@@ -897,7 +851,7 @@ unsigned int text_loadlevel(DWORD *a1, int a2, unsigned int a3)
 					v14 = *(BYTE *)(v12 + 3);
 					v12 += 4;
 					v13 += 2;
-					*(WORD *)(v13 - 2) = (*(_BYTE *)(v12 - 2) >> 3) & 0x1F | (((*(BYTE *)(v12 - 4) >> 3) & 0x1F) << 10) | 32 * ((*(BYTE *)(v12 - 3) >> 3) & 0x1F | ((char)(v14 >> 7) << 10));
+					*(WORD *)(v13 - 2) = (*(BYTE *)(v12 - 2) >> 3) & 0x1F | (((*(BYTE *)(v12 - 4) >> 3) & 0x1F) << 10) | 32 * ((*(BYTE *)(v12 - 3) >> 3) & 0x1F | ((char)(v14 >> 7) << 10));
 				}
 				while ( result > v12 );
 			}

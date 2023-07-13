@@ -71,52 +71,10 @@
 //.data:0000004D                 db    0
 //.data:0000004E                 db  80h
 //.data:0000004F                 db  3Fh ; ?
-//.data:00000050 $SG1256         db '%s matrix:',0Ah,0   ; DATA XREF: _dumpmatrix+D↓o
 //.data:0000005C $SG1260         dd offset loc_2076+5    ; DATA XREF: _dumpmatrix:loc_2BA↓o
-//.data:00000060 $SG1264         db '%13.5f ',0          ; DATA XREF: _dumpmatrix+3B↓o
 //.data:00000068 $SG1265         dd offset loc_A78+5     ; DATA XREF: _dumpmatrix+4B↓o
-//.data:0000006C $SG1303         db 'Modelview',0        ; DATA XREF: _x_matrix+164↓o
-//.data:00000076                 align 4
-//.data:00000078 $SG1304         db 'Projection',0       ; DATA XREF: _x_matrix+172↓o
-//.data:00000083                 align 4
-//.data:00000084 $SG1305         db 'Combined',0         ; DATA XREF: _x_matrix+184↓o
-//.data:0000008D                 align 10h
-//.data:00000090 $SG1306         db 'Xformmode: %i Znear: %f Zfar: %f',0Ah,0
-//.data:00000090                                         ; DATA XREF: _x_matrix+1B2↓o
-//.data:000000B2                 align 4
-//.data:000000B4 $SG1324         db 'vertex without begin',0
-//.data:000000B4                                         ; DATA XREF: _vertexdata+1F↓o
-//.data:000000C9                 align 4
-//.data:000000CC $SG1358         db 'xgeom: too large X_POLYGON!',0Ah,0
-//.data:000000CC                                         ; DATA XREF: _vertexdata+4CB↓o
-//.data:000000E9                 align 4
-//.data:000000EC $SG1487         db '#x_vx[ %13.5f %13.5f %13.5f ]',0Ah,0
-//.data:000000EC                                         ; DATA XREF: _setuprvx+26D↓o
-//.data:0000010B                 align 4
-//.data:0000010C $SG1489         db '#clip[ %13.5f %13.5f %13.5f   w:%13.5f ]',0Ah,0
-//.data:0000010C                                         ; DATA XREF: _setuprvx+2A3↓o
-//.data:00000136                 align 4
-//.data:00000138 $SG1491         db '#clip[ %13.5f %13.5f %13.5f clip %08X ]',0Ah,0
-//.data:00000138                                         ; DATA XREF: _setuprvx+2DE↓o
-//.data:00000161                 align 4
-//.data:00000164 $SG1493         db '#scrn[ %13.5f %13.5f %13.5f oow:%13.5f ]',0Ah,0
-//.data:00000164                                         ; DATA XREF: _setuprvx+311↓o
-//.data:0000018E                 align 10h
 //.data:00000190 $SG1494         dd offset loc_A22+1     ; DATA XREF: _setuprvx:loc_15FB↓o
-//.data:00000194 $SG1523         db 'invalid vertex for x_vxa',0
-//.data:00000194                                         ; DATA XREF: _x_vxa:loc_187E↓o
 //.data:000001AD                 align 10h
-//.data:000001B0 $SG1537         db 'out of memory',0    ; DATA XREF: _x_vxarray+6C↓o
-//.data:000001BE                 align 10h
-//.data:000001C0 $SG1683         db 'xgeom: too large X_POLYGON!',0Ah,0
-//.data:000001C0                                         ; DATA XREF: _flush_reordertables:$L1682↓o
-//.data:000001DD                 align 10h
-//.data:000001E0 $SG1687         db 'internal error flushing vertex buffer',0
-//.data:000001E0                                         ; DATA XREF: _flush_reordertables+FE↓o
-//.data:00000206                 align 4
-//.data:00000208 $SG1747         db '#flush %i %i %i',0Ah,0
-//.data:00000208                                         ; DATA XREF: _x_flush+1D↓o
-//.data:00000219                 align 4
 //.data:00000219 _data           ends
 
 
@@ -155,7 +113,7 @@ LABEL_10:
 	else
 	{
 		g_state[233] = 1;
-		qmemcpy(&g_state[201], a1, 0x40u);
+		memcpy(&g_state[201], a1, 0x40u);
 	}
 	return result;
 }
@@ -163,7 +121,7 @@ LABEL_10:
 
 void x_getmatrix(void *a1)
 {
-	qmemcpy(a1, &g_state[169], 0x40u);
+	memcpy(a1, &g_state[169], 0x40u);
 }
 
 int dumpmatrix(float *a1, int a2)
@@ -175,7 +133,7 @@ int dumpmatrix(float *a1, int a2)
 	int result; // eax
 
 	v2 = 4;
-	x_log(_SG1256, a2);
+	x_log("%s matrix:\n", a2);
 	v3 = a1;
 	do
 	{
@@ -185,7 +143,7 @@ int dumpmatrix(float *a1, int a2)
 		{
 			v5 = *v3;
 			++v3;
-			x_log(_SG1264, (double)v5);
+			x_log("%13.5f ", (double)v5);
 			--v4;
 		}
 		while ( v4 );
@@ -243,7 +201,7 @@ void x_matrix(void *a1)
 	{
 		g_state[247] = g_state[246];
 		x_flush();
-		qmemcpy(&g_state[169], a1, 0x40u);
+		memcpy(&g_state[169], a1, 0x40u);
 		if ( g_state[246] != 1 && g_state[233] )
 		{
 			v1 = &v22;
@@ -316,10 +274,10 @@ void x_matrix(void *a1)
 		while ( v12 < (float *)&g_state[233] );
 		if ( g_state[317] & 0x20 )
 		{
-			dumpmatrix(v21, (int)_SG1303);
-			dumpmatrix((float *)&g_state[217], (int)_SG1304);
-			dumpmatrix((float *)&g_state[185], (int)_SG1305);
-			x_log(_SG1306, g_state[246], (_QWORD)g_state[241], (_QWORD)g_state[242]);
+			dumpmatrix(v21, "Modelview");
+			dumpmatrix((float *)&g_state[217], "Projection");
+			dumpmatrix((float *)&g_state[185], "Combined");
+			x_log("Xformmode: %i Znear: %f Zfar: %f\n", g_state[246], (_QWORD)g_state[241], (_QWORD)g_state[242]);
 		}
 	}
 }
@@ -461,7 +419,7 @@ int vertexdata(float *a1)
 	v35 = *(float *)&g_state[256];
 	v36 = *(float *)&g_state[257];
 	if ( !mode_S1225 )
-		x_fatal(_SG1324);
+		x_fatal("vertex without begin");
 	if ( g_state[258] & 1 )
 	{
 		v1 = 15 * vertices_S1216;
@@ -645,7 +603,7 @@ int vertexdata(float *a1)
 			corner_S1219[v34] = vertices_S1216;
 			result = corners_base_S1221 + 64;
 			if ( corners_base_S1221 + 64 < corners_S1220 )
-				result = x_fatal(_SG1358);
+				x_fatal("xgeom: too large X_POLYGON!\n");
 			break;
 		default:
 			break;
@@ -1114,16 +1072,16 @@ LABEL_23:
 			if ( g_state[317] & 0x20 )
 			{
 				x_log(
-					_SG1487,
+					"#x_vx[ %13.5f %13.5f %13.5f ]\n",
 					pos_S1208[3 * (((char *)v2 - (char *)xfpos_S1212) / 20)],
 					pos_S1208[3 * (((char *)v2 - (char *)xfpos_S1212) / 20) + 1],
 					pos_S1208[3 * (((char *)v2 - (char *)xfpos_S1212) / 20) + 2]);
 				if ( *((DWORD *)v2 + 4) )
-					x_log(_SG1491, *v2, v2[1], v2[2], *((_DWORD *)v2 + 4));
+					x_log("#clip[ %13.5f %13.5f %13.5f clip %08X ]\n", *v2, v2[1], v2[2], *((DWORD*)v2 + 4));
 				else
-					x_log(_SG1489, *v2, v2[1], v2[2], (double)(1.0 / v2[3]));
+					x_log("#clip[ %13.5f %13.5f %13.5f   w:%13.5f ]\n", *v2, v2[1], v2[2], (double)(1.0 / v2[3]));
 				if ( !*((DWORD *)v2 + 4) )
-					x_log(_SG1493, *v3, v3[1], v3[2], v3[8]);
+					x_log("#scrn[ %13.5f %13.5f %13.5f oow:%13.5f ]\n", *v3, v3[1], v3[2], v3[8]);
 				result = (int *)x_log((const char *)&_SG1494);
 			}
 			v5 += 2;
@@ -1250,9 +1208,9 @@ int x_vxa(int a1, float *a2)
 	int v2; // ecx
 
 	if ( a1 < 0 || a1 >= posarraysize_S1223 )
-		x_fatal(_SG1523);
+		x_fatal("invalid vertex for x_vxa");
 	vertices_lastnonrel_S1218 = vertices_S1216;
-	qmemcpy(&xfpos_S1212[5 * vertices_S1216], (const void *)(posarray_S1224 + 20 * a1), 0x14u);
+	memcpy(&xfpos_S1212[5 * vertices_S1216], (const void *)(posarray_S1224 + 20 * a1), 0x14u);
 	v2 = vertices_S1216;
 	++g_stats[1];
 	xformed_S1214[v2] = 1;
@@ -1269,9 +1227,9 @@ int x_vxrel(float *a1, float *a2)
 	*v2 = *a1;
 	v2[1] = a1[1];
 	v3 = vertices_S1216;
-	v4 = *((_DWORD *)a1 + 2);
+	v4 = *((DWORD *)a1 + 2);
 	allxformed_S1215 = 0;
-	*((_DWORD *)v2 + 2) = v4;
+	*((DWORD *)v2 + 2) = v4;
 	xformed_S1214[v3] = vertices_S1216 - vertices_lastnonrel_S1218 + 16;
 	return vertexdata(a2);
 }
@@ -1295,7 +1253,7 @@ void x_vxarray(float *a1, int a2, char *a3)
 			posarrayallocsize_S1222 = v3;
 			posarray_S1224 = x_allocfast(20 * v3);
 			if ( !posarray_S1224 )
-				x_fatal(_SG1537);
+				x_fatal("out of memory");
 		}
 		posarraysize_S1223 = a2;
 		x_fastfpu(1);
@@ -1748,7 +1706,7 @@ void *flush_reordertables()
 			v1 = 1;
 			break;
 		case 9:
-			x_fatal(_SG1683);
+			x_fatal("xgeom: too large X_POLYGON!\n");
 			v1 = v9;
 			v0 = mode_S1225;
 			break;
@@ -1759,8 +1717,8 @@ void *flush_reordertables()
 	v2 = 0;
 	if ( v0 == 4 )
 	{
-		qmemcpy(&grvx_S1213, (char *)&grvx_S1213 + 60 * vertices_base_S1217, 0x3Cu);
-		qmemcpy(xfpos_S1212, &xfpos_S1212[5 * vertices_base_S1217], 0x14u);
+		memcpy(&grvx_S1213, (char *)&grvx_S1213 + 60 * vertices_base_S1217, 0x3Cu);
+		memcpy(xfpos_S1212, &xfpos_S1212[5 * vertices_base_S1217], 0x14u);
 		v3 = flt_E230[2 * vertices_base_S1217];
 		tex_S1209[0] = tex_S1209[2 * vertices_base_S1217];
 		v4 = &texp_S1211[2 * vertices_base_S1217];
@@ -1781,7 +1739,7 @@ void *flush_reordertables()
 	}
 	else
 	{
-		result = (void *)x_fatal(_SG1687);
+		x_fatal("internal error flushing vertex buffer");
 	}
 	v8 = v2 + v1;
 	if ( v8 > 0 )
@@ -1813,7 +1771,7 @@ signed int flush_drawfx()
 	unsigned int v13; // ebp
 	int v14; // eax
 	int *v15; // edi
-	_DWORD *v16; // [esp+10h] [ebp-4h]
+	DWORD *v16; // [esp+10h] [ebp-4h]
 
 	if ( !allxformed_S1215 )
 		xform((int)xfpos_S1212, pos_S1208, vertices_S1216, xformed_S1214);
@@ -1835,7 +1793,7 @@ signed int flush_drawfx()
 			v2 = i;
 			do
 			{
-				v6 = *(_DWORD *)v1;
+				v6 = *(DWORD *)v1;
 				v1 += 4;
 				v7 = dword_1145C[5 * v6];
 				v5 |= v7;
@@ -1951,14 +1909,14 @@ signed int flush_drawfx()
 	return result;
 }
 
-void x_flush()
+void x_flush(void)
 {
 	int v0; // eax
 
 	v0 = corners_S1220;
 	if ( g_state[317] & 0x20 )
 	{
-		x_log(_SG1747, g_state[234], g_state[290], corners_S1220);
+		x_log("#flush %i %i %i\n", g_state[234], g_state[290], corners_S1220);
 		v0 = corners_S1220;
 	}
 	if ( v0 )

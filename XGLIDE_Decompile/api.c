@@ -72,14 +72,8 @@
 //.data:00000045                 db    0
 //.data:00000046                 db  80h
 //.data:00000047                 db  3Fh ; ?
-//.data:00000064 ; char _SG1220[]
-//.data:00000064 $SG1220         db '%s Build %i (%s)',0 ; DATA XREF: _x_version+13↓o
 //.data:00000075                 align 4
-//.data:00000078 $SG1350         db 'undefined texture xhandle %i selected',0Ah,0
-//.data:00000078                                         ; DATA XREF: _texture_get+21↓o
 //.data:0000009F                 align 10h
-//.data:000000A0 $SG1362         db 'too many textures',0Ah,0
-//.data:000000A0                                         ; DATA XREF: _x_createtexture+27↓o
 //.data:000000B3                 align 4
 //.data:000000B3 _data           ends
 
@@ -165,12 +159,12 @@ signed int __cdecl x_open(int a1, int a2, int a3, int a4, int a5, int a6)
 	return result;
 }
 
-int __cdecl x_resize(int a1, int a2)
+void x_resize(int width, int height)
 {
-	return init_resize(a1, a2);
+	init_resize(width, height);
 }
 
-int __cdecl x_select(int a1)
+void x_select(int a1)
 {
 	int result; // eax
 
@@ -186,10 +180,9 @@ int __cdecl x_select(int a1)
 		g_activestateindex = -1;
 		g_activestate = 0;
 	}
-	return result;
 }
 
-DWORD *__cdecl x_close(signed int a1)
+void x_close(int a1)
 {
 	DWORD *result; // eax
 
@@ -203,10 +196,9 @@ DWORD *__cdecl x_close(signed int a1)
 			init_deinit();
 			text_deinit();
 			memset(&g_state[159 * g_activestateindex], 0, 0x27Cu);
-			result = (_DWORD *)x_select(0);
+			x_select(0);
 		}
 	}
-	return result;
 }
 
 int __cdecl x_getstats(DWORD *a1, unsigned int a2)
@@ -219,7 +211,7 @@ int __cdecl x_getstats(DWORD *a1, unsigned int a2)
 	{
 		if ( a2 == 104 )
 		{
-			qmemcpy(a1, g_stats, 0x68u);
+			memcpy(a1, g_stats, 0x68u);
 			v2 = `x_getstats'::`2'::nowtime == `x_getstats'::`2'::lasttime;
 			*a1 = `x_getstats'::`2'::nowtime - `x_getstats'::`2'::lasttime;
 			if ( v2 )
@@ -299,16 +291,13 @@ int __cdecl x_writefb(int a1, int a2, int a3, int a4, int a5, int a6, int a7)
 	return init_writefb(a1, a2, a3, v8, a5, a6, v9);
 }
 
-int x_finish()
+void x_finish(void)
 {
-	int result; // eax
-
 	x_flush();
 	init_bufferswap();
 	text_frameend();
-	result = x_reset();
+	x_reset();
 	++g_state[167];
-	return result;
 }
 
 int __cdecl x_frustum(int a1, int a2, int a3, int a4, int a5, float a6)
@@ -330,12 +319,12 @@ int __cdecl x_frustum(int a1, int a2, int a3, int a4, int a5, float a6)
 	return result;
 }
 
-int __cdecl x_projmatrix(const void *a1)
+void x_projmatrix(xt_matrix* a1)
 {
 	int result; // eax
 	const void *v2; // esi
 
-	result = x_flush();
+	x_flush();
 	v2 = a1;
 	if ( a1 )
 	{
@@ -346,20 +335,18 @@ int __cdecl x_projmatrix(const void *a1)
 		g_state[236] = 1;
 		v2 = &identmatrix_S1310;
 	}
-	qmemcpy(&g_state[217], v2, 0x40u);
+	memcpy(&g_state[217], v2, 0x40u);
 	g_state[246] = 2;
 	g_state[234] = 1;
-	return result;
 }
 
 void projrecalced()
 {
 }
 
-int __cdecl x_ortho(int a1, int a2, int a3, int a4, int a5, float a6)
+//void x_ortho(float xmin, float ymin, float xmax, float ymax, float znear, float zfar)
+void x_ortho(float a1, float a2, float a3, float a4, float a5, float a6)
 {
-	int result; // eax
-
 	x_flush();
 	g_state[237] = a1;
 	g_state[238] = a2;
@@ -367,12 +354,10 @@ int __cdecl x_ortho(int a1, int a2, int a3, int a4, int a5, float a6)
 	g_state[241] = a5;
 	g_state[240] = a4;
 	*(float *)&g_state[242] = a6;
-	result = 1;
 	g_state[246] = 1;
 	g_state[234] = 1;
 	*(float *)&g_state[244] = 1.0 / a6;
-	*(float *)&g_state[245] = 1.0 / *(float *)&a5;
-	return result;
+	*(float *)&g_state[245] = 1.0 / a5;
 }
 
 int __cdecl x_viewport(int a1, float a2, int a3, float a4)
@@ -418,22 +403,19 @@ int __cdecl x_projection(float a1, int a2, float a3)
 	{
 		*(float *)&v3 = (double)(signed int)g_state[164];
 		*(float *)&v4 = (double)(signed int)g_state[163];
-		result = x_ortho(0, v4, v3, 0, a2, a3);
+		x_ortho(0, v4, v3, 0, a2, a3);
 	}
 	return result;
 }
 
-int __cdecl x_zrange(int a1, int a2)
+int x_zrange(float znear, float zfar)
 {
-	int result; // eax
-
 	x_flush();
 	g_state[290] = 1;
 	g_state[234] = 1;
-	g_state[241] = a1;
-	result = 0;
-	g_state[242] = a2;
-	return result;
+	g_state[241] = znear;
+	g_state[242] = zfar;
+	return 0;
 }
 
 int x_zdecal(float factor)
@@ -457,7 +439,7 @@ DWORD *__cdecl texture_get(signed int a1)
 		result = (DWORD *)((char *)&g_texture + 152 * a1);
 		if ( !*result )
 		{
-			x_log(_SG1350);
+			x_log("undefined texture xhandle %i selected\n");
 			result = 0;
 			g_state[168] |= 0x20000000u;
 		}
@@ -467,10 +449,10 @@ DWORD *__cdecl texture_get(signed int a1)
 
 signed int __cdecl x_createtexture(int a1, signed int a2, signed int a3)
 {
-	_DWORD *v3; // eax
+	DWORD *v3; // eax
 	signed int v4; // esi
 	signed int result; // eax
-	_DWORD *v6; // ebx
+	DWORD *v6; // ebx
 	signed int v7; // edx
 	signed int v8; // ecx
 	int v9; // eax
@@ -487,7 +469,7 @@ signed int __cdecl x_createtexture(int a1, signed int a2, signed int a3)
 	while ( v3 < &g_texture[38912] );
 	if ( v4 == 1024 )
 	{
-		x_log(_SG1362);
+		x_log("too many textures\n");
 		result = -1;
 		g_state[168] |= 0x10000000u;
 	}
@@ -534,9 +516,10 @@ signed int __cdecl x_createtexture(int a1, signed int a2, signed int a3)
 	return result;
 }
 
-signed int __cdecl x_gettextureinfo(signed int a1, _DWORD *a2, _DWORD *a3, _DWORD *a4, _DWORD *a5)
+//int x_gettextureinfo(int handle, int* format, int* memformat, int* width, int* height)
+int x_gettextureinfo(int a1, int* a2, int* a3, int* a4, int* a5)
 {
-	_DWORD *v5; // eax
+	DWORD *v5; // eax
 
 	v5 = texture_get(a1);
 	if ( !v5 )
@@ -554,8 +537,8 @@ signed int __cdecl x_gettextureinfo(signed int a1, _DWORD *a2, _DWORD *a3, _DWOR
 
 int __cdecl x_loadtexturelevel(signed int a1, signed int a2, int a3)
 {
-	_DWORD *v3; // eax
-	_DWORD *v4; // esi
+	DWORD *v3; // eax
+	DWORD *v4; // esi
 	int v6; // edx
 
 	v3 = texture_get(a1);
@@ -583,7 +566,7 @@ DWORD *__cdecl x_freetexture(signed int a1)
 	return result;
 }
 
-signed int __cdecl x_texture_getinfo(signed int a1, _DWORD *a2, _DWORD *a3, _DWORD *a4, _DWORD *a5)
+signed int x_texture_getinfo(signed int a1, DWORD *a2, DWORD *a3, DWORD *a4, DWORD *a5)
 {
 	DWORD *v5; // eax
 
@@ -601,12 +584,12 @@ signed int __cdecl x_texture_getinfo(signed int a1, _DWORD *a2, _DWORD *a3, _DWO
 	return 0;
 }
 
-int x_cleartexmem()
+void x_cleartexmem(void)
 {
 	return text_cleartexmem();
 }
 
-int __cdecl x_opentexturedata(signed int a1)
+uchar* x_opentexturedata(int a1)
 {
 	DWORD *v1; // eax
 	int result; // eax
@@ -619,7 +602,7 @@ int __cdecl x_opentexturedata(signed int a1)
 	return result;
 }
 
-DWORD *__cdecl x_closetexturedata(signed int a1)
+void x_closetexturedata(int a1)
 {
 	DWORD *result; // eax
 
@@ -684,16 +667,16 @@ signed int __cdecl x_mask(int a1, int a2, int a3)
 	return 0;
 }
 
-signed int __cdecl x_dither(int a1)
+int x_dither(int type)
 {
-	if ( a1 == 4097 )
+	if (type == X_ENABLE)
 	{
 		g_state[303] = 1;
 LABEL_5:
 		g_state[290] |= 4u;
 		return 0;
 	}
-	if ( a1 == 4098 )
+	if (type == X_DISABLE)
 	{
 		g_state[303] = 0;
 		goto LABEL_5;
@@ -701,48 +684,45 @@ LABEL_5:
 	return 1;
 }
 
-signed int __cdecl x_blend(signed int a1, signed int a2)
+int x_blend(int src, int dst)
 {
-	if ( a1 < 4609 || a1 > 4616 )
+	if (src < 4609 || src > 4616 )
 		return 1;
-	if ( a2 < 4609 || a2 > 4616 )
+	if (dst < 4609 || dst > 4616 )
 		return 1;
-	g_state[304] = a1;
-	g_state[305] = a2;
+	g_state[304] = src;
+	g_state[305] = dst;
 	g_state[290] |= 4u;
 	return 0;
 }
 
-signed int __cdecl x_alphatest(signed int a1)
+int x_alphatest(float limit)
 {
 	if ( g_state[317] & 1 )
-		a1 = 1065353216;
-	if ( (unsigned int)a1 > 0x80000000 || a1 > 1065353216 )
+		limit = 1.0f;
+	if ( limit < 0.0f || limit > 1.0f)
 		return 1;
 	g_state[290] |= 4u;
-	g_state[308] = a1;
+	g_state[308] = limit;
 	return 0;
 }
 
-signed int __cdecl x_combine(signed int a1)
+int x_combine(int colortext1)
 {
-	if ( a1 < 4865 || a1 > 4879 )
+	if (colortext1 < 4865 || colortext1 > 4879 )
 		return 1;
 	g_state[294] = 0;
 	g_state[290] |= 4u;
-	g_state[293] = a1;
+	g_state[293] = colortext1;
 	return 0;
 }
 
-int __cdecl x_procombine(int a1, int a2)
+int x_procombine(int rgb, int alpha)
 {
-	int result; // eax
-
-	result = 0;
 	g_state[294] = 0;
 	g_state[290] |= 4u;
-	g_state[293] = a1 | (a2 << 16);
-	return result;
+	g_state[293] = rgb | (alpha << 16);
+	return 0;
 }
 
 int __cdecl x_envcolor(float a1, float a2, float a3, float a4)
@@ -759,25 +739,26 @@ int __cdecl x_envcolor(float a1, float a2, float a3, float a4)
 	return result;
 }
 
-signed int __cdecl x_combine2(signed int a1, signed int a2, int a3)
+int x_combine2(int colortext1, int text1text2, int sametex)
 {
 	signed int result; // eax
 
 	if ( g_state[160] < 2 )
 		return 1;
-	if ( a1 < 4865 || a1 > 4879 )
+	if (colortext1 < 4865 || colortext1 > 4879 )
 		return 1;
-	if ( a2 < 4865 || a2 > 4879 )
+	if (text1text2 < 4865 || text1text2 > 4879 )
 		return 1;
-	g_state[293] = a1;
-	g_state[306] = a3;
-	g_state[294] = a2;
+	g_state[293] = colortext1;
+	g_state[306] = sametex;
+	g_state[294] = text1text2;
 	result = 0;
 	g_state[290] |= 4u;
 	return result;
 }
 
-signed int __cdecl x_procombine2(int a1, int a2, signed int a3, int a4)
+//int x_procombine2(int rgb, int alpha, int text1text2, int sametex)
+int x_procombine2(int a1, int a2, int a3, int a4)
 {
 	signed int result; // eax
 
@@ -793,24 +774,24 @@ signed int __cdecl x_procombine2(int a1, int a2, signed int a3, int a4)
 	return result;
 }
 
-signed int __cdecl x_texture(int a1)
+int x_texture(int text1handle)
 {
-	if ( a1 <= 0 )
+	if (text1handle <= 0 )
 		return 1;
 	g_state[311] = 0;
 	g_state[290] |= 2u;
-	g_state[310] = a1;
+	g_state[310] = text1handle;
 	return 0;
 }
 
-signed int __cdecl x_texture2(int a1, int a2)
+int x_texture2(int text1handle, int text2handle)
 {
 	if ( g_state[160] < 2 )
 		return 1;
-	if ( a1 <= 0 || a2 <= 0 )
+	if (text1handle <= 0 || text2handle <= 0 )
 		return 1;
-	g_state[310] = a1;
-	g_state[311] = a2;
+	g_state[310] = text1handle;
+	g_state[311] = text2handle;
 	g_state[290] |= 2u;
 	return 0;
 }
@@ -826,7 +807,8 @@ void x_reset(void)
 	x_zdecal(1065353216);
 }
 
-int __cdecl x_fog(int a1, int a2, int a3, int a4, int a5, int a6)
+//int x_fog(int type, float min, float max, float r, float g, float b)
+int x_fog(int a1, float a2, float a3, float a4, float a5, float a6)
 {
 	int result; // eax
 
@@ -836,15 +818,15 @@ int __cdecl x_fog(int a1, int a2, int a3, int a4, int a5, int a6)
 	g_state[299] = a4;
 	result = 0;
 	g_state[300] = a5;
-	g_state[302] = 1065353216;
+	g_state[302] = 1.0f;
 	g_state[290] |= 8u;
 	g_state[301] = a6;
 	return result;
 }
 
-int __cdecl x_fullscreen(int a1)
+void x_fullscreen(int fullscreen)
 {
-	return init_fullscreen(a1);
+	init_fullscreen(fullscreen);
 }
 
 

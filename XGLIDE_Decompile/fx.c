@@ -343,10 +343,10 @@ void fixfogtable(int a1, int a2)
 
 	for ( i = a2 - 1; i >= 0; --i )
 	{
-		v3 = *(_BYTE *)(i + a1);
+		v3 = *(BYTE *)(i + a1);
 		v4 = *(unsigned __int8 *)(i + a1 + 1) - v3;
 		if ( v4 > 60 )
-			*(_BYTE *)(i + a1) = v3 + v4 - 60;
+			*(BYTE *)(i + a1) = v3 + v4 - 60;
 	}
 }
 

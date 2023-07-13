@@ -26,4 +26,3 @@ signed int clipline(int a1, int a2, DWORD* a3);
 signed int splitpoly(int a1, int a2, DWORD* a3);
 void* flush_reordertables();
 signed int flush_drawfx();
-void x_flush();
