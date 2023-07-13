@@ -36,3 +36,5 @@ x64 build is not supported because UltraHLE uses inline assembler in .C files, w
 UltraHLE requires the deprecated Glide 2.0 graphics API.
 
 Wrapper is available here: http://www.zeckensack.de/glide/
+
+Sometimes the screen brightness is disturbed after starting the wrapper in Windows. To reset it, just press Win+I and go to the Display tab.
