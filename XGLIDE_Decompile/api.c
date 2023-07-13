@@ -8,6 +8,7 @@ static float identmatrix[4 * 4] = {
 };
 
 int g_activestateindex;
+xt_state* g_activestate;
 
 void x_init(void)
 {

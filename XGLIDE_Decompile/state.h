@@ -39,11 +39,13 @@ typedef struct
 	int vsync;		// 166
 	int frame;		// 167
 	uint32_t error;		// 168
+
 //matrix
 //xform
 //camxform
 //projxform
 //campresent
+
 	int projchanged;	// 234
 	int matrixnull;		// 235
 	int projnull;		// 236
@@ -63,14 +65,14 @@ typedef struct
 	int view_y0;		// 250
 	int view_y1;		// 251
 
-//projxmul
-//projxadd
-//projymul
-//projyadd
-//texturexmul
-//textureymul
+	float projxmul;		// 252
+	float projxadd;		// 253
+	float projymul;		// 254
+	float projyadd;		// 255
+	float texturexmul;	// 256
+	float textureymul;	// 257
 	
-	uint32_t send;		//  258  - wtf? ("s"omething end?)
+	uint32_t send;		// 258  - wtf? ("s"omething end?)
 	int geometryon;		// 259
 	int geometryoff;	// 260
 

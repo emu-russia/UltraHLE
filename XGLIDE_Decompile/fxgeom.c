@@ -247,19 +247,19 @@ int recalc_projection(int a1)
 	g_state[254] = v2;
 	g_state[253] = v1 + g_state[248] + 0.2;
 	g_state[255] = v2 + g_state[250] + 0.2;
-	v3 = (signed __int64)g_state[251];
-	v4 = (signed __int64)g_state[249];
-	v5 = (signed __int64)g_state[250];
-	grClipWindow(a1, (unsigned __int64)(signed __int64)g_state[248] >> 32, (signed __int64)g_state[248]);
+	v3 = (signed __int64)g_state.view_y1;
+	v4 = (signed __int64)g_state.view_x1;
+	v5 = (signed __int64)g_state.view_y0;
+	grClipWindow(a1, (unsigned __int64)(signed __int64)g_state[248] >> 32, g_state.view_x0);
 	v6 = g_state.xformmode;
 	if ( v6 == 0 )
 	{
 		memset(&g_state[217], 0, 0x40u);
-		v8 = g_state[241] / g_state[238];
+		v8 = g_state.znear / g_state.xmax;
 		g_state[227] = 1.0;
 		g_state[232] = 1.0;
 		g_state[217] = v8;
-		g_state[222] = g_state[241] / g_state[240];
+		g_state[222] = g_state.znear / g_state.ymax;
 		result = projrecalced();
 	}
 	else
@@ -361,8 +361,8 @@ void vertexdata(xt_data* a1)
 	float v35; // [esp+0h] [ebp-8h]
 	float v36; // [esp+4h] [ebp-4h]
 
-	v35 = *(float *)&g_state[256];
-	v36 = *(float *)&g_state[257];
+	v35 = g_state.texturexmul;
+	v36 = g_state.textureymul;
 	if ( !mode)
 		x_fatal("vertex without begin");
 	if ( g_state.send & 1 )
@@ -691,9 +691,9 @@ LABEL_11:
 							v15 |= 0x400u;
 						if ( *(float *)(v11 + 4) > (long double)v55 )
 							v15 |= 0x800u;
-						if ( *(float *)&g_state[241] > (long double)v55 )
+						if ( g_state.znear > (long double)v55 )
 							v15 |= 0x1000u;
-						if ( *(float *)&g_state[242] < (long double)v55 )
+						if ( g_state.zfar < (long double)v55 )
 							v15 |= 0x2000u;
 						goto LABEL_46;
 					}
@@ -727,9 +727,9 @@ LABEL_47:
 					v15 |= 0x400u;
 				if ( *(float *)(v11 + 4) > (long double)v54 )
 					v15 |= 0x800u;
-				if ( *(float *)&g_state[241] > (long double)v54 )
+				if ( g_state.znear > (long double)v54 )
 					v15 |= 0x1000u;
-				if ( *(float *)&g_state[242] < (long double)v54 )
+				if ( g_state.zfar < (long double)v54 )
 					v15 |= 0x2000u;
 				if ( !v15 )
 					*(float *)(v11 + 12) = 1.0 / v54;
@@ -766,13 +766,13 @@ LABEL_46:
 						else
 							*(float *)(v28 + 12) = 1.0 / *(float *)(v28 + 8);
 						v34 = 0;
-						if ( *(DWORD *)v28 > 0xBF800000 )
+						if ( *(DWORD *)v28 > -1.0f)
 							v34 = 256;
-						if ( *(DWORD *)v28 > 1065353216 )
+						if ( *(DWORD *)v28 > 1.0f )
 							v34 |= 0x200u;
-						if ( *(DWORD *)(v28 + 4) > 0xBF800000 )
+						if ( *(DWORD *)(v28 + 4) > -1.0f)
 							v34 |= 0x400u;
-						if ( *(DWORD *)(v28 + 4) > 1065353216 )
+						if ( *(DWORD *)(v28 + 4) > 1.0f)
 							v34 |= 0x800u;
 						*(DWORD *)(v28 + 16) = v34;
 					}
@@ -826,9 +826,9 @@ LABEL_46:
 						v41 |= 0x400u;
 					if ( *(float *)(v37 + 4) > (long double)v56 )
 						v41 |= 0x800u;
-					if ( *(float *)&g_state[241] > (long double)v56 )
+					if ( g_state.znear > (long double)v56 )
 						v41 |= 0x1000u;
-					if ( *(float *)&g_state[242] < (long double)v56 )
+					if ( g_state.zfar < (long double)v56 )
 						v41 |= 0x2000u;
 					if ( !v41 )
 						*(float *)(v37 + 12) = 1.0 / v56;
@@ -871,9 +871,9 @@ LABEL_92:
 							v48 |= 0x400u;
 						if ( *(float *)(v37 + 4) > (long double)v57 )
 							v48 |= 0x800u;
-						if ( *(float *)&g_state[241] > (long double)v57 )
+						if ( g_state.znear > (long double)v57 )
 							v48 |= 0x1000u;
-						if ( *(float *)&g_state[242] < (long double)v57 )
+						if ( g_state.zfar < (long double)v57 )
 							v48 |= 0x2000u;
 						if ( !v48 )
 							*(float *)(v37 + 12) = 1.0 / v57;
@@ -918,11 +918,11 @@ int setuprvx(int a1, int a2)
 	float *v24; // [esp+48h] [ebp-8h]
 	int v25; // [esp+4Ch] [ebp-4h]
 
-	v21 = *(float *)&g_state[252];
-	v22 = *(float *)&g_state[254];
-	v19 = *(float *)&g_state[253];
-	v20 = *(float *)&g_state[255];
-	v23 = *(float *)&g_state[241] * *(float *)&g_state[243];
+	v21 = g_state.projxmul;
+	v22 = g_state.projymul;
+	v19 = g_state.projxadd;
+	v20 = g_state.projyadd;
+	v23 = g_state.znear * g_state.zdecal;
 	v2 = &xfpos_S1212[5 * a1];
 	v3 = (float *)((char *)&grvx_S1213 + 60 * a1);
 	v4 = &tex_S1209[2 * a1];
@@ -1037,7 +1037,7 @@ LABEL_23:
 				return result;
 		}
 	}
-	if ( g_state.zbias || g_state.setnew & 0x10 )
+	if ( g_state.currentmode.zbias || g_state.setnew & 0x10 )
 	{
 		v13 = a2;
 		if ( a2 <= 0 )

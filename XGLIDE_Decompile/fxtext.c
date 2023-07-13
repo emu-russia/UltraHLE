@@ -334,8 +334,8 @@ signed int fxloadtexture_single(DWORD *a1)
 	}
 	v2 = 0;
 	a1[v1 + 26] = v1;
-	g_state[256] = a1[9];
-	g_state[257] = a1[10];
+	g_state.texturexmul = a1[9];
+	g_state.textureymul = a1[10];
 	do
 	{
 		if ( fxloadtexturepart(a1, v1) >= 0 )
@@ -364,8 +364,8 @@ int fxloadtexture_trilin(DWORD *a1)
 		a1[29] = v1 ^ 1;
 	}
 	v2 = 0;
-	g_state[256] = a1[9];
-	g_state[257] = a1[10];
+	g_state.texturexmul = a1[9];
+	g_state.textureymul = a1[10];
 	do
 	{
 		if ( fxloadtexturepart(a1, 2) >= 0 && fxloadtexturepart(a1, 3) >= 0 )
@@ -387,8 +387,8 @@ int fxloadtexture_multi(DWORD *a1, DWORD *a2)
 	signed int v2; // ebx
 
 	v2 = 0;
-	g_state[256] = a1[9];
-	g_state[257] = a1[10];
+	g_state.texturexmul = a1[9];
+	g_state.textureymul = a1[10];
 	do
 	{
 		if ( fxloadtexturepart(a1, 0) >= 0 && fxloadtexturepart(a2, 1) >= 0 )
@@ -837,11 +837,11 @@ void text_closedata(int a1)
 	int result; // eax
 
 	*(DWORD *)(a1 + 48) = 1;
-	if ( *(DWORD *)(a1 + 4) == g_state[282] )
-		g_state[282] = 0;
-	result = g_state[283];
+	if ( *(DWORD *)(a1 + 4) == g_state.active.text1)
+		g_state.active.text1 = 0;
+	result = g_state.active.text2;
 	if ( *(DWORD *)(a1 + 4) == result )
-		g_state[282] = 0;
+		g_state.active.text1 = 0;
 }
 
 int text_frameend()
