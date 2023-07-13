@@ -267,38 +267,34 @@ void projrecalced()
 {
 }
 
-//void x_ortho(float xmin, float ymin, float xmax, float ymax, float znear, float zfar)
-void x_ortho(float a1, float a2, float a3, float a4, float a5, float a6)
+void x_ortho(float xmin, float ymin, float xmax, float ymax, float znear, float zfar)
 {
 	x_flush();
-	g_state[237] = a1;
-	g_state[238] = a2;
-	g_state[239] = a3;
-	g_state[241] = a5;
-	g_state[240] = a4;
-	*(float *)&g_state[242] = a6;
+	g_state[237] = xmin;
+	g_state[238] = ymin;
+	g_state[239] = xmax;
+	g_state[241] = znear;
+	g_state[240] = ymax;
+	g_state[242] = zfar;
 	g_state[246] = 1;
 	g_state[234] = 1;
-	*(float *)&g_state[244] = 1.0 / a6;
-	*(float *)&g_state[245] = 1.0 / a5;
+	g_state[244] = 1.0 / zfar;
+	g_state[245] = 1.0 / znear;
 }
 
-int __cdecl x_viewport(int a1, float a2, int a3, float a4)
+void x_viewport(float x0, float y0, float x1, float y1)
 {
-	int result; // eax
 	int v5; // ST00_4
 	double v6; // st7
 
 	x_flush();
-	g_state[248] = a1;
-	result = g_state[164] - 1;
+	g_state[248] = x0;
 	v5 = g_state[164] - 1;
-	g_state[249] = a3;
+	g_state[249] = x1;
 	v6 = (double)v5;
 	g_state[234] = 1;
-	*(float *)&g_state[250] = v6 - a4;
-	*(float *)&g_state[251] = v6 - a2;
-	return result;
+	g_state[250] = v6 - y1;
+	g_state[251] = v6 - y0;
 }
 
 int __cdecl x_projection(float a1, int a2, float a3)
@@ -538,18 +534,14 @@ void x_closetexturedata(int a1)
 	return result;
 }
 
-int __cdecl x_forcegeometry(int a1, int a2)
+void x_forcegeometry(int forceon, int forceoff)
 {
-	int result; // eax
-
-	result = a1;
-	g_state[259] = a1;
-	g_state[260] = a2;
+	g_state[259] = forceon;
+	g_state[260] = forceoff;
 	g_state[290] |= 1u;
-	return result;
 }
 
-int __cdecl x_geometry(int a1)
+void x_geometry(int flags)
 {
 	int v1; // ecx
 	int result; // eax
@@ -557,34 +549,33 @@ int __cdecl x_geometry(int a1)
 	v1 = g_state[259];
 	result = ~g_state[260];
 	g_state[290] |= 1u;
-	g_state[317] = result & (a1 | v1);
-	return result;
+	g_state[317] = result & (flags | v1);
 }
 
-signed int __cdecl x_mask(int a1, int a2, int a3)
+int x_mask(int colormask, int depthmask, int depthtest)
 {
 	signed int v3; // ecx
 
 	v3 = 0;
-	if ( a1 == 4097 )
+	if (colormask == 4097 )
 	{
 		v3 = 1;
 	}
-	else if ( a1 != 4098 )
+	else if (colormask != 4098 )
 	{
 		return 1;
 	}
-	if ( a2 == 4097 )
+	if (depthmask == 4097 )
 	{
 		v3 |= 2u;
 	}
-	else if ( a2 != 4098 )
+	else if (depthmask != 4098 )
 	{
 		return 1;
 	}
-	if ( !a3 || a3 == 1 )
+	if ( !depthtest || depthtest == 1 )
 		return 1;
-	g_state[292] = a3;
+	g_state[292] = depthtest;
 	g_state[291] = v3;
 	g_state[290] |= 4u;
 	return 0;
@@ -613,8 +604,8 @@ int x_blend(int src, int dst)
 		return 1;
 	if (dst < 4609 || dst > 4616 )
 		return 1;
-	g_state[304] = src;
-	g_state[305] = dst;
+	g_state.src = src;
+	g_state.dst = dst;
 	g_state[290] |= 4u;
 	return 0;
 }
@@ -626,7 +617,7 @@ int x_alphatest(float limit)
 	if ( limit < 0.0f || limit > 1.0f)
 		return 1;
 	g_state[290] |= 4u;
-	g_state[308] = limit;
+	g_state.alphatest = limit;
 	return 0;
 }
 
@@ -648,53 +639,43 @@ int x_procombine(int rgb, int alpha)
 	return 0;
 }
 
-int __cdecl x_envcolor(float a1, float a2, float a3, float a4)
+int x_envcolor(float r, float g, float b, float a)
 {
-	int result; // eax
-
-	*(float *)&g_state[313] = a1;
-	*(float *)&g_state[314] = a2;
-	*(float *)&g_state[315] = a3;
-	*(float *)&g_state[316] = a4;
+	*(float *)&g_state[313] = r;
+	*(float *)&g_state[314] = g;
+	*(float *)&g_state[315] = b;
+	*(float *)&g_state[316] = a;
 	g_state[290] |= 4u;
-	result = 0;
-	g_state[312] = (unsigned __int8)(signed __int64)(a1 * 255.0) | ((unsigned __int8)(signed __int64)(a3 * 255.0) << 16) | ((((unsigned int)(signed __int64)(a4 * 255.0) << 16) | (unsigned __int8)(signed __int64)(a2 * 255.0)) << 8);
-	return result;
+	g_state[312] = (unsigned __int8)(signed __int64)(r * 255.0) | ((unsigned __int8)(signed __int64)(b * 255.0) << 16) | ((((unsigned int)(signed __int64)(a * 255.0) << 16) | (unsigned __int8)(signed __int64)(g * 255.0)) << 8);
+	return 0;
 }
 
 int x_combine2(int colortext1, int text1text2, int sametex)
 {
-	signed int result; // eax
-
 	if ( g_state[160] < 2 )
 		return 1;
-	if (colortext1 < 4865 || colortext1 > 4879 )
+	if (colortext1 < X_FIRSTCOMBINE || colortext1 > X_LASTCOMBINE)
 		return 1;
-	if (text1text2 < 4865 || text1text2 > 4879 )
+	if (text1text2 < X_FIRSTCOMBINE || text1text2 > X_LASTCOMBINE)
 		return 1;
 	g_state[293] = colortext1;
-	g_state[306] = sametex;
+	g_state.sametex = sametex;
 	g_state[294] = text1text2;
-	result = 0;
 	g_state[290] |= 4u;
-	return result;
+	return 0;
 }
 
-//int x_procombine2(int rgb, int alpha, int text1text2, int sametex)
-int x_procombine2(int a1, int a2, int a3, int a4)
+int x_procombine2(int rgb, int alpha, int text1text2, int sametex)
 {
-	signed int result; // eax
-
 	if ( g_state[160] < 2 )
 		return 1;
-	if ( a3 < 4865 || a3 > 4879 )
+	if (text1text2 < X_FIRSTCOMBINE || text1text2 > X_LASTCOMBINE)
 		return 1;
-	g_state[306] = a4;
-	result = 0;
-	g_state[293] = a1 | (a2 << 16);
-	g_state[294] = a3;
+	g_state.sametex = sametex;
+	g_state[293] = rgb | (alpha << 16);
+	g_state[294] = text1text2;
 	g_state[290] |= 4u;
-	return result;
+	return 0;
 }
 
 int x_texture(int text1handle)
@@ -725,76 +706,25 @@ void x_reset(void)
 	x_mask(4097, 4097, 4097);
 	x_dither(1);
 	x_blend(4610, 4609);
-	x_alphatest(1065353216);
+	x_alphatest(1.0f);
 	x_combine(4866);
-	x_zdecal(1065353216);
+	x_zdecal(1.0f);
 }
 
-//int x_fog(int type, float min, float max, float r, float g, float b)
-int x_fog(int a1, float a2, float a3, float a4, float a5, float a6)
+int x_fog(int type, float min, float max, float r, float g, float b)
 {
-	int result; // eax
-
-	g_state[296] = a1;
-	g_state[297] = a2;
-	g_state[298] = a3;
-	g_state[299] = a4;
-	result = 0;
-	g_state[300] = a5;
+	g_state[296] = type;
+	g_state[297] = min;
+	g_state[298] = max;
+	g_state[299] = r;
+	g_state[300] = g;
+	g_state[301] = b;
 	g_state[302] = 1.0f;
 	g_state[290] |= 8u;
-	g_state[301] = a6;
-	return result;
+	return 0;
 }
 
 void x_fullscreen(int fullscreen)
 {
 	init_fullscreen(fullscreen);
 }
-
-
-
-//.rdata:00000F54 _rdata          segment para public 'DATA' use32
-//.rdata:00000F54                 assume cs:_rdata
-//.rdata:00000F54                 ;org 0F54h
-//.rdata:00000F54 $T1520          db    0
-//.rdata:00000F55                 db 0FFh
-//.rdata:00000F56                 db  7Fh ; 
-//.rdata:00000F57                 db  47h ; G
-//.rdata:00000F58 $T1521          db  66h ; f
-//.rdata:00000F59                 db  66h ; f
-//.rdata:00000F5A                 db  66h ; f
-//.rdata:00000F5B                 db  3Fh ; ?
-//.rdata:00000F5C $T1522          db    0
-//.rdata:00000F5D                 db    0
-//.rdata:00000F5E                 db 0B4h
-//.rdata:00000F5F                 db  42h ; B
-//.rdata:00000F60 $T1526          dd 1.0                  ; DATA XREF: _x_frustum+2E↑r
-//.rdata:00000F60                                         ; _x_frustum+67↑r ...
-//.rdata:00000F64 $T1527          db    0
-//.rdata:00000F65                 db    0
-//.rdata:00000F66                 db    0
-//.rdata:00000F67                 db    0
-//.rdata:00000F68                 db    0
-//.rdata:00000F69                 db    0
-//.rdata:00000F6A                 db 0F0h
-//.rdata:00000F6B                 db  3Fh ; ?
-//.rdata:00000F6C $T1528          db    0
-//.rdata:00000F6D                 db    0
-//.rdata:00000F6E                 db    0
-//.rdata:00000F6F                 db    0
-//.rdata:00000F70                 db    0
-//.rdata:00000F71                 db    0
-//.rdata:00000F72                 db    0
-//.rdata:00000F73                 db    0
-//.rdata:00000F74 $T1529          dq 0.0174532925199433   ; DATA XREF: _x_projection+4F↑r
-//.rdata:00000F7C $T1530          dd 0.5                  ; DATA XREF: _x_projection+55↑r
-//.rdata:00000F80                 db    0
-//.rdata:00000F81                 db    0
-//.rdata:00000F82                 db    0
-//.rdata:00000F83                 db    0
-//.rdata:00000F84 $T1531          dq 0.75                 ; DATA XREF: _x_projection+73↑r
-//.rdata:00000F8C $T1536          dq 255.0                ; DATA XREF: _x_envcolor+11↑r
-//.rdata:00000F8C                                         ; _x_envcolor+3A↑r ...
-//.rdata:00000F8C _rdata          ends
-

@@ -94,19 +94,32 @@ void x_free(void *Memory)
 	free(Memory);
 }
 
-void x_fastfpu(int a1)
+/// <summary>
+/// - x_fastfpu(1) sets the fpu to 32-bit accuracy mode (faster).
+/// - x_fastfpu(0) returns the fpu to mode before call to x_fastfpu(1)
+/// - the above calls can be nested
+/// </summary>
+/// <param name="a1"></param>
+void x_fastfpu(int fast)
 {
 	static int state = 0;
-	static int newcontrol;
-	static int originalcontrol;
-	static int initdone;
+	static int newcontrol = 0;
+	static int originalcontrol = 0;
+	static int initdone = 0;
 
 	int v1; // eax
 	bool v2; // zf
 	unsigned int result; // eax
 
+	if (!initdone) {
+
+		originalcontrol = _controlfp(0, 0);
+		// Bugfix
+		initdone = 1;
+	}
+
 	v1 = state;
-	if ( a1 )
+	if (fast)
 	{
 		v1 = state + 1;
 	}
@@ -115,12 +128,14 @@ void x_fastfpu(int a1)
 		v1 = state - 1;
 	}
 	state = v1;
+
 	v2 = v1 == 0;
 	result = originalcontrol;
 	if ( !v2 )
 		result = originalcontrol & 0xFFFFFCFF | 0x3F;
 	newcontrol = result;
-	return result;
+
+	_controlfp(newcontrol, _MCW_PC);
 }
 
 void x_timereset(void)

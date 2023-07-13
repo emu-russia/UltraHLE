@@ -63,13 +63,12 @@ void x_getmatrix(void *a1)
 	memcpy(a1, &g_state[169], 0x40u);
 }
 
-int dumpmatrix(float *a1, int a2)
+void dumpmatrix(float *a1, int a2)
 {
 	signed int v2; // esi
 	float *v3; // ebx
 	signed int v4; // edi
 	long double v5; // fst7
-	int result; // eax
 
 	v2 = 4;
 	x_log("%s matrix:\n", a2);
@@ -86,11 +85,10 @@ int dumpmatrix(float *a1, int a2)
 			--v4;
 		}
 		while ( v4 );
-		result = x_log((const char *)&_SG1265);
+		x_log((const char *)&_SG1265);
 		--v2;
 	}
 	while ( v2 );
-	return result;
 }
 
 void x_matrix(void *a1)
@@ -312,8 +310,9 @@ void x_end()
 		}
 	}
 	mode_S1225 = 0;
-	if ( vertices_S1216 > 127 )
+	if (vertices_S1216 > 127) {
 		x_flush();
+	}
 }
 
 void vertexdata(xt_data* a1)
@@ -363,10 +362,10 @@ void vertexdata(xt_data* a1)
 	{
 		v1 = 15 * vertices_S1216;
 		v2 = a1;
-		flt_2A30[v1] = a1[1] * 256.0;
-		flt_2A34[v1] = a1[2] * 256.0;
-		flt_2A38[v1] = a1[3] * 256.0;
-		flt_2A40[v1] = a1[4] * 256.0;
+		flt_2A30[v1] = a1->r * 256.0;
+		flt_2A34[v1] = a1->g * 256.0;
+		flt_2A38[v1] = a1->b * 256.0;
+		flt_2A40[v1] = a1->a * 256.0;
 	}
 	else
 	{
@@ -1155,7 +1154,7 @@ void x_vxa(int a1, xt_data* a2)
 	vertexdata(a2);
 }
 
-int x_vxrel(float *a1, float *a2)
+void x_vxrel(float *a1, float *a2)
 {
 	float *v2; // edx
 	int v3; // eax
@@ -1872,48 +1871,6 @@ void x_flush(void)
 		x_matrix(0);
 	}
 }
-
-
-//.rdata:000029DC _rdata          segment para public 'DATA' use32
-//.rdata:000029DC                 assume cs:_rdata
-//.rdata:000029DC                 ;org 29DCh
-//.rdata:000029DC $T1773          db    0
-//.rdata:000029DD                 db    0
-//.rdata:000029DE                 db    0
-//.rdata:000029DF                 db    0
-//.rdata:000029E0 $T1775          dd 1.0                  ; DATA XREF: _recalc_projection+D↑r
-//.rdata:000029E0                                         ; _recalc_projection+2B↑r ...
-//.rdata:000029E4 $T1776          dd 0.5                  ; DATA XREF: _recalc_projection+13↑r
-//.rdata:000029E4                                         ; _recalc_projection+31↑r
-//.rdata:000029E8 $T1777          dd 0.2                  ; DATA XREF: _recalc_projection+45↑r
-//.rdata:000029E8                                         ; _recalc_projection+57↑r
-//.rdata:000029EC $T1779          dq 2.0                  ; DATA XREF: _recalc_projection+101↑r
-//.rdata:000029EC                                         ; _recalc_projection+113↑r
-//.rdata:000029F4 $T1780          dq 0.5                  ; DATA XREF: _recalc_projection+131↑r
-//.rdata:000029F4                                         ; _recalc_projection+143↑r
-//.rdata:000029FC $T1783          dd 256.0                ; DATA XREF: _vertexdata+4A↑r
-//.rdata:000029FC                                         ; _vertexdata+59↑r ...
-//.rdata:00002A00                 db    0
-//.rdata:00002A01                 db    0
-//.rdata:00002A02                 db    0
-//.rdata:00002A03                 db    0
-//.rdata:00002A04 $T1802          dq 0.0                  ; DATA XREF: _xform+3C9↑r
-//.rdata:00002A0C $T1803          db    0
-//.rdata:00002A0D                 db    0
-//.rdata:00002A0E                 db  80h
-//.rdata:00002A0F                 db 0BFh
-//.rdata:00002A10 $T1816          dd 786432.0             ; DATA XREF: _setuprvx+90↑r
-//.rdata:00002A10                                         ; _setuprvx+193↑r ...
-//.rdata:00002A14 $T1817          db    0
-//.rdata:00002A15                 db    0
-//.rdata:00002A16                 db    0
-//.rdata:00002A17                 db    0
-//.rdata:00002A18                 db    0
-//.rdata:00002A19                 db    0
-//.rdata:00002A1A                 db 0F0h
-//.rdata:00002A1B                 db  3Fh ; ?
-//.rdata:00002A1B _rdata          ends
-
 
 
 

@@ -70,11 +70,11 @@ int init_reinit()
 	x_log("init_reinit: done\n");
 }
 
-signed int init_init()
+int init_init()
 {
 	int v1; // ST18_4
 	signed int v2; // ecx
-	char v3; // [esp+0h] [ebp-94h]
+	GrHwConfiguration v3; // [esp+0h] [ebp-94h]
 	int v4; // [esp+4h] [ebp-90h]
 	int v5; // [esp+10h] [ebp-84h]
 
@@ -173,7 +173,7 @@ int init_clear(int a1, int a2, float a3, float a4, float a5)
 	grColorMask(LODWORD(g_state[291]) & 1, LODWORD(g_state[291]) & 1);
 }
 
-signed int init_readfb(__int16 a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int init_readfb(__int16 a1, int a2, int a3, int a4, int a5, int a6, int a7)
 {
 	BOOL v7; // ecx
 	signed int result; // eax
@@ -218,7 +218,7 @@ signed int init_readfb(__int16 a1, int a2, int a3, int a4, int a5, int a6, int a
 	return result;
 }
 
-signed int init_writefb()
+int init_writefb()
 {
 	return 1;
 }
@@ -331,7 +331,7 @@ int mode_loadmultitexture(int a1, int a2)
 	return result;
 }
 
-void fixfogtable(int a1, int a2)
+void fixfogtable(GrFog_t* a1, int a2)
 {
 	int i; // esi
 	unsigned __int8 v3; // dl
@@ -346,7 +346,7 @@ void fixfogtable(int a1, int a2)
 	}
 }
 
-void *generatefogtable()
+GrFog_t* generatefogtable()
 {
 	double v1; // st7
 	float v2; // ecx
@@ -364,7 +364,7 @@ void *generatefogtable()
 		&& lastfogmax == g_state[270]
 		&& (double)SLODWORD(g_state[268]) == lastfogtype )
 	{
-		return &fogtable;
+		return fogtable;
 	}
 	v1 = (double)SLODWORD(g_state[268]);
 	v2 = g_state[270];
@@ -376,15 +376,15 @@ void *generatefogtable()
 	{
 		v5 = g_state[270] / g_state[241];
 		v6 = g_state[269] / g_state[241];
-		guFogGenerateLinear(&fogtable, LODWORD(v6), LODWORD(v5));
+		guFogGenerateLinear(fogtable, LODWORD(v6), LODWORD(v5));
 	}
 	else if ( LODWORD(v3) == X_EXPONENTIAL)
 	{
-		v4 = 2.3 / (g_state[270] / g_state[241]);
-		guFogGenerateExp(&fogtable, LODWORD(v4));
+		v4 = 2.3f / (g_state[270] / g_state[241]);
+		guFogGenerateExp(fogtable, LODWORD(v4));
 	}
-	fixfogtable((int)&fogtable, 64);
-	return &fogtable;
+	fixfogtable(fogtable, GR_FOG_TABLE_SIZE);
+	return fogtable;
 }
 
 void mode_change()
@@ -464,7 +464,7 @@ void mode_change()
 		g_state[274] = v7;
 		if ( LODWORD(g_state[296]) == 4098 )
 		{
-			grFogMode(0);
+			grFogMode(GR_FOG_DISABLE);
 		}
 		else
 		{
@@ -476,9 +476,9 @@ void mode_change()
 				HIDWORD(v9),
 				(unsigned __int8)(signed __int64)(g_state[271] * 255.0) | ((unsigned __int16)(signed __int64)(g_state[272] * 255.0) << 8) & 0xFF00 | (((unsigned int)v9 | 0xFFFFFF00) << 16));
 			if ( LODWORD(g_state[268]) == 7939 )
-				grFogMode(514);
+				grFogMode(GR_FOG_ADD2 | GR_FOG_WITH_TABLE);
 			else
-				grFogMode(2);
+				grFogMode(GR_FOG_WITH_TABLE);
 		}
 	}
 	if ( LOBYTE(g_state[290]) & 4 )
@@ -805,7 +805,7 @@ LABEL_103:
 		}
 		else if ( LODWORD(g_state[309]) == 2 )
 		{
-			if ( LODWORD(g_state[306]) )
+			if ( LODWORD(g_state.sametex) )
 				LODWORD(g_state[307]) &= 0xFFFFFFEF;
 			else
 				LODWORD(g_state[307]) |= 0x10u;
@@ -818,7 +818,7 @@ LABEL_103:
 				g_state[282] = v26;
 			}
 		}
-		g_state[278] = g_state[306];
+		g_state[278] = g_state.sametex;
 	}
 	result = g_state[307];
 	if ( LODWORD(g_state[279]) != LODWORD(result) )

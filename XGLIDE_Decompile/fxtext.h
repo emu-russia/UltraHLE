@@ -9,7 +9,7 @@ DWORD* memory_clear(DWORD* a1);
 DWORD* memory_alloc(int a1, int a2, DWORD* a3);
 int memory_free(int a1, DWORD** a2);
 signed int* memory_create(signed int a1, signed int a2);
-int memory_delete(int a1);
+void memory_delete(uint8_t* memory);
 int freetexmem(DWORD* a1);
 int makespace();
 int clearspace();

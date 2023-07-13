@@ -151,10 +151,10 @@ signed int * memory_create(signed int a1, signed int a2)
 	return v3;
 }
 
-int memory_delete(int a1)
+void memory_delete(uint8_t* memory)
 {
-	x_free(*(DWORD *)(a1 + 40));
-	x_free(a1);
+	x_free(*(DWORD *)(memory + 40));
+	x_free(memory);
 }
 
 int freetexmem(DWORD *a1)
