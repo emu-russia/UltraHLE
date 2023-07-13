@@ -20,6 +20,11 @@ static int vertices;
 static int vertices_base;
 static int vertices_lastnonrel;
 
+static int corners_base;
+static int corners;
+
+static int clipnewvx;
+
 void geom_init()
 {
 }
@@ -119,19 +124,19 @@ void x_matrix(void *a1)
 
 	if ( a1 )
 	{
-		g_state[235] = 0;
+		g_state.matrixnull = 0;
 	}
 	else
 	{
 		a1 = &identmatrix;
-		g_state[235] = 1;
+		g_state.matrixnull = 1;
 	}
 	if ( g_state.projchanged )
 	{
 		recalc_projection();
 		g_state.projchanged = 0;
 	}
-	if ( g_state[236] && g_state[235] )
+	if ( g_state.projnull && g_state.matrixnull)
 	{
 		g_state[247] = 3;
 	}
@@ -286,8 +291,8 @@ void x_begin(int a1)
 		x_flush();
 	mode = a1;
 	result = 0;
-	vertices_base_S1217 = vertices;
-	corners_base_S1221 = corners_S1220;
+	vertices_base = vertices;
+	corners_base = corners;
 	state = 0;
 	flip = 0;
 	return result;
@@ -299,15 +304,15 @@ void x_end()
 
 	if (mode == 9 )
 	{
-		v0 = corners_S1220 - corners_base_S1221 - 1;
+		v0 = corners - corners_base - 1;
 		if ( v0 >= 3 )
 		{
-			corner_S1219[corners_base_S1221] = v0;
+			corner_S1219[corners_base] = v0;
 		}
 		else
 		{
-			corners_S1220 = corners_base_S1221;
-			vertices = vertices_base_S1217;
+			corners = corners_base;
+			vertices = vertices_base;
 		}
 	}
 	mode = 0;
@@ -400,22 +405,22 @@ void vertexdata(xt_data* a1)
 	{
 		case 1:
 			v7 = vertices;
-			result = 4 * corners_S1220;
-			corners_S1220 += 2;
+			result = 4 * corners;
+			corners += 2;
 			*(int *)((char *)corner_S1219 + result) = 1;
 			*(int *)((char *)&dword_A228 + result) = v7;
 			break;
 		case 2:
 			if (state >= 2 )
 			{
-				v8 = corners_S1220++;
+				v8 = corners++;
 				corner_S1219[v8] = 3;
-				v9 = corners_S1220++;
+				v9 = corners++;
 				corner_S1219[v9] = vertices - 2;
 				state = 0;
-				corner_S1219[corners_S1220++] = vertices - 1;
+				corner_S1219[corners++] = vertices - 1;
 				result = vertices;
-				v10 = corners_S1220++;
+				v10 = corners++;
 				corner_S1219[v10] = vertices;
 			}
 			else
@@ -427,29 +432,29 @@ void vertexdata(xt_data* a1)
 		case 8:
 			if (state >= 2 )
 			{
-				v11 = corners_S1220++;
+				v11 = corners++;
 				corner_S1219[v11] = 3;
 				if (flip)
 				{
-					v12 = corners_S1220++;
+					v12 = corners++;
 					v13 = vertices;
 					corner_S1219[v12] = vertices - 1;
-					v14 = corners_S1220++;
+					v14 = corners++;
 					corner_S1219[v14] = vertices - 2;
-					result = corners_S1220;
-					corner_S1219[corners_S1220] = v13;
+					result = corners;
+					corner_S1219[corners] = v13;
 				}
 				else
 				{
-					v15 = corners_S1220++;
+					v15 = corners++;
 					corner_S1219[v15] = vertices - 2;
-					v16 = corners_S1220++;
+					v16 = corners++;
 					corner_S1219[v16] = vertices - 1;
 					result = vertices;
-					corner_S1219[corners_S1220] = vertices;
+					corner_S1219[corners] = vertices;
 				}
 				flip ^= 1u;
-				++corners_S1220;
+				++corners;
 			}
 			else
 			{
@@ -459,16 +464,16 @@ void vertexdata(xt_data* a1)
 		case 4:
 			if (state >= 2 )
 			{
-				v17 = corners_S1220;
-				v18 = vertices_base_S1217;
-				++corners_S1220;
+				v17 = corners;
+				v18 = vertices_base;
+				++corners;
 				corner_S1219[v17] = 3;
-				v19 = corners_S1220++;
+				v19 = corners++;
 				corner_S1219[v19] = v18;
-				v20 = corners_S1220++;
+				v20 = corners++;
 				corner_S1219[v20] = vertices - 1;
 				result = vertices;
-				v21 = corners_S1220++;
+				v21 = corners++;
 				corner_S1219[v21] = vertices;
 			}
 			else
@@ -479,17 +484,17 @@ void vertexdata(xt_data* a1)
 		case 5:
 			if (state >= 3 )
 			{
-				v22 = corners_S1220++;
+				v22 = corners++;
 				corner_S1219[v22] = 4;
-				v23 = corners_S1220++;
+				v23 = corners++;
 				corner_S1219[v23] = vertices - 3;
-				v24 = corners_S1220++;
+				v24 = corners++;
 				corner_S1219[v24] = vertices - 2;
-				v25 = corners_S1220++;
+				v25 = corners++;
 				state = 0;
 				corner_S1219[v25] = vertices - 1;
 				result = vertices;
-				v26 = corners_S1220++;
+				v26 = corners++;
 				corner_S1219[v26] = vertices;
 			}
 			else
@@ -500,12 +505,12 @@ void vertexdata(xt_data* a1)
 		case 6:
 			if (state >= 1 )
 			{
-				v27 = corners_S1220++;
+				v27 = corners++;
 				corner_S1219[v27] = 2;
-				v28 = corners_S1220++;
+				v28 = corners++;
 				corner_S1219[v28] = vertices - 1;
 				result = vertices;
-				v29 = corners_S1220++;
+				v29 = corners++;
 				corner_S1219[v29] = vertices;
 			}
 			else
@@ -516,13 +521,13 @@ void vertexdata(xt_data* a1)
 		case 7:
 			if (state >= 1 )
 			{
-				v30 = corners_S1220++;
+				v30 = corners++;
 				corner_S1219[v30] = 2;
-				v31 = corners_S1220++;
+				v31 = corners++;
 				state = 0;
 				corner_S1219[v31] = vertices - 1;
 				result = vertices;
-				v32 = corners_S1220++;
+				v32 = corners++;
 				corner_S1219[v32] = vertices;
 			}
 			else
@@ -533,15 +538,15 @@ void vertexdata(xt_data* a1)
 		case 9:
 			if ( !state)
 			{
-				v33 = corners_S1220;
+				v33 = corners;
 				++state;
-				++corners_S1220;
+				++corners;
 				corner_S1219[v33] = 1;
 			}
-			v34 = corners_S1220++;
+			v34 = corners++;
 			corner_S1219[v34] = vertices;
-			result = corners_base_S1221 + 64;
-			if ( corners_base_S1221 + 64 < corners_S1220 )
+			result = corners_base + 64;
+			if ( corners_base + 64 < corners )
 				x_fatal("xgeom: too large X_POLYGON!\n");
 			break;
 		default:
@@ -756,7 +761,7 @@ LABEL_46:
 																+ v29[2] * *(float *)&g_state[195]
 																+ *(float *)&g_state[196];
 						if ( v33 )
-							*(DWORD *)(v28 + 12) = g_state[245];
+							*(DWORD *)(v28 + 12) = g_state.invznear;
 						else
 							*(float *)(v28 + 12) = 1.0 / *(float *)(v28 + 8);
 						v34 = 0;
@@ -1212,7 +1217,7 @@ int clear()
 	result = 0;
 	state = 0;
 	vertices = 0;
-	corners_S1220 = 0;
+	corners = 0;
 	return result;
 }
 
@@ -1687,7 +1692,7 @@ void *flush_reordertables()
 	}
 	vertices = v8;
 	allxformed = 1;
-	corners_S1220 = 0;
+	corners = 0;
 	return result;
 }
 
@@ -1715,8 +1720,8 @@ signed int flush_drawfx()
 		xform((int)xfpos_S1212, pos_S1208, vertices, xformed_S1214);
 	v0 = &dword_A228;
 	setuprvx(0, vertices);
-	result = corners_S1220;
-	corner_S1219[corners_S1220] = 0;
+	result = corners;
+	corner_S1219[corners] = 0;
 	for ( i = corner_S1219[0]; i; v0 = v15 + 1 )
 	{
 		if ( i < 3 )
@@ -1851,11 +1856,11 @@ void x_flush(void)
 {
 	int v0; // eax
 
-	v0 = corners_S1220;
+	v0 = corners;
 	if ( g_state.geometry & X_DUMPDATA)
 	{
-		x_log("#flush %i %i %i\n", g_state.projchanged, g_state.changed, corners_S1220);
-		v0 = corners_S1220;
+		x_log("#flush %i %i %i\n", g_state.projchanged, g_state.changed, corners);
+		v0 = corners;
 	}
 	if ( v0 )
 	{
@@ -1868,7 +1873,7 @@ void x_flush(void)
 		mode_change();
 	if ( g_state.projchanged )
 	{
-		g_state[235] = 1;
+		g_state.matrixnull = 1;
 		x_matrix(0);
 	}
 }
@@ -1884,8 +1889,6 @@ void x_flush(void)
 //...
 //.bss:0000A222                 db    ? ;
 //.bss:0000A223                 db    ? ;
-//.bss:0000A224 _corner$S1219   dd ?                    ; DATA XREF: _x_end:loc_6DA↑w
-//.bss:0000A224                                         ; _vertexdata+137↑w ...
 //.bss:0000A228 dword_A228      dd ?                    ; DATA XREF: _vertexdata+141↑w
 //.bss:0000A228                                         ; _flush_drawfx+35↑o
 //.bss:0000A22C                 db    ? ;
@@ -1910,12 +1913,6 @@ void x_flush(void)
 //...
 //.bss:0000F22A                 db    ? ;
 //.bss:0000F22B                 db    ? ;
-//.bss:0000F22C _mode$S1225     dd ?                    ; DATA XREF: _x_begin+27↑w
-//.bss:0000F22C                                         ; _x_end↑r ...
-//.bss:0000F230                 db    ? ;
-//.bss:0000F231                 db    ? ;
-//.bss:0000F232                 db    ? ;
-//.bss:0000F233                 db    ? ;
 //.bss:0000F234 _xformed$S1214  db ?                    ; DATA XREF: _x_vx+41↑w
 //.bss:0000F234                                         ; _x_vxa+57↑w ...
 //.bss:0000F235                 db    ? ;
@@ -1946,12 +1943,6 @@ void x_flush(void)
 //.bss:00011441                 db    ? ;
 //.bss:00011442                 db    ? ;
 //.bss:00011443                 db    ? ;
-//.bss:00011444 _corners_base$S1221 dd ?                ; DATA XREF: _x_begin+34↑w
-//.bss:00011444                                         ; _x_end+E↑r ...
-//.bss:00011448                 db    ? ;
-//.bss:00011449                 db    ? ;
-//.bss:0001144A                 db    ? ;
-//.bss:0001144B                 db    ? ;
 //.bss:0001144C _xfpos$S1212    dd ?                    ; DATA XREF: _setuprvx+4B↑o
 //.bss:0001144C                                         ; _setuprvx+24F↑o ...
 //.bss:00011450 flt_11450       dd ?                    ; DATA XREF: _doclipvertex+7D↑r

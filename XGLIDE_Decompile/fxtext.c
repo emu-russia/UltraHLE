@@ -814,16 +814,12 @@ unsigned int text_loadlevel(DWORD *a1, int a2, unsigned int a3)
 	return result;
 }
 
-int text_freedata(DWORD *a1)
+void text_freedata(DWORD *a1)
 {
-	int result; // eax
-
 	freetexmem(a1);
 	if ( a1[17] )
 		x_free(a1[17]);
-	result = 0;
 	memset(a1, 0, 0x98u);
-	return result;
 }
 
 int text_cleartexmem()

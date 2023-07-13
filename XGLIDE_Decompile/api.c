@@ -159,9 +159,9 @@ int x_query()
 	return 0;
 }
 
-int __cdecl x_clear(int a1, int a2, int a3, int a4, int a5)
+void x_clear(int writecolor, int writedepth, float cr, float cg, float cb)
 {
-	return init_clear(a1, a2, a3, a4, a5);
+	init_clear(writecolor, writedepth, cr, cg, cb);
 }
 
 int __cdecl x_readfb(int a1, int a2, int a3, int a4, int a5, int a6, int a7)
@@ -232,8 +232,8 @@ void x_frustum(float xmin, float xmax, float ymin, float ymax, float znear, floa
 	g_state.zfar = zfar;
 	g_state.xformmode = 0;
 	g_state.projchanged = 1;
-	g_state[244] = 1.0 / zfar;
-	g_state[245] = 1.0 / znear;
+	g_state.invzfar = 1.0 / zfar;
+	g_state.invznear = 1.0 / znear;
 }
 
 void x_projmatrix(xt_matrix* a1)
@@ -245,11 +245,11 @@ void x_projmatrix(xt_matrix* a1)
 	v2 = a1;
 	if ( a1 )
 	{
-		g_state[236] = 0;
+		g_state.projnull = 0;
 	}
 	else
 	{
-		g_state[236] = 1;
+		g_state.projnull = 1;
 		v2 = &identmatrix;
 	}
 	memcpy(&g_state[217], v2, 0x40u);
@@ -272,8 +272,8 @@ void x_ortho(float xmin, float ymin, float xmax, float ymax, float znear, float 
 	g_state.zfar = zfar;
 	g_state.xformmode = 1;
 	g_state.projchanged = 1;
-	g_state[244] = 1.0 / zfar;
-	g_state[245] = 1.0 / znear;
+	g_state.invzfar = 1.0 / zfar;
+	g_state.invznear = 1.0 / znear;
 }
 
 void x_viewport(float x0, float y0, float x1, float y1)
@@ -282,20 +282,20 @@ void x_viewport(float x0, float y0, float x1, float y1)
 	double v6; // st7
 
 	x_flush();
-	g_state[248] = x0;
-	v5 = g_state[164] - 1;
-	g_state[249] = x1;
+	g_state.view_x0 = x0;
+	v5 = g_state.ys - 1;
+	g_state.view_x1 = x1;
 	v6 = (double)v5;
 	g_state.projchanged = 1;
-	g_state[250] = v6 - y1;
-	g_state[251] = v6 - y0;
+	g_state.view_y0 = v6 - y1;
+	g_state.view_y1 = v6 - y0;
 }
 
 void x_projection(float fov, float znear, float zfar)
 {
 	int v3; // ST08_4
 	int v4; // ST04_4
-	long double v6; // st7
+	double v6; // st7
 	int v7; // ST0C_4
 	int v8; // ST08_4
 	int v9; // ST04_4
@@ -313,9 +313,7 @@ void x_projection(float fov, float znear, float zfar)
 	}
 	else
 	{
-		*(float *)&v3 = (double)(signed int)g_state[164];
-		*(float *)&v4 = (double)(signed int)g_state[163];
-		x_ortho(0, v4, v3, 0, znear, zfar);
+		x_ortho(0, (float)g_state.xs, (float)g_state.ys, 0, znear, zfar);
 	}
 }
 
@@ -358,7 +356,7 @@ DWORD *__cdecl texture_get(signed int a1)
 	return result;
 }
 
-signed int __cdecl x_createtexture(int a1, signed int a2, signed int a3)
+int x_createtexture(int format, int width, int height)
 {
 	DWORD *v3; // eax
 	signed int v4; // esi
@@ -393,14 +391,14 @@ signed int __cdecl x_createtexture(int a1, signed int a2, signed int a3)
 		if ( v6 )
 		{
 			memset(v6, 0, 0x98u);
-			v7 = a2;
-			v8 = a3;
+			v7 = width;
+			v8 = height;
 			v6[1] = v4;
 			*v6 = g_activestateindex;
-			v6[2] = a2;
-			v6[3] = a3;
-			v6[4] = a1;
-			if ( a1 & 0x200 )
+			v6[2] = width;
+			v6[3] = height;
+			v6[4] = format;
+			if (format & X_MIPMAP)
 			{
 				v9 = 0;
 				while ( v7 > 1 || v8 > 1 )
@@ -427,57 +425,55 @@ signed int __cdecl x_createtexture(int a1, signed int a2, signed int a3)
 	return result;
 }
 
-//int x_gettextureinfo(int handle, int* format, int* memformat, int* width, int* height)
-int x_gettextureinfo(int a1, int* a2, int* a3, int* a4, int* a5)
+int x_gettextureinfo(int handle, int* format, int* memformat, int* width, int* height)
 {
 	DWORD *v5; // eax
 
-	v5 = texture_get(a1);
+	v5 = texture_get(handle);
 	if ( !v5 )
 		return 1;
-	if ( a2 )
-		*a2 = v5[4];
-	if ( a3 )
-		*a3 = v5[5];
-	if ( a4 )
-		*a4 = v5[2];
-	if ( a5 )
-		*a5 = v5[3];
+	if (format)
+		*format = v5[4];
+	if (memformat)
+		*memformat = v5[5];
+	if (width)
+		*width = v5[2];
+	if (height)
+		*height = v5[3];
 	return 0;
 }
 
-int __cdecl x_loadtexturelevel(signed int a1, signed int a2, int a3)
+int x_loadtexturelevel(int handle, int level, char* data)
 {
 	DWORD *v3; // eax
 	DWORD *v4; // esi
 	int v6; // edx
 
-	v3 = texture_get(a1);
+	v3 = texture_get(handle);
 	v4 = v3;
 	if ( !v3 )
 		return 0;
-	if ( v3[7] < a2 + 1 )
-		v3[7] = a2 + 1;
-	if ( a2 > 31 )
+	if ( v3[7] < level + 1 )
+		v3[7] = level + 1;
+	if (level > 31 )
 		return 0;
 	v6 = v3[8];
-	if ( !(v6 & (1 << a2)) )
-		v3[8] = (1 << a2) | v6;
-	text_loadlevel(v3, a2, a3);
+	if ( !(v6 & (1 << level)) )
+		v3[8] = (1 << level) | v6;
+	text_loadlevel(v3, level, data);
 	return 2 - ((v4[4] & 0x200u) < 1);
 }
 
-DWORD *__cdecl x_freetexture(signed int a1)
+void x_freetexture(int handle)
 {
 	DWORD *result; // eax
 
-	result = texture_get(a1);
+	result = texture_get(handle);
 	if ( result )
-		result = (DWORD *)text_freedata(result);
-	return result;
+		text_freedata(result);
 }
 
-signed int x_texture_getinfo(signed int a1, DWORD *a2, DWORD *a3, DWORD *a4, DWORD *a5)
+int x_texture_getinfo(signed int a1, DWORD *a2, DWORD *a3, DWORD *a4, DWORD *a5)
 {
 	DWORD *v5; // eax
 

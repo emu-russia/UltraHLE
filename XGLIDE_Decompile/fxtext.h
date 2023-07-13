@@ -25,7 +25,7 @@ void text_deinit();
 int accesstexture(DWORD* a1, int a2, signed int* a3, signed int* a4);
 int text_allocdata(int a1);
 unsigned int text_loadlevel(DWORD* a1, int a2, unsigned int a3);
-int text_freedata(DWORD* a1);
+void text_freedata(DWORD* a1);
 int text_cleartexmem();
 int text_opendata(int a1);
 int text_closedata(int a1);

@@ -10,7 +10,7 @@ void init_deinit();
 void init_activate();
 void init_resize(int xs, int ys);
 int init_bufferswap();
-int init_clear(int a1, int a2, float a3, float a4, float a5);
+void init_clear(int writecolor, int writedepth, float cr, float cg, float cb);
 int init_readfb(__int16 a1, int a2, int a3, int a4, int a5, int a6, int a7);
 int init_writefb();
 int mode_init();

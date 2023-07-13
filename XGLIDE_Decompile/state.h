@@ -21,8 +21,8 @@ typedef struct
 //projxform
 //campresent
 	int projchanged;	// 234
-//matrixnull
-//projnull
+	int matrixnull;		// 235
+	int projnull;		// 236
 	float xmin;			// 237
 	float xmax;			// 238
 	float ymin;			// 239
@@ -30,8 +30,8 @@ typedef struct
 	float znear;		// g_state[241]
 	float zfar;			// g_state[242]
 	float zdecal;		// g_state[243]
-//invzfar
-//invznear
+	float invzfar;		// 244
+	float invznear;		// 245
 	int xformmode;		// 246
 //usexformmode
 	int view_x0;		// 248
@@ -66,7 +66,7 @@ typedef struct
 	int sametex;	// g_state[306]
 	FxU32 stwhint;		// 307
 	float alphatest;	// g_state[308]
-//textures
+	int textures;		// 309
 	int text1;			// 310
 	int text2;			// 311
 	uint32_t envc;		// 312 - combined env color (buggy)
