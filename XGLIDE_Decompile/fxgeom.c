@@ -98,7 +98,7 @@ void dumpmatrix(float *a1, int a2)
 	while ( v2 );
 }
 
-void x_matrix(void *a1)
+void x_matrix(xt_matrix* matrix)
 {
 	char *v1; // edi
 	float *v2; // edx
@@ -123,13 +123,13 @@ void x_matrix(void *a1)
 	float *v21; // [esp+24h] [ebp-44h]
 	char v22; // [esp+28h] [ebp-40h]
 
-	if ( a1 )
+	if (matrix)
 	{
 		g_state.matrixnull = 0;
 	}
 	else
 	{
-		a1 = &identmatrix;
+		matrix = &identmatrix;
 		g_state.matrixnull = 1;
 	}
 	if ( g_state.projchanged )
@@ -145,14 +145,14 @@ void x_matrix(void *a1)
 	{
 		g_state.usexformmode = g_state.xformmode;
 		x_flush();
-		memcpy(&g_state[169], a1, 0x40u);
+		memcpy(&g_state[169], matrix, 0x40u);
 		if ( g_state.xformmode != 1 && g_state[233] )
 		{
 			v1 = &v22;
 			v2 = (float *)&g_state[201];
 			do
 			{
-				v3 = (float *)a1;
+				v3 = (float *)matrix;
 				v4 = 4;
 				do
 				{
@@ -1661,11 +1661,11 @@ void *flush_reordertables()
 	v2 = 0;
 	if ( v0 == 4 )
 	{
-		memcpy(&grvx_S1213, (char *)&grvx_S1213 + 60 * vertices_base_S1217, 0x3Cu);
-		memcpy(xfpos_S1212, &xfpos_S1212[5 * vertices_base_S1217], 0x14u);
-		v3 = flt_E230[2 * vertices_base_S1217];
-		tex_S1209[0] = tex_S1209[2 * vertices_base_S1217];
-		v4 = &texp_S1211[2 * vertices_base_S1217];
+		memcpy(&grvx_S1213, (char *)&grvx_S1213 + 60 * vertices_base, 0x3Cu);
+		memcpy(xfpos_S1212, &xfpos_S1212[5 * vertices_base], 0x14u);
+		v3 = flt_E230[2 * vertices_base];
+		tex_S1209[0] = tex_S1209[2 * vertices_base];
+		v4 = &texp_S1211[2 * vertices_base];
 		v2 = 1;
 		flt_E230[0] = v3;
 		v5 = *v4;
@@ -1790,8 +1790,6 @@ signed int flush_drawfx()
 									v14 = *v12;
 									v12 += 3;
 									grDrawTriangle(
-													12 * *(v12 - 5),
-													v1,
 													(char *)&grvx_S1213 + 60 * *(v12 - 5),
 													(char *)&grvx_S1213 + 60 * *(v12 - 4),
 													(char *)&grvx_S1213 + 60 * v14);
@@ -1826,18 +1824,16 @@ signed int flush_drawfx()
 			{
 				case 1:
 					++g_stats.out_tri;
-					grDrawPoint(12 * *v0, v1, (char *)&grvx_S1213 + 60 * *v0);
+					grDrawPoint((char *)&grvx_S1213 + 60 * v0[0]);
 					break;
 				case 2:
 					++g_stats.out_tri;
-					grDrawLine((char *)&grvx_S1213 + 60 * *v0, (char *)&grvx_S1213 + 60 * v0[1]);
+					grDrawLine((char *)&grvx_S1213 + 60 * v0[0], (char*)&grvx_S1213 + 60 * v0[1]);
 					break;
 				case 3:
 					++g_stats.out_tri;
 					grDrawTriangle(
-									12 * *v0,
-									v1,
-									(char *)&grvx_S1213 + 60 * *v0,
+									(char *)&grvx_S1213 + 60 * v0[0],
 									(char *)&grvx_S1213 + 60 * v0[1],
 									(char *)&grvx_S1213 + 60 * v0[2]);
 					break;
@@ -1881,7 +1877,31 @@ void x_flush(void)
 
 
 
-
+//.bss:00002A1C _bss            segment para public 'BSS' use32
+//.bss:00002A1C                 assume cs:_bss
+//.bss:00002A1C                 ;org 2A1Ch
+//.bss:00002A1C                 assume es:nothing, ss:nothing, ds:_data, fs:nothing, gs:nothing
+//.bss:00002A1C _corners$S1220  dd ?                    ; DATA XREF: _x_begin+21↑r
+//.bss:00002A1C                                         ; _x_end+9↑r ...
+//.bss:00002A20                 db    ? ;
+//.bss:00002A21                 db    ? ;
+//.bss:00002A22                 db    ? ;
+//.bss:00002A23                 db    ? ;
+//.bss:00002A24 _grvx$S1213     db    ? ;               ; DATA XREF: _setuprvx+52↑o
+//.bss:00002A24                                         ; _flush_reordertables+7A↑o ...
+//.bss:00002A25                 db    ? ;
+//.bss:00002A26                 db    ? ;
+//.bss:00002A27                 db    ? ;
+//.bss:00002A28 flt_2A28        dd ?                    ; DATA XREF: _splitpoly+27↑r
+//.bss:00002A28                                         ; _splitpoly+31↑r ...
+//.bss:00002A2C                 align 10h
+//.bss:00002A30 flt_2A30        dd ?                    ; DATA XREF: _vertexdata+50↑w
+//.bss:00002A30                                         ; _doclipvertex+E3↑r ...
+//.bss:00002A34 flt_2A34        dd ?                    ; DATA XREF: _vertexdata+5F↑w
+//.bss:00002A34                                         ; _doclipvertex+111↑r ...
+//.bss:00002A38 flt_2A38        dd ?                    ; DATA XREF: _vertexdata+6E↑w
+//.bss:00002A38                                         ; _doclipvertex+12D↑r ...
+//.bss:00002A3C                 align 10h
 //.bss:00002A40 flt_2A40        dd ?                    ; DATA XREF: _vertexdata+7D↑w
 //.bss:00002A40                                         ; _doclipvertex+149↑r ...
 //.bss:00002A44                 db    ? ;
@@ -1890,6 +1910,10 @@ void x_flush(void)
 //...
 //.bss:0000A222                 db    ? ;
 //.bss:0000A223                 db    ? ;
+
+
+//.bss:0000A224 _corner$S1219   dd ?                    ; DATA XREF: _x_end:loc_6DA↑w
+//.bss:0000A224                                         ; _vertexdata+137↑w ...
 //.bss:0000A228 dword_A228      dd ?                    ; DATA XREF: _vertexdata+141↑w
 //.bss:0000A228                                         ; _flush_drawfx+35↑o
 //.bss:0000A22C                 db    ? ;
