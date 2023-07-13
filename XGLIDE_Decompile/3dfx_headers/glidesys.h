@@ -14,12 +14,8 @@ n** as set forth in subdivision (c)(1)(ii) of the Rights in Technical Data
 ** successor clauses in the FAR, DOD or NASA FAR Supplement. Unpublished -
 ** rights reserved under the Copyright Laws of the United States.
 **
-** $Header: /Releases/Glide2.1/devel/sst1/glide/src/glidesys.h 5     1/13/97 6:21p Jdt $
-** $Log: /Releases/Glide2.1/devel/sst1/glide/src/glidesys.h $
- * 
- * 5     1/13/97 6:21p Jdt
- * 
- * 5     1/13/97 6:21p Jdt
+** $Header: /engr/DEVEL/SST1/GLIDE/DOS/SRC/GLIDESYS.H 2     6/08/96 4:16p Dow $
+** $Log: /engr/DEVEL/SST1/GLIDE/DOS/SRC/GLIDESYS.H $
 */
 #ifndef __GLIDESYS_H__
 #define __GLIDESYS_H__

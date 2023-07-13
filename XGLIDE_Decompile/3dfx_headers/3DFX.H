@@ -14,8 +14,8 @@
 ** successor clauses in the FAR, DOD or NASA FAR Supplement. Unpublished  -
 ** rights reserved under the Copyright Laws of the United States.
 **
-** $Revision: 9 $
-** $Date: 8/24/96 5:50p $
+** $Revision: 5 $
+** $Date: 3/02/97 3:41p $
 */
 #ifndef __3DFX_H__
 #define __3DFX_H__
@@ -54,16 +54,26 @@ typedef struct { float r, g, b, a; } FxColor4;
 /*
 ** export macros
 */
+
 #if defined(__MSC__) || defined(__WATCOMC__)
-#define FX_ENTRY extern
-#define FX_CALL  __stdcall
+  #define FX_ENTRY extern
+  #define FX_CALL  __stdcall
+  #if defined (MSVC16)
+    #undef FX_ENTRY 
+    #undef FX_CALL
+    #define FX_ENTRY 
+    #define FX_CALL
+  #endif
 #elif defined(__DJGPP__)
-#define FX_ENTRY extern
-#define FX_CALL
+  #define FX_ENTRY extern
+  #define FX_CALL
+#elif defined(__unix__)
+  #define FX_ENTRY extern
+  #define FX_CALL
 #else
-#warning define FX_ENTRY & FX_CALL for your compiler
-#define FX_ENTRY extern
-#define FX_CALL
+  #warning define FX_ENTRY & FX_CALL for your compiler
+  #define FX_ENTRY extern
+  #define FX_CALL
 #endif
 
 /*

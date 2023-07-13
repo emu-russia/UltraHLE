@@ -33,9 +33,9 @@
 #ifndef __GLIDE_H__
 #define __GLIDE_H__
 
-#include <3dfx.h>
-#include <sst1vid.h>
-#include <glidesys.h>
+#include "3dfx.h"
+#include "sst1vid.h"
+#include "glidesys.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -235,28 +235,48 @@ typedef FxI32 GrFogMode_t;
 #define GR_FOG_MULT2            0x100
 #define GR_FOG_ADD2             0x200
 
+typedef FxU32 GrLock_t;
+#define GR_LFB_READ_ONLY  0x00
+#define GR_LFB_WRITE_ONLY 0x01
+#define GR_LFB_IDLE       0x00
+#define GR_LFB_NOIDLE     0x10
+
 typedef FxI32 GrLfbBypassMode_t;
 #define GR_LFBBYPASS_DISABLE    0x0
 #define GR_LFBBYPASS_ENABLE     0x1
 
 typedef FxI32 GrLfbWriteMode_t;
-#define GR_LFBWRITEMODE_565 0x0 /* RGB:RGB */
-#define GR_LFBWRITEMODE_555 0x1 /* RGB:RGB */
-#define GR_LFBWRITEMODE_1555 0x2 /* ARGB:ARGB */
-#define GR_LFBWRITEMODE_RESERVED1 0x3
-#define GR_LFBWRITEMODE_888 0x4 /* RGB */
-#define GR_LFBWRITEMODE_8888 0x5 /* ARGB */
-#define GR_LFBWRITEMODE_RESERVED2 0x6
-#define GR_LFBWRITEMODE_RESERVED3 0x7
-#define GR_LFBWRITEMODE_RESERVED4 0x8
-#define GR_LFBWRITEMODE_RESERVED5 0x9
-#define GR_LFBWRITEMODE_RESERVED6 0xa
-#define GR_LFBWRITEMODE_RESERVED7 0xb
-#define GR_LFBWRITEMODE_565_DEPTH 0xc /* RGB:DEPTH */
-#define GR_LFBWRITEMODE_555_DEPTH 0xd /* RGB:DEPTH */
+#define GR_LFBWRITEMODE_565        0x0 /* RGB:RGB */
+#define GR_LFBWRITEMODE_555        0x1 /* RGB:RGB */
+#define GR_LFBWRITEMODE_1555       0x2 /* ARGB:ARGB */
+#define GR_LFBWRITEMODE_RESERVED1  0x3
+#define GR_LFBWRITEMODE_888        0x4 /* RGB */
+#define GR_LFBWRITEMODE_8888       0x5 /* ARGB */
+#define GR_LFBWRITEMODE_RESERVED2  0x6
+#define GR_LFBWRITEMODE_RESERVED3  0x7
+#define GR_LFBWRITEMODE_RESERVED4  0x8
+#define GR_LFBWRITEMODE_RESERVED5  0x9
+#define GR_LFBWRITEMODE_RESERVED6  0xa
+#define GR_LFBWRITEMODE_RESERVED7  0xb
+#define GR_LFBWRITEMODE_565_DEPTH  0xc /* RGB:DEPTH */
+#define GR_LFBWRITEMODE_555_DEPTH  0xd /* RGB:DEPTH */
 #define GR_LFBWRITEMODE_1555_DEPTH 0xe /* ARGB:DEPTH */
-#define GR_LFBWRITEMODE_DEPTH_DEPTH 0xf /* DEPTH:DEPTH */
-#define GR_LFBWRITEMODE_ALPHA_ALPHA GR_LFBWRITEMODE_DEPTH_DEPTH
+#define GR_LFBWRITEMODE_ZA16       0xf /* DEPTH:DEPTH */
+#define GR_LFBWRITEMODE_ANY        0xFF
+
+
+typedef FxI32 GrOriginLocation_t;
+#define GR_ORIGIN_UPPER_LEFT    0x0
+#define GR_ORIGIN_LOWER_LEFT    0x1
+#define GR_ORIGIN_ANY           0xFF
+
+typedef struct {
+    int                size;
+    void               *lfbPtr;
+    FxU32              strideInBytes;        
+    GrLfbWriteMode_t   writeMode;
+    GrOriginLocation_t origin;
+} GrLfbInfo_t;
 
 typedef FxI32 GrLOD_t;
 #define GR_LOD_256              0x0
@@ -274,9 +294,6 @@ typedef FxI32 GrMipMapMode_t;
 #define GR_MIPMAP_NEAREST               0x1 /* use nearest mipmap */
 #define GR_MIPMAP_NEAREST_DITHER        0x2 /* GR_MIPMAP_NEAREST + LOD dith */
 
-typedef FxI32 GrOriginLocation_t;
-#define GR_ORIGIN_UPPER_LEFT    0x0
-#define GR_ORIGIN_LOWER_LEFT    0x1
 
 typedef FxI32 GrSmoothingMode_t;
 #define GR_SMOOTHING_DISABLE    0x0
@@ -518,6 +535,18 @@ typedef struct
 #define GR_VERTEX_OOW_TMU2_OFFSET       17
 #endif
 
+typedef FxU32 GrLfbSrcFmt_t;
+#define GR_LFB_SRC_FMT_565          0x00
+#define GR_LFB_SRC_FMT_555          0x01
+#define GR_LFB_SRC_FMT_1555         0x02
+#define GR_LFB_SRC_FMT_888          0x04
+#define GR_LFB_SRC_FMT_8888         0x05
+#define GR_LFB_SRC_FMT_565_DEPTH    0x0c
+#define GR_LFB_SRC_FMT_555_DEPTH    0x0d
+#define GR_LFB_SRC_FMT_1555_DEPTH   0x0e
+#define GR_LFB_SRC_FMT_ZA16         0x0f
+#define GR_LFB_SRC_FMT_RLE16        0x80
+
 typedef FxI32 GrPassthruMode_t;
 #define GR_PASSTHRU_SHOW_VGA    0x0
 #define GR_PASSTHRU_SHOW_SST1   0x1
@@ -539,6 +568,12 @@ typedef FxU32 GrSTWHint_t;
 #define GR_STWHINT_W_DIFF_TMU2  FXBIT(5)
 #define GR_STWHINT_ST_DIFF_TMU2 FXBIT(6)
 
+typedef FxU32 GrControl_t;
+#define GR_CONTROL_ACTIVATE   0x1
+#define GR_CONTROL_DEACTIVATE 0x2
+#define GR_CONTROL_RESIZE     0x3
+#define GR_CONTROL_MOVE       0x4
+
 #define GR_GENERATE_FIFOCHECK_HINT_MASK(swHWM, swLWM) \
   (((swHWM & 0xffff) << 16) | (swLWM & 0xffff))
 
@@ -547,7 +582,7 @@ typedef FxU32 GrSTWHint_t;
 ** FUNCTION PROTOTYPES
 ** -----------------------------------------------------------------------
 */
-
+#ifndef FX_GLIDE_NO_FUNC_PROTO
 /*
 ** rendering functions
 */
@@ -611,13 +646,20 @@ FX_ENTRY FxBool FX_CALL
 grSstIsBusy( void );
 
 FX_ENTRY FxBool FX_CALL 
-grSstOpen(
+grSstWinOpen(
+          FxU32                hWnd,
           GrScreenResolution_t screen_resolution,
           GrScreenRefresh_t    refresh_rate,
           GrColorFormat_t      color_format,
           GrOriginLocation_t   origin_location,
-          GrSmoothingMode_t    smoothing_filter,
-          int                  num_buffers );
+          int                  nColBuffers,
+          int                  nAuxBuffers);
+
+FX_ENTRY void FX_CALL
+grSstWinClose( void );
+
+FX_ENTRY FxBool FX_CALL
+grSstControl( FxU32 code );
 
 FX_ENTRY FxBool FX_CALL 
 grSstQueryHardware( GrHwConfiguration *hwconfig );
@@ -639,9 +681,6 @@ grSstScreenWidth( void );
 
 FX_ENTRY FxU32 FX_CALL 
 grSstStatus( void );
-
-FX_ENTRY void FX_CALL
-grSstPassthruMode( GrPassthruMode_t mode);
 
 /*
 **  Drawing Statistics
@@ -741,7 +780,7 @@ FX_ENTRY void FX_CALL
 grGammaCorrectionValue( float value );
 
 FX_ENTRY void FX_CALL
-grSplash(void);
+grSplash(float x, float y, float width, float height, FxU32 frame);
 
 /*
 ** texture mapping control functions
@@ -844,6 +883,27 @@ grTexDownloadMipMapLevelPartial( GrChipID_t        tmu,
                                  int               end );
 
 
+FX_ENTRY void FX_CALL 
+ConvertAndDownloadRle( GrChipID_t        tmu,
+                        FxU32             startAddress,
+                        GrLOD_t           thisLod,
+                        GrLOD_t           largeLod,
+                        GrAspectRatio_t   aspectRatio,
+                        GrTextureFormat_t format,
+                        FxU32             evenOdd,
+                        FxU8              *bm_data,
+                        long              bm_h,
+                        FxU32             u0,
+                        FxU32             v0,
+                        FxU32             width,
+                        FxU32             height,
+                        FxU32             dest_width,
+                        FxU32             dest_height,
+                        FxU16             *tlut);
+
+FX_ENTRY void FX_CALL 
+grCheckForRoom(FxI32 n);
+
 FX_ENTRY void FX_CALL
 grTexDownloadTable( GrChipID_t   tmu,
                     GrTexTable_t type, 
@@ -943,11 +1003,14 @@ guTexSource( GrMipMapId_t id );
 /*
 ** linear frame buffer functions
 */
-FX_ENTRY void FX_CALL 
-grLfbBegin( void );
 
-FX_ENTRY void FX_CALL 
-grLfbBypassMode( GrLfbBypassMode_t mode );
+FX_ENTRY FxBool FX_CALL
+grLfbLock( GrLock_t type, GrBuffer_t buffer, GrLfbWriteMode_t writeMode,
+           GrOriginLocation_t origin, FxBool pixelPipeline, 
+           GrLfbInfo_t *info );
+
+FX_ENTRY FxBool FX_CALL
+grLfbUnlock( GrLock_t type, GrBuffer_t buffer );
 
 FX_ENTRY void FX_CALL 
 grLfbConstantAlpha( GrAlpha_t alpha );
@@ -956,25 +1019,24 @@ FX_ENTRY void FX_CALL
 grLfbConstantDepth( FxU16 depth );
 
 FX_ENTRY void FX_CALL 
-grLfbEnd( void );
+grLfbWriteColorSwizzle(FxBool swizzleBytes, FxBool swapWords);
 
-FX_ENTRY const FxU32 * FX_CALL 
-grLfbGetReadPtr( GrBuffer_t buffer );
-
-FX_ENTRY void * FX_CALL 
-grLfbGetWritePtr( GrBuffer_t buffer );
-
-FX_ENTRY void FX_CALL 
-grLfbOrigin(GrOriginLocation_t origin);
-
-FX_ENTRY void FX_CALL 
-grLfbWriteMode( GrLfbWriteMode_t mode );
-
-FX_ENTRY void FX_CALL 
+FX_ENTRY void FX_CALL
 grLfbWriteColorFormat(GrColorFormat_t colorFormat);
 
-FX_ENTRY void FX_CALL 
-grLfbWriteColorSwizzle(FxBool swizzleBytes, FxBool swapWords);
+
+FX_ENTRY FxBool FX_CALL
+grLfbWriteRegion( GrBuffer_t dst_buffer, 
+                  FxU32 dst_x, FxU32 dst_y, 
+                  GrLfbSrcFmt_t src_format, 
+                  FxU32 src_width, FxU32 src_height, 
+                  FxI32 src_stride, void *src_data );
+
+FX_ENTRY FxBool FX_CALL
+grLfbReadRegion( GrBuffer_t src_buffer,
+                 FxU32 src_x, FxU32 src_y,
+                 FxU32 src_width, FxU32 src_height,
+                 FxU32 dst_stride, void *dst_data );
 
 
 /*
@@ -1022,10 +1084,12 @@ grGlideShamelessPlug(const FxBool on);
 FX_ENTRY void FX_CALL
 grHints(GrHint_t hintType, FxU32 hintMask);
 
+#endif /* FX_GLIDE_NO_FUNC_PROTO */
+
 #ifdef __cplusplus
 }
 #endif
 
-#include <glideutl.h>
+#include "glideutl.h"
 
 #endif /* __GLIDE_H__ */

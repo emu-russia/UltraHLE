@@ -118,7 +118,7 @@ signed int init_init()
 	return 0;
 }
 
-int init_deinit()
+void init_deinit()
 {
 	x_log("x_close");
 	grGlideShutdown();
@@ -128,14 +128,10 @@ void init_activate()
 {
 }
 
-int init_resize(int a1, int a2)
+void init_resize(int a1, int a2)
 {
-	int result; // eax
-
-	result = a1;
 	g_state[163] = a1;
 	g_state[164] = a2;
-	return result;
 }
 
 int init_bufferswap()

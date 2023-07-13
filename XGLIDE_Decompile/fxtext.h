@@ -19,7 +19,7 @@ signed int fxloadtexture_single(DWORD* a1);
 int fxloadtexture_trilin(DWORD* a1);
 int fxloadtexture_multi(DWORD* a1, DWORD* a2);
 signed int* text_init();
-int text_deinit();
+void text_deinit();
 int accesstexture(DWORD* a1, int a2, signed int* a3, signed int* a4);
 int text_allocdata(int a1);
 unsigned int text_loadlevel(DWORD* a1, int a2, unsigned int a3);

@@ -14,12 +14,14 @@
 ** successor clauses in the FAR, DOD or NASA FAR Supplement. Unpublished -
 ** rights reserved under the Copyright Laws of the United States.
 **
-** $Header: /Releases/Glide2.1/devel/sst1/glide/src/glideutl.h 3     1/13/97 6:22p Jdt $
-** $Log: /Releases/Glide2.1/devel/sst1/glide/src/glideutl.h $
+** $Header: /devel/sst1/glide/src/glideutl.h 4     3/05/97 9:36p Jdt $
+** $Log: /devel/sst1/glide/src/glideutl.h $
  * 
- * 3     1/13/97 6:22p Jdt
+ * 4     3/05/97 9:36p Jdt
+ * Removed guFbWriteRegion added guEncodeRLE16
  * 
- * 3     1/13/97 6:22p Jdt
+ * 3     1/16/97 3:45p Dow
+ * Embedded fn protos in ifndef FX_GLIDE_NO_FUNC_PROTO 
 */
 
 /* Glide Utility routines */
@@ -31,6 +33,7 @@
 extern "C" {
 #endif
 
+#ifndef FX_GLIDE_NO_FUNC_PROTO
 /*
 ** rendering functions
 */
@@ -64,12 +67,13 @@ guFbReadRegion(
                const int strideInBytes
                );
 
-FX_ENTRY void FX_CALL
-guFbWriteRegion(
-                const int dst_x, const int dst_y,
-                const int w, const int h, const void *src,
-                const int strideInBytes
-                );
+
+FX_ENTRY int FX_CALL
+guEncodeRLE16( void *dst, 
+               void *src, 
+               FxU32 width, 
+               FxU32 height );
+
 FX_ENTRY FxU16 * FX_CALL
 guTexCreateColorMipMap( void );
 
@@ -121,6 +125,8 @@ gu3dfGetInfo( const char *filename, Gu3dfInfo *info );
 
 FX_ENTRY FxBool FX_CALL
 gu3dfLoad( const char *filename, Gu3dfInfo *data );
+
+#endif /* FX_GLIDE_NO_FUNC_PROTO */
 
 /*
 ** Glide structure-less primitive handling

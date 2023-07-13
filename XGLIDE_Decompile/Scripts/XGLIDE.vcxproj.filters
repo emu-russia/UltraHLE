@@ -74,7 +74,19 @@
     <ClInclude Include="..\main.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\state.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="..\3dfx_headers\3DFX.H">
+      <Filter>3dfx Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\3dfx_headers\FXDLL.H">
+      <Filter>3dfx Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\3dfx_headers\FXGLOB.H">
+      <Filter>3dfx Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\3dfx_headers\FXOS.H">
       <Filter>3dfx Headers</Filter>
     </ClInclude>
     <ClInclude Include="..\3dfx_headers\glide.h">
@@ -86,13 +98,7 @@
     <ClInclude Include="..\3dfx_headers\glideutl.h">
       <Filter>3dfx Headers</Filter>
     </ClInclude>
-    <ClInclude Include="..\3dfx_headers\gump.h">
-      <Filter>3dfx Headers</Filter>
-    </ClInclude>
     <ClInclude Include="..\3dfx_headers\SST1VID.H">
-      <Filter>3dfx Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\3dfx_headers\TEXUS.H">
       <Filter>3dfx Headers</Filter>
     </ClInclude>
   </ItemGroup>

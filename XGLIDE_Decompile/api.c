@@ -7,6 +7,8 @@ static float identmatrix[4 * 4] = {
 	0.0f, 0.0f, 0.0f, 1.0f,
 };
 
+int g_activestateindex;
+
 void x_init(void)
 {
 	log_open("wt");
@@ -87,14 +89,11 @@ void x_resize(int width, int height)
 
 void x_select(int a1)
 {
-	int result; // eax
-
-	result = a1;
 	if ( a1 > 0 )
 	{
 		g_activestateindex = a1;
 		g_activestate = &g_state[159 * a1];
-		result = init_activate();
+		init_activate();
 	}
 	else
 	{

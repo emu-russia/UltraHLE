@@ -14,10 +14,8 @@
 ** successor clauses in the FAR, DOD or NASA FAR Supplement. Unpublished -
 ** rights reserved under the Copyright Laws of the United States.
 **
-** $Header: /Releases/Glide2.1/devel/sst1/init/SST1VID.H 2     1/14/97 12:10p Jdt $
-** $Log: /Releases/Glide2.1/devel/sst1/init/SST1VID.H $
- * 
- * 2     1/14/97 12:10p Jdt
+** $Header: /engr/devel/sst1/init/sst1vid.h 5     7/24/96 3:43p Sellers $
+** $Log: /engr/devel/sst1/init/sst1vid.h $
  * 
  * 5     7/24/96 3:43p Sellers
  * added 512x384 @ 60 Hz for arcade monitors

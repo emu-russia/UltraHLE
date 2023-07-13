@@ -430,18 +430,14 @@ signed int *text_init()
 	return result;
 }
 
-int text_deinit()
+void text_deinit()
 {
-	int result; // eax
-
 	if ( mem_S1205[0] )
 		memory_delete(mem_S1205[0]);
 	if ( dword_131C )
 		memory_delete(dword_131C);
-	result = 0;
 	mem_S1205[0] = 0;
 	dword_131C = 0;
-	return result;
 }
 
 int accesstexture(DWORD *a1, int a2, signed int *a3, signed int *a4)
