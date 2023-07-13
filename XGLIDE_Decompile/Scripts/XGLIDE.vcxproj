@@ -37,6 +37,13 @@
     <None Include="..\Readme.md" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\3dfx_headers\3DFX.H" />
+    <ClInclude Include="..\3dfx_headers\glide.h" />
+    <ClInclude Include="..\3dfx_headers\glidesys.h" />
+    <ClInclude Include="..\3dfx_headers\glideutl.h" />
+    <ClInclude Include="..\3dfx_headers\gump.h" />
+    <ClInclude Include="..\3dfx_headers\SST1VID.H" />
+    <ClInclude Include="..\3dfx_headers\TEXUS.H" />
     <ClInclude Include="..\api.h" />
     <ClInclude Include="..\fx.h" />
     <ClInclude Include="..\fxgeom.h" />

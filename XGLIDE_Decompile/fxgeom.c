@@ -5,84 +5,24 @@
 //.data:00000004                                         ; _x_vxarray+38↓w ...
 //.data:00000008 _posarraysize$S1223 dd 0                ; DATA XREF: _x_vxa+A↓r
 //.data:00000008                                         ; _x_vxarray+7B↓w ...
-//.data:0000000C                 align 10h
-//.data:00000010 _identmatrix$S1242 db    0              ; DATA XREF: _x_cameramatrix+A↓o
-//.data:00000010                                         ; _x_matrix+E↓o
-//.data:00000011                 db    0
-//.data:00000012                 db  80h
-//.data:00000013                 db  3Fh ; ?
-//.data:00000014                 db    0
-//.data:00000015                 db    0
-//.data:00000016                 db    0
-//.data:00000017                 db    0
-//.data:00000018                 db    0
-//.data:00000019                 db    0
-//.data:0000001A                 db    0
-//.data:0000001B                 db    0
-//.data:0000001C                 db    0
-//.data:0000001D                 db    0
-//.data:0000001E                 db    0
-//.data:0000001F                 db    0
-//.data:00000020                 db    0
-//.data:00000021                 db    0
-//.data:00000022                 db    0
-//.data:00000023                 db    0
-//.data:00000024                 db    0
-//.data:00000025                 db    0
-//.data:00000026                 db  80h
-//.data:00000027                 db  3Fh ; ?
-//.data:00000028                 db    0
-//.data:00000029                 db    0
-//.data:0000002A                 db    0
-//.data:0000002B                 db    0
-//.data:0000002C                 db    0
-//.data:0000002D                 db    0
-//.data:0000002E                 db    0
-//.data:0000002F                 db    0
-//.data:00000030                 db    0
-//.data:00000031                 db    0
-//.data:00000032                 db    0
-//.data:00000033                 db    0
-//.data:00000034                 db    0
-//.data:00000035                 db    0
-//.data:00000036                 db    0
-//.data:00000037                 db    0
-//.data:00000038                 db    0
-//.data:00000039                 db    0
-//.data:0000003A                 db  80h
-//.data:0000003B                 db  3Fh ; ?
-//.data:0000003C                 db    0
-//.data:0000003D                 db    0
-//.data:0000003E                 db    0
-//.data:0000003F                 db    0
-//.data:00000040                 db    0
-//.data:00000041                 db    0
-//.data:00000042                 db    0
-//.data:00000043                 db    0
-//.data:00000044                 db    0
-//.data:00000045                 db    0
-//.data:00000046                 db    0
-//.data:00000047                 db    0
-//.data:00000048                 db    0
-//.data:00000049                 db    0
-//.data:0000004A                 db    0
-//.data:0000004B                 db    0
-//.data:0000004C                 db    0
-//.data:0000004D                 db    0
-//.data:0000004E                 db  80h
-//.data:0000004F                 db  3Fh ; ?
 //.data:0000005C $SG1260         dd offset loc_2076+5    ; DATA XREF: _dumpmatrix:loc_2BA↓o
 //.data:00000068 $SG1265         dd offset loc_A78+5     ; DATA XREF: _dumpmatrix+4B↓o
 //.data:00000190 $SG1494         dd offset loc_A22+1     ; DATA XREF: _setuprvx:loc_15FB↓o
 //.data:000001AD                 align 10h
 //.data:00000219 _data           ends
 
+static float identmatrix[4 * 4] = {
+	1.0f, 0.0f, 0.0f, 0.0f,
+	0.0f, 1.0f, 0.0f, 0.0f,
+	0.0f, 0.0f, 1.0f, 0.0f,
+	0.0f, 0.0f, 0.0f, 1.0f,
+};
 
 void geom_init()
 {
 }
 
-BYTE * x_cameramatrix(BYTE *a1)
+void x_cameramatrix(xt_matrix* a1)
 {
 	BYTE *result; // eax
 	bool v2; // zf
@@ -94,7 +34,7 @@ BYTE * x_cameramatrix(BYTE *a1)
 	v2 = a1 == 0;
 	if ( !a1 )
 		goto LABEL_10;
-	v3 = &identmatrix_S1242;
+	v3 = &identmatrix;
 	v4 = 64;
 	v5 = a1;
 	do
@@ -115,7 +55,6 @@ LABEL_10:
 		g_state[233] = 1;
 		memcpy(&g_state[201], a1, 0x40u);
 	}
-	return result;
 }
 
 
@@ -185,7 +124,7 @@ void x_matrix(void *a1)
 	}
 	else
 	{
-		a1 = &identmatrix_S1242;
+		a1 = &identmatrix;
 		g_state[235] = 1;
 	}
 	if ( g_state[234] )
@@ -377,7 +316,7 @@ void x_end()
 		x_flush();
 }
 
-int vertexdata(float *a1)
+void vertexdata(xt_data* a1)
 {
 	int v1; // eax
 	float *v2; // ecx
@@ -438,7 +377,7 @@ int vertexdata(float *a1)
 		if ( g_state[289] & 0x10 )
 		{
 			v3 = 2 * vertices_S1216;
-			texp_S1211[v3] = *((_DWORD *)v2 + 7);
+			texp_S1211[v3] = *((DWORD *)v2 + 7);
 			tex_S1209[v3] = v2[5] * v2[7] * v35;
 			v4 = v2[6] * v2[7];
 		}
@@ -609,11 +548,10 @@ int vertexdata(float *a1)
 			break;
 	}
 	if ( ++vertices_S1216 >= 191 && (!state_S1226 || vertices_S1216 >= 256) )
-		result = x_flush();
-	return result;
+		x_flush();
 }
 
-void xform(int a1, float *a2, int a3, char *a4)
+void xform(int a1, xt_pos* a2, int a3, char *a4)
 {
 	int v4; // ecx
 	int v5; // edx
@@ -735,7 +673,7 @@ LABEL_11:
 						*(float *)(v11 + 4) = v12[1] + *(float *)(v21 + v11 + 4);
 						v55 = *(float *)(v21 + v11 + 8);
 						*(float *)(v11 + 8) = v55;
-						*(DWORD *)(v11 + 12) = *(_DWORD *)(v21 + v11 + 12);
+						*(DWORD *)(v11 + 12) = *(DWORD *)(v21 + v11 + 12);
 						v15 = 0;
 						v22 = *(float *)v11;
 						if ( !(v25 | v26) )
@@ -1082,7 +1020,7 @@ LABEL_23:
 					x_log("#clip[ %13.5f %13.5f %13.5f   w:%13.5f ]\n", *v2, v2[1], v2[2], (double)(1.0 / v2[3]));
 				if ( !*((DWORD *)v2 + 4) )
 					x_log("#scrn[ %13.5f %13.5f %13.5f oow:%13.5f ]\n", *v3, v3[1], v3[2], v3[8]);
-				result = (int *)x_log((const char *)&_SG1494);
+				x_log((const char *)&_SG1494);
 			}
 			v5 += 2;
 			v4 += 2;
@@ -1186,24 +1124,24 @@ LABEL_55:
 	return result;
 }
 
-int x_vx(float *a1, float *a2)
+void x_vx(xt_pos* a1, xt_data* a2)
 {
 	float *v2; // edx
 	int v3; // edx
 
 	vertices_lastnonrel_S1218 = vertices_S1216;
 	v2 = &pos_S1208[3 * vertices_S1216];
-	*v2 = *a1;
-	v2[1] = a1[1];
-	v2[2] = a1[2];
+	v2[0] = a1->v[0];
+	v2[1] = a1->v[1];
+	v2[2] = a1->v[2];
 	v3 = vertices_S1216;
 	allxformed_S1215 = 0;
 	++g_stats[1];
 	xformed_S1214[v3] = 0;
-	return vertexdata(a2);
+	vertexdata(a2);
 }
 
-int x_vxa(int a1, float *a2)
+void x_vxa(int a1, xt_data* a2)
 {
 	int v2; // ecx
 
@@ -1214,7 +1152,7 @@ int x_vxa(int a1, float *a2)
 	v2 = vertices_S1216;
 	++g_stats[1];
 	xformed_S1214[v2] = 1;
-	return vertexdata(a2);
+	vertexdata(a2);
 }
 
 int x_vxrel(float *a1, float *a2)
@@ -1231,10 +1169,10 @@ int x_vxrel(float *a1, float *a2)
 	allxformed_S1215 = 0;
 	*((DWORD *)v2 + 2) = v4;
 	xformed_S1214[v3] = vertices_S1216 - vertices_lastnonrel_S1218 + 16;
-	return vertexdata(a2);
+	vertexdata(a2);
 }
 
-void x_vxarray(float *a1, int a2, char *a3)
+void x_vxarray(xt_pos* a1, int a2, char* a3)
 {
 	int v3; // eax
 
@@ -1538,17 +1476,17 @@ signed int clippoly(int a1, int a2, int *a3, DWORD *a4)
 	}
 	*v4 = *a3;
 	v4[1] = -1;
-	if ( *((_BYTE *)&clipor + 1) & 0x10 )
+	if ( *((BYTE *)&clipor + 1) & 0x10 )
 		doclip(4096);
-	if ( *((_BYTE *)&clipor + 1) & 0x20 )
+	if ( *((BYTE *)&clipor + 1) & 0x20 )
 		doclip(0x2000);
-	if ( *((_BYTE *)&clipor + 1) & 1 )
+	if ( *((BYTE *)&clipor + 1) & 1 )
 		doclip(256);
-	if ( *((_BYTE *)&clipor + 1) & 2 )
+	if ( *((BYTE *)&clipor + 1) & 2 )
 		doclip(512);
-	if ( *((_BYTE *)&clipor + 1) & 4 )
+	if ( *((BYTE *)&clipor + 1) & 4 )
 		doclip(1024);
-	if ( *((_BYTE *)&clipor + 1) & 8 )
+	if ( *((BYTE *)&clipor + 1) & 8 )
 		doclip(2048);
 	if ( *clipin == -1 )
 		return 0;
@@ -1813,7 +1751,7 @@ signed int flush_drawfx()
 					{
 						v9 = v16;
 						++g_stats[3];
-						result = grDrawLine((char *)&grvx_S1213 + 60 * *v16, (char *)&grvx_S1213 + 60 * v9[1]);
+						grDrawLine((char *)&grvx_S1213 + 60 * *v16, (char *)&grvx_S1213 + 60 * v9[1]);
 					}
 				}
 				else
@@ -1829,7 +1767,7 @@ signed int flush_drawfx()
 							v2 = v10 - 1;
 							for ( j = 0; v10 > j; ++j )
 							{
-								result = grDrawLine((char *)&grvx_S1213 + 60 * v16[v2], (char *)&grvx_S1213 + 60 * v16[j]);
+								grDrawLine((char *)&grvx_S1213 + 60 * v16[v2], (char *)&grvx_S1213 + 60 * v16[j]);
 								v2 = j;
 							}
 						}
@@ -1845,12 +1783,12 @@ signed int flush_drawfx()
 								{
 									v14 = *v12;
 									v12 += 3;
-									result = grDrawTriangle(
-														 12 * *(v12 - 5),
-														 v1,
-														 (char *)&grvx_S1213 + 60 * *(v12 - 5),
-														 (char *)&grvx_S1213 + 60 * *(v12 - 4),
-														 (char *)&grvx_S1213 + 60 * v14);
+									grDrawTriangle(
+													12 * *(v12 - 5),
+													v1,
+													(char *)&grvx_S1213 + 60 * *(v12 - 5),
+													(char *)&grvx_S1213 + 60 * *(v12 - 4),
+													(char *)&grvx_S1213 + 60 * v14);
 									--v13;
 								}
 								while ( v13 );
@@ -1870,7 +1808,7 @@ signed int flush_drawfx()
 			{
 				do
 				{
-					result = grDrawLine((char *)&grvx_S1213 + 60 * v0[v2], (char *)&grvx_S1213 + 60 * v0[v8]);
+					grDrawLine((char *)&grvx_S1213 + 60 * v0[v2], (char *)&grvx_S1213 + 60 * v0[v8]);
 					v2 = v8++;
 				}
 				while ( i > v8 );
@@ -1882,24 +1820,24 @@ signed int flush_drawfx()
 			{
 				case 1:
 					++g_stats[3];
-					result = grDrawPoint(12 * *v0, v1, (char *)&grvx_S1213 + 60 * *v0);
+					grDrawPoint(12 * *v0, v1, (char *)&grvx_S1213 + 60 * *v0);
 					break;
 				case 2:
 					++g_stats[3];
-					result = grDrawLine((char *)&grvx_S1213 + 60 * *v0, (char *)&grvx_S1213 + 60 * v0[1]);
+					grDrawLine((char *)&grvx_S1213 + 60 * *v0, (char *)&grvx_S1213 + 60 * v0[1]);
 					break;
 				case 3:
 					++g_stats[3];
-					result = grDrawTriangle(
-										 12 * *v0,
-										 v1,
-										 (char *)&grvx_S1213 + 60 * *v0,
-										 (char *)&grvx_S1213 + 60 * v0[1],
-										 (char *)&grvx_S1213 + 60 * v0[2]);
+					grDrawTriangle(
+									12 * *v0,
+									v1,
+									(char *)&grvx_S1213 + 60 * *v0,
+									(char *)&grvx_S1213 + 60 * v0[1],
+									(char *)&grvx_S1213 + 60 * v0[2]);
 					break;
 				default:
 					g_stats[3] += i - 2;
-					result = grDrawPlanarPolygon(v2, v1, i, v0, &grvx_S1213);
+					grDrawPlanarPolygon(v2, v1, i, v0, &grvx_S1213);
 					break;
 			}
 		}

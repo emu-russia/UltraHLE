@@ -121,7 +121,7 @@ signed int init_init()
 int init_deinit()
 {
 	x_log("x_close");
-	return grGlideShutdown();
+	grGlideShutdown();
 }
 
 void init_activate()
@@ -154,7 +154,7 @@ int init_bufferswap()
 			return init_reinit();
 		}
 	}
-	return grBufferSwap(1);
+	grBufferSwap(1);
 }
 
 int init_clear(int a1, int a2, float a3, float a4, float a5)
@@ -174,7 +174,7 @@ int init_clear(int a1, int a2, float a3, float a4, float a5)
 		0,
 		0xFFFF);
 	grDepthMask((LODWORD(g_state[291]) & 2u) >> 1);
-	return grColorMask(LODWORD(g_state[291]) & 1, LODWORD(g_state[291]) & 1);
+	grColorMask(LODWORD(g_state[291]) & 1, LODWORD(g_state[291]) & 1);
 }
 
 signed int init_readfb(__int16 a1, int a2, int a3, int a4, int a5, int a6, int a7)
@@ -236,7 +236,7 @@ int mode_init()
 	grDitherMode(2);
 	grHints(3, 1);
 	grTexFilterMode(0, 1, 1);
-	return grTexFilterMode(1, 1, 1);
+	grTexFilterMode(1, 1, 1);
 }
 
 int mode_texturemode(int a1, __int16 a2, int a3)
@@ -262,9 +262,9 @@ int mode_texturemode(int a1, __int16 a2, int a3)
 	else
 		grTexClampMode(v3, 0, 0);
 	if ( v4 & 0x800 )
-		result = grTexFilterMode(v3, 0, 0);
+		grTexFilterMode(v3, 0, 0);
 	else
-		result = grTexFilterMode(v3, 1, 1);
+		grTexFilterMode(v3, 1, 1);
 	return result;
 }
 
@@ -359,31 +359,36 @@ void *generatefogtable()
 	float v5; // ST08_4
 	float v6; // ST04_4
 
-	if ( `generatefogtable'::`2'::lastfogmin == g_state[269]
-		&& `generatefogtable'::`2'::lastfogmax == g_state[270]
-		&& (double)SLODWORD(g_state[268]) == `generatefogtable'::`2'::lastfogtype )
+	static int lastfogtype;
+	static float lastfogmin;
+	static float lastfogmax;
+	static GrFog_t fogtable[GR_FOG_TABLE_SIZE];
+
+	if ( lastfogmin == g_state[269]
+		&& lastfogmax == g_state[270]
+		&& (double)SLODWORD(g_state[268]) == lastfogtype )
 	{
-		return &`generatefogtable'::`2'::fogtable;
+		return &fogtable;
 	}
 	v1 = (double)SLODWORD(g_state[268]);
 	v2 = g_state[270];
 	v3 = g_state[268];
-	`generatefogtable'::`2'::lastfogmin = g_state[269];
-	`generatefogtable'::`2'::lastfogmax = v2;
-	`generatefogtable'::`2'::lastfogtype = v1;
-	if ( LODWORD(v3) == 7937 || LODWORD(v3) == 7939 )
+	lastfogmin = g_state[269];
+	lastfogmax = v2;
+	lastfogtype = v1;
+	if ( LODWORD(v3) == X_LINEAR || LODWORD(v3) == X_LINEARADD)
 	{
 		v5 = g_state[270] / g_state[241];
 		v6 = g_state[269] / g_state[241];
-		guFogGenerateLinear(&`generatefogtable'::`2'::fogtable, LODWORD(v6), LODWORD(v5));
+		guFogGenerateLinear(&fogtable, LODWORD(v6), LODWORD(v5));
 	}
-	else if ( LODWORD(v3) == 7938 )
+	else if ( LODWORD(v3) == X_EXPONENTIAL)
 	{
 		v4 = 2.3 / (g_state[270] / g_state[241]);
-		guFogGenerateExp(&`generatefogtable'::`2'::fogtable, LODWORD(v4));
+		guFogGenerateExp(&fogtable, LODWORD(v4));
 	}
-	fixfogtable((int)&`generatefogtable'::`2'::fogtable, 64);
-	return &`generatefogtable'::`2'::fogtable;
+	fixfogtable((int)&fogtable, 64);
+	return &fogtable;
 }
 
 void mode_change()
@@ -884,89 +889,3 @@ LABEL_103:
 //.rdata:000012EC $T1549          dd 256.0                ; DATA XREF: _mode_change+4D8↑r
 //.rdata:000012EC _rdata          ends
 //
-//
-//
-//.bss:000012F0 _bss            segment para public 'BSS' use32
-//.bss:000012F0                 assume cs:_bss
-//.bss:000012F0                 ;org 12F0h
-//.bss:000012F0                 assume es:nothing, ss:nothing, ds:_data, fs:nothing, gs:nothing
-//.bss:000012F0 ; `generatefogtable'::`2'::fogtable
-//.bss:000012F0 ?fogtable@?1??generatefogtable@@9@9 db    ? ;
-//.bss:000012F0                                         ; DATA XREF: _generatefogtable+3C↑o
-//.bss:000012F0                                         ; _generatefogtable+94↑o ...
-//.bss:000012F1                 db    ? ;
-//.bss:000012F2                 db    ? ;
-//.bss:000012F3                 db    ? ;
-//.bss:000012F4                 db    ? ;
-//.bss:000012F5                 db    ? ;
-//.bss:000012F6                 db    ? ;
-//.bss:000012F7                 db    ? ;
-//.bss:000012F8                 db    ? ;
-//.bss:000012F9                 db    ? ;
-//.bss:000012FA                 db    ? ;
-//.bss:000012FB                 db    ? ;
-//.bss:000012FC                 db    ? ;
-//.bss:000012FD                 db    ? ;
-//.bss:000012FE                 db    ? ;
-//.bss:000012FF                 db    ? ;
-//.bss:00001300                 db    ? ;
-//.bss:00001301                 db    ? ;
-//.bss:00001302                 db    ? ;
-//.bss:00001303                 db    ? ;
-//.bss:00001304                 db    ? ;
-//.bss:00001305                 db    ? ;
-//.bss:00001306                 db    ? ;
-//.bss:00001307                 db    ? ;
-//.bss:00001308                 db    ? ;
-//.bss:00001309                 db    ? ;
-//.bss:0000130A                 db    ? ;
-//.bss:0000130B                 db    ? ;
-//.bss:0000130C                 db    ? ;
-//.bss:0000130D                 db    ? ;
-//.bss:0000130E                 db    ? ;
-//.bss:0000130F                 db    ? ;
-//.bss:00001310                 db    ? ;
-//.bss:00001311                 db    ? ;
-//.bss:00001312                 db    ? ;
-//.bss:00001313                 db    ? ;
-//.bss:00001314                 db    ? ;
-//.bss:00001315                 db    ? ;
-//.bss:00001316                 db    ? ;
-//.bss:00001317                 db    ? ;
-//.bss:00001318                 db    ? ;
-//.bss:00001319                 db    ? ;
-//.bss:0000131A                 db    ? ;
-//.bss:0000131B                 db    ? ;
-//.bss:0000131C                 db    ? ;
-//.bss:0000131D                 db    ? ;
-//.bss:0000131E                 db    ? ;
-//.bss:0000131F                 db    ? ;
-//.bss:00001320                 db    ? ;
-//.bss:00001321                 db    ? ;
-//.bss:00001322                 db    ? ;
-//.bss:00001323                 db    ? ;
-//.bss:00001324                 db    ? ;
-//.bss:00001325                 db    ? ;
-//.bss:00001326                 db    ? ;
-//.bss:00001327                 db    ? ;
-//.bss:00001328                 db    ? ;
-//.bss:00001329                 db    ? ;
-//.bss:0000132A                 db    ? ;
-//.bss:0000132B                 db    ? ;
-//.bss:0000132C                 db    ? ;
-//.bss:0000132D                 db    ? ;
-//.bss:0000132E                 db    ? ;
-//.bss:0000132F                 db    ? ;
-//.bss:00001330 ; `generatefogtable'::`2'::lastfogtype
-//.bss:00001330 ?lastfogtype@?1??generatefogtable@@9@9 dd ?
-//.bss:00001330                                         ; DATA XREF: _generatefogtable+2F↑r
-//.bss:00001330                                         ; _generatefogtable+6D↑w
-//.bss:00001334 ; `generatefogtable'::`2'::lastfogmax
-//.bss:00001334 ?lastfogmax@?1??generatefogtable@@9@9 dd ?
-//.bss:00001334                                         ; DATA XREF: _generatefogtable+16↑r
-//.bss:00001334                                         ; _generatefogtable+61↑w
-//.bss:00001338 ; `generatefogtable'::`2'::lastfogmin
-//.bss:00001338 ?lastfogmin@?1??generatefogtable@@9@9 dd ?
-//.bss:00001338                                         ; DATA XREF: _generatefogtable↑r
-//.bss:00001338                                         ; _generatefogtable+5C↑w
-//.bss:00001338 _bss            ends

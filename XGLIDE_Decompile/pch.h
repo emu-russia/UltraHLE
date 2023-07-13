@@ -15,3 +15,8 @@ typedef unsigned char bool;
 #include "version.h"
 
 #include "X.H"
+
+
+#include "3dfx_headers/3DFX.H"
+#include "3dfx_headers/glide.h"
+#include "3dfx_headers/glideutl.h"

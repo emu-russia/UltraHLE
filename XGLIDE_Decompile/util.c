@@ -1,12 +1,5 @@
 #include "pch.h"
 
-//.data:00000000 _data           segment dword public 'DATA' use32
-//.data:00000000                 assume cs:_data
-//.data:00000008 ; `x_fastfpu'::`2'::state
-//.data:00000008 ?state@?1??x_fastfpu@@9@9 dd 0          ; DATA XREF: _x_fastfpu+17↓r
-//.data:00000008                                         ; _x_fastfpu:loc_28E↓w
-//.data:0000006C _data           ends
-
 FILE* logfile;
 char* logfilename = "x.log";
 uint32_t initdone;

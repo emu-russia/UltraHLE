@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="3dfx Headers">
+      <UniqueIdentifier>{43149afd-a9f5-4a7d-a23a-f48a909114f6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\api.c">
@@ -70,6 +73,27 @@
     </ClInclude>
     <ClInclude Include="..\main.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\3dfx_headers\3DFX.H">
+      <Filter>3dfx Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\3dfx_headers\glide.h">
+      <Filter>3dfx Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\3dfx_headers\glidesys.h">
+      <Filter>3dfx Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\3dfx_headers\glideutl.h">
+      <Filter>3dfx Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\3dfx_headers\gump.h">
+      <Filter>3dfx Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\3dfx_headers\SST1VID.H">
+      <Filter>3dfx Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\3dfx_headers\TEXUS.H">
+      <Filter>3dfx Headers</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

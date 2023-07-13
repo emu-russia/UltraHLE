@@ -1,82 +1,11 @@
 #include "pch.h"
 
-//.data:00000000 _data           segment para public 'DATA' use32
-//.data:00000000                 assume cs:_data
-//.data:00000000 ; `x_getstats'::`2'::lasttime
-//.data:00000000 ?lasttime@?1??x_getstats@@9@9 dd 0      ; DATA XREF: _x_getstats+31↓r
-//.data:00000000                                         ; _x_getstats+5A↓w
-//.data:00000004 ; `x_getstats'::`2'::nowtime
-//.data:00000004 ?nowtime@?1??x_getstats@@9@9 dd 0       ; DATA XREF: _x_getstats+C↓w
-//.data:00000004                                         ; _x_getstats+2C↓r ...
-//.data:00000008 _identmatrix$S1310 db    0              ; DATA XREF: _x_projmatrix+19↓o
-//.data:00000009                 db    0
-//.data:0000000A                 db  80h
-//.data:0000000B                 db  3Fh ; ?
-//.data:0000000C                 db    0
-//.data:0000000D                 db    0
-//.data:0000000E                 db    0
-//.data:0000000F                 db    0
-//.data:00000010                 db    0
-//.data:00000011                 db    0
-//.data:00000012                 db    0
-//.data:00000013                 db    0
-//.data:00000014                 db    0
-//.data:00000015                 db    0
-//.data:00000016                 db    0
-//.data:00000017                 db    0
-//.data:00000018                 db    0
-//.data:00000019                 db    0
-//.data:0000001A                 db    0
-//.data:0000001B                 db    0
-//.data:0000001C                 db    0
-//.data:0000001D                 db    0
-//.data:0000001E                 db  80h
-//.data:0000001F                 db  3Fh ; ?
-//.data:00000020                 db    0
-//.data:00000021                 db    0
-//.data:00000022                 db    0
-//.data:00000023                 db    0
-//.data:00000024                 db    0
-//.data:00000025                 db    0
-//.data:00000026                 db    0
-//.data:00000027                 db    0
-//.data:00000028                 db    0
-//.data:00000029                 db    0
-//.data:0000002A                 db    0
-//.data:0000002B                 db    0
-//.data:0000002C                 db    0
-//.data:0000002D                 db    0
-//.data:0000002E                 db    0
-//.data:0000002F                 db    0
-//.data:00000030                 db    0
-//.data:00000031                 db    0
-//.data:00000032                 db  80h
-//.data:00000033                 db  3Fh ; ?
-//.data:00000034                 db    0
-//.data:00000035                 db    0
-//.data:00000036                 db    0
-//.data:00000037                 db    0
-//.data:00000038                 db    0
-//.data:00000039                 db    0
-//.data:0000003A                 db    0
-//.data:0000003B                 db    0
-//.data:0000003C                 db    0
-//.data:0000003D                 db    0
-//.data:0000003E                 db    0
-//.data:0000003F                 db    0
-//.data:00000040                 db    0
-//.data:00000041                 db    0
-//.data:00000042                 db    0
-//.data:00000043                 db    0
-//.data:00000044                 db    0
-//.data:00000045                 db    0
-//.data:00000046                 db  80h
-//.data:00000047                 db  3Fh ; ?
-//.data:00000075                 align 4
-//.data:0000009F                 align 10h
-//.data:000000B3                 align 4
-//.data:000000B3 _data           ends
-
+static float identmatrix[4 * 4] = {
+	1.0f, 0.0f, 0.0f, 0.0f,
+	0.0f, 1.0f, 0.0f, 0.0f,
+	0.0f, 0.0f, 1.0f, 0.0f,
+	0.0f, 0.0f, 0.0f, 1.0f,
+};
 
 void x_init(void)
 {
@@ -203,17 +132,20 @@ void x_close(int a1)
 
 int __cdecl x_getstats(DWORD *a1, unsigned int a2)
 {
+	static int nowtime = 0;
+	static int lasttime = 0;
+
 	bool v2; // zf
 	int result; // eax
 
-	`x_getstats'::`2'::nowtime = x_timeus();
+	nowtime = x_timeus();
 	if ( a1 )
 	{
 		if ( a2 == 104 )
 		{
 			memcpy(a1, g_stats, 0x68u);
-			v2 = `x_getstats'::`2'::nowtime == `x_getstats'::`2'::lasttime;
-			*a1 = `x_getstats'::`2'::nowtime - `x_getstats'::`2'::lasttime;
+			v2 = nowtime == lasttime;
+			*a1 = nowtime - lasttime;
 			if ( v2 )
 				*a1 = 1;
 		}
@@ -333,7 +265,7 @@ void x_projmatrix(xt_matrix* a1)
 	else
 	{
 		g_state[236] = 1;
-		v2 = &identmatrix_S1310;
+		v2 = &identmatrix;
 	}
 	memcpy(&g_state[217], v2, 0x40u);
 	g_state[246] = 2;
