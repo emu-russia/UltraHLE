@@ -28,5 +28,5 @@ unsigned int text_loadlevel(DWORD* a1, int a2, unsigned int a3);
 void text_freedata(DWORD* a1);
 int text_cleartexmem();
 int text_opendata(int a1);
-int text_closedata(int a1);
+void text_closedata(int a1);
 int text_frameend();

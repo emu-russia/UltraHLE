@@ -832,7 +832,7 @@ int text_opendata(int a1)
 	return *(DWORD *)(a1 + 68);
 }
 
-int text_closedata(int a1)
+void text_closedata(int a1)
 {
 	int result; // eax
 
@@ -842,7 +842,6 @@ int text_closedata(int a1)
 	result = g_state[283];
 	if ( *(DWORD *)(a1 + 4) == result )
 		g_state[282] = 0;
-	return result;
 }
 
 int text_frameend()

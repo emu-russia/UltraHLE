@@ -517,9 +517,8 @@ void x_closetexturedata(int a1)
 	if ( result )
 	{
 		if ( *((BYTE *)result + 17) & 4 )
-			result = (DWORD *)text_closedata(result);
+			text_closedata(result);
 	}
-	return result;
 }
 
 void x_forcegeometry(int forceon, int forceoff)
@@ -563,8 +562,8 @@ int x_mask(int colormask, int depthmask, int depthtest)
 	}
 	if ( !depthtest || depthtest == 1 )
 		return 1;
-	g_state.masktst = depthtest;
-	g_state.mask = v3;
+	g_state.currentmode.masktst = depthtest;
+	g_state.currentmode.mask = v3;
 	g_state.changed |= 4u;
 	return 0;
 }
@@ -573,14 +572,14 @@ int x_dither(int type)
 {
 	if (type == X_ENABLE)
 	{
-		g_state.dither = 1;
+		g_state.currentmode.dither = 1;
 LABEL_5:
 		g_state.changed |= 4u;
 		return 0;
 	}
 	if (type == X_DISABLE)
 	{
-		g_state.dither = 0;
+		g_state.currentmode.dither = 0;
 		goto LABEL_5;
 	}
 	return 1;
@@ -592,8 +591,8 @@ int x_blend(int src, int dst)
 		return 1;
 	if (dst < 4609 || dst > 4616 )
 		return 1;
-	g_state.src = src;
-	g_state.dst = dst;
+	g_state.currentmode.src = src;
+	g_state.currentmode.dst = dst;
 	g_state.changed |= 4u;
 	return 0;
 }
@@ -605,7 +604,7 @@ int x_alphatest(float limit)
 	if ( limit < 0.0f || limit > 1.0f)
 		return 1;
 	g_state.changed |= 4u;
-	g_state.alphatest = limit;
+	g_state.currentmode.alphatest = limit;
 	return 0;
 }
 
@@ -613,29 +612,33 @@ int x_combine(int colortext1)
 {
 	if (colortext1 < 4865 || colortext1 > 4879 )
 		return 1;
-	g_state.text1text2 = 0;
+	g_state.currentmode.text1text2 = 0;
 	g_state.changed |= 4u;
-	g_state.colortext1 = colortext1;
+	g_state.currentmode.colortext1 = colortext1;
 	return 0;
 }
 
 int x_procombine(int rgb, int alpha)
 {
-	g_state.text1text2 = 0;
+	g_state.currentmode.text1text2 = 0;
 	g_state.changed |= 4u;
-	g_state.colortext1 = rgb | (alpha << 16);
+	g_state.currentmode.colortext1 = rgb | (alpha << 16);
 	return 0;
 }
 
 int x_envcolor(float r, float g, float b, float a)
 {
-	g_state.env[0] = r;
-	g_state.env[1] = g;
-	g_state.env[2] = b;
-	g_state.env[3] = a;
+	g_state.currentmode.env[0] = r;
+	g_state.currentmode.env[1] = g;
+	g_state.currentmode.env[2] = b;
+	g_state.currentmode.env[3] = a;
 	g_state.changed |= 4u;
 	// Buggy
-	g_state.envc = (unsigned __int8)(signed __int64)(r * 255.0) | ((unsigned __int8)(signed __int64)(b * 255.0) << 16) | ((((unsigned int)(signed __int64)(a * 255.0) << 16) | (unsigned __int8)(signed __int64)(g * 255.0)) << 8);
+	g_state.currentmode.envc = 
+		(unsigned __int8)(signed __int64)(r * 255.0) | 
+		((unsigned __int8)(signed __int64)(b * 255.0) << 16) | 
+		((((unsigned int)(signed __int64)(a * 255.0) << 16) | 
+		(unsigned __int8)(signed __int64)(g * 255.0)) << 8);
 	return 0;
 }
 
@@ -647,9 +650,9 @@ int x_combine2(int colortext1, int text1text2, int sametex)
 		return 1;
 	if (text1text2 < X_FIRSTCOMBINE || text1text2 > X_LASTCOMBINE)
 		return 1;
-	g_state.colortext1 = colortext1;
-	g_state.sametex = sametex;
-	g_state.text1text2 = text1text2;
+	g_state.currentmode.colortext1 = colortext1;
+	g_state.currentmode.sametex = sametex;
+	g_state.currentmode.text1text2 = text1text2;
 	g_state.changed |= 4u;
 	return 0;
 }
@@ -660,9 +663,9 @@ int x_procombine2(int rgb, int alpha, int text1text2, int sametex)
 		return 1;
 	if (text1text2 < X_FIRSTCOMBINE || text1text2 > X_LASTCOMBINE)
 		return 1;
-	g_state.sametex = sametex;
-	g_state.colortext1 = rgb | (alpha << 16);
-	g_state.text1text2 = text1text2;
+	g_state.currentmode.sametex = sametex;
+	g_state.currentmode.colortext1 = rgb | (alpha << 16);
+	g_state.currentmode.text1text2 = text1text2;
 	g_state.changed |= 4u;
 	return 0;
 }
@@ -671,8 +674,8 @@ int x_texture(int text1handle)
 {
 	if (text1handle <= 0 )
 		return 1;
-	g_state.text1 = text1handle;
-	g_state.text2 = 0;
+	g_state.currentmode.text1 = text1handle;
+	g_state.currentmode.text2 = 0;
 	g_state.changed |= 2u;
 	return 0;
 }
@@ -683,8 +686,8 @@ int x_texture2(int text1handle, int text2handle)
 		return 1;
 	if (text1handle <= 0 || text2handle <= 0 )
 		return 1;
-	g_state.text1 = text1handle;
-	g_state.text2 = text2handle;
+	g_state.currentmode.text1 = text1handle;
+	g_state.currentmode.text2 = text2handle;
 	g_state.changed |= 2u;
 	return 0;
 }
@@ -702,13 +705,13 @@ void x_reset(void)
 
 int x_fog(int type, float min, float max, float r, float g, float b)
 {
-	g_state.fogtype = type;
-	g_state.fogmin = min;
-	g_state.fogmax = max;
-	g_state.fogcolor[0] = r;
-	g_state.fogcolor[1] = g;
-	g_state.fogcolor[2] = b;
-	g_state.fogcolor[3] = 1.0f;
+	g_state.currentmode.fogtype = type;
+	g_state.currentmode.fogmin = min;
+	g_state.currentmode.fogmax = max;
+	g_state.currentmode.fogcolor[0] = r;
+	g_state.currentmode.fogcolor[1] = g;
+	g_state.currentmode.fogcolor[2] = b;
+	g_state.currentmode.fogcolor[3] = 1.0f;
 	g_state.changed |= 8u;
 	return 0;
 }

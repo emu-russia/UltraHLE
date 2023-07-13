@@ -165,8 +165,8 @@ void init_clear(int writecolor, int writedepth, float cr, float cg, float cb)
 		(unsigned __int8)(signed __int64)(cr * 255.0) | ((unsigned __int16)(signed __int64)(cg * 255.0) << 8) & 0xFF00 | ((unsigned __int8)(signed __int64)(cb * 255.0) << 16),
 		0,
 		0xFFFF);
-	grDepthMask((g_state.mask & 2u) >> 1);
-	grColorMask(g_state.mask & 1, g_state.mask & 1);
+	grDepthMask((g_state.currentmode.mask & 2u) >> 1);
+	grColorMask(g_state.currentmode.mask & 1, g_state.currentmode.mask & 1);
 }
 
 int init_readfb(__int16 a1, int a2, int a3, int a4, int a5, int a6, int a7)
@@ -222,7 +222,7 @@ int init_writefb()
 
 int mode_init()
 {
-	g_state.stwhint = 0;
+	g_state.currentmode.stwhint = 0;
 	grDepthBiasLevel(0);
 	grDepthBufferMode(GR_DEPTHBUFFER_WBUFFER);
 	grDepthMask(FXTRUE);
@@ -345,9 +345,6 @@ void fixfogtable(GrFog_t* a1, int a2)
 
 GrFog_t* generatefogtable()
 {
-	double v1; // st7
-	float v2; // ecx
-	float v3; // edx
 	float v4; // ST08_4
 	float v5; // ST08_4
 	float v6; // ST04_4
@@ -357,28 +354,26 @@ GrFog_t* generatefogtable()
 	static float lastfogmax;
 	static GrFog_t fogtable[GR_FOG_TABLE_SIZE];
 
-	if ( lastfogmin == g_state[269]
-		&& lastfogmax == g_state[270]
-		&& (double)SLODWORD(g_state[268]) == lastfogtype )
+	if ( lastfogmin == g_state.active.fogmin
+		&& lastfogmax == g_state.active.fogmax
+		&& g_state.active.fogtype == lastfogtype )
 	{
 		return fogtable;
 	}
-	v1 = (double)SLODWORD(g_state[268]);
-	v2 = g_state[270];
-	v3 = g_state[268];
-	lastfogmin = g_state[269];
-	lastfogmax = v2;
-	lastfogtype = v1;
-	if ( LODWORD(v3) == X_LINEAR || LODWORD(v3) == X_LINEARADD)
+
+	lastfogmin = g_state.active.fogmin;
+	lastfogmax = g_state.active.fogmax;
+	lastfogtype = g_state.active.fogtype;
+	if (g_state.active.fogtype == X_LINEAR || g_state.active.fogtype == X_LINEARADD)
 	{
-		v5 = g_state[270] / g_state.znear;
-		v6 = g_state[269] / g_state.znear;
-		guFogGenerateLinear(fogtable, LODWORD(v6), LODWORD(v5));
+		v5 = g_state.active.fogmax / g_state.znear;
+		v6 = g_state.active.fogmin / g_state.znear;
+		guFogGenerateLinear(fogtable, v6, v5);
 	}
-	else if ( LODWORD(v3) == X_EXPONENTIAL)
+	else if (g_state.active.fogtype == X_EXPONENTIAL)
 	{
-		v4 = 2.3f / (g_state[270] / g_state.znear);
-		guFogGenerateExp(fogtable, LODWORD(v4));
+		v4 = 2.3f / (g_state.active.fogmax / g_state.znear);
+		guFogGenerateExp(fogtable, v4);
 	}
 	fixfogtable(fogtable, GR_FOG_TABLE_SIZE);
 	return fogtable;
@@ -399,7 +394,6 @@ void mode_change()
 	int v10; // ecx
 	float v11; // eax
 	float v12; // eax
-	float v13; // ST18_4
 	signed int v14; // eax
 	double v15; // ST24_8
 	signed __int64 v16; // rax
@@ -427,39 +421,39 @@ void mode_change()
 	if ( g_state.changed & 1 )
 	{
 		v1 = g_state.geometry;
-		if ( LODWORD(g_state[289]) != LODWORD(v1) )
+		if ( g_state.setnew != LODWORD(v1) )
 		{
 			if ( LOBYTE(v1) & 2 )
 			{
-				grCullMode(1);
+				grCullMode(GR_CULL_NEGATIVE);
 			}
 			else if ( g_state.geometry & 4 )
 			{
-				grCullMode(2);
+				grCullMode(GR_CULL_POSITIVE);
 			}
 			else
 			{
-				grCullMode(0);
+				grCullMode(GR_CULL_DISABLE);
 			}
-			g_state[289] = g_state.geometry;
+			g_state.setnew = g_state.geometry;
 		}
 	}
 	if ( g_state.changed & 8 )
 	{
-		v2 = g_state[297];
-		v3 = g_state[298];
-		g_state[268] = g_state[296];
-		v4 = g_state[299];
+		v2 = g_state.currentmode.fogmin;
+		v3 = g_state.currentmode.fogmax;
+		g_state[268] = g_state.currentmode.fogtype;
+		v4 = g_state.currentmode.fogcolor[0];
 		g_state[269] = v2;
-		v5 = g_state[300];
+		v5 = g_state.currentmode.fogcolor[1];
 		g_state[270] = v3;
-		v6 = g_state[301];
+		v6 = g_state.currentmode.fogcolor[2];
 		g_state[271] = v4;
-		v7 = g_state[302];
+		v7 = g_state.currentmode.fogcolor[3];
 		g_state[272] = v5;
 		g_state[273] = v6;
 		g_state[274] = v7;
-		if ( LODWORD(g_state[296]) == 4098 )
+		if ( g_state.currentmode.fogtype == X_DISABLE)
 		{
 			grFogMode(GR_FOG_DISABLE);
 		}
@@ -480,16 +474,16 @@ void mode_change()
 	}
 	if ( g_state.changed & 4 )
 	{
-		v11 = g_state.mask;
+		v11 = g_state.currentmode.mask;
 		if ( LODWORD(g_state[263]) != LODWORD(v11) )
 		{
 			grDepthMask((LOBYTE(v11) & 2u) >> 1);
-			grColorMask(g_state.mask & 1, g_state.mask & 1);
-			a1 = g_state.mask;
+			grColorMask(g_state.currentmode.mask & 1, g_state.currentmode.mask & 1);
+			a1 = g_state.currentmode.mask;
 			g_state[263] = a1;
 		}
-		v12 = g_state.masktst;
-		if ( LODWORD(g_state[264]) != LODWORD(v12) )
+		v12 = g_state.currentmode.masktst;
+		if ( g_state.active.masktst != LODWORD(v12) )
 		{
 			if ( SLODWORD(v12) > 4098 )
 			{
@@ -511,7 +505,7 @@ void mode_change()
 						goto $L1409;
 				}
 			}
-			else if ( LODWORD(v12) == 4098 || v12 == 0.0 )
+			else if ( LODWORD(v12) == 4098 || v12 == 0 )
 			{
 				grDepthBufferFunction(7);
 			}
@@ -520,17 +514,17 @@ void mode_change()
 $L1409:
 				grDepthBufferFunction(3);
 			}
-			g_state[264] = g_state.masktst;
+			g_state.active.masktst = g_state.currentmode.masktst;
 		}
-		if ( g_state.envc != LODWORD(g_state[284]) )
+		if ( g_state.currentmode.envc != LODWORD(g_state[284]) )
 		{
 			g_state[265] = -6.8056469e38/*NaN*/;
-			g_state[284] = g_state.envc;
+			g_state[284] = g_state.currentmode.envc;
 		}
-		if ( g_state.colortext1 != LODWORD(g_state[265]) )
+		if ( g_state.currentmode.colortext1 != LODWORD(g_state[265]) )
 		{
 			g_state.send &= 0xFFFFFFFC;
-			switch ( g_state.colortext1 & 0xFFFF )
+			switch ( g_state.currentmode.colortext1 & 0xFFFF )
 			{
 				case X_WHITE:
 					grConstantColorValue(0x7FFF7FFF);
@@ -586,10 +580,9 @@ $L1409:
 				case X_TEXTUREENVCR:
 					grColorCombine(7, 5, 0, 2, 0);
 					guAlphaSource(GR_ALPHASOURCE_ITERATED_ALPHA);
-					v13 = g_state[284];
-					x_log("envc=%08X\n");
+					x_log("envc=%08X\n", g_state.active.envc);
 LABEL_47:
-					grConstantColorValue(LODWORD(g_state[284]));
+					grConstantColorValue(g_state.active.envc);
 LABEL_48:
 					g_state.send |= 1u;
 LABEL_49:
@@ -598,7 +591,7 @@ LABEL_49:
 				default:
 					break;
 			}
-			switch ( g_state.colortext1 >> 16 )
+			switch ( g_state.currentmode.colortext1 >> 16 )
 			{
 				case X_COLOR:
 					guAlphaSource(GR_ALPHASOURCE_ITERATED_ALPHA);
@@ -621,13 +614,13 @@ LABEL_56:
 				default:
 					break;
 			}
-			g_state[265] = g_state.colortext1;
+			g_state[265] = g_state.currentmode.colortext1;
 		}
-		if ( g_state.text1text2 != LODWORD(g_state[266]) )
+		if ( g_state.currentmode.text1text2 != LODWORD(g_state[266]) )
 		{
 			g_state.send &= 0xFFFFFFFB;
 			grTexCombine(1, 1, 0, 1, 0, 0, 0);
-			v14 = g_state.text1text2;
+			v14 = g_state.currentmode.text1text2;
 			if ( v14 > X_TEXTURE)
 			{
 				a1 = 0.0;
@@ -659,9 +652,9 @@ LABEL_70:
 				grTexCombine(0, 1, 0, 1, 0, 0, 0);
 				grTexCombine(1, 1, 0, 1, 0, 0, 0);
 			}
-			g_state[266] = g_state.text1text2;
+			g_state[266] = g_state.currentmode.text1text2;
 		}
-		if ( g_state[280] != g_state.alphatest)
+		if ( g_state[280] != g_state.currentmode.alphatest)
 		{
 			if ( SLODWORD(g_state[308]) < 1065353216 && (v15 = g_state[308], LODWORD(v15) | HIDWORD(v15) & 0x7FFFFFFF) )
 			{
@@ -677,11 +670,11 @@ LABEL_70:
 			{
 				grAlphaTestFunction(GR_CMP_ALWAYS);
 			}
-			g_state[280] = g_state.alphatest;
+			g_state[280] = g_state.currentmode.alphatest;
 		}
-		if ( LODWORD(g_state[276]) != g_state.src || g_state.dst != LODWORD(g_state[277]) )
+		if ( LODWORD(g_state[276]) != g_state.currentmode.src || g_state.currentmode.dst != LODWORD(g_state[277]) )
 		{
-			switch ( g_state.src)
+			switch ( g_state.currentmode.src)
 			{
 				case X_ZERO:
 					v17 = 0;
@@ -716,7 +709,7 @@ LABEL_93:
 					v18 = 4;
 					break;
 			}
-			switch ( g_state.dst)
+			switch ( g_state.currentmode.dst)
 			{
 				case X_ONE:
 					v20 = 4;
@@ -749,79 +742,79 @@ LABEL_103:
 					break;
 			}
 			grAlphaBlendFunction(v17, v19, v18, v20);
-			v21 = g_state.dst;
-			g_state[276] = g_state.src;
+			v21 = g_state.currentmode.dst;
+			g_state[276] = g_state.currentmode.src;
 			g_state[277] = v21;
 		}
-		v22 = g_state[303];
+		v22 = g_state.currentmode.dither;
 		if ( LODWORD(g_state[275]) != LODWORD(v22) )
 		{
-			if ( v22 == 0.0 )
+			if ( v22 == 0 )
 				grDitherMode(GR_DITHER_DISABLE);
 			else
 				grDitherMode(GR_DITHER_4x4);
-			g_state[275] = g_state[303];
+			g_state[275] = g_state.currentmode.dither;
 		}
 	}
 	if ( g_state.send & 4 )
 	{
-		g_state.textures = 2;
+		g_state.currentmode.textures = 2;
 	}
 	else
 	{
 		v23 = (g_state.send & 2) == 0;
-		g_state.textures = 1;
+		g_state.currentmode.textures = 1;
 		if ( v23 )
-			g_state.textures = 0;
+			g_state.currentmode.textures = 0;
 	}
-	if ( LOBYTE(g_state[289]) & 1 )
-		g_state.textures = 0;
-	if ( LODWORD(g_state[281]) != g_state.textures)
+	if ( g_state.setnew & 1 )
+		g_state.currentmode.textures = 0;
+	if ( LODWORD(g_state[281]) != g_state.currentmode.textures)
 	{
-		v24 = g_state.textures;
-		g_state[282] = 0.0;
-		g_state[283] = 0.0;
+		v24 = g_state.currentmode.textures;
+		g_state[282] = 0;
+		g_state[283] = 0;
 		g_state.changed |= 2u;
 		g_state[281] = v24;
 	}
 	if ( g_state.changed & 2 )
 	{
 		if ( g_state.geometry & 0x10 )
-			g_state.stwhint |= 2u;
+			g_state.currentmode.stwhint |= 2u;
 		else
-			g_state.stwhint &= 0xFFFFFFFD;
-		if ( g_state.textures == 1 )
+			g_state.currentmode.stwhint &= 0xFFFFFFFD;
+		if ( g_state.currentmode.textures == 1 )
 		{
-			g_state.stwhint &= 0xFFFFFFEF;
-			if ( LODWORD(g_state[310]) != LODWORD(g_state[282]) )
+			g_state.currentmode.stwhint &= 0xFFFFFFEF;
+			if ( g_state.currentmode.text1 != LODWORD(g_state[282]) )
 			{
-				mode_loadtexture(LODWORD(g_state[310]));
-				g_state[282] = g_state[310];
+				mode_loadtexture(g_state.currentmode.text1);
+				g_state[282] = g_state.currentmode.text1;
 				++g_stats.chg_text;
 			}
 		}
-		else if ( g_state.textures == 2 )
+		else if ( g_state.currentmode.textures == 2 )
 		{
 			if ( LODWORD(g_state.sametex) )
-				g_state.stwhint &= 0xFFFFFFEF;
+				g_state.currentmode.stwhint &= 0xFFFFFFEF;
 			else
-				g_state.stwhint |= 0x10u;
-			if ( LODWORD(g_state[310]) != LODWORD(g_state[282]) || LODWORD(g_state[311]) != LODWORD(g_state[283]) )
+				g_state.currentmode.stwhint |= 0x10u;
+			if ( g_state.currentmode.text1 != LODWORD(g_state[282]) || g_state.currentmode.text2 != LODWORD(g_state[283]) )
 			{
-				v25 = g_state[311];
-				mode_loadmultitexture(*(_QWORD *)&g_state[310], *(_QWORD *)&g_state[310] >> 32);
-				v26 = g_state[310];
+				v25 = g_state.currentmode.text2;
+				mode_loadmultitexture(g_state.currentmode.text1, g_state.currentmode.text2);
+				v26 = g_state.currentmode.text1;
 				g_stats.chg_text += 2;
 				g_state[282] = v26;
 			}
 		}
-		g_state[278] = g_state.sametex;
+		g_state[278] = g_state.currentmode.sametex;
 	}
-	result = g_state.stwhint;
+	result = g_state.currentmode.stwhint;
 	if ( LODWORD(g_state[279]) != LODWORD(result) )
 	{
-		grHints(GR_HINT_STWHINT, g_state.stwhint);
-		result = g_state.stwhint;
+		grHints(GR_HINT_STWHINT, g_state.currentmode.stwhint);
+		result = g_state.currentmode.stwhint;
 		g_state[279] = result;
 	}
 	g_state.changed = 0;
@@ -829,12 +822,10 @@ LABEL_103:
 	if ( g_state.geometry & X_DUMPDATA)
 	{
 		x_log("#modechange:\n");
-		x_log("-mask c=%i z=%i zt=%i\n", (g_state.mask & 4u) >> 2, (g_state.mask & 2u) >> 1, g_state.mask & 1);
-		x_log("-colortext1 %08X\n", g_state.colortext1);
-		x_log("-alphatest %04X\n", (int16_t)g_state.alphatest);
-		x_log("-blend %04X %04X\n", g_state.dst, g_state.src);
-		v35 = g_state[281];
-		v36 = g_state[310];
-		x_log("-texture %i (%i textures)\n");
+		x_log("-mask c=%i z=%i zt=%i\n", g_state.currentmode.mask & 1, (g_state.currentmode.mask & 2u) >> 1, (g_state.currentmode.mask & 4u) >> 2);
+		x_log("-colortext1 %08X\n", g_state.currentmode.colortext1);
+		x_log("-alphatest %04X\n", (int16_t)g_state.currentmode.alphatest);
+		x_log("-blend %04X %04X\n", g_state.currentmode.src, g_state.currentmode.dst);
+		x_log("-texture %i (%i textures)\n", g_state.currentmode.text1, g_state.active.textures);
 	}
 }

@@ -24,6 +24,7 @@ static int corners_base;
 static int corners;
 
 static int clipnewvx;
+static int clipor;
 
 void geom_init()
 {
@@ -138,11 +139,11 @@ void x_matrix(void *a1)
 	}
 	if ( g_state.projnull && g_state.matrixnull)
 	{
-		g_state[247] = 3;
+		g_state.usexformmode = 3;
 	}
 	else
 	{
-		g_state[247] = g_state.xformmode;
+		g_state.usexformmode = g_state.xformmode;
 		x_flush();
 		memcpy(&g_state[169], a1, 0x40u);
 		if ( g_state.xformmode != 1 && g_state[233] )
@@ -379,7 +380,7 @@ void vertexdata(xt_data* a1)
 	}
 	if ( g_state.send & 2 )
 	{
-		if ( g_state[289] & 0x10 )
+		if ( g_state.setnew & 0x10 )
 		{
 			v3 = 2 * vertices;
 			texp_S1211[v3] = *((DWORD *)v2 + 7);
@@ -608,11 +609,11 @@ void xform(int a1, xt_pos* a2, int a3, char *a4)
 	float v56; // [esp+10h] [ebp-8h]
 	float v57; // [esp+10h] [ebp-8h]
 
-	switch ( g_state[247] )
+	switch ( g_state.usexformmode)
 	{
 		case 0:
 			v4 = a3;
-			if ( g_state[289] & 8 )
+			if ( g_state.setnew & 8 )
 			{
 				if ( a3 <= 0 )
 					return;
@@ -986,7 +987,7 @@ int setuprvx(int a1, int a2)
 				v3[1] = v3[1] - 786432.0;
 				result = (int *)*((DWORD *)v3 + 8);
 				v17 = v3[8];
-				if ( g_state[289] & 0x10 )
+				if ( g_state.setnew & 0x10 )
 				{
 					if ( g_state.send & 2 )
 					{
@@ -1036,7 +1037,7 @@ LABEL_23:
 				return result;
 		}
 	}
-	if ( g_state[295] || g_state[289] & 0x10 )
+	if ( g_state.zbias || g_state.setnew & 0x10 )
 	{
 		v13 = a2;
 		if ( a2 <= 0 )
@@ -1056,7 +1057,7 @@ LABEL_23:
 				v3[1] = v3[1] - 786432.0;
 				v15 = *((DWORD *)v3 + 8);
 				v18 = v3[8];
-				if ( g_state[289] & 0x10 )
+				if ( g_state.setnew & 0x10 )
 				{
 					if ( g_state.send & 2 )
 					{
@@ -1255,7 +1256,7 @@ int doclipvertex(signed int a1, int a2, int a3)
 				v3 = a2;
 				v4 = a3;
 				v20 = &flt_11454[5 * a2];
-				v22 = *v20 - *(float *)&g_state[241];
+				v22 = *v20 - g_state.znear;
 				v24 = *v20 - flt_11454[5 * a3];
 			}
 			else
@@ -1265,7 +1266,7 @@ int doclipvertex(signed int a1, int a2, int a3)
 				v3 = a2;
 				v4 = a3;
 				v21 = &flt_11454[5 * a2];
-				v22 = *(float *)&g_state[242] - *v21;
+				v22 = g_state.zfar - *v21;
 				v24 = flt_11454[5 * a3] - *v21;
 			}
 		}
@@ -1327,7 +1328,7 @@ LABEL_5:
 	if ( g_state.send & 2 )
 	{
 		v8 = 2 * clipnewvx;
-		v6 = (g_state[289] & 0x10) == 0;
+		v6 = (g_state.setnew & 0x10) == 0;
 		tex_S1209[v8] = (tex_S1209[2 * v4] - tex_S1209[2 * v3]) * v23 + tex_S1209[2 * v3];
 		flt_E230[v8] = (flt_E230[2 * v4] - flt_E230[2 * v3]) * v23 + flt_E230[2 * v3];
 		if ( !v6 )
@@ -1352,9 +1353,9 @@ LABEL_5:
 		v12 |= 0x400u;
 	if ( flt_11450[v5] > (long double)v25 )
 		v12 |= 0x800u;
-	if ( *(float *)&g_state[241] > (long double)v25 )
+	if ( g_state.znear > (long double)v25 )
 		v12 |= 0x1000u;
-	if ( *(float *)&g_state[242] < (long double)v25 )
+	if ( g_state.zfar < (long double)v25 )
 		v12 |= 0x2000u;
 	++clipnewvx;
 	v17 = ~a1 & v12;
@@ -1767,7 +1768,7 @@ signed int flush_drawfx()
 					{
 						result -= 2;
 						g_stats.out_tri += v10 - 2;
-						if ( g_state[289] & 1 )
+						if ( g_state.setnew & 1 )
 						{
 							v2 = v10 - 1;
 							for ( j = 0; v10 > j; ++j )
@@ -1803,7 +1804,7 @@ signed int flush_drawfx()
 				}
 			}
 		}
-		else if ( g_state[289] & 1 && i > 2 )
+		else if ( g_state.setnew & 1 && i > 2 )
 		{
 			v2 = i - 1;
 			result = i - 2;
