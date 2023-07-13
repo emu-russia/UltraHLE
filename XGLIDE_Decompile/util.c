@@ -99,7 +99,6 @@ void x_free(void *Memory)
 /// - x_fastfpu(0) returns the fpu to mode before call to x_fastfpu(1)
 /// - the above calls can be nested
 /// </summary>
-/// <param name="a1"></param>
 void x_fastfpu(int fast)
 {
 	static int state = 0;

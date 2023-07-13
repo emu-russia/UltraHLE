@@ -125,10 +125,10 @@ void x_matrix(void *a1)
 		a1 = &identmatrix;
 		g_state[235] = 1;
 	}
-	if ( g_state[234] )
+	if ( g_state.projchanged )
 	{
 		recalc_projection();
-		g_state[234] = 0;
+		g_state.projchanged = 0;
 	}
 	if ( g_state[236] && g_state[235] )
 	{
@@ -136,10 +136,10 @@ void x_matrix(void *a1)
 	}
 	else
 	{
-		g_state[247] = g_state[246];
+		g_state[247] = g_state.xformmode;
 		x_flush();
 		memcpy(&g_state[169], a1, 0x40u);
-		if ( g_state[246] != 1 && g_state[233] )
+		if ( g_state.xformmode != 1 && g_state[233] )
 		{
 			v1 = &v22;
 			v2 = (float *)&g_state[201];
@@ -214,7 +214,7 @@ void x_matrix(void *a1)
 			dumpmatrix(v21, "Modelview");
 			dumpmatrix((float *)&g_state[217], "Projection");
 			dumpmatrix((float *)&g_state[185], "Combined");
-			x_log("Xformmode: %i Znear: %f Zfar: %f\n", g_state[246], (_QWORD)g_state[241], (_QWORD)g_state[242]);
+			x_log("Xformmode: %i Znear: %f Zfar: %f\n", g_state.xformmode, (_QWORD)g_state[241], (_QWORD)g_state[242]);
 		}
 	}
 }
@@ -244,8 +244,8 @@ int recalc_projection(int a1)
 	v4 = (signed __int64)g_state[249];
 	v5 = (signed __int64)g_state[250];
 	grClipWindow(a1, (unsigned __int64)(signed __int64)g_state[248] >> 32, (signed __int64)g_state[248]);
-	v6 = g_state[246];
-	if ( v6 == 0.0 )
+	v6 = g_state.xformmode;
+	if ( v6 == 0 )
 	{
 		memset(&g_state[217], 0, 0x40u);
 		v8 = g_state[241] / g_state[238];
@@ -281,7 +281,7 @@ int x_begin(int a1)
 {
 	int result; // eax
 
-	if ( g_state[290] || g_state[234] )
+	if ( g_state.changed || g_state.projchanged )
 		x_flush();
 	mode_S1225 = a1;
 	result = 0;
@@ -922,7 +922,7 @@ int * setuprvx(int a1, int a2)
 	v5 = &tex2_S1210[2 * a1];
 	result = &texp_S1211[2 * a1];
 	v24 = (float *)&texp_S1211[2 * a1];
-	if ( g_state[246] == 1 )
+	if ( g_state.xformmode == 1 )
 	{
 		v7 = a2;
 		if ( a2 > 0 )
@@ -961,7 +961,7 @@ int * setuprvx(int a1, int a2)
 		}
 		return result;
 	}
-	if ( g_state[246] == 2 )
+	if ( g_state.xformmode == 2 )
 	{
 		if ( a2 <= 0 )
 			return result;
@@ -1741,7 +1741,7 @@ signed int flush_drawfx()
 		}
 		if ( v5 )
 		{
-			if ( !result && g_state[246] != 1 )
+			if ( !result && g_state.xformmode != 1 )
 			{
 				if ( i == 2 )
 				{
@@ -1853,7 +1853,7 @@ void x_flush(void)
 	v0 = corners_S1220;
 	if ( g_state[317] & 0x20 )
 	{
-		x_log("#flush %i %i %i\n", g_state[234], g_state[290], corners_S1220);
+		x_log("#flush %i %i %i\n", g_state.projchanged, g_state.changed, corners_S1220);
 		v0 = corners_S1220;
 	}
 	if ( v0 )
@@ -1863,9 +1863,9 @@ void x_flush(void)
 		flush_reordertables();
 		x_fastfpu(0);
 	}
-	if ( g_state[290] )
+	if ( g_state.changed )
 		mode_change();
-	if ( g_state[234] )
+	if ( g_state.projchanged )
 	{
 		g_state[235] = 1;
 		x_matrix(0);

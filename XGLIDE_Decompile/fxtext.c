@@ -203,7 +203,7 @@ int makespace()
 				v3 = v2[21] + v2[20] + v2[19] + v2[18];
 				if ( v3 )
 				{
-					if ( v2[11] < g_state[167] - 1 )
+					if ( v2[11] < g_state.frame - 1 )
 					{
 						v0 += v3;
 						freetexmem(v2);
@@ -250,9 +250,9 @@ int clearspace()
 int picktmu()
 {
 	static int tmupick = 0;
-	int result; // eax
+	int result;
 
-	if ( g_state[160] < 2 )
+	if ( g_state.tmus < 2 )
 		return 0;
 	result = tmupick ^ 1;
 	tmupick ^= 1u;
@@ -270,7 +270,7 @@ signed int fxloadtexturepart(DWORD *a1, int a2)
 	int v8; // [esp+14h] [ebp-8h]
 	DWORD *v9; // [esp+18h] [ebp-4h]
 
-	a1[11] = g_state[167];
+	a1[11] = g_state.frame;
 	v2 = a1[a2 + 26];
 	switch ( a2 )
 	{
@@ -323,7 +323,7 @@ signed int fxloadtexture_single(DWORD *a1)
 	signed int v2; // ebx
 
 	v1 = 0;
-	if ( g_state[160] > 1 && a1[18] <= 0 )
+	if ( g_state.tmus > 1 && a1[18] <= 0 )
 	{
 		if ( a1[19] <= 0 )
 			v1 = picktmu();
@@ -416,7 +416,7 @@ signed int *text_init()
 	v1 = grTexMinAddress(0);
 	mem_S1205[0] = (int)memory_create(v1 + 256, v0);
 	x_log("Texture memory TMU1: ");
-	if ( g_state[160] >= 2 )
+	if ( g_state.tmus >= 2 )
 	{
 		v3 = grTexMaxAddress(1);
 		v4 = grTexMinAddress(1);
@@ -713,70 +713,6 @@ $L1462:
 	return result;
 }
 
-
-
-//.text:00000D70 $L1564          dd offset $L1420, offset $L1419, offset $L1418, offset $L1417
-//.text:00000D70                                         ; DATA XREF: _text_allocdata+60↑r
-//.text:00000D70                 dd offset $L1416, offset $L1425 ; jump table for switch statement
-//.text:00000D88 $L1563          db 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 1, 5
-//.text:00000D88                                         ; DATA XREF: _text_allocdata+5A↑r
-//.text:00000D88                 db 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 ; indirect table for switch statement
-//.text:00000D88                 db 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 2, 5, 5, 5, 5, 5
-//.text:00000D88                 db 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5
-//.text:00000D88                 db 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5
-//.text:00000D88                 db 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5
-//.text:00000D88                 db 5, 5, 5, 5, 3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5
-//.text:00000D88                 db 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5
-//.text:00000D88                 db 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5
-//.text:00000D88                 db 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5
-//.text:00000D88                 db 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5
-//.text:00000D88                 db 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5
-//.text:00000D88                 db 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5
-//.text:00000D88                 db 5, 5, 5, 5, 5, 5, 4
-//.text:00000E79                 align 4
-//.text:00000E7C $L1566          dd offset $L1435        ; DATA XREF: _text_allocdata+115↑r
-//.text:00000E7C                 dd offset $L1434        ; jump table for switch statement
-//.text:00000E7C                 dd offset $L1433
-//.text:00000E7C                 dd offset $L1432
-//.text:00000E7C                 dd offset $L1436
-//.text:00000E90 $L1565          db      0,     1,     4,     2
-//.text:00000E90                                         ; DATA XREF: _text_allocdata+10F↑r
-//.text:00000E90                 db      4,     4,     4,     3 ; indirect table for switch statement
-//.text:00000E98 $L1567          dd offset $L1442        ; DATA XREF: _text_allocdata+161↑r
-//.text:00000E98                 dd offset $L1443        ; jump table for switch statement
-//.text:00000E98                 dd offset $L1444
-//.text:00000E98                 dd offset $L1445
-//.text:00000E98                 dd offset $L1446
-//.text:00000E98                 dd offset $L1447
-//.text:00000E98                 dd offset $L1448
-//.text:00000EB4 $L1573          dd offset $L1457, offset $L1456, offset $L1455, offset $L1454
-//.text:00000EB4                                         ; DATA XREF: _text_allocdata+204↑r
-//.text:00000EB4                 dd offset $L1453, offset $L1462 ; jump table for switch statement
-//.text:00000ECC $L1572          db 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 1, 5
-//.text:00000ECC                                         ; DATA XREF: _text_allocdata+1FE↑r
-//.text:00000ECC                 db 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 ; indirect table for switch statement
-//.text:00000ECC                 db 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 2, 5, 5, 5, 5, 5
-//.text:00000ECC                 db 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5
-//.text:00000ECC                 db 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5
-//.text:00000ECC                 db 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5
-//.text:00000ECC                 db 5, 5, 5, 5, 3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5
-//.text:00000ECC                 db 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5
-//.text:00000ECC                 db 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5
-//.text:00000ECC                 db 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5
-//.text:00000ECC                 db 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5
-//.text:00000ECC                 db 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5
-//.text:00000ECC                 db 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5
-//.text:00000ECC                 db 5, 5, 5, 5, 5, 5, 4
-//.text:00000FBD                 align 10h
-//.text:00000FC0 $L1574          dd offset $L1470        ; DATA XREF: _text_allocdata+267↑r
-//.text:00000FC0                 dd offset $L1471        ; jump table for switch statement
-//.text:00000FC0                 dd offset $L1471
-//.text:00000FC0                 dd offset $L1468
-//.text:00000FC0                 dd offset $L1469
-
-
-
-
 unsigned int text_loadlevel(DWORD *a1, int a2, unsigned int a3)
 {
 	unsigned int result; // eax
@@ -876,18 +812,6 @@ unsigned int text_loadlevel(DWORD *a1, int a2, unsigned int a3)
 	return result;
 }
 
-
-//.text:000011F8 $L1588          dd offset $L1490        ; DATA XREF: _text_loadlevel+21↑r
-//.text:000011F8                 dd offset $L1500        ; jump table for switch statement
-//.text:000011F8                 dd offset $L1505
-//.text:000011F8                 dd offset $L1495
-//.text:000011F8                 dd offset $L1487
-//.text:0000120C $L1587          db      0,     4,     4,     4
-//.text:0000120C                                         ; DATA XREF: _text_loadlevel+1B↑r
-//.text:0000120C                 db      4,     4,     4,     1 ; indirect table for switch statement
-//.text:0000120C                 db      2,     3
-
-
 int text_freedata(DWORD *a1)
 {
 	int result; // eax
@@ -947,7 +871,7 @@ int text_frameend()
 				do
 				{
 					g_stats[8] += *(v3 - 16);
-					result = g_state[167] - 1;
+					result = g_state.frame - 1;
 					if ( result <= v2[11] )
 					{
 						result = *v3;
@@ -966,25 +890,3 @@ int text_frameend()
 	}
 	return result;
 }
-
-
-//.rdata:00001320 _rdata          segment dword public 'DATA' use32
-//.rdata:00001320                 assume cs:_rdata
-//.rdata:00001320                 ;org 1320h
-//.rdata:00001320 $T1568          db    0
-//.rdata:00001321                 db    0
-//.rdata:00001322                 db  80h
-//.rdata:00001323                 db  43h ; C
-//.rdata:00001324 $T1569          db    0
-//.rdata:00001325                 db    0
-//.rdata:00001326                 db    0
-//.rdata:00001327                 db  42h ; B
-//.rdata:00001328 $T1570          db    0
-//.rdata:00001329                 db    0
-//.rdata:0000132A                 db  80h
-//.rdata:0000132B                 db  42h ; B
-//.rdata:0000132C $T1571          db    0
-//.rdata:0000132D                 db    0
-//.rdata:0000132E                 db    0
-//.rdata:0000132F                 db  43h ; C
-//.rdata:0000132F _rdata          ends

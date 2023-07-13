@@ -5,21 +5,21 @@ char *init_name()
 	return "Glide";
 }
 
-int init_fullscreen(int a1)
+int init_fullscreen(int fullscreen)
 {
 	int result; // eax
 
-	if ( a1 )
-		result = grSstControl(1);
+	if (fullscreen)
+		result = grSstControl(GR_CONTROL_ACTIVATE);
 	else
-		result = grSstControl(2);
+		result = grSstControl(GR_CONTROL_DEACTIVATE);
 	return result;
 }
 
 int init_query()
 {
 	int result; // eax
-	char v1; // [esp+0h] [ebp-94h]
+	GrHwConfiguration v1; // [esp+0h] [ebp-94h]
 	int v2; // [esp+4h] [ebp-90h]
 
 	grGlideInit();
@@ -32,7 +32,7 @@ int init_query()
 
 int init_reinit()
 {
-	signed int v0; // ecx
+	GrScreenResolution_t mode;
 
 	x_log("init_reinit: shutdown\n");
 	grGlideShutdown();
@@ -41,80 +41,78 @@ int init_reinit()
 	x_log("init_reinit: select\n");
 	grSstSelect(0);
 	x_log("init_reinit: resolution\n");
-	if ( g_state[163] < 1024 )
+	if ( g_state.xs < 1024 )
 	{
-		if ( g_state[163] < 800 )
+		if ( g_state.xs < 800 )
 		{
-			if ( g_state[163] < 640 )
+			if ( g_state.xs < 640 )
 			{
-				v0 = 3;
-				if ( g_state[163] < 512 )
-					v0 = 7;
+				mode = GR_RESOLUTION_512x384;
+				if ( g_state.xs < 512 )
+					mode = GR_RESOLUTION_640x480;
 			}
 			else
 			{
-				v0 = 7;
+				mode = GR_RESOLUTION_640x480;
 			}
 		}
 		else
 		{
-			v0 = 8;
+			mode = GR_RESOLUTION_800x600;
 		}
 	}
 	else
 	{
-		v0 = 12;
+		// 1024x768
+		mode = 12;
 	}
-	grSstWinOpen(g_state[162], v0, 0, 1, 1, g_state[165], g_state[166]);
-	grClipWindow(0, 0, g_state[163], g_state[164]);
+	grSstWinOpen(g_state.hwnd, mode, GR_REFRESH_60Hz, GR_COLORFORMAT_ABGR, GR_ORIGIN_LOWER_LEFT, g_state.buffers, g_state.vsync);
+	grClipWindow(0, 0, g_state.xs, g_state.ys);
 	x_log("init_reinit: done\n");
 }
 
 int init_init()
 {
-	int v1; // ST18_4
-	signed int v2; // ecx
-	GrHwConfiguration v3; // [esp+0h] [ebp-94h]
-	int v4; // [esp+4h] [ebp-90h]
-	int v5; // [esp+10h] [ebp-84h]
+	GrScreenResolution_t mode;
+	GrHwConfiguration hw;
 
 	grGlideInit();
-	if ( !grSstQueryHardware(&v3) )
+	if ( !grSstQueryHardware(&hw) )
 		return -1;
-	if ( v4 != 3 && v4 )
-		g_state[160] = 1;
+	if (hw.SSTs[0].type != 3 && hw.SSTs[0].type)
+		g_state.tmus = 1;
 	else
-		g_state[160] = v5;
-	v1 = g_state[160];
-	x_log("x_open: cartdtype=%i, tmus=%i\n");
+		g_state.tmus = hw.SSTs[0].sstBoard.VoodooConfig.nTexelfx;
+	x_log("x_open: cartdtype=%i, tmus=%i\n", hw.SSTs[0].type, g_state.tmus);
+
 	grSstSelect(0);
 	text_init();
-	if ( g_state[163] < 1024 )
+	if ( g_state.xs < 1024 )
 	{
-		if ( g_state[163] < 800 )
+		if ( g_state.xs < 800 )
 		{
-			if ( g_state[163] < 640 )
+			if ( g_state.xs < 640 )
 			{
-				v2 = 3;
-				if ( g_state[163] < 512 )
-					v2 = 7;
+				mode = GR_RESOLUTION_512x384;
+				if ( g_state.xs < 512 )
+					mode = GR_RESOLUTION_640x480;
 			}
 			else
 			{
-				v2 = 7;
+				mode = GR_RESOLUTION_640x480;
 			}
 		}
 		else
 		{
-			v2 = 8;
+			mode = GR_RESOLUTION_800x600;
 		}
 	}
 	else
 	{
-		v2 = 12;
+		mode = 12;
 	}
-	grSstWinOpen(g_state[162], v2, 0, 1, 1, g_state[165], g_state[166]);
-	grClipWindow(0, 0, g_state[163], g_state[164]);
+	grSstWinOpen(g_state.hwnd, mode, GR_REFRESH_60Hz, GR_COLORFORMAT_ABGR, GR_ORIGIN_LOWER_LEFT, g_state.buffers, g_state.vsync);
+	grClipWindow(0, 0, g_state.xs, g_state.ys);
 	return 0;
 }
 
@@ -128,10 +126,10 @@ void init_activate()
 {
 }
 
-void init_resize(int a1, int a2)
+void init_resize(int xs, int ys)
 {
-	g_state[163] = a1;
-	g_state[164] = a2;
+	g_state.xs = xs;
+	g_state.ys = ys;
 }
 
 int init_bufferswap()
@@ -272,7 +270,7 @@ int mode_loadtexture(int a1)
 	int v4; // edi
 
 	v1 = 1;
-	if ( SLODWORD(g_state[160]) < 2 )
+	if ( g_state.tmus < 2 )
 		v1 = 0;
 	result = texture_get(a1);
 	v3 = result;
@@ -427,7 +425,7 @@ void mode_change()
 	float v35; // ST18_4
 	float v36; // ST14_4
 
-	if ( LOBYTE(g_state[290]) & 1 )
+	if ( g_state.changed & 1 )
 	{
 		v1 = g_state[317];
 		if ( LODWORD(g_state[289]) != LODWORD(v1) )
@@ -447,7 +445,7 @@ void mode_change()
 			g_state[289] = g_state[317];
 		}
 	}
-	if ( LOBYTE(g_state[290]) & 8 )
+	if ( g_state.changed & 8 )
 	{
 		v2 = g_state[297];
 		v3 = g_state[298];
@@ -481,7 +479,7 @@ void mode_change()
 				grFogMode(GR_FOG_WITH_TABLE);
 		}
 	}
-	if ( LOBYTE(g_state[290]) & 4 )
+	if ( g_state.changed & 4 )
 	{
 		v11 = g_state[291];
 		if ( LODWORD(g_state[263]) != LODWORD(v11) )
@@ -784,10 +782,10 @@ LABEL_103:
 		v24 = g_state[309];
 		g_state[282] = 0.0;
 		g_state[283] = 0.0;
-		LODWORD(g_state[290]) |= 2u;
+		g_state.changed |= 2u;
 		g_state[281] = v24;
 	}
-	if ( LOBYTE(g_state[290]) & 2 )
+	if ( g_state.changed & 2 )
 	{
 		if ( LOBYTE(g_state[317]) & 0x10 )
 			LODWORD(g_state[307]) |= 2u;
@@ -827,7 +825,7 @@ LABEL_103:
 		result = g_state[307];
 		g_state[279] = result;
 	}
-	g_state[290] = 0.0;
+	g_state.changed = 0;
 	++g_stats[4];
 	if ( LOBYTE(g_state[317]) & 0x20 )
 	{
@@ -848,40 +846,3 @@ LABEL_103:
 		x_log("-texture %i (%i textures)\n");
 	}
 }
-
-
-//.data:00001150 _data           segment dword public 'DATA' use32
-//.data:00001150                 assume cs:_data
-//.data:00001150                 ;org 1150h
-//.data:0000120C $SG1379         db 'fog: type %i, %.4f..%.4f (znear=%f)',0Ah,0
-//.data:00001231                 align 4
-//.data:00001234 $SG1383         db '%3i: %3i',0Ah,0
-//.data:0000123E                 align 10h
-//.data:000012CB _data           ends
-//
-//
-//.rdata:000012CC _rdata          segment para public 'DATA' use32
-//.rdata:000012CC                 assume cs:_rdata
-//.rdata:000012CC                 ;org 12CCh
-//.rdata:000012CC $T1525          dq 255.0                ; DATA XREF: _init_clear+4↑r
-//.rdata:000012CC                                         ; _init_clear+14↑r ...
-//.rdata:000012D4 $T1539          dq 2.3                  ; DATA XREF: _generatefogtable+99↑r
-//.rdata:000012DC $T1547          db    0
-//.rdata:000012DD                 db    0
-//.rdata:000012DE                 db    0
-//.rdata:000012DF                 db    0
-//.rdata:000012E0                 db    0
-//.rdata:000012E1                 db    0
-//.rdata:000012E2                 db 0F0h
-//.rdata:000012E3                 db  3Fh ; ?
-//.rdata:000012E4 $T1548          db    0
-//.rdata:000012E5                 db    0
-//.rdata:000012E6                 db    0
-//.rdata:000012E7                 db    0
-//.rdata:000012E8                 db    0
-//.rdata:000012E9                 db    0
-//.rdata:000012EA                 db    0
-//.rdata:000012EB                 db    0
-//.rdata:000012EC $T1549          dd 256.0                ; DATA XREF: _mode_change+4D8↑r
-//.rdata:000012EC _rdata          ends
-//

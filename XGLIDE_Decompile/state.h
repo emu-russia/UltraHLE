@@ -6,33 +6,33 @@ typedef struct
 
 //xt_rendmode
 //used
-//tmus
-//hdc
-//hwnd
-//xs
-//ys
-//buffers
-//vsync
-//frame
+	int tmus;		// g_state[160]
+	void* hdc;		// 161
+	void* hwnd;		// 162
+	int xs;			// g_state[163]
+	int ys;			// g_state[164]
+	int buffers;	// 165
+	int vsync;		// 166
+	int frame;		// 167
 //error
 //matrix
 //xform
 //camxform
 //projxform
 //campresent
-//projchanged
+	int projchanged;	// 234
 //matrixnull
 //projnull
-//xmin
-//xmax
-//ymin
-//ymax
+	float xmin;			// 237
+	float xmax;			// 238
+	float ymin;			// 239
+	float ymax;			// 240
 	float znear;		// g_state[241]
 	float zfar;			// g_state[242]
 	float zdecal;		// g_state[243]
 //invzfar
 //invznear
-//xformmode
+	int xformmode;		// 246
 //usexformmode
 //view_x0
 //view_x1
@@ -50,17 +50,17 @@ typedef struct
 //currentmode
 //active
 //setnew
-//changed
-//mask
-//masktst
+	int changed;	// 290   -- mode changed
+	int mask;		// 291
+	int masktst;	// 292
 //colortext1
 //text1text2
 //zbias
-//fogtype
-//fogmin
-//fogmax
-//fogcolor
-//dither
+	int fogtype;	// 296
+	float fogmin;	// 297
+	float fogmax;	// 298
+	float fogcolor[4];	// 299(r), 300(g), 301(b), 302(a)
+	int dither;		// 303
 	int src;		// g_state[304]
 	int dst;		// g_state[305]
 	int sametex;	// g_state[306]

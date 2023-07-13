@@ -41,7 +41,7 @@ char *x_version()
 	return version;
 }
 
-signed int __cdecl x_open(int a1, int a2, int a3, int a4, int a5, int a6)
+int x_open(void* hdc, void* hwnd, int width, int height, int buffers, int vsync)
 {
 	DWORD *v6; // eax
 	signed int v7; // esi
@@ -64,17 +64,18 @@ signed int __cdecl x_open(int a1, int a2, int a3, int a4, int a5, int a6)
 	g_state[159 * v7] = 1;
 	g_activestateindex = v7;
 	g_activestate = &g_state[159 * v7];
-	g_state[161] = a1;
-	g_state[162] = a2;
-	g_state[163] = a3;
-	g_state[164] = a4;
-	g_state[165] = a5;
-	g_state[166] = a6;
+
+	g_state.hdc = hdc;
+	g_state.hwnd = hwnd;
+	g_state.xs = width;
+	g_state.ys = height;
+	g_state.buffers = buffers;
+	g_state.vsync = vsync;
 	v9 = init_init();
 	mode_init();
 	geom_init();
-	g_state[234] = 0;
-	g_state[290] = 0;
+	g_state.projchanged = 0;
+	g_state.changed = 0;
 	x_projection(90.0, 1063675494, 65535.0);
 	result = -1;
 	if ( !v9 )
@@ -87,12 +88,12 @@ void x_resize(int width, int height)
 	init_resize(width, height);
 }
 
-void x_select(int a1)
+void x_select(int which)
 {
-	if ( a1 > 0 )
+	if (which > 0 )
 	{
-		g_activestateindex = a1;
-		g_activestate = &g_state[159 * a1];
+		g_activestateindex = which;
+		g_activestate = &g_state[159 * which];
 		init_activate();
 	}
 	else
@@ -102,14 +103,14 @@ void x_select(int a1)
 	}
 }
 
-void x_close(int a1)
+void x_close(int which)
 {
 	DWORD *result; // eax
 
-	result = (DWORD *)a1;
-	if ( a1 < 2 )
+	result = (DWORD *)which;
+	if (which < 2 )
 	{
-		result = &g_state[159 * a1];
+		result = &g_state[159 * which];
 		if ( *result )
 		{
 			*result = 0;
@@ -220,26 +221,22 @@ void x_finish(void)
 	init_bufferswap();
 	text_frameend();
 	x_reset();
-	++g_state[167];
+	++g_state.frame;
 }
 
-int __cdecl x_frustum(int a1, int a2, int a3, int a4, int a5, float a6)
+void x_frustum(float xmin, float xmax, float ymin, float ymax, float znear, float zfar)
 {
-	int result; // eax
-
 	x_flush();
-	g_state[237] = a1;
-	result = a4;
-	g_state[238] = a2;
-	g_state[239] = a3;
-	g_state[241] = a5;
-	g_state[246] = 0;
-	g_state[240] = a4;
-	g_state[234] = 1;
-	*(float *)&g_state[242] = a6;
-	*(float *)&g_state[244] = 1.0 / a6;
-	*(float *)&g_state[245] = 1.0 / *(float *)&a5;
-	return result;
+	g_state.xmin = xmin;
+	g_state.xmax = xmax;
+	g_state.ymin = ymin;
+	g_state.ymax = ymax;
+	g_state.znear = znear;
+	g_state.zfar = zfar;
+	g_state.xformmode = 0;
+	g_state.projchanged = 1;
+	g_state[244] = 1.0 / zfar;
+	g_state[245] = 1.0 / znear;
 }
 
 void x_projmatrix(xt_matrix* a1)
@@ -259,8 +256,8 @@ void x_projmatrix(xt_matrix* a1)
 		v2 = &identmatrix;
 	}
 	memcpy(&g_state[217], v2, 0x40u);
-	g_state[246] = 2;
-	g_state[234] = 1;
+	g_state.xformmode = 2;
+	g_state.projchanged = 1;
 }
 
 void projrecalced()
@@ -270,14 +267,14 @@ void projrecalced()
 void x_ortho(float xmin, float ymin, float xmax, float ymax, float znear, float zfar)
 {
 	x_flush();
-	g_state[237] = xmin;
-	g_state[238] = ymin;
-	g_state[239] = xmax;
-	g_state[241] = znear;
-	g_state[240] = ymax;
-	g_state[242] = zfar;
-	g_state[246] = 1;
-	g_state[234] = 1;
+	g_state.xmin = xmin;
+	g_state.ymin = ymin;
+	g_state.xmax = xmax;
+	g_state.ymax = ymax;
+	g_state.znear = znear;
+	g_state.zfar = zfar;
+	g_state.xformmode = 1;
+	g_state.projchanged = 1;
 	g_state[244] = 1.0 / zfar;
 	g_state[245] = 1.0 / znear;
 }
@@ -292,16 +289,15 @@ void x_viewport(float x0, float y0, float x1, float y1)
 	v5 = g_state[164] - 1;
 	g_state[249] = x1;
 	v6 = (double)v5;
-	g_state[234] = 1;
+	g_state.projchanged = 1;
 	g_state[250] = v6 - y1;
 	g_state[251] = v6 - y0;
 }
 
-int __cdecl x_projection(float a1, int a2, float a3)
+void x_projection(float fov, float znear, float zfar)
 {
 	int v3; // ST08_4
 	int v4; // ST04_4
-	int result; // eax
 	long double v6; // st7
 	int v7; // ST0C_4
 	int v8; // ST08_4
@@ -309,38 +305,37 @@ int __cdecl x_projection(float a1, int a2, float a3)
 	int v10; // ST00_4
 
 	x_flush();
-	if ( SLODWORD(a1) >= 1065353216 )
+	if ( fov >= 1.0 )
 	{
-		v6 = tan(a1 * 0.0174532925199433 * 0.5) * *(float *)&a2;
+		v6 = tan(fov * 0.0174532925199433 * 0.5) * zfar;
 		*(float *)&v7 = 0.75 * v6;
 		*(float *)&v8 = -(0.75 * v6);
 		*(float *)&v9 = v6;
 		*(float *)&v10 = -v6;
-		result = x_frustum(v10, v9, v8, v7, a2, a3);
+		x_frustum(v10, v9, v8, v7, znear, zfar);
 	}
 	else
 	{
 		*(float *)&v3 = (double)(signed int)g_state[164];
 		*(float *)&v4 = (double)(signed int)g_state[163];
-		x_ortho(0, v4, v3, 0, a2, a3);
+		x_ortho(0, v4, v3, 0, znear, zfar);
 	}
-	return result;
 }
 
 int x_zrange(float znear, float zfar)
 {
 	x_flush();
-	g_state[290] = 1;
-	g_state[234] = 1;
-	g_state[241] = znear;
-	g_state[242] = zfar;
+	g_state.changed = 1;
+	g_state.projchanged = 1;
+	g_state.znear = znear;
+	g_state.zfar = zfar;
 	return 0;
 }
 
 int x_zdecal(float factor)
 {
 	x_flush();
-	g_state[243] = factor;
+	g_state.zdecal = factor;
 	return 0;
 }
 
@@ -538,7 +533,7 @@ void x_forcegeometry(int forceon, int forceoff)
 {
 	g_state[259] = forceon;
 	g_state[260] = forceoff;
-	g_state[290] |= 1u;
+	g_state.changed |= 1u;
 }
 
 void x_geometry(int flags)
@@ -548,7 +543,7 @@ void x_geometry(int flags)
 
 	v1 = g_state[259];
 	result = ~g_state[260];
-	g_state[290] |= 1u;
+	g_state.changed |= 1u;
 	g_state[317] = result & (flags | v1);
 }
 
@@ -557,27 +552,27 @@ int x_mask(int colormask, int depthmask, int depthtest)
 	signed int v3; // ecx
 
 	v3 = 0;
-	if (colormask == 4097 )
+	if (colormask == X_ENABLE)
 	{
 		v3 = 1;
 	}
-	else if (colormask != 4098 )
+	else if (colormask != X_DISABLE)
 	{
 		return 1;
 	}
-	if (depthmask == 4097 )
+	if (depthmask == X_ENABLE)
 	{
 		v3 |= 2u;
 	}
-	else if (depthmask != 4098 )
+	else if (depthmask != X_DISABLE)
 	{
 		return 1;
 	}
 	if ( !depthtest || depthtest == 1 )
 		return 1;
-	g_state[292] = depthtest;
-	g_state[291] = v3;
-	g_state[290] |= 4u;
+	g_state.masktst = depthtest;
+	g_state.mask = v3;
+	g_state.changed |= 4u;
 	return 0;
 }
 
@@ -585,14 +580,14 @@ int x_dither(int type)
 {
 	if (type == X_ENABLE)
 	{
-		g_state[303] = 1;
+		g_state.dither = 1;
 LABEL_5:
-		g_state[290] |= 4u;
+		g_state.changed |= 4u;
 		return 0;
 	}
 	if (type == X_DISABLE)
 	{
-		g_state[303] = 0;
+		g_state.dither = 0;
 		goto LABEL_5;
 	}
 	return 1;
@@ -606,7 +601,7 @@ int x_blend(int src, int dst)
 		return 1;
 	g_state.src = src;
 	g_state.dst = dst;
-	g_state[290] |= 4u;
+	g_state.changed |= 4u;
 	return 0;
 }
 
@@ -616,7 +611,7 @@ int x_alphatest(float limit)
 		limit = 1.0f;
 	if ( limit < 0.0f || limit > 1.0f)
 		return 1;
-	g_state[290] |= 4u;
+	g_state.changed |= 4u;
 	g_state.alphatest = limit;
 	return 0;
 }
@@ -626,7 +621,7 @@ int x_combine(int colortext1)
 	if (colortext1 < 4865 || colortext1 > 4879 )
 		return 1;
 	g_state[294] = 0;
-	g_state[290] |= 4u;
+	g_state.changed |= 4u;
 	g_state[293] = colortext1;
 	return 0;
 }
@@ -634,7 +629,7 @@ int x_combine(int colortext1)
 int x_procombine(int rgb, int alpha)
 {
 	g_state[294] = 0;
-	g_state[290] |= 4u;
+	g_state.changed |= 4u;
 	g_state[293] = rgb | (alpha << 16);
 	return 0;
 }
@@ -645,14 +640,14 @@ int x_envcolor(float r, float g, float b, float a)
 	*(float *)&g_state[314] = g;
 	*(float *)&g_state[315] = b;
 	*(float *)&g_state[316] = a;
-	g_state[290] |= 4u;
+	g_state.changed |= 4u;
 	g_state[312] = (unsigned __int8)(signed __int64)(r * 255.0) | ((unsigned __int8)(signed __int64)(b * 255.0) << 16) | ((((unsigned int)(signed __int64)(a * 255.0) << 16) | (unsigned __int8)(signed __int64)(g * 255.0)) << 8);
 	return 0;
 }
 
 int x_combine2(int colortext1, int text1text2, int sametex)
 {
-	if ( g_state[160] < 2 )
+	if ( g_state.tmus < 2 )
 		return 1;
 	if (colortext1 < X_FIRSTCOMBINE || colortext1 > X_LASTCOMBINE)
 		return 1;
@@ -661,20 +656,20 @@ int x_combine2(int colortext1, int text1text2, int sametex)
 	g_state[293] = colortext1;
 	g_state.sametex = sametex;
 	g_state[294] = text1text2;
-	g_state[290] |= 4u;
+	g_state.changed |= 4u;
 	return 0;
 }
 
 int x_procombine2(int rgb, int alpha, int text1text2, int sametex)
 {
-	if ( g_state[160] < 2 )
+	if ( g_state.tmus < 2 )
 		return 1;
 	if (text1text2 < X_FIRSTCOMBINE || text1text2 > X_LASTCOMBINE)
 		return 1;
 	g_state.sametex = sametex;
 	g_state[293] = rgb | (alpha << 16);
 	g_state[294] = text1text2;
-	g_state[290] |= 4u;
+	g_state.changed |= 4u;
 	return 0;
 }
 
@@ -683,20 +678,20 @@ int x_texture(int text1handle)
 	if (text1handle <= 0 )
 		return 1;
 	g_state[311] = 0;
-	g_state[290] |= 2u;
+	g_state.changed |= 2u;
 	g_state[310] = text1handle;
 	return 0;
 }
 
 int x_texture2(int text1handle, int text2handle)
 {
-	if ( g_state[160] < 2 )
+	if ( g_state.tmus < 2 )
 		return 1;
 	if (text1handle <= 0 || text2handle <= 0 )
 		return 1;
 	g_state[310] = text1handle;
 	g_state[311] = text2handle;
-	g_state[290] |= 2u;
+	g_state.changed |= 2u;
 	return 0;
 }
 
@@ -713,14 +708,14 @@ void x_reset(void)
 
 int x_fog(int type, float min, float max, float r, float g, float b)
 {
-	g_state[296] = type;
-	g_state[297] = min;
-	g_state[298] = max;
-	g_state[299] = r;
-	g_state[300] = g;
-	g_state[301] = b;
-	g_state[302] = 1.0f;
-	g_state[290] |= 8u;
+	g_state.fogtype = type;
+	g_state.fogmin = min;
+	g_state.fogmax = max;
+	g_state.fogcolor[0] = r;
+	g_state.fogcolor[1] = g;
+	g_state.fogcolor[2] = b;
+	g_state.fogcolor[3] = 1.0f;
+	g_state.changed |= 8u;
 	return 0;
 }
 
