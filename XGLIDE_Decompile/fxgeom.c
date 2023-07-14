@@ -1218,16 +1218,12 @@ void x_vxarray(xt_pos* a1, int a2, char* a3)
 	}
 }
 
-int clear()
+void clear()
 {
-	int result; // eax
-
 	allxformed = 1;
-	result = 0;
 	state = 0;
 	vertices = 0;
 	corners = 0;
-	return result;
 }
 
 int doclipvertex(signed int a1, int a2, int a3)
@@ -1621,22 +1617,21 @@ signed int splitpoly(int a1, int a2, DWORD *a3)
 	return v17;
 }
 
-void *flush_reordertables()
+void flush_reordertables()
 {
-	int v0; // ecx
 	signed int v1; // ebx
 	signed int v2; // esi
 	float v3; // ebp
 	int *v4; // eax
 	int v5; // edx
 	int v6; // ebp
-	void *result; // eax
 	signed int v8; // ebx
-	signed int v9; // [esp+10h] [ebp-4h]
 
-	v0 = mode;
-	if ( !mode)
-		return (void *)clear();
+	if (mode == 0) {
+		clear();
+		return;
+	}
+
 	switch (mode)
 	{
 		case X_POINTS:
@@ -1659,15 +1654,14 @@ void *flush_reordertables()
 			break;
 		case X_POLYGON:
 			x_fatal("xgeom: too large X_POLYGON!\n");
-			v1 = v9;
-			v0 = mode;
+			v1 = 0;
 			break;
 		default:
 			v1 = 0;
 			break;
 	}
 	v2 = 0;
-	if ( v0 == 4 )
+	if (mode == X_TRIFAN)
 	{
 		memcpy(grvx, &grvx[vertices_base], 0x3Cu);
 		memcpy(xfpos, &xfpos[vertices_base], 0x14u);
@@ -1687,7 +1681,7 @@ void *flush_reordertables()
 		memmove(&xfpos[v2], &xfpos[vertices - v1], 20 * v1);
 		memmove(&grvx[v2], &grvx[vertices - v1], 60 * v1);
 		memmove(&tex[v2], &tex[vertices - v1], 8 * v1);
-		result = memmove(&texp[v2], &texp[vertices - v1], 8 * v1);
+		memmove(&texp[v2], &texp[vertices - v1], 8 * v1);
 	}
 	else
 	{
@@ -1696,13 +1690,11 @@ void *flush_reordertables()
 	v8 = v2 + v1;
 	if ( v8 > 0 )
 	{
-		result = (void *)16843009;
 		memset(xformed, 1u, v8);
 	}
 	vertices = v8;
 	allxformed = 1;
 	corners = 0;
-	return result;
 }
 
 signed int flush_drawfx()

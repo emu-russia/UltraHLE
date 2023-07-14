@@ -101,7 +101,7 @@ Overall status: Not yet buildable, but its something already.
 |splitpoly| | |
 |flush_reordertables| | |
 |flush_drawfx| | |
-|x_flush| | |
+|x_flush|Ready| |
 |**fxtext.c**|||
 |newblock| | |
 |addbefore| | |
