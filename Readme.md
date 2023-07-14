@@ -24,7 +24,7 @@ Tidied up for building under Visual Studio 2022.
 - `strlwr` replaced by `_strlwr`.
 - Unicode: Not Set (UltraHLE does not use Unicode)
 - Minor fixes in UltraHLE.rc and RESOURCE.H
-- MAIN.C: Emulation is started with the command `sgo` (`breakcommand("sgo");`), without using the recompiler. It is safe to use the interpreter for N64 in 2023.
+- Executable base address should be 0 (Linker->Advanced); If you are unsure about the recompiler, you can replace the `go` call with `sgo` in MAIN.C (`breakcommand("sgo");`)
 
 ## Build
 
