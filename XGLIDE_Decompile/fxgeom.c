@@ -68,18 +68,18 @@ void x_cameramatrix(xt_matrix* a1)
 	if ( v2 )
 	{
 LABEL_10:
-		g_state.campresent = 0;
+		g_state[XST].campresent = 0;
 	}
 	else
 	{
-		g_state.campresent = 1;
-		memcpy(g_state.camxform, a1, 0x40u);
+		g_state[XST].campresent = 1;
+		memcpy(g_state[XST].camxform, a1, 0x40u);
 	}
 }
 
 void x_getmatrix(xt_matrix* matrix)
 {
-	memcpy(matrix, g_state.matrix, 0x40u);
+	memcpy(matrix, g_state[XST].matrix, 0x40u);
 }
 
 void dumpmatrix(float *a1, int a2)
@@ -137,31 +137,31 @@ void x_matrix(xt_matrix* matrix)
 
 	if (matrix)
 	{
-		g_state.matrixnull = 0;
+		g_state[XST].matrixnull = 0;
 	}
 	else
 	{
 		matrix = &identmatrix;
-		g_state.matrixnull = 1;
+		g_state[XST].matrixnull = 1;
 	}
-	if ( g_state.projchanged )
+	if ( g_state[XST].projchanged )
 	{
 		recalc_projection();
-		g_state.projchanged = 0;
+		g_state[XST].projchanged = 0;
 	}
-	if ( g_state.projnull && g_state.matrixnull)
+	if ( g_state[XST].projnull && g_state[XST].matrixnull)
 	{
-		g_state.usexformmode = 3;
+		g_state[XST].usexformmode = 3;
 	}
 	else
 	{
-		g_state.usexformmode = g_state.xformmode;
+		g_state[XST].usexformmode = g_state[XST].xformmode;
 		x_flush();
-		memcpy(g_state.matrix, matrix, 0x40u);
-		if ( g_state.xformmode != 1 && g_state.campresent)
+		memcpy(g_state[XST].matrix, matrix, 0x40u);
+		if ( g_state[XST].xformmode != 1 && g_state[XST].campresent)
 		{
 			v1 = &v22;
-			v2 = (float *)g_state.camxform;
+			v2 = (float *)g_state[XST].camxform;
 			do
 			{
 				v3 = (float *)matrix;
@@ -190,15 +190,15 @@ void x_matrix(xt_matrix* matrix)
 				while ( v4 );
 				v2 += 4;
 			}
-			while ( v2 < (float *)&g_state.camxform[4*4]);
+			while ( v2 < (float *)&g_state[XST].camxform[4*4]);
 			v21 = (float *)&v22;
 		}
 		else
 		{
-			v21 = (float *)g_state.matrix;
+			v21 = (float *)g_state[XST].matrix;
 		}
-		v11 = (float *)g_state.xform;
-		v12 = (float *)g_state.projxform;
+		v11 = (float *)g_state[XST].xform;
+		v12 = (float *)g_state[XST].projxform;
 		do
 		{
 			v13 = v21;
@@ -227,14 +227,14 @@ void x_matrix(xt_matrix* matrix)
 			while ( v14 );
 			v12 += 4;
 		}
-		while ( v12 < (float *)g_state.projxform[4*4]);
+		while ( v12 < (float *)g_state[XST].projxform[4*4]);
 
-		if ( g_state.geometry & X_DUMPDATA)
+		if ( g_state[XST].geometry & X_DUMPDATA)
 		{
 			dumpmatrix(v21, "Modelview");
-			dumpmatrix(g_state.projxform, "Projection");
-			dumpmatrix(g_state.xform, "Combined");
-			x_log("Xformmode: %i Znear: %f Zfar: %f\n", g_state.xformmode, g_state.znear, g_state.zfar);
+			dumpmatrix(g_state[XST].projxform, "Projection");
+			dumpmatrix(g_state[XST].xform, "Combined");
+			x_log("Xformmode: %i Znear: %f Zfar: %f\n", g_state[XST].xformmode, g_state[XST].znear, g_state[XST].zfar);
 		}
 	}
 }
@@ -251,41 +251,41 @@ int recalc_projection()
 	long double v11; // fst5
 	long double v12; // fst4
 
-	v1 = (g_state.view_x1 - g_state.view_x0 + 1.0f) * 0.5f;
-	g_state.projxmul = v1;
-	v2 = (g_state.view_y1 - g_state.view_y0 + 1.0f) * 0.5f;
-	g_state.projymul = v2;
-	g_state.projxadd = v1 + g_state.view_x0 + 0.2f;
-	g_state.projyadd = v2 + g_state.view_y0 + 0.2f;
+	v1 = (g_state[XST].view_x1 - g_state[XST].view_x0 + 1.0f) * 0.5f;
+	g_state[XST].projxmul = v1;
+	v2 = (g_state[XST].view_y1 - g_state[XST].view_y0 + 1.0f) * 0.5f;
+	g_state[XST].projymul = v2;
+	g_state[XST].projxadd = v1 + g_state[XST].view_x0 + 0.2f;
+	g_state[XST].projyadd = v2 + g_state[XST].view_y0 + 0.2f;
 	// TODO: Check. Hard place for decompiler.
-	grClipWindow(g_state.view_x0, g_state.view_y0, g_state.view_x1, g_state.view_y1);
-	v6 = g_state.xformmode;
+	grClipWindow(g_state[XST].view_x0, g_state[XST].view_y0, g_state[XST].view_x1, g_state[XST].view_y1);
+	v6 = g_state[XST].xformmode;
 	if ( v6 == 0 )
 	{
-		memset(g_state.projxform, 0, 0x40u);
-		v8 = g_state.znear / g_state.xmax;
-		g_state.projxform[227 - 217] = 1.0f;
-		g_state.projxform[232 - 217] = 1.0f;
-		g_state.projxform[217 - 217] = v8;
-		g_state.projxform[222 - 217] = g_state.znear / g_state.ymax;
+		memset(g_state[XST].projxform, 0, 0x40u);
+		v8 = g_state[XST].znear / g_state[XST].xmax;
+		g_state[XST].projxform[227 - 217] = 1.0f;
+		g_state[XST].projxform[232 - 217] = 1.0f;
+		g_state[XST].projxform[217 - 217] = v8;
+		g_state[XST].projxform[222 - 217] = g_state[XST].znear / g_state[XST].ymax;
 		result = projrecalced();
 	}
 	else
 	{
 		if ( v6 == 1 )
 		{
-			v9 = 2.0 / (g_state.xmax - g_state.xmin);
-			v10 = 2.0 / (g_state.ymax - g_state.ymin);
-			v11 = (g_state.xmin + g_state.xmax) * 0.5f;
-			v12 = (g_state.ymax + g_state.ymin) * 0.5f;
-			memset(g_state.projxform, 0, 0x40u);
-			g_state.projxform[227 - 217] = 1.0f;
-			g_state.projxform[217 - 217] = v9;
-			g_state.projxform[222 - 217] = v10;
-			g_state.projxform[228 - 217] = 0.0f;
-			g_state.projxform[232 - 217] = 0.0f;
-			g_state.projxform[220 - 217] = -(v11 * v9);
-			g_state.projxform[224 - 217] = -(v10 * v12);
+			v9 = 2.0 / (g_state[XST].xmax - g_state[XST].xmin);
+			v10 = 2.0 / (g_state[XST].ymax - g_state[XST].ymin);
+			v11 = (g_state[XST].xmin + g_state[XST].xmax) * 0.5f;
+			v12 = (g_state[XST].ymax + g_state[XST].ymin) * 0.5f;
+			memset(g_state[XST].projxform, 0, 0x40u);
+			g_state[XST].projxform[227 - 217] = 1.0f;
+			g_state[XST].projxform[217 - 217] = v9;
+			g_state[XST].projxform[222 - 217] = v10;
+			g_state[XST].projxform[228 - 217] = 0.0f;
+			g_state[XST].projxform[232 - 217] = 0.0f;
+			g_state[XST].projxform[220 - 217] = -(v11 * v9);
+			g_state[XST].projxform[224 - 217] = -(v10 * v12);
 		}
 		result = projrecalced();
 	}
@@ -296,7 +296,7 @@ void x_begin(int a1)
 {
 	int result; // eax
 
-	if ( g_state.changed || g_state.projchanged )
+	if ( g_state[XST].changed || g_state[XST].projchanged )
 		x_flush();
 	mode = a1;
 	result = 0;
@@ -369,11 +369,11 @@ void vertexdata(xt_data* a1)
 	float v35; // [esp+0h] [ebp-8h]
 	float v36; // [esp+4h] [ebp-4h]
 
-	v35 = g_state.texturexmul;
-	v36 = g_state.textureymul;
+	v35 = g_state[XST].texturexmul;
+	v36 = g_state[XST].textureymul;
 	if ( !mode)
 		x_fatal("vertex without begin");
-	if ( g_state.send & 1 )
+	if ( g_state[XST].send & 1 )
 	{
 		v1 = 15 * vertices;
 		v2 = a1;
@@ -386,9 +386,9 @@ void vertexdata(xt_data* a1)
 	{
 		v2 = a1;
 	}
-	if ( g_state.send & 2 )
+	if ( g_state[XST].send & 2 )
 	{
-		if ( g_state.setnew & 0x10 )
+		if ( g_state[XST].setnew & 0x10 )
 		{
 			v3 = 2 * vertices;
 			texp_S1211[v3] = *((DWORD *)v2 + 7);
@@ -403,7 +403,7 @@ void vertexdata(xt_data* a1)
 		}
 		flt_E230[v3] = v4 * v36;
 	}
-	if ( g_state.send & 4 )
+	if ( g_state[XST].send & 4 )
 	{
 		v5 = 2 * vertices;
 		tex2_S1210[v5] = v2[8] * v35;
@@ -617,11 +617,11 @@ void xform(int a1, xt_pos* a2, int a3, char *a4)
 	float v56; // [esp+10h] [ebp-8h]
 	float v57; // [esp+10h] [ebp-8h]
 
-	switch ( g_state.usexformmode)
+	switch ( g_state[XST].usexformmode)
 	{
 		case 0:
 			v4 = a3;
-			if ( g_state.setnew & 8 )
+			if ( g_state[XST].setnew & 8 )
 			{
 				if ( a3 <= 0 )
 					return;
@@ -650,18 +650,18 @@ LABEL_12:
 					if ( !--v4 )
 						return;
 				}
-				*(float *)v5 = *v6 * g_state.xform[185 - 185]
-										 + v6[1] * g_state.xform[186 - 185]
-										 + v6[2] * g_state.xform[187 - 185]
-										 + g_state.xform[188 - 185];
-				*(float *)(v5 + 4) = *v6 * g_state.xform[189 - 185]
-													 + v6[1] * g_state.xform[190 - 185]
-													 + v6[2] * g_state.xform[191 - 185]
-													 + g_state.xform[192 - 185];
-				v9 = *v6 * g_state.xform[193 - 185]
-					 + v6[1] * g_state.xform[194 - 185]
-					 + v6[2] * g_state.xform[195 - 185]
-					 + g_state.xform[196 - 185];
+				*(float *)v5 = *v6 * g_state[XST].xform[185 - 185]
+										 + v6[1] * g_state[XST].xform[186 - 185]
+										 + v6[2] * g_state[XST].xform[187 - 185]
+										 + g_state[XST].xform[188 - 185];
+				*(float *)(v5 + 4) = *v6 * g_state[XST].xform[189 - 185]
+													 + v6[1] * g_state[XST].xform[190 - 185]
+													 + v6[2] * g_state[XST].xform[191 - 185]
+													 + g_state[XST].xform[192 - 185];
+				v9 = *v6 * g_state[XST].xform[193 - 185]
+					 + v6[1] * g_state[XST].xform[194 - 185]
+					 + v6[2] * g_state[XST].xform[195 - 185]
+					 + g_state[XST].xform[196 - 185];
 				*(float *)(v5 + 8) = v9;
 				*(float *)(v5 + 12) = 1.0 / v9;
 LABEL_11:
@@ -699,9 +699,9 @@ LABEL_11:
 							v15 |= 0x400u;
 						if ( *(float *)(v11 + 4) > (long double)v55 )
 							v15 |= 0x800u;
-						if ( g_state.znear > (long double)v55 )
+						if ( g_state[XST].znear > (long double)v55 )
 							v15 |= 0x1000u;
-						if ( g_state.zfar < (long double)v55 )
+						if ( g_state[XST].zfar < (long double)v55 )
 							v15 |= 0x2000u;
 						goto LABEL_46;
 					}
@@ -712,18 +712,18 @@ LABEL_47:
 						return;
 				}
 				v15 = 0;
-				*(float *)v11 = *v12 * g_state.xform[185 - 185]
-											+ v12[1] * g_state.xform[186 - 185]
-											+ v12[2] * g_state.xform[187 - 185]
-											+ g_state.xform[188 - 185];
-				*(float *)(v11 + 4) = *v12 * g_state.xform[189 - 185]
-														+ v12[1] * g_state.xform[190 - 185]
-														+ v12[2] * g_state.xform[191 - 185]
-														+ g_state.xform[192 - 185];
-				v54 = *v12 * g_state.xform[193 - 185]
-						+ v12[1] * g_state.xform[194 - 185]
-						+ v12[2] * g_state.xform[195 - 185]
-						+ g_state.xform[196 - 185];
+				*(float *)v11 = *v12 * g_state[XST].xform[185 - 185]
+											+ v12[1] * g_state[XST].xform[186 - 185]
+											+ v12[2] * g_state[XST].xform[187 - 185]
+											+ g_state[XST].xform[188 - 185];
+				*(float *)(v11 + 4) = *v12 * g_state[XST].xform[189 - 185]
+														+ v12[1] * g_state[XST].xform[190 - 185]
+														+ v12[2] * g_state[XST].xform[191 - 185]
+														+ g_state[XST].xform[192 - 185];
+				v54 = *v12 * g_state[XST].xform[193 - 185]
+						+ v12[1] * g_state[XST].xform[194 - 185]
+						+ v12[2] * g_state[XST].xform[195 - 185]
+						+ g_state[XST].xform[196 - 185];
 				*(float *)(v11 + 8) = v54;
 				v16 = *(float *)v11;
 				if ( !(v19 | v20) )
@@ -735,9 +735,9 @@ LABEL_47:
 					v15 |= 0x400u;
 				if ( *(float *)(v11 + 4) > (long double)v54 )
 					v15 |= 0x800u;
-				if ( g_state.znear > (long double)v54 )
+				if ( g_state[XST].znear > (long double)v54 )
 					v15 |= 0x1000u;
-				if ( g_state.zfar < (long double)v54 )
+				if ( g_state[XST].zfar < (long double)v54 )
 					v15 |= 0x2000u;
 				if ( !v15 )
 					*(float *)(v11 + 12) = 1.0 / v54;
@@ -757,20 +757,20 @@ LABEL_46:
 				{
 					if ( !v30 || (v31 = v30, ++v30, !*v31) )
 					{
-						*(float *)v28 = *v29 * g_state.xform[185 - 185]
-													+ v29[1] * g_state.xform[186 - 185]
-													+ v29[2] * g_state.xform[187 - 185]
-													+ g_state.xform[188 - 185];
-						*(float *)(v28 + 4) = *v29 * g_state.xform[189 - 185]
-																+ v29[1] * g_state.xform[190 - 185]
-																+ v29[2] * g_state.xform[191 - 185]
-																+ g_state.xform[192 - 185];
-						*(float *)(v28 + 8) = *v29 * g_state.xform[193 - 185]
-																+ v29[1] * g_state.xform[194 - 185]
-																+ v29[2] * g_state.xform[195 - 185]
-																+ g_state.xform[196 - 185];
+						*(float *)v28 = *v29 * g_state[XST].xform[185 - 185]
+													+ v29[1] * g_state[XST].xform[186 - 185]
+													+ v29[2] * g_state[XST].xform[187 - 185]
+													+ g_state[XST].xform[188 - 185];
+						*(float *)(v28 + 4) = *v29 * g_state[XST].xform[189 - 185]
+																+ v29[1] * g_state[XST].xform[190 - 185]
+																+ v29[2] * g_state[XST].xform[191 - 185]
+																+ g_state[XST].xform[192 - 185];
+						*(float *)(v28 + 8) = *v29 * g_state[XST].xform[193 - 185]
+																+ v29[1] * g_state[XST].xform[194 - 185]
+																+ v29[2] * g_state[XST].xform[195 - 185]
+																+ g_state[XST].xform[196 - 185];
 						if ( v33 )
-							*(DWORD *)(v28 + 12) = g_state.invznear;
+							*(DWORD *)(v28 + 12) = g_state[XST].invznear;
 						else
 							*(float *)(v28 + 12) = 1.0 / *(float *)(v28 + 8);
 						v34 = 0;
@@ -811,18 +811,18 @@ LABEL_46:
 				if ( !v40 )
 				{
 					v41 = 0;
-					*(float *)v37 = *v38 * g_state.xform[185 - 185]
-												+ v38[1] * g_state.xform[186 - 185]
-												+ v38[2] * g_state.xform[187 - 185]
-												+ g_state.xform[188 - 185];
-					*(float *)(v37 + 4) = *v38 * g_state.xform[189 - 185]
-															+ v38[1] * g_state.xform[190 - 185]
-															+ v38[2] * g_state.xform[191 - 185]
-															+ g_state.xform[192 - 185];
-					v56 = *v38 * g_state.xform[197 - 185]
-							+ v38[1] * g_state.xform[198 - 185]
-							+ v38[2] * g_state.xform[199 - 185]
-							+ g_state.xform[200 - 185];
+					*(float *)v37 = *v38 * g_state[XST].xform[185 - 185]
+												+ v38[1] * g_state[XST].xform[186 - 185]
+												+ v38[2] * g_state[XST].xform[187 - 185]
+												+ g_state[XST].xform[188 - 185];
+					*(float *)(v37 + 4) = *v38 * g_state[XST].xform[189 - 185]
+															+ v38[1] * g_state[XST].xform[190 - 185]
+															+ v38[2] * g_state[XST].xform[191 - 185]
+															+ g_state[XST].xform[192 - 185];
+					v56 = *v38 * g_state[XST].xform[197 - 185]
+							+ v38[1] * g_state[XST].xform[198 - 185]
+							+ v38[2] * g_state[XST].xform[199 - 185]
+							+ g_state[XST].xform[200 - 185];
 					*(float *)(v37 + 8) = v56;
 					v42 = *(float *)v37;
 					if ( !(v45 | v46) )
@@ -834,9 +834,9 @@ LABEL_46:
 						v41 |= 0x400u;
 					if ( *(float *)(v37 + 4) > (long double)v56 )
 						v41 |= 0x800u;
-					if ( g_state.znear > (long double)v56 )
+					if ( g_state[XST].znear > (long double)v56 )
 						v41 |= 0x1000u;
-					if ( g_state.zfar < (long double)v56 )
+					if ( g_state[XST].zfar < (long double)v56 )
 						v41 |= 0x2000u;
 					if ( !v41 )
 						*(float *)(v37 + 12) = 1.0 / v56;
@@ -879,9 +879,9 @@ LABEL_92:
 							v48 |= 0x400u;
 						if ( *(float *)(v37 + 4) > (long double)v57 )
 							v48 |= 0x800u;
-						if ( g_state.znear > (long double)v57 )
+						if ( g_state[XST].znear > (long double)v57 )
 							v48 |= 0x1000u;
-						if ( g_state.zfar < (long double)v57 )
+						if ( g_state[XST].zfar < (long double)v57 )
 							v48 |= 0x2000u;
 						if ( !v48 )
 							*(float *)(v37 + 12) = 1.0 / v57;
@@ -926,18 +926,18 @@ int setuprvx(int a1, int a2)
 	float *v24; // [esp+48h] [ebp-8h]
 	int v25; // [esp+4Ch] [ebp-4h]
 
-	v21 = g_state.projxmul;
-	v22 = g_state.projymul;
-	v19 = g_state.projxadd;
-	v20 = g_state.projyadd;
-	v23 = g_state.znear * g_state.zdecal;
+	v21 = g_state[XST].projxmul;
+	v22 = g_state[XST].projymul;
+	v19 = g_state[XST].projxadd;
+	v20 = g_state[XST].projyadd;
+	v23 = g_state[XST].znear * g_state[XST].zdecal;
 	v2 = &xfpos[a1];
 	v3 = &grvx[a1];
 	v4 = &tex[a1];
 	v5 = &tex2[a1];
 	result = &texp[a1];
 	v24 = &texp[a1];
-	if ( g_state.xformmode == 1 )
+	if ( g_state[XST].xformmode == 1 )
 	{
 		v7 = a2;
 		if ( a2 > 0 )
@@ -955,13 +955,13 @@ int setuprvx(int a1, int a2)
 				v3[1] = v3[1] - 786432.0;
 				v9 = *((DWORD *)v3 + 8);
 				v16 = v3[8];
-				if ( g_state.send & 2 )
+				if ( g_state[XST].send & 2 )
 				{
 					v3[9] = *v4 * v16;
 					v3[10] = v4[1] * v16;
 					*((DWORD *)v3 + 11) = v9;
 				}
-				if ( g_state.send & 4 )
+				if ( g_state[XST].send & 4 )
 				{
 					v3[12] = *v5 * v16;
 					v3[13] = v5[1] * v16;
@@ -976,7 +976,7 @@ int setuprvx(int a1, int a2)
 		}
 		return result;
 	}
-	if ( g_state.xformmode == 2 )
+	if ( g_state[XST].xformmode == 2 )
 	{
 		if ( a2 <= 0 )
 			return result;
@@ -995,33 +995,33 @@ int setuprvx(int a1, int a2)
 				v3[1] = v3[1] - 786432.0;
 				result = (int *)*((DWORD *)v3 + 8);
 				v17 = v3[8];
-				if ( g_state.setnew & 0x10 )
+				if ( g_state[XST].setnew & 0x10 )
 				{
-					if ( g_state.send & 2 )
+					if ( g_state[XST].send & 2 )
 					{
 						v3[9] = *v4 * v17;
 						v3[10] = v4[1] * v17;
 						v3[11] = *v24 * v17;
 					}
-					if ( !(g_state.send & 4) )
+					if ( !(g_state[XST].send & 4) )
 						goto LABEL_23;
 				}
 				else
 				{
-					if ( g_state.send & 2 )
+					if ( g_state[XST].send & 2 )
 					{
 						v3[9] = *v4 * v17;
 						v3[10] = v4[1] * v17;
 						*((DWORD *)v3 + 11) = result;
 					}
-					if ( !(g_state.send & 4) )
+					if ( !(g_state[XST].send & 4) )
 						goto LABEL_23;
 				}
 				v3[12] = *v5 * v17;
 				v3[13] = v5[1] * v17;
 			}
 LABEL_23:
-			if ( g_state.geometry & X_DUMPDATA)
+			if ( g_state[XST].geometry & X_DUMPDATA)
 			{
 				x_log(
 					"#x_vx[ %13.5f %13.5f %13.5f ]\n",
@@ -1045,7 +1045,7 @@ LABEL_23:
 				return result;
 		}
 	}
-	if ( g_state.currentmode.zbias || g_state.setnew & 0x10 )
+	if ( g_state[XST].currentmode.zbias || g_state[XST].setnew & 0x10 )
 	{
 		v13 = a2;
 		if ( a2 <= 0 )
@@ -1065,26 +1065,26 @@ LABEL_23:
 				v3[1] = v3[1] - 786432.0;
 				v15 = *((DWORD *)v3 + 8);
 				v18 = v3[8];
-				if ( g_state.setnew & 0x10 )
+				if ( g_state[XST].setnew & 0x10 )
 				{
-					if ( g_state.send & 2 )
+					if ( g_state[XST].send & 2 )
 					{
 						v3[9] = *v4 * v18;
 						v3[10] = v4[1] * v18;
 						v3[11] = *v24 * v18;
 					}
-					if ( !(g_state.send & 4) )
+					if ( !(g_state[XST].send & 4) )
 						goto LABEL_55;
 				}
 				else
 				{
-					if ( g_state.send & 2 )
+					if ( g_state[XST].send & 2 )
 					{
 						v3[9] = *v4 * v18;
 						v3[10] = v4[1] * v18;
 						*((DWORD *)v3 + 11) = v15;
 					}
-					if ( !(g_state.send & 4) )
+					if ( !(g_state[XST].send & 4) )
 						goto LABEL_55;
 				}
 				v3[12] = *v5 * v18;
@@ -1116,12 +1116,12 @@ LABEL_55:
 				*v3 = v12 - 786432.0;
 				v3[1] = v3[1] + 786432.0;
 				v3[1] = v3[1] - 786432.0;
-				if ( g_state.send & 2 )
+				if ( g_state[XST].send & 2 )
 				{
 					v3[9] = *v4 * v3[8];
 					v3[10] = v4[1] * v3[8];
 				}
-				if ( g_state.send & 4 )
+				if ( g_state[XST].send & 4 )
 				{
 					v3[12] = *v5 * v3[8];
 					v3[13] = v5[1] * v3[8];
@@ -1260,7 +1260,7 @@ int doclipvertex(signed int a1, int a2, int a3)
 				v3 = a2;
 				v4 = a3;
 				v20 = &flt_11454[5 * a2];
-				v22 = *v20 - g_state.znear;
+				v22 = *v20 - g_state[XST].znear;
 				v24 = *v20 - flt_11454[5 * a3];
 			}
 			else
@@ -1270,7 +1270,7 @@ int doclipvertex(signed int a1, int a2, int a3)
 				v3 = a2;
 				v4 = a3;
 				v21 = &flt_11454[5 * a2];
-				v22 = g_state.zfar - *v21;
+				v22 = g_state[XST].zfar - *v21;
 				v24 = flt_11454[5 * a3] - *v21;
 			}
 		}
@@ -1318,7 +1318,7 @@ LABEL_5:
 	v23 = v22 / v24;
 	xfpos_S1212[v5] = (xfpos_S1212[5 * v4] - xfpos_S1212[5 * v3]) * v23 + xfpos_S1212[5 * v3];
 	flt_11450[v5] = (flt_11450[5 * v4] - flt_11450[5 * v3]) * v23 + flt_11450[5 * v3];
-	v6 = (g_state.send & 1) == 0;
+	v6 = (g_state[XST].send & 1) == 0;
 	v25 = (flt_11454[5 * v4] - flt_11454[5 * v3]) * v23 + flt_11454[5 * v3];
 	flt_11454[v5] = v25;
 	if ( !v6 )
@@ -1329,17 +1329,17 @@ LABEL_5:
 		flt_2A38[v7] = (flt_2A38[15 * v4] - flt_2A38[15 * v3]) * v23 + flt_2A38[15 * v3];
 		flt_2A40[v7] = (flt_2A40[15 * v4] - flt_2A40[15 * v3]) * v23 + flt_2A40[15 * v3];
 	}
-	if ( g_state.send & 2 )
+	if ( g_state[XST].send & 2 )
 	{
 		v8 = 2 * clipnewvx;
-		v6 = (g_state.setnew & 0x10) == 0;
+		v6 = (g_state[XST].setnew & 0x10) == 0;
 		tex_S1209[v8] = (tex_S1209[2 * v4] - tex_S1209[2 * v3]) * v23 + tex_S1209[2 * v3];
 		flt_E230[v8] = (flt_E230[2 * v4] - flt_E230[2 * v3]) * v23 + flt_E230[2 * v3];
 		if ( !v6 )
 			*(float *)&texp_S1211[v8] = (*(float *)&texp_S1211[2 * v4] - *(float *)&texp_S1211[2 * v3]) * v23
 																+ *(float *)&texp_S1211[2 * v3];
 	}
-	if ( g_state.send & 4 )
+	if ( g_state[XST].send & 4 )
 	{
 		v9 = 2 * v4;
 		v10 = 2 * clipnewvx;
@@ -1357,9 +1357,9 @@ LABEL_5:
 		v12 |= 0x400u;
 	if ( flt_11450[v5] > (long double)v25 )
 		v12 |= 0x800u;
-	if ( g_state.znear > (long double)v25 )
+	if ( g_state[XST].znear > (long double)v25 )
 		v12 |= 0x1000u;
-	if ( g_state.zfar < (long double)v25 )
+	if ( g_state[XST].zfar < (long double)v25 )
 		v12 |= 0x2000u;
 	++clipnewvx;
 	v17 = ~a1 & v12;
@@ -1748,7 +1748,7 @@ signed int flush_drawfx()
 		}
 		if ( v5 )
 		{
-			if ( !result && g_state.xformmode != 1 )
+			if ( !result && g_state[XST].xformmode != 1 )
 			{
 				if ( i == 2 )
 				{
@@ -1768,7 +1768,7 @@ signed int flush_drawfx()
 					{
 						result -= 2;
 						g_stats.out_tri += v10 - 2;
-						if ( g_state.setnew & 1 )
+						if ( g_state[XST].setnew & 1 )
 						{
 							v2 = v10 - 1;
 							for ( j = 0; v10 > j; ++j )
@@ -1801,7 +1801,7 @@ signed int flush_drawfx()
 				}
 			}
 		}
-		else if ( g_state.setnew & 1 && i > 2 )
+		else if ( g_state[XST].setnew & 1 && i > 2 )
 		{
 			v2 = i - 1;
 			result = i - 2;
@@ -1849,9 +1849,9 @@ signed int flush_drawfx()
 
 void x_flush(void)
 {
-	if ( g_state.geometry & X_DUMPDATA)
+	if ( g_state[XST].geometry & X_DUMPDATA)
 	{
-		x_log("#flush %i %i %i\n", g_state.projchanged, g_state.changed, corners);
+		x_log("#flush %i %i %i\n", g_state[XST].projchanged, g_state[XST].changed, corners);
 	}
 	if (corners)
 	{
@@ -1860,11 +1860,11 @@ void x_flush(void)
 		flush_reordertables();
 		x_fastfpu(0);
 	}
-	if ( g_state.changed )
+	if ( g_state[XST].changed )
 		mode_change();
-	if ( g_state.projchanged )
+	if ( g_state[XST].projchanged )
 	{
-		g_state.matrixnull = 1;
+		g_state[XST].matrixnull = 1;
 		x_matrix(0);
 	}
 }

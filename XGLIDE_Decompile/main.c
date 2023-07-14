@@ -1,8 +1,5 @@
 #include "pch.h"
 
-xt_state g_state;		// The 0th entry is not used
-xt_stats g_stats;
-
 void zerobase()
 {
 }

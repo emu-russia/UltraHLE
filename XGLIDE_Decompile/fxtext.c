@@ -208,7 +208,7 @@ void makespace()
 				v3 = v2[21] + v2[20] + v2[19] + v2[18];
 				if ( v3 )
 				{
-					if ( v2[11] < g_state.frame - 1 )
+					if ( v2[11] < g_state[XST].frame - 1 )
 					{
 						v0 += v3;
 						freetexmem(v2);
@@ -257,7 +257,7 @@ int picktmu()
 	static int tmupick = 0;
 	int result;
 
-	if ( g_state.tmus < 2 )
+	if ( g_state[XST].tmus < 2 )
 		return 0;
 	result = tmupick ^ 1;
 	tmupick ^= 1u;
@@ -275,7 +275,7 @@ signed int fxloadtexturepart(DWORD *txt, int texturepart)
 	int v8; // [esp+14h] [ebp-8h]
 	DWORD *v9; // [esp+18h] [ebp-4h]
 
-	txt[11] = g_state.frame;
+	txt[11] = g_state[XST].frame;
 	v2 = txt[texturepart + 26];
 	switch (texturepart)
 	{
@@ -329,7 +329,7 @@ signed int fxloadtexture_single(DWORD *txt)
 	signed int v2; // ebx
 
 	v1 = 0;
-	if ( g_state.tmus > 1 && txt[18] <= 0 )
+	if ( g_state[XST].tmus > 1 && txt[18] <= 0 )
 	{
 		if (txt[19] <= 0 )
 			v1 = picktmu();
@@ -338,8 +338,8 @@ signed int fxloadtexture_single(DWORD *txt)
 	}
 	v2 = 0;
 	txt[v1 + 26] = v1;
-	g_state.texturexmul = txt[9];
-	g_state.textureymul = txt[10];
+	g_state[XST].texturexmul = txt[9];
+	g_state[XST].textureymul = txt[10];
 	do
 	{
 		if ( fxloadtexturepart(txt, v1) >= 0 )
@@ -368,8 +368,8 @@ int fxloadtexture_trilin(DWORD *txt)
 		txt[29] = v1 ^ 1;
 	}
 	v2 = 0;
-	g_state.texturexmul = txt[9];
-	g_state.textureymul = txt[10];
+	g_state[XST].texturexmul = txt[9];
+	g_state[XST].textureymul = txt[10];
 	do
 	{
 		if ( fxloadtexturepart(txt, 2) >= 0 && fxloadtexturepart(txt, 3) >= 0 )
@@ -391,8 +391,8 @@ int fxloadtexture_multi(DWORD *txt1, DWORD *txt2)
 	signed int v2; // ebx
 
 	v2 = 0;
-	g_state.texturexmul = txt1[9];
-	g_state.textureymul = txt1[10];
+	g_state[XST].texturexmul = txt1[9];
+	g_state[XST].textureymul = txt1[10];
 	do
 	{
 		if ( fxloadtexturepart(txt1, 0) >= 0 && fxloadtexturepart(txt2, 1) >= 0 )
@@ -422,7 +422,7 @@ void text_init()
 	v0 = grTexMaxAddress(GR_TMU0);
 	mem[0] = memory_create(v1 + 256, v0);
 	x_log("Texture memory TMU1: ");
-	if ( g_state.tmus >= 2 )
+	if ( g_state[XST].tmus >= 2 )
 	{
 		v4 = grTexMinAddress(GR_TMU1);
 		v3 = grTexMaxAddress(GR_TMU1);
@@ -840,11 +840,11 @@ void text_closedata(int txt)
 	int result; // eax
 
 	*(DWORD *)(txt + 48) = 1;
-	if ( *(DWORD *)(txt + 4) == g_state.active.text1)
-		g_state.active.text1 = 0;
-	result = g_state.active.text2;
+	if ( *(DWORD *)(txt + 4) == g_state[XST].active.text1)
+		g_state[XST].active.text1 = 0;
+	result = g_state[XST].active.text2;
 	if ( *(DWORD *)(txt + 4) == result )
-		g_state.active.text1 = 0;
+		g_state[XST].active.text1 = 0;
 }
 
 int text_frameend()
@@ -871,7 +871,7 @@ int text_frameend()
 				do
 				{
 					g_stats.text_resident += *(v3 - 16);
-					result = g_state.frame - 1;
+					result = g_state[XST].frame - 1;
 					if ( result <= v2[11] )
 					{
 						result = *v3;

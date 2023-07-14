@@ -10,6 +10,9 @@ static float identmatrix[4 * 4] = {
 int g_activestateindex;
 xt_state* g_activestate;
 
+xt_state g_state[X_MAXSTATES];		// The 0th entry is not used
+xt_stats g_stats;
+
 void x_init(void)
 {
 	log_open("wt");
@@ -19,20 +22,20 @@ void x_init(void)
 void x_deinit(void)
 {
 	signed int v0; // edi
-	DWORD *v1; // esi
+	xt_state *v1; // esi
 
 	v0 = 1;
-	v1 = &g_state[159];
+	v1 = &g_state[1];
 	do
 	{
-		if ( *v1 )
+		if ( v1->used )
 			x_close(v0);
-		v1 += 159;
+		v1++;
 		++v0;
 	}
-	while ( v1 < &g_state[318] );
+	while ( v1 < &g_state[X_MAXSTATES] );
 	x_log("Deinit: %s\n", x_version());
-	return log_open(0);
+	log_open(0);
 }
 
 char *x_version()
@@ -44,39 +47,39 @@ char *x_version()
 
 int x_open(void* hdc, void* hwnd, int width, int height, int buffers, int vsync)
 {
-	DWORD *v6; // eax
+	xt_state *v6; // eax
 	signed int v7; // esi
 	signed int result; // eax
 	int v9; // edi
 
-	v6 = &g_state[159];
+	v6 = &g_state[1];
 	v7 = 1;
 	do
 	{
-		if ( !*v6 )
+		if ( v6->used == 0 )
 			break;
-		v6 += 159;
+		v6++;
 		++v7;
 	}
-	while ( v6 < &g_state[318] );
-	if ( v7 >= 2 )
+	while ( v6 < &g_state[X_MAXSTATES] );
+	if ( v7 >= X_MAXSTATES)
 		return -1;
-	memset(&g_state[159 * v7], 0, 0x27Cu);
-	g_state[159 * v7] = 1;
+	memset(&g_state[v7], 0, sizeof(xt_state));
+	g_state[v7].used = 1;
 	g_activestateindex = v7;
-	g_activestate = &g_state[159 * v7];
+	g_activestate = &g_state[v7];
 
-	g_state.hdc = hdc;
-	g_state.hwnd = hwnd;
-	g_state.xs = width;
-	g_state.ys = height;
-	g_state.buffers = buffers;
-	g_state.vsync = vsync;
+	g_state[XST].hdc = hdc;
+	g_state[XST].hwnd = hwnd;
+	g_state[XST].xs = width;
+	g_state[XST].ys = height;
+	g_state[XST].buffers = buffers;
+	g_state[XST].vsync = vsync;
 	v9 = init_init();
 	mode_init();
 	geom_init();
-	g_state.projchanged = 0;
-	g_state.changed = 0;
+	g_state[XST].projchanged = 0;
+	g_state[XST].changed = 0;
 	x_projection(90.0, 0.9f, 65535.0);
 	result = -1;
 	if ( !v9 )
@@ -94,7 +97,7 @@ void x_select(int which)
 	if (which > 0 )
 	{
 		g_activestateindex = which;
-		g_activestate = &g_state[159 * which];
+		g_activestate = &g_state[which];
 		init_activate();
 	}
 	else
@@ -106,18 +109,17 @@ void x_select(int which)
 
 void x_close(int which)
 {
-	DWORD *result; // eax
+	xt_state *result; // eax
 
-	result = (DWORD *)which;
-	if (which < 2 )
+	if (which < X_MAXSTATES)
 	{
-		result = &g_state[159 * which];
-		if ( *result )
+		result = &g_state[which];
+		if ( result->used )
 		{
-			*result = 0;
+			result->used = 0;
 			init_deinit();
 			text_deinit();
-			memset(&g_state[159 * g_activestateindex], 0, 0x27Cu);
+			memset(&g_state[g_activestateindex], 0, sizeof(xt_state));
 			x_select(0);
 		}
 	}
@@ -203,22 +205,22 @@ void x_finish(void)
 	init_bufferswap();
 	text_frameend();
 	x_reset();
-	++g_state.frame;
+	++g_state[XST].frame;
 }
 
 void x_frustum(float xmin, float xmax, float ymin, float ymax, float znear, float zfar)
 {
 	x_flush();
-	g_state.xmin = xmin;
-	g_state.xmax = xmax;
-	g_state.ymin = ymin;
-	g_state.ymax = ymax;
-	g_state.znear = znear;
-	g_state.zfar = zfar;
-	g_state.xformmode = 0;
-	g_state.projchanged = 1;
-	g_state.invzfar = 1.0 / zfar;
-	g_state.invznear = 1.0 / znear;
+	g_state[XST].xmin = xmin;
+	g_state[XST].xmax = xmax;
+	g_state[XST].ymin = ymin;
+	g_state[XST].ymax = ymax;
+	g_state[XST].znear = znear;
+	g_state[XST].zfar = zfar;
+	g_state[XST].xformmode = 0;
+	g_state[XST].projchanged = 1;
+	g_state[XST].invzfar = 1.0f / zfar;
+	g_state[XST].invznear = 1.0f / znear;
 }
 
 void x_projmatrix(xt_matrix* a1)
@@ -229,16 +231,16 @@ void x_projmatrix(xt_matrix* a1)
 	v2 = a1;
 	if ( a1 )
 	{
-		g_state.projnull = 0;
+		g_state[XST].projnull = 0;
 	}
 	else
 	{
-		g_state.projnull = 1;
+		g_state[XST].projnull = 1;
 		v2 = &identmatrix;
 	}
-	memcpy(g_state.projxform, v2, 0x40u);
-	g_state.xformmode = 2;
-	g_state.projchanged = 1;
+	memcpy(g_state[XST].projxform, v2, 0x40u);
+	g_state[XST].xformmode = 2;
+	g_state[XST].projchanged = 1;
 }
 
 void projrecalced()
@@ -248,16 +250,16 @@ void projrecalced()
 void x_ortho(float xmin, float ymin, float xmax, float ymax, float znear, float zfar)
 {
 	x_flush();
-	g_state.xmin = xmin;
-	g_state.ymin = ymin;
-	g_state.xmax = xmax;
-	g_state.ymax = ymax;
-	g_state.znear = znear;
-	g_state.zfar = zfar;
-	g_state.xformmode = 1;
-	g_state.projchanged = 1;
-	g_state.invzfar = 1.0f / zfar;
-	g_state.invznear = 1.0f / znear;
+	g_state[XST].xmin = xmin;
+	g_state[XST].ymin = ymin;
+	g_state[XST].xmax = xmax;
+	g_state[XST].ymax = ymax;
+	g_state[XST].znear = znear;
+	g_state[XST].zfar = zfar;
+	g_state[XST].xformmode = 1;
+	g_state[XST].projchanged = 1;
+	g_state[XST].invzfar = 1.0f / zfar;
+	g_state[XST].invznear = 1.0f / znear;
 }
 
 void x_viewport(float x0, float y0, float x1, float y1)
@@ -266,13 +268,13 @@ void x_viewport(float x0, float y0, float x1, float y1)
 	double v6; // st7
 
 	x_flush();
-	g_state.view_x0 = x0;
-	v5 = g_state.ys - 1;
-	g_state.view_x1 = x1;
+	g_state[XST].view_x0 = x0;
+	v5 = g_state[XST].ys - 1;
+	g_state[XST].view_x1 = x1;
 	v6 = (double)v5;
-	g_state.projchanged = 1;
-	g_state.view_y0 = v6 - y1;
-	g_state.view_y1 = v6 - y0;
+	g_state[XST].projchanged = 1;
+	g_state[XST].view_y0 = v6 - y1;
+	g_state[XST].view_y1 = v6 - y0;
 }
 
 void x_projection(float fov, float znear, float zfar)
@@ -287,24 +289,24 @@ void x_projection(float fov, float znear, float zfar)
 	}
 	else
 	{
-		x_ortho(0, (float)g_state.xs, (float)g_state.ys, 0, znear, zfar);
+		x_ortho(0, (float)g_state[XST].xs, (float)g_state[XST].ys, 0, znear, zfar);
 	}
 }
 
 int x_zrange(float znear, float zfar)
 {
 	x_flush();
-	g_state.changed = 1;
-	g_state.projchanged = 1;
-	g_state.znear = znear;
-	g_state.zfar = zfar;
+	g_state[XST].changed = 1;
+	g_state[XST].projchanged = 1;
+	g_state[XST].znear = znear;
+	g_state[XST].zfar = zfar;
 	return 0;
 }
 
 int x_zdecal(float factor)
 {
 	x_flush();
-	g_state.zdecal = factor;
+	g_state[XST].zdecal = factor;
 	return 0;
 }
 
@@ -315,7 +317,7 @@ xt_texture* texture_get(int t)
 	// TODO: There seems to be an error here, 1024 != X_MAX_TEXTURES
 	if ( t <= 0 || t > 1024 )
 	{
-		g_state.error |= X_ERROR_GET_TEXTURE;
+		g_state[XST].error |= X_ERROR_GET_TEXTURE;
 		txt = 0;
 	}
 	else
@@ -325,7 +327,7 @@ xt_texture* texture_get(int t)
 		{
 			x_log("undefined texture xhandle %i selected\n");
 			txt = 0;
-			g_state.error |= X_ERROR_GET_TEXTURE;
+			g_state[XST].error |= X_ERROR_GET_TEXTURE;
 		}
 	}
 	return txt;
@@ -358,7 +360,7 @@ int x_createtexture(int format, int width, int height)
 	{
 		x_log("too many textures\n");
 		result = -1;
-		g_state.error |= X_ERROR_TOO_MANY_TEXTURES;
+		g_state[XST].error |= X_ERROR_TOO_MANY_TEXTURES;
 	}
 	else
 	{
@@ -501,15 +503,15 @@ void x_closetexturedata(int a1)
 
 void x_forcegeometry(int forceon, int forceoff)
 {
-	g_state.geometryon = forceon;
-	g_state.geometryoff = forceoff;
-	g_state.changed |= 1u;
+	g_state[XST].geometryon = forceon;
+	g_state[XST].geometryoff = forceoff;
+	g_state[XST].changed |= 1u;
 }
 
 void x_geometry(int flags)
 {
-	g_state.geometry = (flags | g_state.geometryon) & ~g_state.geometryoff;
-	g_state.changed |= 1u;
+	g_state[XST].geometry = (flags | g_state[XST].geometryon) & ~g_state[XST].geometryoff;
+	g_state[XST].changed |= 1u;
 }
 
 int x_mask(int colormask, int depthmask, int depthtest)
@@ -535,9 +537,9 @@ int x_mask(int colormask, int depthmask, int depthtest)
 	}
 	if ( !depthtest || depthtest == 1 )
 		return 1;
-	g_state.currentmode.masktst = depthtest;
-	g_state.currentmode.mask = v3;
-	g_state.changed |= 4u;
+	g_state[XST].currentmode.masktst = depthtest;
+	g_state[XST].currentmode.mask = v3;
+	g_state[XST].changed |= 4u;
 	return 0;
 }
 
@@ -545,14 +547,14 @@ int x_dither(int type)
 {
 	if (type == X_ENABLE)
 	{
-		g_state.currentmode.dither = 1;
+		g_state[XST].currentmode.dither = 1;
 LABEL_5:
-		g_state.changed |= 4u;
+		g_state[XST].changed |= 4u;
 		return 0;
 	}
 	if (type == X_DISABLE)
 	{
-		g_state.currentmode.dither = 0;
+		g_state[XST].currentmode.dither = 0;
 		goto LABEL_5;
 	}
 	return 1;
@@ -564,20 +566,20 @@ int x_blend(int src, int dst)
 		return 1;
 	if (dst < X_FIRSTBLEND || dst > X_LASTBLEND)
 		return 1;
-	g_state.currentmode.src = src;
-	g_state.currentmode.dst = dst;
-	g_state.changed |= 4u;
+	g_state[XST].currentmode.src = src;
+	g_state[XST].currentmode.dst = dst;
+	g_state[XST].changed |= 4u;
 	return 0;
 }
 
 int x_alphatest(float limit)
 {
-	if ( g_state.geometry & 1 )
+	if ( g_state[XST].geometry & 1 )
 		limit = 1.0f;
 	if ( limit < 0.0f || limit > 1.0f)
 		return 1;
-	g_state.currentmode.alphatest = limit;
-	g_state.changed |= 4u;
+	g_state[XST].currentmode.alphatest = limit;
+	g_state[XST].changed |= 4u;
 	return 0;
 }
 
@@ -585,61 +587,61 @@ int x_combine(int colortext1)
 {
 	if (colortext1 < X_FIRSTCOMBINE || colortext1 > X_LASTCOMBINE)
 		return 1;
-	g_state.currentmode.text1text2 = 0;
-	g_state.currentmode.colortext1 = colortext1;
-	g_state.changed |= 4u;
+	g_state[XST].currentmode.text1text2 = 0;
+	g_state[XST].currentmode.colortext1 = colortext1;
+	g_state[XST].changed |= 4u;
 	return 0;
 }
 
 int x_procombine(int rgb, int alpha)
 {
-	g_state.currentmode.text1text2 = 0;
-	g_state.currentmode.colortext1 = rgb | (alpha << 16);
-	g_state.changed |= 4u;
+	g_state[XST].currentmode.text1text2 = 0;
+	g_state[XST].currentmode.colortext1 = rgb | (alpha << 16);
+	g_state[XST].changed |= 4u;
 	return 0;
 }
 
 int x_envcolor(float r, float g, float b, float a)
 {
-	g_state.currentmode.env[0] = r;
-	g_state.currentmode.env[1] = g;
-	g_state.currentmode.env[2] = b;
-	g_state.currentmode.env[3] = a;
+	g_state[XST].currentmode.env[0] = r;
+	g_state[XST].currentmode.env[1] = g;
+	g_state[XST].currentmode.env[2] = b;
+	g_state[XST].currentmode.env[3] = a;
 	// Buggy (decompile bug?)
-	g_state.currentmode.envc = 
+	g_state[XST].currentmode.envc =
 		(unsigned __int8)(signed __int64)(r * 255.0) | 
 		((unsigned __int8)(signed __int64)(b * 255.0) << 16) | 
 		((((unsigned int)(signed __int64)(a * 255.0) << 16) | 
 		(unsigned __int8)(signed __int64)(g * 255.0)) << 8);
-	g_state.changed |= 4u;
+	g_state[XST].changed |= 4u;
 	return 0;
 }
 
 int x_combine2(int colortext1, int text1text2, int sametex)
 {
-	if ( g_state.tmus < 2 )
+	if ( g_state[XST].tmus < 2 )
 		return 1;
 	if (colortext1 < X_FIRSTCOMBINE || colortext1 > X_LASTCOMBINE)
 		return 1;
 	if (text1text2 < X_FIRSTCOMBINE || text1text2 > X_LASTCOMBINE)
 		return 1;
-	g_state.currentmode.colortext1 = colortext1;
-	g_state.currentmode.sametex = sametex;
-	g_state.currentmode.text1text2 = text1text2;
-	g_state.changed |= 4u;
+	g_state[XST].currentmode.colortext1 = colortext1;
+	g_state[XST].currentmode.sametex = sametex;
+	g_state[XST].currentmode.text1text2 = text1text2;
+	g_state[XST].changed |= 4u;
 	return 0;
 }
 
 int x_procombine2(int rgb, int alpha, int text1text2, int sametex)
 {
-	if ( g_state.tmus < 2 )
+	if ( g_state[XST].tmus < 2 )
 		return 1;
 	if (text1text2 < X_FIRSTCOMBINE || text1text2 > X_LASTCOMBINE)
 		return 1;
-	g_state.currentmode.sametex = sametex;
-	g_state.currentmode.colortext1 = rgb | (alpha << 16);
-	g_state.currentmode.text1text2 = text1text2;
-	g_state.changed |= 4u;
+	g_state[XST].currentmode.sametex = sametex;
+	g_state[XST].currentmode.colortext1 = rgb | (alpha << 16);
+	g_state[XST].currentmode.text1text2 = text1text2;
+	g_state[XST].changed |= 4u;
 	return 0;
 }
 
@@ -647,21 +649,21 @@ int x_texture(int text1handle)
 {
 	if (text1handle <= 0 )
 		return 1;
-	g_state.currentmode.text1 = text1handle;
-	g_state.currentmode.text2 = 0;
-	g_state.changed |= 2u;
+	g_state[XST].currentmode.text1 = text1handle;
+	g_state[XST].currentmode.text2 = 0;
+	g_state[XST].changed |= 2u;
 	return 0;
 }
 
 int x_texture2(int text1handle, int text2handle)
 {
-	if ( g_state.tmus < 2 )
+	if ( g_state[XST].tmus < 2 )
 		return 1;
 	if (text1handle <= 0 || text2handle <= 0 )
 		return 1;
-	g_state.currentmode.text1 = text1handle;
-	g_state.currentmode.text2 = text2handle;
-	g_state.changed |= 2u;
+	g_state[XST].currentmode.text1 = text1handle;
+	g_state[XST].currentmode.text2 = text2handle;
+	g_state[XST].changed |= 2u;
 	return 0;
 }
 
@@ -679,14 +681,14 @@ void x_reset(void)
 
 int x_fog(int type, float min, float max, float r, float g, float b)
 {
-	g_state.currentmode.fogtype = type;
-	g_state.currentmode.fogmin = min;
-	g_state.currentmode.fogmax = max;
-	g_state.currentmode.fogcolor[0] = r;
-	g_state.currentmode.fogcolor[1] = g;
-	g_state.currentmode.fogcolor[2] = b;
-	g_state.currentmode.fogcolor[3] = 1.0f;
-	g_state.changed |= 8u;
+	g_state[XST].currentmode.fogtype = type;
+	g_state[XST].currentmode.fogmin = min;
+	g_state[XST].currentmode.fogmax = max;
+	g_state[XST].currentmode.fogcolor[0] = r;
+	g_state[XST].currentmode.fogcolor[1] = g;
+	g_state[XST].currentmode.fogcolor[2] = b;
+	g_state[XST].currentmode.fogcolor[3] = 1.0f;
+	g_state[XST].changed |= 8u;
 	return 0;
 }
 

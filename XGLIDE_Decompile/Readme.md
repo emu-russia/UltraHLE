@@ -9,21 +9,21 @@ Overall status: Not yet buildable, but its something already.
 |Module/Function|Status|Notes|
 |---|---|---|
 |**api.c**|||
-|x_init| | |
-|x_deinit| | |
-|x_version| | |
-|x_open| | |
-|x_resize| | |
-|x_select| | |
-|x_close| | |
-|x_getstats| | |
-|x_query| | |
-|x_clear| | |
-|x_readfb| | |
-|x_writefb| | |
-|x_finish| | |
-|x_frustum| | |
-|x_projmatrix| | |
+|x_init|Ready| |
+|x_deinit|Ready| |
+|x_version|Ready| |
+|x_open|Ready| |
+|x_resize|Ready| |
+|x_select|Ready| |
+|x_close|Ready| |
+|x_getstats|Ready|:warning: Uses internal static variables that are not cleared between restarts of the graphics subsystem.|
+|x_query|Ready|empty. It was most likely intended to use `init_query`|
+|x_clear|Ready| |
+|x_readfb|Ready| |
+|x_writefb|Ready| |
+|x_finish|Ready| |
+|x_frustum|Ready| |
+|x_projmatrix|Ready|xt_matrix is taken as a pointer to the internal representation of 4x4 matrices (without the xt_matrix::type property). If xt_matrix changes, it could break everything.|
 |projrecalced|Ready|empty|
 |x_ortho|Ready| |
 |x_viewport|Ready| |
@@ -31,14 +31,14 @@ Overall status: Not yet buildable, but its something already.
 |x_zrange|Ready| |
 |x_zdecal|Ready| |
 |texture_get|Ready|Nothing special, but seems to contain a typo of checking the number of texture entries (1024 != X_MAX_TEXTURES)|
-|x_createtexture| | |
+|x_createtexture| |:construction: Needs to be converted to `xt_texture`|
 |x_gettextureinfo|Ready| |
-|x_loadtexturelevel| | |
-|x_freetexture| | |
+|x_loadtexturelevel| |:construction: Needs to be converted to `xt_texture`|
+|x_freetexture| |:construction: Needs to be converted to `xt_texture`|
 |x_texture_getinfo|Ready|Copy-paste of `x_gettextureinfo`|
 |x_cleartexmem|Ready|Calls `text_cleartexmem`|
-|x_opentexturedata| | |
-|x_closetexturedata| | |
+|x_opentexturedata| |:construction: Needs to be converted to `xt_texture`|
+|x_closetexturedata| |:construction: Needs to be converted to `xt_texture`|
 |x_forcegeometry|Ready| |
 |x_geometry|Ready| |
 |x_mask|Ready| |

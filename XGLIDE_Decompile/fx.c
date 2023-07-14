@@ -47,14 +47,14 @@ void init_reinit()
 	x_log("init_reinit: select\n");
 	grSstSelect(0);
 	x_log("init_reinit: resolution\n");
-	if ( g_state.xs < 1024 )
+	if ( g_state[XST].xs < 1024 )
 	{
-		if ( g_state.xs < 800 )
+		if ( g_state[XST].xs < 800 )
 		{
-			if ( g_state.xs < 640 )
+			if ( g_state[XST].xs < 640 )
 			{
 				mode = GR_RESOLUTION_512x384;
-				if ( g_state.xs < 512 )
+				if ( g_state[XST].xs < 512 )
 					mode = GR_RESOLUTION_640x480;
 			}
 			else
@@ -72,8 +72,8 @@ void init_reinit()
 		// 1024x768
 		mode = 12;
 	}
-	grSstWinOpen((FxU32)g_state.hwnd, mode, GR_REFRESH_60Hz, GR_COLORFORMAT_ABGR, GR_ORIGIN_LOWER_LEFT, g_state.buffers, g_state.vsync);
-	grClipWindow(0, 0, g_state.xs, g_state.ys);
+	grSstWinOpen((FxU32)g_state[XST].hwnd, mode, GR_REFRESH_60Hz, GR_COLORFORMAT_ABGR, GR_ORIGIN_LOWER_LEFT, g_state[XST].buffers, g_state[XST].vsync);
+	grClipWindow(0, 0, g_state[XST].xs, g_state[XST].ys);
 	x_log("init_reinit: done\n");
 }
 
@@ -86,21 +86,21 @@ int init_init()
 	if ( !grSstQueryHardware(&hw) )
 		return -1;
 	if (hw.SSTs[0].type != 3 && hw.SSTs[0].type)
-		g_state.tmus = 1;
+		g_state[XST].tmus = 1;
 	else
-		g_state.tmus = hw.SSTs[0].sstBoard.VoodooConfig.nTexelfx;
-	x_log("x_open: cartdtype=%i, tmus=%i\n", hw.SSTs[0].type, g_state.tmus);
+		g_state[XST].tmus = hw.SSTs[0].sstBoard.VoodooConfig.nTexelfx;
+	x_log("x_open: cartdtype=%i, tmus=%i\n", hw.SSTs[0].type, g_state[XST].tmus);
 
 	grSstSelect(0);
 	text_init();
-	if ( g_state.xs < 1024 )
+	if ( g_state[XST].xs < 1024 )
 	{
-		if ( g_state.xs < 800 )
+		if ( g_state[XST].xs < 800 )
 		{
-			if ( g_state.xs < 640 )
+			if ( g_state[XST].xs < 640 )
 			{
 				mode = GR_RESOLUTION_512x384;
-				if ( g_state.xs < 512 )
+				if ( g_state[XST].xs < 512 )
 					mode = GR_RESOLUTION_640x480;
 			}
 			else
@@ -117,8 +117,8 @@ int init_init()
 	{
 		mode = 12;
 	}
-	grSstWinOpen((FxU32)g_state.hwnd, mode, GR_REFRESH_60Hz, GR_COLORFORMAT_ABGR, GR_ORIGIN_LOWER_LEFT, g_state.buffers, g_state.vsync);
-	grClipWindow(0, 0, g_state.xs, g_state.ys);
+	grSstWinOpen((FxU32)g_state[XST].hwnd, mode, GR_REFRESH_60Hz, GR_COLORFORMAT_ABGR, GR_ORIGIN_LOWER_LEFT, g_state[XST].buffers, g_state[XST].vsync);
+	grClipWindow(0, 0, g_state[XST].xs, g_state[XST].ys);
 	return 0;
 }
 
@@ -134,8 +134,8 @@ void init_activate()
 
 void init_resize(int xs, int ys)
 {
-	g_state.xs = xs;
-	g_state.ys = ys;
+	g_state[XST].xs = xs;
+	g_state[XST].ys = ys;
 }
 
 void init_bufferswap()
@@ -162,18 +162,18 @@ void init_clear(int writecolor, int writedepth, float cr, float cg, float cb)
 {
 	x_flush();
 	grClipWindow(
-		g_state.view_x0,
-		g_state.view_y0,
-		g_state.view_x1,
-		g_state.view_y1);
+		g_state[XST].view_x0,
+		g_state[XST].view_y0,
+		g_state[XST].view_x1,
+		g_state[XST].view_y1);
 	grColorMask(writecolor >= 1 ? FXTRUE : FXFALSE, writecolor >= 1 ? FXTRUE : FXFALSE);
 	grDepthMask(writedepth >= 1 ? FXTRUE : FXFALSE);
 	grBufferClear(
 		(unsigned __int8)(signed __int64)(cr * 255.0) | ((unsigned __int16)(signed __int64)(cg * 255.0) << 8) & 0xFF00 | ((unsigned __int8)(signed __int64)(cb * 255.0) << 16),
 		0,
 		0xFFFF);
-	grDepthMask((g_state.currentmode.mask & 2u) >> 1);
-	grColorMask(g_state.currentmode.mask & 1, g_state.currentmode.mask & 1);
+	grDepthMask((g_state[XST].currentmode.mask & 2u) >> 1);
+	grColorMask(g_state[XST].currentmode.mask & 1, g_state[XST].currentmode.mask & 1);
 }
 
 int init_readfb(__int16 a1, int a2, int a3, int a4, int a5, int a6, int a7)
@@ -229,7 +229,7 @@ int init_writefb()
 
 void mode_init()
 {
-	g_state.currentmode.stwhint = 0;
+	g_state[XST].currentmode.stwhint = 0;
 	grDepthBiasLevel(0);
 	grDepthBufferMode(GR_DEPTHBUFFER_WBUFFER);
 	grDepthMask(FXTRUE);
@@ -274,7 +274,7 @@ void mode_loadtexture(int a1)
 	int v4; // edi
 
 	v1 = 1;
-	if ( g_state.tmus < 2 )
+	if ( g_state[XST].tmus < 2 )
 		v1 = 0;
 	result = texture_get(a1);
 	v3 = result;
@@ -357,25 +357,25 @@ GrFog_t* generatefogtable()
 	static float lastfogmax;
 	static GrFog_t fogtable[GR_FOG_TABLE_SIZE];
 
-	if ( lastfogmin == g_state.active.fogmin
-		&& lastfogmax == g_state.active.fogmax
-		&& g_state.active.fogtype == lastfogtype )
+	if ( lastfogmin == g_state[XST].active.fogmin
+		&& lastfogmax == g_state[XST].active.fogmax
+		&& g_state[XST].active.fogtype == lastfogtype )
 	{
 		return fogtable;
 	}
 
-	lastfogmin = g_state.active.fogmin;
-	lastfogmax = g_state.active.fogmax;
-	lastfogtype = g_state.active.fogtype;
-	if (g_state.active.fogtype == X_LINEAR || g_state.active.fogtype == X_LINEARADD)
+	lastfogmin = g_state[XST].active.fogmin;
+	lastfogmax = g_state[XST].active.fogmax;
+	lastfogtype = g_state[XST].active.fogtype;
+	if (g_state[XST].active.fogtype == X_LINEAR || g_state[XST].active.fogtype == X_LINEARADD)
 	{
-		v5 = g_state.active.fogmax / g_state.znear;
-		v6 = g_state.active.fogmin / g_state.znear;
+		v5 = g_state[XST].active.fogmax / g_state[XST].znear;
+		v6 = g_state[XST].active.fogmin / g_state[XST].znear;
 		guFogGenerateLinear(fogtable, v6, v5);
 	}
-	else if (g_state.active.fogtype == X_EXPONENTIAL)
+	else if (g_state[XST].active.fogtype == X_EXPONENTIAL)
 	{
-		v4 = 2.3f / (g_state.active.fogmax / g_state.znear);
+		v4 = 2.3f / (g_state[XST].active.fogmax / g_state[XST].znear);
 		guFogGenerateExp(fogtable, v4);
 	}
 	fixfogtable(fogtable, GR_FOG_TABLE_SIZE);
@@ -392,15 +392,15 @@ void mode_change()
 	signed int v20; // ecx
 	float v25; // eax
 
-	if ( g_state.changed & 1 )
+	if ( g_state[XST].changed & 1 )
 	{
-		if ( g_state.setnew != g_state.geometry)
+		if ( g_state[XST].setnew != g_state[XST].geometry)
 		{
-			if (g_state.geometry & 2 )
+			if (g_state[XST].geometry & 2 )
 			{
 				grCullMode(GR_CULL_NEGATIVE);
 			}
-			else if ( g_state.geometry & 4 )
+			else if ( g_state[XST].geometry & 4 )
 			{
 				grCullMode(GR_CULL_POSITIVE);
 			}
@@ -408,19 +408,19 @@ void mode_change()
 			{
 				grCullMode(GR_CULL_DISABLE);
 			}
-			g_state.setnew = g_state.geometry;
+			g_state[XST].setnew = g_state[XST].geometry;
 		}
 	}
-	if ( g_state.changed & 8 )
+	if ( g_state[XST].changed & 8 )
 	{
-		g_state.active.fogtype = g_state.currentmode.fogtype;
-		g_state.active.fogmin = g_state.currentmode.fogmin;
-		g_state.active.fogmax = g_state.currentmode.fogmax;
-		g_state.active.fogcolor[0] = g_state.currentmode.fogcolor[0];
-		g_state.active.fogcolor[1] = g_state.currentmode.fogcolor[1];
-		g_state.active.fogcolor[2] = g_state.currentmode.fogcolor[2];
-		g_state.active.fogcolor[3] = g_state.currentmode.fogcolor[3];
-		if ( g_state.currentmode.fogtype == X_DISABLE)
+		g_state[XST].active.fogtype = g_state[XST].currentmode.fogtype;
+		g_state[XST].active.fogmin = g_state[XST].currentmode.fogmin;
+		g_state[XST].active.fogmax = g_state[XST].currentmode.fogmax;
+		g_state[XST].active.fogcolor[0] = g_state[XST].currentmode.fogcolor[0];
+		g_state[XST].active.fogcolor[1] = g_state[XST].currentmode.fogcolor[1];
+		g_state[XST].active.fogcolor[2] = g_state[XST].currentmode.fogcolor[2];
+		g_state[XST].active.fogcolor[3] = g_state[XST].currentmode.fogcolor[3];
+		if ( g_state[XST].currentmode.fogtype == X_DISABLE)
 		{
 			grFogMode(GR_FOG_DISABLE);
 		}
@@ -428,29 +428,29 @@ void mode_change()
 		{
 			grFogTable(generatefogtable());
 			grFogColorValue(
-				(unsigned __int8)(signed __int64)(g_state.active.fogcolor[0] * 255.0) | 
-				((unsigned __int16)(signed __int64)(g_state.active.fogcolor[1] * 255.0) << 8) & 0xFF00 | 
-				(((unsigned int)(signed __int64)(g_state.active.fogcolor[2] * 255.0) | 0xFFFFFF00) << 16)
+				(unsigned __int8)(signed __int64)(g_state[XST].active.fogcolor[0] * 255.0) | 
+				((unsigned __int16)(signed __int64)(g_state[XST].active.fogcolor[1] * 255.0) << 8) & 0xFF00 | 
+				(((unsigned int)(signed __int64)(g_state[XST].active.fogcolor[2] * 255.0) | 0xFFFFFF00) << 16)
 			);
-			if ( g_state.active.fogtype == X_LINEARADD)
+			if ( g_state[XST].active.fogtype == X_LINEARADD)
 				grFogMode(GR_FOG_ADD2 | GR_FOG_WITH_TABLE);
 			else
 				grFogMode(GR_FOG_WITH_TABLE);
 		}
 	}
-	if ( g_state.changed & 4 )
+	if ( g_state[XST].changed & 4 )
 	{
-		if ( g_state.active.mask != g_state.currentmode.mask)
+		if ( g_state[XST].active.mask != g_state[XST].currentmode.mask)
 		{
-			grDepthMask((g_state.currentmode.mask & 2u) >> 1);
-			grColorMask(g_state.currentmode.mask & 1, g_state.currentmode.mask & 1);
-			g_state.active.mask = g_state.currentmode.mask;
+			grDepthMask((g_state[XST].currentmode.mask & 2u) >> 1);
+			grColorMask(g_state[XST].currentmode.mask & 1, g_state[XST].currentmode.mask & 1);
+			g_state[XST].active.mask = g_state[XST].currentmode.mask;
 		}
-		if ( g_state.active.masktst != g_state.currentmode.masktst)
+		if ( g_state[XST].active.masktst != g_state[XST].currentmode.masktst)
 		{
-			if (g_state.currentmode.masktst > X_DISABLE)
+			if (g_state[XST].currentmode.masktst > X_DISABLE)
 			{
-				switch (g_state.currentmode.masktst)
+				switch (g_state[XST].currentmode.masktst)
 				{
 					case X_TESTEQ:
 						grDepthBufferFunction(2);
@@ -468,7 +468,7 @@ void mode_change()
 						goto $L1409;
 				}
 			}
-			else if (g_state.currentmode.masktst == X_DISABLE || g_state.currentmode.masktst == 0 )
+			else if (g_state[XST].currentmode.masktst == X_DISABLE || g_state[XST].currentmode.masktst == 0 )
 			{
 				grDepthBufferFunction(7);
 			}
@@ -477,18 +477,18 @@ void mode_change()
 $L1409:
 				grDepthBufferFunction(3);
 			}
-			g_state.active.masktst = g_state.currentmode.masktst;
+			g_state[XST].active.masktst = g_state[XST].currentmode.masktst;
 		}
-		if ( g_state.currentmode.envc != g_state.active.envc)
+		if ( g_state[XST].currentmode.envc != g_state[XST].active.envc)
 		{
 			// TODO: Check wtf here (NaN)
-			g_state.active.colortext1 = -6.8056469e38/*NaN*/;
-			g_state.active.envc = g_state.currentmode.envc;
+			g_state[XST].active.colortext1 = -6.8056469e38/*NaN*/;
+			g_state[XST].active.envc = g_state[XST].currentmode.envc;
 		}
-		if ( g_state.currentmode.colortext1 != g_state.active.colortext1 )
+		if ( g_state[XST].currentmode.colortext1 != g_state[XST].active.colortext1 )
 		{
-			g_state.send &= 0xFFFFFFFC;
-			switch ( g_state.currentmode.colortext1 & 0xFFFF )
+			g_state[XST].send &= 0xFFFFFFFC;
+			switch ( g_state[XST].currentmode.colortext1 & 0xFFFF )
 			{
 				case X_WHITE:
 					grConstantColorValue(0x7FFF7FFF);
@@ -498,7 +498,7 @@ $L1409:
 				case X_COLOR:
 					guColorCombineFunction(GR_COLORCOMBINE_ITRGB);
 					guAlphaSource(1);
-					g_state.send |= 1u;
+					g_state[XST].send |= 1u;
 					break;
 				case X_TEXTURE:
 				case X_DECAL:
@@ -544,22 +544,22 @@ $L1409:
 				case X_TEXTUREENVCR:
 					grColorCombine(7, 5, 0, 2, 0);
 					guAlphaSource(GR_ALPHASOURCE_ITERATED_ALPHA);
-					x_log("envc=%08X\n", g_state.active.envc);
+					x_log("envc=%08X\n", g_state[XST].active.envc);
 LABEL_47:
-					grConstantColorValue(g_state.active.envc);
+					grConstantColorValue(g_state[XST].active.envc);
 LABEL_48:
-					g_state.send |= 1u;
+					g_state[XST].send |= 1u;
 LABEL_49:
-					g_state.send |= 2u;
+					g_state[XST].send |= 2u;
 					break;
 				default:
 					break;
 			}
-			switch ( g_state.currentmode.colortext1 >> 16 )
+			switch ( g_state[XST].currentmode.colortext1 >> 16 )
 			{
 				case X_COLOR:
 					guAlphaSource(GR_ALPHASOURCE_ITERATED_ALPHA);
-					g_state.send |= 1u;
+					g_state[XST].send |= 1u;
 					break;
 				case X_TEXTURE:
 				case X_DECAL:
@@ -571,23 +571,23 @@ LABEL_49:
 				case X_MUL:
 					guAlphaSource(GR_ALPHASOURCE_TEXTURE_ALPHA_TIMES_ITERATED_ALPHA);
 LABEL_55:
-					g_state.send |= 1u;
+					g_state[XST].send |= 1u;
 LABEL_56:
-					g_state.send |= 2u;
+					g_state[XST].send |= 2u;
 					break;
 				default:
 					break;
 			}
-			g_state.active.colortext1 = g_state.currentmode.colortext1;
+			g_state[XST].active.colortext1 = g_state[XST].currentmode.colortext1;
 		}
-		if ( g_state.currentmode.text1text2 != g_state.active.text1text2)
+		if ( g_state[XST].currentmode.text1text2 != g_state[XST].active.text1text2)
 		{
-			g_state.send &= 0xFFFFFFFB;
+			g_state[XST].send &= 0xFFFFFFFB;
 			grTexCombine(1, 1, 0, 1, 0, 0, 0);
-			if (g_state.currentmode.text1text2 > X_TEXTURE)
+			if (g_state[XST].currentmode.text1text2 > X_TEXTURE)
 			{
 				a1 = 0.0;
-				switch (g_state.currentmode.text1text2)
+				switch (g_state[XST].currentmode.text1text2)
 				{
 					case X_ADD:
 						grTexCombine(0, 4, 8, 4, 8, 0, 0);
@@ -604,25 +604,25 @@ LABEL_56:
 					case X_SUB:
 						grTexCombine(0, 6, 8, 6, 8, 0, 0);
 LABEL_70:
-						g_state.send |= 4u;
+						g_state[XST].send |= 4u;
 						break;
 					default:
 						break;
 				}
 			}
-			else if (g_state.currentmode.text1text2 >= X_WHITE || !g_state.currentmode.text1text2)
+			else if (g_state[XST].currentmode.text1text2 >= X_WHITE || !g_state[XST].currentmode.text1text2)
 			{
 				grTexCombine(0, 1, 0, 1, 0, 0, 0);
 				grTexCombine(1, 1, 0, 1, 0, 0, 0);
 			}
-			g_state.active.text1text2 = g_state.currentmode.text1text2;
+			g_state[XST].active.text1text2 = g_state[XST].currentmode.text1text2;
 		}
-		if ( g_state.active.alphatest != g_state.currentmode.alphatest)
+		if ( g_state[XST].active.alphatest != g_state[XST].currentmode.alphatest)
 		{
 			// TODO: Check to see what kind of decompilation is so crooked
-			if ( g_state.currentmode.alphatest < 1065353216 && g_state.currentmode.alphatest != 0 /*???*/)
+			if ( g_state[XST].currentmode.alphatest < 1065353216 && g_state[XST].currentmode.alphatest != 0 /*???*/)
 			{
-				v16 = (int)(g_state.currentmode.alphatest * 256.0);
+				v16 = (int)(g_state[XST].currentmode.alphatest * 256.0);
 				// Clamp
 				if ( v16 < 0 )
 					v16 = 0;
@@ -635,11 +635,11 @@ LABEL_70:
 			{
 				grAlphaTestFunction(GR_CMP_ALWAYS);
 			}
-			g_state.active.alphatest = g_state.currentmode.alphatest;
+			g_state[XST].active.alphatest = g_state[XST].currentmode.alphatest;
 		}
-		if ( g_state.active.src != g_state.currentmode.src || g_state.currentmode.dst != g_state.active.dst)
+		if ( g_state[XST].active.src != g_state[XST].currentmode.src || g_state[XST].currentmode.dst != g_state[XST].active.dst)
 		{
-			switch ( g_state.currentmode.src)
+			switch ( g_state[XST].currentmode.src)
 			{
 				case X_ZERO:
 					v17 = 0;
@@ -674,7 +674,7 @@ LABEL_93:
 					v18 = 4;
 					break;
 			}
-			switch ( g_state.currentmode.dst)
+			switch ( g_state[XST].currentmode.dst)
 			{
 				case X_ONE:
 					v20 = 4;
@@ -707,83 +707,83 @@ LABEL_103:
 					break;
 			}
 			grAlphaBlendFunction(v17, v19, v18, v20);
-			g_state.active.src = g_state.currentmode.src;
-			g_state.active.dst = g_state.currentmode.dst;
+			g_state[XST].active.src = g_state[XST].currentmode.src;
+			g_state[XST].active.dst = g_state[XST].currentmode.dst;
 		}
-		if ( g_state.active.dither != g_state.currentmode.dither)
+		if ( g_state[XST].active.dither != g_state[XST].currentmode.dither)
 		{
-			if (g_state.currentmode.dither == 0 )
+			if (g_state[XST].currentmode.dither == 0 )
 				grDitherMode(GR_DITHER_DISABLE);
 			else
 				grDitherMode(GR_DITHER_4x4);
-			g_state.active.dither = g_state.currentmode.dither;
+			g_state[XST].active.dither = g_state[XST].currentmode.dither;
 		}
 	}
-	if ( g_state.send & 4 )
+	if ( g_state[XST].send & 4 )
 	{
-		g_state.currentmode.textures = 2;
+		g_state[XST].currentmode.textures = 2;
 	}
 	else
 	{
-		g_state.currentmode.textures = 1;
-		if ((g_state.send & 2) == 0)
-			g_state.currentmode.textures = 0;
+		g_state[XST].currentmode.textures = 1;
+		if ((g_state[XST].send & 2) == 0)
+			g_state[XST].currentmode.textures = 0;
 	}
-	if ( g_state.setnew & 1 )
-		g_state.currentmode.textures = 0;
-	if ( g_state.active.textures != g_state.currentmode.textures)
+	if ( g_state[XST].setnew & 1 )
+		g_state[XST].currentmode.textures = 0;
+	if ( g_state[XST].active.textures != g_state[XST].currentmode.textures)
 	{
-		g_state.active.text1 = 0;
-		g_state.active.text2 = 0;
-		g_state.changed |= 2u;
-		g_state.active.textures = g_state.currentmode.textures;
+		g_state[XST].active.text1 = 0;
+		g_state[XST].active.text2 = 0;
+		g_state[XST].changed |= 2u;
+		g_state[XST].active.textures = g_state[XST].currentmode.textures;
 	}
-	if ( g_state.changed & 2 )
+	if ( g_state[XST].changed & 2 )
 	{
-		if ( g_state.geometry & 0x10 )
-			g_state.currentmode.stwhint |= 2u;
+		if ( g_state[XST].geometry & 0x10 )
+			g_state[XST].currentmode.stwhint |= 2u;
 		else
-			g_state.currentmode.stwhint &= 0xFFFFFFFD;
-		if ( g_state.currentmode.textures == 1 )
+			g_state[XST].currentmode.stwhint &= 0xFFFFFFFD;
+		if ( g_state[XST].currentmode.textures == 1 )
 		{
-			g_state.currentmode.stwhint &= 0xFFFFFFEF;
-			if ( g_state.currentmode.text1 != g_state.active.text1)
+			g_state[XST].currentmode.stwhint &= 0xFFFFFFEF;
+			if ( g_state[XST].currentmode.text1 != g_state[XST].active.text1)
 			{
-				mode_loadtexture(g_state.currentmode.text1);
-				g_state.active.text1 = g_state.currentmode.text1;
+				mode_loadtexture(g_state[XST].currentmode.text1);
+				g_state[XST].active.text1 = g_state[XST].currentmode.text1;
 				++g_stats.chg_text;
 			}
 		}
-		else if ( g_state.currentmode.textures == 2 )
+		else if ( g_state[XST].currentmode.textures == 2 )
 		{
-			if ( g_state.currentmode.sametex )
-				g_state.currentmode.stwhint &= 0xFFFFFFEF;
+			if ( g_state[XST].currentmode.sametex )
+				g_state[XST].currentmode.stwhint &= 0xFFFFFFEF;
 			else
-				g_state.currentmode.stwhint |= 0x10u;
-			if ( g_state.currentmode.text1 != g_state.active.text1 || g_state.currentmode.text2 != g_state.active.text2)
+				g_state[XST].currentmode.stwhint |= 0x10u;
+			if ( g_state[XST].currentmode.text1 != g_state[XST].active.text1 || g_state[XST].currentmode.text2 != g_state[XST].active.text2)
 			{
-				v25 = g_state.currentmode.text2;
-				mode_loadmultitexture(g_state.currentmode.text1, g_state.currentmode.text2);
+				v25 = g_state[XST].currentmode.text2;
+				mode_loadmultitexture(g_state[XST].currentmode.text1, g_state[XST].currentmode.text2);
 				g_stats.chg_text += 2;
-				g_state.active.text1 = g_state.currentmode.text1;
+				g_state[XST].active.text1 = g_state[XST].currentmode.text1;
 			}
 		}
-		g_state.active.sametex = g_state.currentmode.sametex;
+		g_state[XST].active.sametex = g_state[XST].currentmode.sametex;
 	}
-	if ( g_state.active.stwhint != g_state.currentmode.stwhint)
+	if ( g_state[XST].active.stwhint != g_state[XST].currentmode.stwhint)
 	{
-		grHints(GR_HINT_STWHINT, g_state.currentmode.stwhint);
-		g_state.active.stwhint = g_state.currentmode.stwhint;
+		grHints(GR_HINT_STWHINT, g_state[XST].currentmode.stwhint);
+		g_state[XST].active.stwhint = g_state[XST].currentmode.stwhint;
 	}
-	g_state.changed = 0;
+	g_state[XST].changed = 0;
 	++g_stats.chg_mode;
-	if ( g_state.geometry & X_DUMPDATA)
+	if ( g_state[XST].geometry & X_DUMPDATA)
 	{
 		x_log("#modechange:\n");
-		x_log("-mask c=%i z=%i zt=%i\n", g_state.currentmode.mask & 1, (g_state.currentmode.mask & 2u) >> 1, (g_state.currentmode.mask & 4u) >> 2);
-		x_log("-colortext1 %08X\n", g_state.currentmode.colortext1);
-		x_log("-alphatest %04X\n", (int16_t)g_state.currentmode.alphatest);
-		x_log("-blend %04X %04X\n", g_state.currentmode.src, g_state.currentmode.dst);
-		x_log("-texture %i (%i textures)\n", g_state.currentmode.text1, g_state.active.textures);
+		x_log("-mask c=%i z=%i zt=%i\n", g_state[XST].currentmode.mask & 1, (g_state[XST].currentmode.mask & 2u) >> 1, (g_state[XST].currentmode.mask & 4u) >> 2);
+		x_log("-colortext1 %08X\n", g_state[XST].currentmode.colortext1);
+		x_log("-alphatest %04X\n", (int16_t)g_state[XST].currentmode.alphatest);
+		x_log("-blend %04X %04X\n", g_state[XST].currentmode.src, g_state[XST].currentmode.dst);
+		x_log("-texture %i (%i textures)\n", g_state[XST].currentmode.text1, g_state[XST].active.textures);
 	}
 }

@@ -100,7 +100,7 @@ void x_fastfpu(int fast)
 	static int initdone = 0;
 
 	int v1; // eax
-	bool v2; // zf
+	int v2; // zf - bool
 	unsigned int result; // eax
 
 	if (!initdone) {
