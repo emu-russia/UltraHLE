@@ -13,6 +13,7 @@ Tidied up for building under Visual Studio 2022.
 - src: original slightly modified sources
 - Build: this is where the executable will be built
 - Scripts: project for VS2022, which pulls sources and everything else from the original src folder by links.
+- XGLIDE_Recompile: decompiling the XGLIDE library. Why not?
 
 ## How the sources are modified
 
