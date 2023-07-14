@@ -5,8 +5,6 @@
 #include <float.h>			// See x_fastfpu
 #include <Windows.h>
 
-typedef unsigned char bool;
-
 #include "3dfx_headers/glide.h"
 
 #include "X.H"

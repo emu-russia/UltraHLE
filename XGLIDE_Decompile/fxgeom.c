@@ -45,7 +45,7 @@ void geom_init()
 void x_cameramatrix(xt_matrix* a1)
 {
 	BYTE *result; // eax
-	bool v2; // zf
+	int v2; // zf  - bool
 	BYTE *v3; // edi
 	signed int v4; // ecx
 	BYTE *v5; // esi
@@ -1231,7 +1231,7 @@ int doclipvertex(signed int a1, int a2, int a3)
 	int v3; // edx
 	int v4; // esi
 	int v5; // edi
-	bool v6; // zf
+	int v6; // zf  - bool
 	int v7; // ebx
 	int v8; // ebx
 	int v9; // esi

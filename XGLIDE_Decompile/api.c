@@ -128,17 +128,14 @@ void x_getstats(xt_stats* s, int ssize)
 	static int nowtime = 0;
 	static int lasttime = 0;
 
-	bool v2; // zf
-
 	nowtime = x_timeus();
 	if ( s )
 	{
 		if ( ssize == sizeof(xt_stats))
 		{
 			memcpy(s, &g_stats, sizeof(xt_stats));
-			v2 = nowtime == lasttime;
 			s->frametime = nowtime - lasttime;
-			if ( v2 )
+			if (nowtime == lasttime)
 				s->frametime = 1;
 		}
 		else

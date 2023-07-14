@@ -20,9 +20,9 @@ int init_fullscreen(int fullscreen)
 
 int init_query()
 {
-	int result; // eax
-	GrHwConfiguration v1; // [esp+0h] [ebp-94h]
-	int v2; // [esp+4h] [ebp-90h]
+	//int result; // eax
+	//GrHwConfiguration v1; // [esp+0h] [ebp-94h]
+	//int v2; // [esp+4h] [ebp-90h]
 
 	// Badly decompiled and not used.
 
@@ -385,14 +385,12 @@ GrFog_t* generatefogtable()
 void mode_change()
 {
 	float a1; // @ecx 
-	signed __int64 v16; // rax
+	int v16; // rax
 	signed int v17; // edx
 	signed int v18; // esi
 	signed int v19; // eax
 	signed int v20; // ecx
-	bool v23; // zf
 	float v25; // eax
-	float result; // eax
 
 	if ( g_state.changed & 1 )
 	{
@@ -620,15 +618,16 @@ LABEL_70:
 		}
 		if ( g_state.active.alphatest != g_state.currentmode.alphatest)
 		{
+			// TODO: Check to see what kind of decompilation is so crooked
 			if ( g_state.currentmode.alphatest < 1065353216 && g_state.currentmode.alphatest != 0 /*???*/)
 			{
-				v16 = (signed __int64)(g_state.currentmode.alphatest * 256.0);
+				v16 = (int)(g_state.currentmode.alphatest * 256.0);
 				// Clamp
-				if ( (signed int)v16 < 0 )
+				if ( v16 < 0 )
 					v16 = 0;
-				if ( (signed int)v16 > 255 )
+				if ( v16 > 255 )
 					v16 = 255;
-				grAlphaTestReferenceValue(v16);
+				grAlphaTestReferenceValue((GrAlpha_t)v16);
 				grAlphaTestFunction(GR_CMP_GREATER);
 			}
 			else
@@ -725,9 +724,8 @@ LABEL_103:
 	}
 	else
 	{
-		v23 = (g_state.send & 2) == 0;
 		g_state.currentmode.textures = 1;
-		if ( v23 )
+		if ((g_state.send & 2) == 0)
 			g_state.currentmode.textures = 0;
 	}
 	if ( g_state.setnew & 1 )
@@ -757,7 +755,7 @@ LABEL_103:
 		}
 		else if ( g_state.currentmode.textures == 2 )
 		{
-			if ( LODWORD(g_state.currentmode.sametex) )
+			if ( g_state.currentmode.sametex )
 				g_state.currentmode.stwhint &= 0xFFFFFFEF;
 			else
 				g_state.currentmode.stwhint |= 0x10u;
@@ -771,12 +769,10 @@ LABEL_103:
 		}
 		g_state.active.sametex = g_state.currentmode.sametex;
 	}
-	result = g_state.currentmode.stwhint;
-	if ( g_state.active.stwhint != LODWORD(result) )
+	if ( g_state.active.stwhint != g_state.currentmode.stwhint)
 	{
 		grHints(GR_HINT_STWHINT, g_state.currentmode.stwhint);
-		result = g_state.currentmode.stwhint;
-		g_state.active.stwhint = result;
+		g_state.active.stwhint = g_state.currentmode.stwhint;
 	}
 	g_state.changed = 0;
 	++g_stats.chg_mode;
