@@ -6,7 +6,7 @@ The decomposition is done in IDA, using HexRays. After that, additional manual p
 
 |Module/Function|Status|Notes|
 |---|---|---|
-|api.c|||
+|**api.c**|||
 |x_init| | |
 |x_deinit| | |
 |x_version| | |
@@ -53,7 +53,7 @@ The decomposition is done in IDA, using HexRays. After that, additional manual p
 |x_reset| | |
 |x_fog| | |
 |x_fullscreen| | |
-|fx.c|||
+|**fx.c**|||
 |init_name| | |
 |init_fullscreen| | |
 |init_query| | |
@@ -73,7 +73,7 @@ The decomposition is done in IDA, using HexRays. After that, additional manual p
 |fixfogtable| | |
 |generatefogtable| | |
 |mode_change| | |
-|fxgeom.c|||
+|**fxgeom.c**|||
 |geom_init| | |
 |x_cameramatrix| | |
 |x_getmatrix| | |
@@ -100,7 +100,7 @@ The decomposition is done in IDA, using HexRays. After that, additional manual p
 |flush_reordertables| | |
 |flush_drawfx| | |
 |x_flush| | |
-|fxtext.c|||
+|**fxtext.c**|||
 |newblock| | |
 |addbefore| | |
 |addafter| | |
@@ -128,11 +128,11 @@ The decomposition is done in IDA, using HexRays. After that, additional manual p
 |text_opendata| | |
 |text_closedata| | |
 |text_frameend| | |
-|main.c|||
+|**main.c**|||
 |zerobase| | |
 |mysleep| | |
 |DllMain| | |
-|util.c|||
+|**util.c**|||
 |log_open| | |
 |x_log| | |
 |breakpoint| | |
