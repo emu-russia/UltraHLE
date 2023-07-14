@@ -481,6 +481,7 @@ $L1409:
 		}
 		if ( g_state.currentmode.envc != g_state.active.envc)
 		{
+			// TODO: Check wtf here (NaN)
 			g_state.active.colortext1 = -6.8056469e38/*NaN*/;
 			g_state.active.envc = g_state.currentmode.envc;
 		}
