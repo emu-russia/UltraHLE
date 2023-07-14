@@ -3,7 +3,7 @@
 
 void geom_init();
 void dumpmatrix(float* a1, int a2);
-int recalc_projection(int a1);
+int recalc_projection();
 void vertexdata(xt_data* a1);
 void xform(int a1, xt_pos* a2, int a3, char* a4);
 int setuprvx(int a1, int a2);

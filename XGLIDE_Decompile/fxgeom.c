@@ -73,13 +73,13 @@ LABEL_10:
 	else
 	{
 		g_state.campresent = 1;
-		memcpy(&g_state[201], a1, 0x40u);
+		memcpy(g_state.camxform, a1, 0x40u);
 	}
 }
 
 void x_getmatrix(xt_matrix* matrix)
 {
-	memcpy(matrix, &g_state[169], 0x40u);
+	memcpy(matrix, g_state.matrix, 0x40u);
 }
 
 void dumpmatrix(float *a1, int a2)
@@ -157,11 +157,11 @@ void x_matrix(xt_matrix* matrix)
 	{
 		g_state.usexformmode = g_state.xformmode;
 		x_flush();
-		memcpy(&g_state[169], matrix, 0x40u);
+		memcpy(g_state.matrix, matrix, 0x40u);
 		if ( g_state.xformmode != 1 && g_state.campresent)
 		{
 			v1 = &v22;
-			v2 = (float *)&g_state[201];
+			v2 = (float *)g_state.camxform;
 			do
 			{
 				v3 = (float *)matrix;
@@ -190,15 +190,15 @@ void x_matrix(xt_matrix* matrix)
 				while ( v4 );
 				v2 += 4;
 			}
-			while ( v2 < (float *)&g_state[217] );
+			while ( v2 < (float *)&g_state.camxform[4*4]);
 			v21 = (float *)&v22;
 		}
 		else
 		{
-			v21 = (float *)&g_state[169];
+			v21 = (float *)g_state.matrix;
 		}
-		v11 = (float *)&g_state[185];
-		v12 = (float *)&g_state[217];
+		v11 = (float *)g_state.xform;
+		v12 = (float *)g_state.projxform;
 		do
 		{
 			v13 = v21;
@@ -227,25 +227,22 @@ void x_matrix(xt_matrix* matrix)
 			while ( v14 );
 			v12 += 4;
 		}
-		while ( v12 < (float *)&g_state[233] );
+		while ( v12 < (float *)g_state.projxform[4*4]);
 
 		if ( g_state.geometry & X_DUMPDATA)
 		{
 			dumpmatrix(v21, "Modelview");
-			dumpmatrix((float *)&g_state[217], "Projection");
-			dumpmatrix((float *)&g_state[185], "Combined");
+			dumpmatrix(g_state.projxform, "Projection");
+			dumpmatrix(g_state.xform, "Combined");
 			x_log("Xformmode: %i Znear: %f Zfar: %f\n", g_state.xformmode, g_state.znear, g_state.zfar);
 		}
 	}
 }
 
-int recalc_projection(int a1)
+int recalc_projection()
 {
 	long double v1; // fst7
 	long double v2; // fst6
-	signed __int64 v3; // rax
-	signed __int64 v4; // rax
-	signed __int64 v5; // rax
 	float v6; // eax
 	int result; // eax
 	long double v8; // fst7
@@ -254,43 +251,41 @@ int recalc_projection(int a1)
 	long double v11; // fst5
 	long double v12; // fst4
 
-	v1 = (g_state[249] - g_state[248] + 1.0) * 0.5;
-	g_state[252] = v1;
-	v2 = (g_state[251] - g_state[250] + 1.0) * 0.5;
-	g_state[254] = v2;
-	g_state[253] = v1 + g_state[248] + 0.2;
-	g_state[255] = v2 + g_state[250] + 0.2;
-	v3 = (signed __int64)g_state.view_y1;
-	v4 = (signed __int64)g_state.view_x1;
-	v5 = (signed __int64)g_state.view_y0;
-	grClipWindow(a1, (unsigned __int64)(signed __int64)g_state[248] >> 32, g_state.view_x0);
+	v1 = (g_state.view_x1 - g_state.view_x0 + 1.0f) * 0.5f;
+	g_state.projxmul = v1;
+	v2 = (g_state.view_y1 - g_state.view_y0 + 1.0f) * 0.5f;
+	g_state.projymul = v2;
+	g_state.projxadd = v1 + g_state.view_x0 + 0.2f;
+	g_state.projyadd = v2 + g_state.view_y0 + 0.2f;
+	// TODO: Check. Hard place for decompiler.
+	grClipWindow(g_state.view_x0, g_state.view_y0, g_state.view_x1, g_state.view_y1);
 	v6 = g_state.xformmode;
 	if ( v6 == 0 )
 	{
-		memset(&g_state[217], 0, 0x40u);
+		memset(g_state.projxform, 0, 0x40u);
 		v8 = g_state.znear / g_state.xmax;
-		g_state[227] = 1.0;
-		g_state[232] = 1.0;
-		g_state[217] = v8;
-		g_state[222] = g_state.znear / g_state.ymax;
+		g_state.projxform[227 - 217] = 1.0f;
+		g_state.projxform[232 - 217] = 1.0f;
+		g_state.projxform[217 - 217] = v8;
+		g_state.projxform[222 - 217] = g_state.znear / g_state.ymax;
 		result = projrecalced();
 	}
 	else
 	{
-		if ( LODWORD(v6) == 1 )
+		if ( v6 == 1 )
 		{
-			v9 = 2.0 / (g_state[238] - g_state[237]);
-			v10 = 2.0 / (g_state[240] - g_state[239]);
-			v11 = (g_state[237] + g_state[238]) * 0.5;
-			v12 = (g_state[240] + g_state[239]) * 0.5;
-			memset(&g_state[217], 0, 0x40u);
-			g_state[227] = 1.0;
-			g_state[217] = v9;
-			g_state[222] = v10;
-			g_state[228] = 0.0;
-			g_state[232] = 0.0;
-			g_state[220] = -(v11 * v9);
-			g_state[224] = -(v10 * v12);
+			v9 = 2.0 / (g_state.xmax - g_state.xmin);
+			v10 = 2.0 / (g_state.ymax - g_state.ymin);
+			v11 = (g_state.xmin + g_state.xmax) * 0.5f;
+			v12 = (g_state.ymax + g_state.ymin) * 0.5f;
+			memset(g_state.projxform, 0, 0x40u);
+			g_state.projxform[227 - 217] = 1.0f;
+			g_state.projxform[217 - 217] = v9;
+			g_state.projxform[222 - 217] = v10;
+			g_state.projxform[228 - 217] = 0.0f;
+			g_state.projxform[232 - 217] = 0.0f;
+			g_state.projxform[220 - 217] = -(v11 * v9);
+			g_state.projxform[224 - 217] = -(v10 * v12);
 		}
 		result = projrecalced();
 	}
@@ -655,18 +650,18 @@ LABEL_12:
 					if ( !--v4 )
 						return;
 				}
-				*(float *)v5 = *v6 * *(float *)&g_state[185]
-										 + v6[1] * *(float *)&g_state[186]
-										 + v6[2] * *(float *)&g_state[187]
-										 + *(float *)&g_state[188];
-				*(float *)(v5 + 4) = *v6 * *(float *)&g_state[189]
-													 + v6[1] * *(float *)&g_state[190]
-													 + v6[2] * *(float *)&g_state[191]
-													 + *(float *)&g_state[192];
-				v9 = *v6 * *(float *)&g_state[193]
-					 + v6[1] * *(float *)&g_state[194]
-					 + v6[2] * *(float *)&g_state[195]
-					 + *(float *)&g_state[196];
+				*(float *)v5 = *v6 * g_state.xform[185 - 185]
+										 + v6[1] * g_state.xform[186 - 185]
+										 + v6[2] * g_state.xform[187 - 185]
+										 + g_state.xform[188 - 185];
+				*(float *)(v5 + 4) = *v6 * g_state.xform[189 - 185]
+													 + v6[1] * g_state.xform[190 - 185]
+													 + v6[2] * g_state.xform[191 - 185]
+													 + g_state.xform[192 - 185];
+				v9 = *v6 * g_state.xform[193 - 185]
+					 + v6[1] * g_state.xform[194 - 185]
+					 + v6[2] * g_state.xform[195 - 185]
+					 + g_state.xform[196 - 185];
 				*(float *)(v5 + 8) = v9;
 				*(float *)(v5 + 12) = 1.0 / v9;
 LABEL_11:
@@ -717,18 +712,18 @@ LABEL_47:
 						return;
 				}
 				v15 = 0;
-				*(float *)v11 = *v12 * *(float *)&g_state[185]
-											+ v12[1] * *(float *)&g_state[186]
-											+ v12[2] * *(float *)&g_state[187]
-											+ *(float *)&g_state[188];
-				*(float *)(v11 + 4) = *v12 * *(float *)&g_state[189]
-														+ v12[1] * *(float *)&g_state[190]
-														+ v12[2] * *(float *)&g_state[191]
-														+ *(float *)&g_state[192];
-				v54 = *v12 * *(float *)&g_state[193]
-						+ v12[1] * *(float *)&g_state[194]
-						+ v12[2] * *(float *)&g_state[195]
-						+ *(float *)&g_state[196];
+				*(float *)v11 = *v12 * g_state.xform[185 - 185]
+											+ v12[1] * g_state.xform[186 - 185]
+											+ v12[2] * g_state.xform[187 - 185]
+											+ g_state.xform[188 - 185];
+				*(float *)(v11 + 4) = *v12 * g_state.xform[189 - 185]
+														+ v12[1] * g_state.xform[190 - 185]
+														+ v12[2] * g_state.xform[191 - 185]
+														+ g_state.xform[192 - 185];
+				v54 = *v12 * g_state.xform[193 - 185]
+						+ v12[1] * g_state.xform[194 - 185]
+						+ v12[2] * g_state.xform[195 - 185]
+						+ g_state.xform[196 - 185];
 				*(float *)(v11 + 8) = v54;
 				v16 = *(float *)v11;
 				if ( !(v19 | v20) )
@@ -762,18 +757,18 @@ LABEL_46:
 				{
 					if ( !v30 || (v31 = v30, ++v30, !*v31) )
 					{
-						*(float *)v28 = *v29 * *(float *)&g_state[185]
-													+ v29[1] * *(float *)&g_state[186]
-													+ v29[2] * *(float *)&g_state[187]
-													+ *(float *)&g_state[188];
-						*(float *)(v28 + 4) = *v29 * *(float *)&g_state[189]
-																+ v29[1] * *(float *)&g_state[190]
-																+ v29[2] * *(float *)&g_state[191]
-																+ *(float *)&g_state[192];
-						*(float *)(v28 + 8) = *v29 * *(float *)&g_state[193]
-																+ v29[1] * *(float *)&g_state[194]
-																+ v29[2] * *(float *)&g_state[195]
-																+ *(float *)&g_state[196];
+						*(float *)v28 = *v29 * g_state.xform[185 - 185]
+													+ v29[1] * g_state.xform[186 - 185]
+													+ v29[2] * g_state.xform[187 - 185]
+													+ g_state.xform[188 - 185];
+						*(float *)(v28 + 4) = *v29 * g_state.xform[189 - 185]
+																+ v29[1] * g_state.xform[190 - 185]
+																+ v29[2] * g_state.xform[191 - 185]
+																+ g_state.xform[192 - 185];
+						*(float *)(v28 + 8) = *v29 * g_state.xform[193 - 185]
+																+ v29[1] * g_state.xform[194 - 185]
+																+ v29[2] * g_state.xform[195 - 185]
+																+ g_state.xform[196 - 185];
 						if ( v33 )
 							*(DWORD *)(v28 + 12) = g_state.invznear;
 						else
@@ -816,18 +811,18 @@ LABEL_46:
 				if ( !v40 )
 				{
 					v41 = 0;
-					*(float *)v37 = *v38 * *(float *)&g_state[185]
-												+ v38[1] * *(float *)&g_state[186]
-												+ v38[2] * *(float *)&g_state[187]
-												+ *(float *)&g_state[188];
-					*(float *)(v37 + 4) = *v38 * *(float *)&g_state[189]
-															+ v38[1] * *(float *)&g_state[190]
-															+ v38[2] * *(float *)&g_state[191]
-															+ *(float *)&g_state[192];
-					v56 = *v38 * *(float *)&g_state[197]
-							+ v38[1] * *(float *)&g_state[198]
-							+ v38[2] * *(float *)&g_state[199]
-							+ *(float *)&g_state[200];
+					*(float *)v37 = *v38 * g_state.xform[185 - 185]
+												+ v38[1] * g_state.xform[186 - 185]
+												+ v38[2] * g_state.xform[187 - 185]
+												+ g_state.xform[188 - 185];
+					*(float *)(v37 + 4) = *v38 * g_state.xform[189 - 185]
+															+ v38[1] * g_state.xform[190 - 185]
+															+ v38[2] * g_state.xform[191 - 185]
+															+ g_state.xform[192 - 185];
+					v56 = *v38 * g_state.xform[197 - 185]
+							+ v38[1] * g_state.xform[198 - 185]
+							+ v38[2] * g_state.xform[199 - 185]
+							+ g_state.xform[200 - 185];
 					*(float *)(v37 + 8) = v56;
 					v42 = *(float *)v37;
 					if ( !(v45 | v46) )

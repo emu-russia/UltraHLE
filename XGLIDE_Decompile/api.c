@@ -239,7 +239,7 @@ void x_projmatrix(xt_matrix* a1)
 		g_state.projnull = 1;
 		v2 = &identmatrix;
 	}
-	memcpy(&g_state[217], v2, 0x40u);
+	memcpy(g_state.projxform, v2, 0x40u);
 	g_state.xformmode = 2;
 	g_state.projchanged = 1;
 }
