@@ -28,6 +28,10 @@ static int corners;
 
 static int clipnewvx;
 static int clipor;
+static int clipbuf1[0x10];		// TODO: not sure of the size
+static int clipbuf2[0x10];		// TODO: not sure of the size
+static int* clipin;
+static int* clipout;
 
 static GrVertex grvx[0x200];		// Item size: 60 bytes
 static float corner[0x200 * 5];
@@ -37,6 +41,8 @@ static xt_tex tex2[0x200];
 static xt_tex texp[0x200];
 static xt_xfpos xfpos[0x200];		// Item size: 20 bytes
 static uint8_t xformed[0x200];			// Contains an indication that the vertex has been transformed (?)
+
+static int splitbuf[0x10];		// TODO: not sure of the size
 
 void geom_init()
 {
@@ -1465,12 +1471,12 @@ signed int clippoly(int a1, int a2, int *a3, DWORD *a4)
 	int v7; // esi
 	DWORD *v9; // ST00_4
 
-	v4 = (int *)&clipbuf1;
+	v4 = clipbuf1;
 	clipor = a1;
 	clipnewvx = vertices;
 	v5 = a2;
-	clipin = &clipbuf1;
-	clipout = &clipbuf2;
+	clipin = clipbuf1;
+	clipout = clipbuf2;
 	if ( a2 > 0 )
 	{
 		v6 = a3;
@@ -1779,10 +1785,10 @@ signed int flush_drawfx()
 						}
 						else
 						{
-							result = splitpoly(v10, (int)v16, &splitbuf);
+							result = splitpoly(v10, (int)v16, splitbuf);
 							if ( result > 0 )
 							{
-								v12 = (int *)((char *)&splitbuf + 8);
+								v12 = (int *)((char *)splitbuf + 8);
 								v1 = (result + 2) % 3u;
 								v13 = (result + 2) / 3u;
 								do
