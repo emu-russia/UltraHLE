@@ -1,6 +1,6 @@
 # Decompiling the XGLIDE.LIB library
 
-The decomposition is done in IDA, using HexRays. After that, additional manual processing for buildability is performed.
+The decompilation is done in IDA, using HexRays. After that, additional manual processing for buildability is performed.
 
 ## Decompilation status
 
