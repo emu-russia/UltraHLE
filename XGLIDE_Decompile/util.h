@@ -1,5 +1,5 @@
 
 #pragma once
 
-FILE* log_open(char* Mode);
+void log_open(char* mode);
 void breakpoint();

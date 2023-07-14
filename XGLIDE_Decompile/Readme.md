@@ -131,22 +131,22 @@ Overall status: Not yet buildable, but its something already.
 |text_closedata| | |
 |text_frameend| | |
 |**main.c**|||
-|zerobase| | |
-|mysleep| | |
-|DllMain| | |
+|zerobase|Ready|empty|
+|mysleep|Ready|Uses Win32 Sleep|
+|DllMain|Ready|not used|
 |**util.c**|||
-|log_open| | |
-|x_log| | |
-|breakpoint| | |
-|x_fatal| | |
-|x_allocfast| | |
-|x_alloc| | |
-|x_realloc| | |
-|x_free| | |
-|x_fastfpu| | |
-|x_timereset| | |
-|x_timeus| | |
-|x_timems| | |
+|log_open|Ready| |
+|x_log|Ready| |
+|breakpoint|Ready|Uses __debugbreak|
+|x_fatal|Ready|Does a repeated log_open to dump the contents into x.log|
+|x_allocfast|Ready|malloc|
+|x_alloc|Ready|malloc+memset|
+|x_realloc|Ready| |
+|x_free|Ready|free|
+|x_fastfpu|Not sure|I'm not too sure if the decompilation is done correctly, but there are no plans to use this call. Modern compilers/Windows do not require it.|
+|x_timereset|Ready|Uses Win32 QueryPerformanceCounter|
+|x_timeus|Ready| |
+|x_timems|Ready| |
 
 ## Additional symbolic information
 
@@ -154,15 +154,15 @@ IDA does not fully understand the format of old .LIB files, so some of the infor
 
 In particular, if you open a .LIB file in a HEX editor, you can find there the names of parameters for calls, as well as the names of fields of private structures.
 
-## g_state
+## xt_state
 
-Large structure with all execution context. It also contains 2 substructures xt_mode (new modes and current modes).
+Large structure with all execution context. It also contains 2 substructures `xt_rendmode` (new modes and current modes).
 
-:warning: There are actually 2 structures (g_state\[2\]), and the current one is selected by the `x_select` method (0 - unused). But actually `g_state[1]` is used everywhere.
+:warning: There are actually 2 instancies (g_state\[2\]), and the current one is selected by the `x_select` method (0 - unused). But actually `g_state[1]` is used everywhere.
 
-## g_stats
+## xt_stats
 
-A `xt_stats` structure with global library statistics. Used in `x_getstats`.
+A `xt_stats` structure with global library statistics. Single instance - `g_stats`. Used in `x_getstats`.
 
 |n|field|
 |---|---|
@@ -210,4 +210,66 @@ typedef struct {
   float  tow;                   /* t texture ordinate (t over w) */  
   float  oow;                   /* 1/w (used mipmapping - really 0xfff/w) */
 }  GrTmuVertex;
+```
+
+## t_block
+
+Texture block.
+
+```
+typedef struct _t_block   // 16 bytes
+{
+  struct _t_block* prev;
+  struct _t_block* next;
+  int base;
+  int size;
+} t_block;
+```
+
+## xt_memory
+
+Texture memory map.
+
+```
+typedef struct _xt_memory // 48 bytes
+{
+  int min;    // 0
+  int max;    // 1
+  t_block free; // 2..5
+  t_block used;   // 6..9
+  void* table;  // 10
+  int tableind; // 11  - table index
+} xt_memory;
+```
+
+## xt_texture
+
+Texture descriptor (TODO)
+
+```
+typedef struct _xt_texture    // 152 bytes (38 dwords)
+{
+  int state;        // 0  - Active number of the state (g_state). 0: texture is not used.
+  int handle;       // 1
+  int width;        // 2
+  int height;       // 3
+  int format;       // 4
+  int memformat;      // 5
+  int bytes;        // 6
+  int levels;       // 7  (1 - no mipmap)
+  int levelsloaded;   // 8
+  float xmul;       // 9
+  float ymul;       // 10
+  int lastframeused;    // 11
+  //reload
+  //GrTexInfo ti
+  //size
+  //base
+  //tmu
+  //xblock
+  //usedsize
+
+  uint32_t unknown[38 - 12/*known*/];
+
+} xt_texture;
 ```

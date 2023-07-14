@@ -1,37 +1,31 @@
 #include "pch.h"
 
-FILE* logfile;
-char* logfilename = "x.log";
-uint32_t initdone;
-LARGE_INTEGER perf_freq;
-LARGE_INTEGER perf_counter;
+static FILE* logfile;
+static char* logfilename = "x.log";
+static uint32_t initdone;				// TODO: Conflicts with an internal variable in x_fastfpu
+static LARGE_INTEGER perf_freq;
+static LARGE_INTEGER perf_counter;
 
-FILE * log_open(char *Mode)
+void log_open(char *mode)
 {
-	FILE *result; // eax
-
 	if (logfile)
 		fclose(logfile);
-	result = (FILE *)Mode;
-	if ( Mode )
+	if (mode)
 	{
-		result = fopen(logfilename, Mode);
-		logfile = result;
+		logfile = fopen(logfilename, mode);
 	}
-	return result;
 }
 
 void x_log(char* Format, ...)
 {
 	static char buf[0x100];
-	FILE *result; // eax
-	va_list va; // [esp+8h] [ebp+8h]
+	va_list va;
 
 	va_start(va, Format);
 	vsprintf(buf, Format, va);
-	result = (FILE *)fputs(buf, logfile);
+	fputs(buf, logfile);
 	if ( *Format != 35 )
-		result = log_open("at");
+		log_open("at");
 }
 
 void breakpoint()
@@ -42,7 +36,7 @@ void breakpoint()
 void x_fatal(char* Format, ...)
 {
 	static char buf[0x100];
-	va_list va; // [esp+8h] [ebp+8h]
+	va_list va;
 
 	va_start(va, Format);
 	vsprintf(buf, Format, va);
@@ -56,7 +50,7 @@ void x_fatal(char* Format, ...)
 
 void* x_allocfast(int Size)
 {
-	void *result; // eax
+	void *result;
 
 	result = malloc(Size);
 	if ( !result )
@@ -66,7 +60,7 @@ void* x_allocfast(int Size)
 
 void* x_alloc(int Size)
 {
-	void *result; // eax
+	void *result;
 
 	result = x_allocfast(Size);
 	memset(result, 0, Size);
@@ -75,17 +69,16 @@ void* x_alloc(int Size)
 
 void* x_realloc(void* Memory, int NewSize)
 {
-	size_t v2; // edi
-	void *result; // eax
+	void *result;
 
-	v2 = NewSize;
 	if ( !Memory )
 		return x_alloc(NewSize);
+
 	if ( (signed int)NewSize <= 0 )
-		v2 = 1;
-	result = realloc(Memory, v2);
+		NewSize = 1;
+	result = realloc(Memory, NewSize);
 	if ( !result )
-		x_fatal("out of memory allocating %i bytes", v2);
+		x_fatal("out of memory allocating %i bytes", NewSize);
 	return result;
 }
 
@@ -139,11 +132,9 @@ void x_fastfpu(int fast)
 
 void x_timereset(void)
 {
-	BOOL result;
-
 	if ( !QueryPerformanceFrequency(&perf_freq) )
 		x_fatal("This computer does not support Pentium Performance Counter\n");
-	result = QueryPerformanceCounter(&perf_counter);
+	QueryPerformanceCounter(&perf_counter);
 	initdone = 1;
 }
 
