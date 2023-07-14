@@ -226,7 +226,6 @@ void x_frustum(float xmin, float xmax, float ymin, float ymax, float znear, floa
 
 void x_projmatrix(xt_matrix* a1)
 {
-	int result; // eax
 	const void *v2; // esi
 
 	x_flush();
@@ -260,8 +259,8 @@ void x_ortho(float xmin, float ymin, float xmax, float ymax, float znear, float 
 	g_state.zfar = zfar;
 	g_state.xformmode = 1;
 	g_state.projchanged = 1;
-	g_state.invzfar = 1.0 / zfar;
-	g_state.invznear = 1.0 / znear;
+	g_state.invzfar = 1.0f / zfar;
+	g_state.invznear = 1.0f / znear;
 }
 
 void x_viewport(float x0, float y0, float x1, float y1)
@@ -281,23 +280,13 @@ void x_viewport(float x0, float y0, float x1, float y1)
 
 void x_projection(float fov, float znear, float zfar)
 {
-	int v3; // ST08_4
-	int v4; // ST04_4
 	double v6; // st7
-	int v7; // ST0C_4
-	int v8; // ST08_4
-	int v9; // ST04_4
-	int v10; // ST00_4
 
 	x_flush();
 	if ( fov >= 1.0 )
 	{
-		v6 = tan(fov * (PI/180.0f) * 0.5) * zfar;
-		*(float *)&v7 = 0.75 * v6;
-		*(float *)&v8 = -(0.75 * v6);
-		*(float *)&v9 = v6;
-		*(float *)&v10 = -v6;
-		x_frustum(v10, v9, v8, v7, znear, zfar);
+		v6 = tan(fov * (PI/180.0f) * 0.5f) * zfar;
+		x_frustum(-v6, v6, -(0.75f * v6), 0.75f * v6, znear, zfar);
 	}
 	else
 	{
@@ -419,19 +408,19 @@ int x_createtexture(int format, int width, int height)
 
 int x_gettextureinfo(int handle, int* format, int* memformat, int* width, int* height)
 {
-	DWORD *v5; // eax
+	xt_texture* tex;
 
-	v5 = texture_get(handle);
-	if ( !v5 )
+	tex = texture_get(handle);
+	if ( !tex)
 		return 1;
 	if (format)
-		*format = v5[4];
+		*format = tex->format;
 	if (memformat)
-		*memformat = v5[5];
+		*memformat = tex->memformat;
 	if (width)
-		*width = v5[2];
+		*width = tex->width;
 	if (height)
-		*height = v5[3];
+		*height = tex->height;
 	return 0;
 }
 
@@ -465,27 +454,27 @@ void x_freetexture(int handle)
 		text_freedata(result);
 }
 
-int x_texture_getinfo(signed int a1, DWORD *a2, DWORD *a3, DWORD *a4, DWORD *a5)
+int x_texture_getinfo(int handle, int* format, int* memformat, int* width, int* height)
 {
-	DWORD *v5; // eax
+	xt_texture* tex;
 
-	v5 = texture_get(a1);
-	if ( !v5 )
+	tex = texture_get(handle);
+	if (!tex)
 		return 1;
-	if ( a2 )
-		*a2 = v5[4];
-	if ( a3 )
-		*a3 = v5[5];
-	if ( a4 )
-		*a4 = v5[2];
-	if ( a5 )
-		*a5 = v5[3];
+	if (format)
+		*format = tex->format;
+	if (memformat)
+		*memformat = tex->memformat;
+	if (width)
+		*width = tex->width;
+	if (height)
+		*height = tex->height;
 	return 0;
 }
 
 void x_cleartexmem(void)
 {
-	return text_cleartexmem();
+	text_cleartexmem();
 }
 
 uchar* x_opentexturedata(int a1)
@@ -522,13 +511,8 @@ void x_forcegeometry(int forceon, int forceoff)
 
 void x_geometry(int flags)
 {
-	int v1; // ecx
-	int result; // eax
-
-	v1 = g_state.geometryon;
-	result = ~g_state.geometryoff;
+	g_state.geometry = (flags | g_state.geometryon) & ~g_state.geometryoff;
 	g_state.changed |= 1u;
-	g_state.geometry = result & (flags | v1);
 }
 
 int x_mask(int colormask, int depthmask, int depthtest)
@@ -579,9 +563,9 @@ LABEL_5:
 
 int x_blend(int src, int dst)
 {
-	if (src < 4609 || src > 4616 )
+	if (src < X_FIRSTBLEND || src > X_LASTBLEND)
 		return 1;
-	if (dst < 4609 || dst > 4616 )
+	if (dst < X_FIRSTBLEND || dst > X_LASTBLEND)
 		return 1;
 	g_state.currentmode.src = src;
 	g_state.currentmode.dst = dst;
@@ -595,26 +579,26 @@ int x_alphatest(float limit)
 		limit = 1.0f;
 	if ( limit < 0.0f || limit > 1.0f)
 		return 1;
-	g_state.changed |= 4u;
 	g_state.currentmode.alphatest = limit;
+	g_state.changed |= 4u;
 	return 0;
 }
 
 int x_combine(int colortext1)
 {
-	if (colortext1 < 4865 || colortext1 > 4879 )
+	if (colortext1 < X_FIRSTCOMBINE || colortext1 > X_LASTCOMBINE)
 		return 1;
 	g_state.currentmode.text1text2 = 0;
-	g_state.changed |= 4u;
 	g_state.currentmode.colortext1 = colortext1;
+	g_state.changed |= 4u;
 	return 0;
 }
 
 int x_procombine(int rgb, int alpha)
 {
 	g_state.currentmode.text1text2 = 0;
-	g_state.changed |= 4u;
 	g_state.currentmode.colortext1 = rgb | (alpha << 16);
+	g_state.changed |= 4u;
 	return 0;
 }
 
@@ -624,13 +608,13 @@ int x_envcolor(float r, float g, float b, float a)
 	g_state.currentmode.env[1] = g;
 	g_state.currentmode.env[2] = b;
 	g_state.currentmode.env[3] = a;
-	g_state.changed |= 4u;
 	// Buggy (decompile bug?)
 	g_state.currentmode.envc = 
 		(unsigned __int8)(signed __int64)(r * 255.0) | 
 		((unsigned __int8)(signed __int64)(b * 255.0) << 16) | 
 		((((unsigned int)(signed __int64)(a * 255.0) << 16) | 
 		(unsigned __int8)(signed __int64)(g * 255.0)) << 8);
+	g_state.changed |= 4u;
 	return 0;
 }
 
@@ -688,6 +672,7 @@ void x_reset(void)
 {
 	x_geometry(X_CULLBACK);
 	x_mask(X_ENABLE, X_ENABLE, X_ENABLE);
+	// TODO: Probably meant X_ENABLE?
 	x_dither(1);
 	x_blend(X_ONE, X_ZERO);
 	x_alphatest(1.0f);

@@ -24,37 +24,37 @@ Overall status: Not yet buildable, but its something already.
 |x_finish| | |
 |x_frustum| | |
 |x_projmatrix| | |
-|projrecalced| | |
-|x_ortho| | |
-|x_viewport| | |
-|x_projection| | |
-|x_zrange| | |
-|x_zdecal| | |
+|projrecalced|Ready|empty|
+|x_ortho|Ready| |
+|x_viewport|Ready| |
+|x_projection|Ready| |
+|x_zrange|Ready| |
+|x_zdecal|Ready| |
 |texture_get|Ready|Nothing special, but seems to contain a typo of checking the number of texture entries (1024 != X_MAX_TEXTURES)|
 |x_createtexture| | |
-|x_gettextureinfo| | |
+|x_gettextureinfo|Ready| |
 |x_loadtexturelevel| | |
 |x_freetexture| | |
-|x_texture_getinfo| | |
-|x_cleartexmem| | |
+|x_texture_getinfo|Ready|Copy-paste of `x_gettextureinfo`|
+|x_cleartexmem|Ready|Calls `text_cleartexmem`|
 |x_opentexturedata| | |
 |x_closetexturedata| | |
-|x_forcegeometry| | |
-|x_geometry| | |
-|x_mask| | |
-|x_dither| | |
-|x_blend| | |
-|x_alphatest| | |
-|x_combine| | |
-|x_procombine| | |
-|x_envcolor| | |
-|x_combine2| | |
-|x_procombine2| | |
-|x_texture| | |
-|x_texture2| | |
-|x_reset| | |
-|x_fog| | |
-|x_fullscreen| | |
+|x_forcegeometry|Ready| |
+|x_geometry|Ready| |
+|x_mask|Ready| |
+|x_dither|Ready|Uses goto?|
+|x_blend|Ready| |
+|x_alphatest|Ready|Check range check|
+|x_combine|Ready| |
+|x_procombine|Ready| |
+|x_envcolor|Ready|envc buggy (decompile bug?)|
+|x_combine2|Ready| |
+|x_procombine2|Ready| |
+|x_texture|Ready| |
+|x_texture2|Ready| |
+|x_reset|Ready|Check x_dither(1). Probably meant X_ENABLE?|
+|x_fog|Ready| |
+|x_fullscreen|Ready|Calls `init_fullscreen`|
 |**fx.c**|||
 |init_name| | |
 |init_fullscreen| | |
