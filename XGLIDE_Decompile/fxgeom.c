@@ -1029,11 +1029,11 @@ LABEL_23:
 					pos_S1208[3 * (((char *)v2 - (char *)xfpos_S1212) / 20) + 1],
 					pos_S1208[3 * (((char *)v2 - (char *)xfpos_S1212) / 20) + 2]);
 				if ( *((DWORD *)v2 + 4) )
-					x_log("#clip[ %13.5f %13.5f %13.5f clip %08X ]\n", *v2, v2[1], v2[2], *((DWORD*)v2 + 4));
+					x_log("#clip[ %13.5f %13.5f %13.5f clip %08X ]\n", v2[0], v2[1], v2[2], *((DWORD*)v2 + 4));
 				else
-					x_log("#clip[ %13.5f %13.5f %13.5f   w:%13.5f ]\n", *v2, v2[1], v2[2], (double)(1.0 / v2[3]));
+					x_log("#clip[ %13.5f %13.5f %13.5f   w:%13.5f ]\n", v2[0], v2[1], v2[2], (double)(1.0 / v2[3]));
 				if ( !*((DWORD *)v2 + 4) )
-					x_log("#scrn[ %13.5f %13.5f %13.5f oow:%13.5f ]\n", *v3, v3[1], v3[2], v3[8]);
+					x_log("#scrn[ %13.5f %13.5f %13.5f oow:%13.5f ]\n", v3[0], v3[1], v3[2], v3[8]);
 				x_log("#\n");
 			}
 			v5 += 2;
@@ -1857,15 +1857,11 @@ signed int flush_drawfx()
 
 void x_flush(void)
 {
-	int v0; // eax
-
-	v0 = corners;
 	if ( g_state.geometry & X_DUMPDATA)
 	{
 		x_log("#flush %i %i %i\n", g_state.projchanged, g_state.changed, corners);
-		v0 = corners;
 	}
-	if ( v0 )
+	if (corners)
 	{
 		x_fastfpu(1);
 		flush_drawfx();
