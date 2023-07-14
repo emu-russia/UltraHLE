@@ -1,5 +1,151 @@
 # Decompiling the XGLIDE.LIB library
 
+The decomposition is done in IDA, using HexRays. After that, additional manual processing for buildability is performed.
+
+## Decompilation status
+
+|Module/Function|Status|Notes|
+|---|---|---|
+|api.c|||
+|x_init| | |
+|x_deinit| | |
+|x_version| | |
+|x_open| | |
+|x_resize| | |
+|x_select| | |
+|x_close| | |
+|x_getstats| | |
+|x_query| | |
+|x_clear| | |
+|x_readfb| | |
+|x_writefb| | |
+|x_finish| | |
+|x_frustum| | |
+|x_projmatrix| | |
+|projrecalced| | |
+|x_ortho| | |
+|x_viewport| | |
+|x_projection| | |
+|x_zrange| | |
+|x_zdecal| | |
+|texture_get| | |
+|x_createtexture| | |
+|x_gettextureinfo| | |
+|x_loadtexturelevel| | |
+|x_freetexture| | |
+|x_texture_getinfo| | |
+|x_cleartexmem| | |
+|x_opentexturedata| | |
+|x_closetexturedata| | |
+|x_forcegeometry| | |
+|x_geometry| | |
+|x_mask| | |
+|x_dither| | |
+|x_blend| | |
+|x_alphatest| | |
+|x_combine| | |
+|x_procombine| | |
+|x_envcolor| | |
+|x_combine2| | |
+|x_procombine2| | |
+|x_texture| | |
+|x_texture2| | |
+|x_reset| | |
+|x_fog| | |
+|x_fullscreen| | |
+|fx.c|||
+|init_name| | |
+|init_fullscreen| | |
+|init_query| | |
+|init_reinit| | |
+|init_init| | |
+|init_deinit| | |
+|init_activate| | |
+|init_resize| | |
+|init_bufferswap| | |
+|init_clear| | |
+|init_readfb| | |
+|init_writefb| | |
+|mode_init| | |
+|mode_texturemode| | |
+|mode_loadtexture| | |
+|mode_loadmultitexture| | |
+|fixfogtable| | |
+|generatefogtable| | |
+|mode_change| | |
+|fxgeom.c|||
+|geom_init| | |
+|x_cameramatrix| | |
+|x_getmatrix| | |
+|dumpmatrix| | |
+|x_matrix| | |
+|recalc_projection| | |
+|x_begin| | |
+|x_end| | |
+|vertexdata| | |
+|xform| | |
+|setuprvx| | |
+|x_vx| | |
+|x_vxa| | |
+|x_vxrel| | |
+|x_vxarray| | |
+|clear| | |
+|doclipvertex| | |
+|doclip| | |
+|clipfinish| | |
+|clippoly| | |
+|docliplineend| | |
+|clipline| | |
+|splitpoly| | |
+|flush_reordertables| | |
+|flush_drawfx| | |
+|x_flush| | |
+|fxtext.c|||
+|newblock| | |
+|addbefore| | |
+|addafter| | |
+|removeblk| | |
+|memory_clear| | |
+|memory_alloc| | |
+|memory_free| | |
+|memory_create| | |
+|memory_delete| | |
+|freetexmem| | |
+|makespace| | |
+|clearspace| | |
+|picktmu| | |
+|fxloadtexturepart| | |
+|fxloadtexture_single| | |
+|fxloadtexture_trilin| | |
+|fxloadtexture_multi| | |
+|text_init| | |
+|text_deinit| | |
+|accesstexture| | |
+|text_allocdata| | |
+|text_loadlevel| | |
+|text_freedata| | |
+|text_cleartexmem| | |
+|text_opendata| | |
+|text_closedata| | |
+|text_frameend| | |
+|main.c|||
+|zerobase| | |
+|mysleep| | |
+|DllMain| | |
+|util.c|||
+|log_open| | |
+|x_log| | |
+|breakpoint| | |
+|x_fatal| | |
+|x_allocfast| | |
+|x_alloc| | |
+|x_realloc| | |
+|x_free| | |
+|x_fastfpu| | |
+|x_timereset| | |
+|x_timeus| | |
+|x_timems| | |
+
 ## Additional symbolic information
 
 IDA does not fully understand the format of old .LIB files, so some of the information is not retracted.
