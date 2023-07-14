@@ -1,3 +1,5 @@
+// This module deals with vertex transformation (3D->2D), since Glide does not know how to do Z. It also deals with Clipping and partitioning of edge polygons. This is supposed to be handled by the graphics API, but alas....
+
 #include "pch.h"
 
 static float identmatrix[4 * 4] = {

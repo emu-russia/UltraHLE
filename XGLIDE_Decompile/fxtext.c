@@ -1,3 +1,5 @@
+// Texture memory management and texture upload
+
 #include "pch.h"
 
 int g_lasttexture;

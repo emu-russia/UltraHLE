@@ -1,3 +1,5 @@
+// Set pixel pipeline modes, and initialize the graphics device.
+
 #include "pch.h"
 
 char *init_name()
