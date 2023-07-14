@@ -157,6 +157,7 @@ void x_getstats(xt_stats* s, int ssize)
 
 int x_query()
 {
+	// It was most likely intended to use `init_query`
 	return 0;
 }
 
@@ -634,7 +635,7 @@ int x_envcolor(float r, float g, float b, float a)
 	g_state.currentmode.env[2] = b;
 	g_state.currentmode.env[3] = a;
 	g_state.changed |= 4u;
-	// Buggy
+	// Buggy (decompile bug?)
 	g_state.currentmode.envc = 
 		(unsigned __int8)(signed __int64)(r * 255.0) | 
 		((unsigned __int8)(signed __int64)(b * 255.0) << 16) | 

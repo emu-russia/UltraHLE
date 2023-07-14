@@ -1,7 +1,20 @@
 # Decompiling the XGLIDE.LIB library
 
+## Additional symbolic information
+
+IDA does not fully understand the format of old .LIB files, so some of the information is not retracted.
+
+In particular, if you open a .LIB file in a HEX editor, you can find there the names of parameters for calls, as well as the names of fields of private structures.
+
+## g_state
+
+Large structure with all execution context. It also contains 2 substructures xt_mode (new modes and current modes).
+
+:warning: There are actually 2 structures (g_state is a pointer to the current state), and the current one is selected by the `x_select` method. But this is not yet fully decompiled.
 
 ## g_stats
+
+A `xt_stats` structure with global library statistics. Used in `x_getstats`.
 
 |n|field|
 |---|---|
@@ -17,6 +30,8 @@
 |9|text_used|
 
 ## GrVertex (fxgeom.c)
+
+Used in fxgeom.c, `grvx` array.
 
 ```
 /*

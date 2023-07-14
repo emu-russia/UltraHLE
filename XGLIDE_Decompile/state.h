@@ -1,13 +1,16 @@
 
 #pragma once
 
-typedef struct
+/// <summary>
+/// Contains pixel output and texturing modes. What in modern video cards is essentially realized with the use of pixel shaders.
+/// </summary>
+typedef struct _xt_mode
 {
 	int mask;		// 291
 	int masktst;	// 292
 	int colortext1;		// 293
 	int text1text2;		// 294
-	int zbias;		// 295  (unused?)
+	int zbias;		// 295
 	int fogtype;	// 296
 	float fogmin;	// 297
 	float fogmax;	// 298
@@ -21,15 +24,15 @@ typedef struct
 	int textures;		// 309
 	int text1;			// 310
 	int text2;			// 311
-	uint32_t envc;		// 312 - combined env color (buggy)
+	uint32_t envc;		// 312 - combined env color
 	float env[4];		// 313(r), 314(g), 315(b), 316(a)
 } xt_mode;
 
-typedef struct
+typedef struct _xt_state
 {
 
 //xt_rendmode
-//used
+	int used;		// 159  1: This state is the current state in use
 	int tmus;		// g_state[160]
 	void* hdc;		// 161
 	void* hwnd;		// 162
@@ -38,7 +41,9 @@ typedef struct
 	int buffers;	// 165
 	int vsync;		// 166
 	int frame;		// 167
-	uint32_t error;		// 168
+	uint32_t error;		// 168  Contains a mask of various errors
+
+#pragma region "Xform"
 
 //matrix
 //xform
@@ -72,39 +77,18 @@ typedef struct
 	float texturexmul;	// 256
 	float textureymul;	// 257
 	
+#pragma endregion "Xform"
+
 	uint32_t send;		// 258  - wtf? ("s"omething end?)
 	int geometryon;		// 259
 	int geometryoff;	// 260
 
-	xt_mode active;		// [263 ... 288]
-	// 263 -- mask
-	// 264 -- masktst
-	// 265 -- colortext1
-	// 266 -- text1text2
-	// 267 -- zbias
-	// 268 -- fogtype
-	// 269 -- fogmin
-	// 270 -- fogmax
-	// 271 -- fogcolor[0]
-	// 272 -- fogcolor[1]
-	// 273 -- fogcolor[2]
-	// 274 -- fogcolor[3]
-	// 275 -- dither
-	// 276 -- src
-	// 277 -- dst
-	// 278 -- sametex
-	// 279 -- stwhint
-	// 280 -- alphatest
-	// 281 -- textures
-	// 282 -- text1
-	// 283 -- text2
-	// 284 -- envc
-	// 285 -- env[4]
+	xt_mode active;		// [263 ... 288]   Actual set modes, corresponding to what was set in Glide API. The values get here from `currentmode`.
 
 	int setnew;		// 289  -- new geometry
 	int changed;	// 290   -- mode changed
 
-	xt_mode currentmode;	// [291 ... 316]
+	xt_mode currentmode;	// [291 ... 316]  Used by X api calls to set new values for different modes. But they are not set immediately yet.
 
 	int geometry;		// 317
 

@@ -15,6 +15,7 @@ static int mode;		// x_begin type
 static int16_t debugcount = 0;
 static int posarrayallocsize = 0;
 static int posarraysize = 0;
+static xt_xfpos* posarray;			// Item size: 20 bytes
 
 static int vertices;
 static int vertices_base;
@@ -25,6 +26,15 @@ static int corners;
 
 static int clipnewvx;
 static int clipor;
+
+static GrVertex grvx[0x200];		// Item size: 60 bytes
+static float corner[0x200 * 5];
+static xt_pos pos[0x200];
+static xt_tex tex[0x200];
+static xt_tex tex2[0x200];
+static xt_tex texp[0x200];
+static xt_xfpos xfpos[0x200];		// Item size: 20 bytes
+static uint8_t xformed[0x200];			// Contains an indication that the vertex has been transformed (?)
 
 void geom_init()
 {
@@ -308,7 +318,7 @@ void x_end()
 		v0 = corners - corners_base - 1;
 		if ( v0 >= 3 )
 		{
-			corner_S1219[corners_base] = v0;
+			corner[corners_base] = v0;
 		}
 		else
 		{
@@ -404,14 +414,14 @@ void vertexdata(xt_data* a1)
 	result = mode - 1;
 	switch (mode)
 	{
-		case 1:
+		case X_POINTS:
 			v7 = vertices;
 			result = 4 * corners;
 			corners += 2;
 			*(int *)((char *)corner_S1219 + result) = 1;
 			*(int *)((char *)&dword_A228 + result) = v7;
 			break;
-		case 2:
+		case X_TRIANGLES:
 			if (state >= 2 )
 			{
 				v8 = corners++;
@@ -429,8 +439,8 @@ void vertexdata(xt_data* a1)
 				++state;
 			}
 			break;
-		case 3:
-		case 8:
+		case X_TRISTRIP:
+		case X_QUADSTRIP:
 			if (state >= 2 )
 			{
 				v11 = corners++;
@@ -462,7 +472,7 @@ void vertexdata(xt_data* a1)
 				++state;
 			}
 			break;
-		case 4:
+		case X_TRIFAN:
 			if (state >= 2 )
 			{
 				v17 = corners;
@@ -482,7 +492,7 @@ void vertexdata(xt_data* a1)
 				++state;
 			}
 			break;
-		case 5:
+		case X_QUADS:
 			if (state >= 3 )
 			{
 				v22 = corners++;
@@ -503,7 +513,7 @@ void vertexdata(xt_data* a1)
 				++state;
 			}
 			break;
-		case 6:
+		case X_POLYLINE:
 			if (state >= 1 )
 			{
 				v27 = corners++;
@@ -519,7 +529,7 @@ void vertexdata(xt_data* a1)
 				++state;
 			}
 			break;
-		case 7:
+		case X_LINES:
 			if (state >= 1 )
 			{
 				v30 = corners++;
@@ -536,7 +546,7 @@ void vertexdata(xt_data* a1)
 				++state;
 			}
 			break;
-		case 9:
+		case X_POLYGON:
 			if ( !state)
 			{
 				v33 = corners;
@@ -923,12 +933,12 @@ int setuprvx(int a1, int a2)
 	v19 = g_state.projxadd;
 	v20 = g_state.projyadd;
 	v23 = g_state.znear * g_state.zdecal;
-	v2 = &xfpos_S1212[5 * a1];
-	v3 = (float *)((char *)&grvx_S1213 + 60 * a1);
-	v4 = &tex_S1209[2 * a1];
-	v5 = &tex2_S1210[2 * a1];
-	result = &texp_S1211[2 * a1];
-	v24 = (float *)&texp_S1211[2 * a1];
+	v2 = &xfpos[a1];
+	v3 = &grvx[a1];
+	v4 = &tex[a1];
+	v5 = &tex2[a1];
+	result = &texp[a1];
+	v24 = &texp[a1];
 	if ( g_state.xformmode == 1 )
 	{
 		v7 = a2;
@@ -1136,14 +1146,14 @@ void x_vx(xt_pos* a1, xt_data* a2)
 	int v3; // edx
 
 	vertices_lastnonrel = vertices;
-	v2 = &pos_S1208[3 * vertices];
+	v2 = &pos[vertices];
 	v2[0] = a1->v[0];
 	v2[1] = a1->v[1];
 	v2[2] = a1->v[2];
 	v3 = vertices;
 	allxformed = 0;
 	++g_stats.in_vx;
-	xformed_S1214[v3] = 0;
+	xformed[v3] = 0;
 	vertexdata(a2);
 }
 
@@ -1154,10 +1164,10 @@ void x_vxa(int a1, xt_data* a2)
 	if ( a1 < 0 || a1 >= posarraysize)
 		x_fatal("invalid vertex for x_vxa");
 	vertices_lastnonrel = vertices;
-	memcpy(&xfpos_S1212[5 * vertices], (const void *)(posarray_S1224 + 20 * a1), 0x14u);
+	memcpy(&xfpos[vertices], &posarray[a1], 0x14u);
 	v2 = vertices;
 	++g_stats.in_vx;
-	xformed_S1214[v2] = 1;
+	xformed[v2] = 1;
 	vertexdata(a2);
 }
 
@@ -1167,14 +1177,14 @@ void x_vxrel(float *a1, float *a2)
 	int v3; // eax
 	int v4; // ecx
 
-	v2 = &pos_S1208[3 * vertices];
+	v2 = &pos[vertices];
 	*v2 = *a1;
 	v2[1] = a1[1];
 	v3 = vertices;
 	v4 = *((DWORD *)a1 + 2);
 	allxformed = 0;
 	*((DWORD *)v2 + 2) = v4;
-	xformed_S1214[v3] = vertices - vertices_lastnonrel + 16;
+	xformed[v3] = vertices - vertices_lastnonrel + 16;
 	vertexdata(a2);
 }
 
@@ -1189,19 +1199,19 @@ void x_vxarray(xt_pos* a1, int a2, char* a3)
 		{
 			v3 = a2 + 256;
 			posarrayallocsize = a2 + 256;
-			if ( posarray_S1224 )
+			if ( posarray )
 			{
-				x_free(posarray_S1224);
+				x_free(posarray);
 				v3 = posarrayallocsize;
 			}
 			posarrayallocsize = v3;
-			posarray_S1224 = x_allocfast(20 * v3);
-			if ( !posarray_S1224 )
+			posarray = x_allocfast(20 * v3);
+			if ( !posarray )
 				x_fatal("out of memory");
 		}
 		posarraysize = a2;
 		x_fastfpu(1);
-		xform(posarray_S1224, a1, a2, a3);
+		xform(posarray, a1, a2, a3);
 		x_fastfpu(0);
 	}
 	else
@@ -1661,25 +1671,25 @@ void *flush_reordertables()
 	v2 = 0;
 	if ( v0 == 4 )
 	{
-		memcpy(&grvx_S1213, (char *)&grvx_S1213 + 60 * vertices_base, 0x3Cu);
-		memcpy(xfpos_S1212, &xfpos_S1212[5 * vertices_base], 0x14u);
+		memcpy(grvx, &grvx[vertices_base], 0x3Cu);
+		memcpy(xfpos, &xfpos[vertices_base], 0x14u);
 		v3 = flt_E230[2 * vertices_base];
 		tex_S1209[0] = tex_S1209[2 * vertices_base];
-		v4 = &texp_S1211[2 * vertices_base];
+		v4 = &texp[vertices_base];
 		v2 = 1;
 		flt_E230[0] = v3;
 		v5 = *v4;
 		v6 = v4[1];
-		vertices_base_S1217 = 0;
-		texp_S1211[0] = v5;
-		dword_10448 = v6;
+		vertices_base = 0;
+		texp[0].s = v5;
+		texp[0].t = v6;
 	}
 	if ( v1 <= vertices)
 	{
-		memmove(&xfpos_S1212[5 * v2], &xfpos_S1212[5 * (vertices - v1)], 20 * v1);
-		memmove((char *)&grvx_S1213 + 60 * v2, (char *)&grvx_S1213 + 60 * (vertices - v1), 60 * v1);
-		memmove(&tex_S1209[2 * v2], &tex_S1209[2 * (vertices - v1)], 8 * v1);
-		result = memmove(&texp_S1211[2 * v2], &texp_S1211[2 * (vertices - v1)], 8 * v1);
+		memmove(&xfpos[v2], &xfpos[vertices - v1], 20 * v1);
+		memmove(&grvx[v2], &grvx[vertices - v1], 60 * v1);
+		memmove(&tex[v2], &tex[vertices - v1], 8 * v1);
+		result = memmove(&texp[v2], &texp[vertices - v1], 8 * v1);
 	}
 	else
 	{
@@ -1689,7 +1699,7 @@ void *flush_reordertables()
 	if ( v8 > 0 )
 	{
 		result = (void *)16843009;
-		memset(xformed_S1214, 1u, v8);
+		memset(xformed, 1u, v8);
 	}
 	vertices = v8;
 	allxformed = 1;
@@ -1718,12 +1728,12 @@ signed int flush_drawfx()
 	DWORD *v16; // [esp+10h] [ebp-4h]
 
 	if ( !allxformed)
-		xform((int)xfpos_S1212, pos_S1208, vertices, xformed_S1214);
+		xform(xfpos, pos, vertices, xformed);
 	v0 = &dword_A228;
 	setuprvx(0, vertices);
 	result = corners;
-	corner_S1219[corners] = 0;
-	for ( i = corner_S1219[0]; i; v0 = v15 + 1 )
+	corner[corners] = 0;
+	for ( i = corner[0]; i; v0 = v15 + 1 )
 	{
 		if ( i < 3 )
 			++g_stats.in_tri;
@@ -1757,7 +1767,7 @@ signed int flush_drawfx()
 					{
 						v9 = v16;
 						++g_stats.out_tri;
-						grDrawLine((char *)&grvx_S1213 + 60 * *v16, (char *)&grvx_S1213 + 60 * v9[1]);
+						grDrawLine(&grvx[*v16], &grvx[v9[1]]);
 					}
 				}
 				else
@@ -1773,7 +1783,7 @@ signed int flush_drawfx()
 							v2 = v10 - 1;
 							for ( j = 0; v10 > j; ++j )
 							{
-								grDrawLine((char *)&grvx_S1213 + 60 * v16[v2], (char *)&grvx_S1213 + 60 * v16[j]);
+								grDrawLine(&grvx[v16[v2]], &grvx[v16[j]]);
 								v2 = j;
 							}
 						}
@@ -1789,10 +1799,9 @@ signed int flush_drawfx()
 								{
 									v14 = *v12;
 									v12 += 3;
-									grDrawTriangle(
-													(char *)&grvx_S1213 + 60 * *(v12 - 5),
-													(char *)&grvx_S1213 + 60 * *(v12 - 4),
-													(char *)&grvx_S1213 + 60 * v14);
+									grDrawTriangle( &grvx[*(v12 - 5)],
+													&grvx[*(v12 - 4)],
+													&grvx[v14] );
 									--v13;
 								}
 								while ( v13 );
@@ -1812,7 +1821,7 @@ signed int flush_drawfx()
 			{
 				do
 				{
-					grDrawLine((char *)&grvx_S1213 + 60 * v0[v2], (char *)&grvx_S1213 + 60 * v0[v8]);
+					grDrawLine(&grvx[v0[v2]], &grvx[v0[v8]]);
 					v2 = v8++;
 				}
 				while ( i > v8 );
@@ -1824,22 +1833,21 @@ signed int flush_drawfx()
 			{
 				case 1:
 					++g_stats.out_tri;
-					grDrawPoint((char *)&grvx_S1213 + 60 * v0[0]);
+					grDrawPoint(&grvx[v0[0]]);
 					break;
 				case 2:
 					++g_stats.out_tri;
-					grDrawLine((char *)&grvx_S1213 + 60 * v0[0], (char*)&grvx_S1213 + 60 * v0[1]);
+					grDrawLine(&grvx[v0[0]], &grvx[v0[1]]);
 					break;
 				case 3:
 					++g_stats.out_tri;
-					grDrawTriangle(
-									(char *)&grvx_S1213 + 60 * v0[0],
-									(char *)&grvx_S1213 + 60 * v0[1],
-									(char *)&grvx_S1213 + 60 * v0[2]);
+					grDrawTriangle( &grvx[v0[0]],
+									&grvx[v0[1]],
+									&grvx[v0[2]] );
 					break;
 				default:
 					g_stats.out_tri += i - 2;
-					grDrawPlanarPolygon(v2, v1, i, v0, &grvx_S1213);
+					grDrawPlanarPolygon(v2, v1, i, v0, grvx);
 					break;
 			}
 		}
