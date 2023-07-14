@@ -33,7 +33,7 @@ typedef struct _xt_memory	// 48 bytes
 /// </summary>
 typedef struct _xt_texture		// 152 bytes (38 dwords)
 {
-	int state;				// 0
+	int state;				// 0  - Active number of the state (g_state). 0: texture is not used.
 	int handle;				// 1
 	int width;				// 2
 	int height;				// 3

@@ -30,7 +30,7 @@ Overall status: Not yet buildable, but its something already.
 |x_projection| | |
 |x_zrange| | |
 |x_zdecal| | |
-|texture_get| | |
+|texture_get|Ready|Nothing special, but seems to contain a typo of checking the number of texture entries (1024 != X_MAX_TEXTURES)|
 |x_createtexture| | |
 |x_gettextureinfo| | |
 |x_loadtexturelevel| | |

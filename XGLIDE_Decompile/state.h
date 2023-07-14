@@ -91,3 +91,8 @@ typedef struct _xt_state
 	int geometry;		// 317
 
 } xt_state;
+
+// Error mask for g_state.error
+
+#define X_ERROR_TOO_MANY_TEXTURES 0x10000000	// Too many textures (see x_createtexture)
+#define X_ERROR_GET_TEXTURE 0x20000000			// Failed to get texture pointer in `texture_get`

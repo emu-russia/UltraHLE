@@ -155,7 +155,7 @@ void x_getstats(xt_stats* s, int ssize)
 	g_stats.text_uploaded = 0;
 }
 
-int x_query()
+int x_query(void* hdc, void* hwnd)
 {
 	// It was most likely intended to use `init_query`
 	return 0;
@@ -166,52 +166,38 @@ void x_clear(int writecolor, int writedepth, float cr, float cg, float cb)
 	init_clear(writecolor, writedepth, cr, cg, cb);
 }
 
-int __cdecl x_readfb(int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int x_readfb(int fb, int x, int y, int xs, int ys, char* buffer, int bufrowlen)
 {
-	int v8; // esi
-	int v9; // edx
-
-	if ( (unsigned __int8)a1 == 17 )
+	if ( fb == X_FB_RGB565)
 	{
-		v8 = a4;
-		v9 = a7;
-		if ( 2 * a4 > a7 )
+		if ( 2 * xs > bufrowlen)
 			return 1;
 	}
 	else
 	{
-		if ( (unsigned __int8)a1 != 18 )
+		if ( fb != X_FB_RGBA8888)
 			return 1;
-		v8 = a4;
-		v9 = a7;
-		if ( 4 * a4 > a7 )
+		if ( 4 * xs > bufrowlen)
 			return 1;
 	}
-	return init_readfb(a1, a2, a3, v8, a5, a6, v9);
+	return init_readfb(fb, x, y, xs, ys, buffer, bufrowlen);
 }
 
-int __cdecl x_writefb(int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int x_writefb(int fb, int x, int y, int xs, int ys, char* buffer, int bufrowlen)
 {
-	int v8; // esi
-	int v9; // edx
-
-	if ( (unsigned __int8)a1 == 17 )
+	if (fb == X_FB_RGB565)
 	{
-		v8 = a4;
-		v9 = a7;
-		if ( 2 * a4 > a7 )
+		if ( 2 * xs > bufrowlen)
 			return 1;
 	}
 	else
 	{
-		if ( (unsigned __int8)a1 != 18 )
+		if (fb != X_FB_RGBA8888)
 			return 1;
-		v8 = a4;
-		v9 = a7;
-		if ( 4 * a4 > a7 )
+		if ( 4 * xs > bufrowlen)
 			return 1;
 	}
-	return init_writefb(a1, a2, a3, v8, a5, a6, v9);
+	return init_writefb(fb, x, y, xs, ys, buffer, bufrowlen);
 }
 
 void x_finish(void)
@@ -336,26 +322,27 @@ int x_zdecal(float factor)
 	return 0;
 }
 
-DWORD *__cdecl texture_get(signed int a1)
+xt_texture* texture_get(int t)
 {
-	DWORD *result; // eax
+	xt_texture* txt;
 
-	if ( a1 <= 0 || a1 > 1024 )
+	// TODO: There seems to be an error here, 1024 != X_MAX_TEXTURES
+	if ( t <= 0 || t > 1024 )
 	{
-		g_state.error |= 0x20000000u;
-		result = 0;
+		g_state.error |= X_ERROR_GET_TEXTURE;
+		txt = 0;
 	}
 	else
 	{
-		result = (DWORD *)(&g_texture[a1]);
-		if ( !*result )
+		txt = &g_texture[t];
+		if (txt->state == 0)
 		{
 			x_log("undefined texture xhandle %i selected\n");
-			result = 0;
-			g_state.error |= 0x20000000u;
+			txt = 0;
+			g_state.error |= X_ERROR_GET_TEXTURE;
 		}
 	}
-	return result;
+	return txt;
 }
 
 int x_createtexture(int format, int width, int height)
@@ -385,7 +372,7 @@ int x_createtexture(int format, int width, int height)
 	{
 		x_log("too many textures\n");
 		result = -1;
-		g_state.error |= 0x10000000u;
+		g_state.error |= X_ERROR_TOO_MANY_TEXTURES;
 	}
 	else
 	{

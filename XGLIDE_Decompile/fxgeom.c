@@ -77,9 +77,9 @@ LABEL_10:
 	}
 }
 
-void x_getmatrix(void *a1)
+void x_getmatrix(xt_matrix* matrix)
 {
-	memcpy(a1, &g_state[169], 0x40u);
+	memcpy(matrix, &g_state[169], 0x40u);
 }
 
 void dumpmatrix(float *a1, int a2)
