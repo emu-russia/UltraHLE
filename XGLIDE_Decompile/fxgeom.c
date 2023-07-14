@@ -421,21 +421,21 @@ void vertexdata(xt_data* a1)
 			v7 = vertices;
 			result = 4 * corners;
 			corners += 2;
-			*(int *)((char *)corner_S1219 + result) = 1;
+			*(int *)((char *)corner + result) = 1;
 			*(int *)((char *)&dword_A228 + result) = v7;
 			break;
 		case X_TRIANGLES:
 			if (state >= 2 )
 			{
 				v8 = corners++;
-				corner_S1219[v8] = 3;
+				corner[v8] = 3;
 				v9 = corners++;
-				corner_S1219[v9] = vertices - 2;
+				corner[v9] = vertices - 2;
 				state = 0;
-				corner_S1219[corners++] = vertices - 1;
+				corner[corners++] = vertices - 1;
 				result = vertices;
 				v10 = corners++;
-				corner_S1219[v10] = vertices;
+				corner[v10] = vertices;
 			}
 			else
 			{
@@ -447,25 +447,25 @@ void vertexdata(xt_data* a1)
 			if (state >= 2 )
 			{
 				v11 = corners++;
-				corner_S1219[v11] = 3;
+				corner[v11] = 3;
 				if (flip)
 				{
 					v12 = corners++;
 					v13 = vertices;
-					corner_S1219[v12] = vertices - 1;
+					corner[v12] = vertices - 1;
 					v14 = corners++;
-					corner_S1219[v14] = vertices - 2;
+					corner[v14] = vertices - 2;
 					result = corners;
-					corner_S1219[corners] = v13;
+					corner[corners] = v13;
 				}
 				else
 				{
 					v15 = corners++;
-					corner_S1219[v15] = vertices - 2;
+					corner[v15] = vertices - 2;
 					v16 = corners++;
-					corner_S1219[v16] = vertices - 1;
+					corner[v16] = vertices - 1;
 					result = vertices;
-					corner_S1219[corners] = vertices;
+					corner[corners] = vertices;
 				}
 				flip ^= 1u;
 				++corners;
@@ -481,14 +481,14 @@ void vertexdata(xt_data* a1)
 				v17 = corners;
 				v18 = vertices_base;
 				++corners;
-				corner_S1219[v17] = 3;
+				corner[v17] = 3;
 				v19 = corners++;
-				corner_S1219[v19] = v18;
+				corner[v19] = v18;
 				v20 = corners++;
-				corner_S1219[v20] = vertices - 1;
+				corner[v20] = vertices - 1;
 				result = vertices;
 				v21 = corners++;
-				corner_S1219[v21] = vertices;
+				corner[v21] = vertices;
 			}
 			else
 			{
@@ -499,17 +499,17 @@ void vertexdata(xt_data* a1)
 			if (state >= 3 )
 			{
 				v22 = corners++;
-				corner_S1219[v22] = 4;
+				corner[v22] = 4;
 				v23 = corners++;
-				corner_S1219[v23] = vertices - 3;
+				corner[v23] = vertices - 3;
 				v24 = corners++;
-				corner_S1219[v24] = vertices - 2;
+				corner[v24] = vertices - 2;
 				v25 = corners++;
 				state = 0;
-				corner_S1219[v25] = vertices - 1;
+				corner[v25] = vertices - 1;
 				result = vertices;
 				v26 = corners++;
-				corner_S1219[v26] = vertices;
+				corner[v26] = vertices;
 			}
 			else
 			{
@@ -520,12 +520,12 @@ void vertexdata(xt_data* a1)
 			if (state >= 1 )
 			{
 				v27 = corners++;
-				corner_S1219[v27] = 2;
+				corner[v27] = 2;
 				v28 = corners++;
-				corner_S1219[v28] = vertices - 1;
+				corner[v28] = vertices - 1;
 				result = vertices;
 				v29 = corners++;
-				corner_S1219[v29] = vertices;
+				corner[v29] = vertices;
 			}
 			else
 			{
@@ -536,13 +536,13 @@ void vertexdata(xt_data* a1)
 			if (state >= 1 )
 			{
 				v30 = corners++;
-				corner_S1219[v30] = 2;
+				corner[v30] = 2;
 				v31 = corners++;
 				state = 0;
-				corner_S1219[v31] = vertices - 1;
+				corner[v31] = vertices - 1;
 				result = vertices;
 				v32 = corners++;
-				corner_S1219[v32] = vertices;
+				corner[v32] = vertices;
 			}
 			else
 			{
@@ -555,10 +555,10 @@ void vertexdata(xt_data* a1)
 				v33 = corners;
 				++state;
 				++corners;
-				corner_S1219[v33] = 1;
+				corner[v33] = 1;
 			}
 			v34 = corners++;
-			corner_S1219[v34] = vertices;
+			corner[v34] = vertices;
 			result = corners_base + 64;
 			if ( corners_base + 64 < corners )
 				x_fatal("xgeom: too large X_POLYGON!\n");
