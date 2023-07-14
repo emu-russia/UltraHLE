@@ -158,7 +158,7 @@ In particular, if you open a .LIB file in a HEX editor, you can find there the n
 
 Large structure with all execution context. It also contains 2 substructures xt_mode (new modes and current modes).
 
-:warning: There are actually 2 structures (g_state is a pointer to the current state), and the current one is selected by the `x_select` method. But this is not yet fully decompiled.
+:warning: There are actually 2 structures (g_state\[2\]), and the current one is selected by the `x_select` method (0 - unused). But actually `g_state[1]` is used everywhere.
 
 ## g_stats
 

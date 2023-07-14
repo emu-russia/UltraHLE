@@ -77,7 +77,7 @@ int x_open(void* hdc, void* hwnd, int width, int height, int buffers, int vsync)
 	geom_init();
 	g_state.projchanged = 0;
 	g_state.changed = 0;
-	x_projection(90.0, 1063675494, 65535.0);
+	x_projection(90.0, 0.9f, 65535.0);
 	result = -1;
 	if ( !v9 )
 		result = v7;
@@ -347,7 +347,7 @@ DWORD *__cdecl texture_get(signed int a1)
 	}
 	else
 	{
-		result = (DWORD *)((char *)&g_texture + 152 * a1);
+		result = (DWORD *)(&g_texture[a1]);
 		if ( !*result )
 		{
 			x_log("undefined texture xhandle %i selected\n");
@@ -360,7 +360,7 @@ DWORD *__cdecl texture_get(signed int a1)
 
 int x_createtexture(int format, int width, int height)
 {
-	DWORD *v3; // eax
+	xt_texture *v3; // eax
 	signed int v4; // esi
 	signed int result; // eax
 	DWORD *v6; // ebx
@@ -368,16 +368,19 @@ int x_createtexture(int format, int width, int height)
 	signed int v8; // ecx
 	int v9; // eax
 
-	v3 = &g_texture[38];
+	// Find the first free texture
+
+	v3 = &g_texture[1];
 	v4 = 1;
 	do
 	{
-		if ( !*v3 )
+		if ( v3->state == 0)
 			break;
-		v3 += 38;
+		v3++;		// next texture
 		++v4;
 	}
-	while ( v3 < &g_texture[38912] );
+	while ( v3 < &g_texture[X_MAX_TEXTURES] );
+
 	if ( v4 == 1024 )
 	{
 		x_log("too many textures\n");
@@ -388,15 +391,15 @@ int x_createtexture(int format, int width, int height)
 	{
 		if ( g_lasttexture < v4 )
 			g_lasttexture = v4;
-		g_texture[38 * v4] = g_activestateindex;
+		g_texture[v4].state = g_activestateindex;
 		v6 = texture_get(v4);
 		if ( v6 )
 		{
-			memset(v6, 0, 0x98u);
+			memset(v6, 0, sizeof(xt_texture));
 			v7 = width;
 			v8 = height;
 			v6[1] = v4;
-			*v6 = g_activestateindex;
+			v6[0] = g_activestateindex;
 			v6[2] = width;
 			v6[3] = height;
 			v6[4] = format;

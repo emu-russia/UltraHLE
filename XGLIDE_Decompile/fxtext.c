@@ -3,79 +3,83 @@
 #include "pch.h"
 
 int g_lasttexture;
+xt_texture g_texture[X_MAX_TEXTURES];
 
-int newblock(int a1)
+static xt_memory* mem[GLIDE_NUM_TMU];
+
+int newblock(int m)
 {
 	signed int v1; // edx
 
-	v1 = *(DWORD *)(a1 + 44);
-	if ( v1 >= 2048 )
+	v1 = *(DWORD *)(m + 44);
+	if ( v1 >= X_MAX_BLOCKS)
 		return 0;
-	*(DWORD *)(a1 + 44) = v1 + 1;
-	return 16 * v1 + *(DWORD *)(a1 + 40);
+	*(DWORD *)(m + 44) = v1 + 1;
+	return 16 * v1 + *(DWORD *)(m + 40);
 }
 
-DWORD * addbefore(DWORD *a1, DWORD *a2)
+DWORD * addbefore(DWORD *b, DWORD *t)
 {
 	DWORD *result; // eax
 
-	result = a1;
-	a2[1] = a1;
-	*a2 = *a1;
-	*a1 = a2;
-	*(DWORD *)(*a2 + 4) = a2;
+	result = b;
+	t[1] = b;
+	*t = *b;
+	*b = t;
+	*(DWORD *)(*t + 4) = t;
 	return result;
 }
 
-int addafter(int a1, DWORD *a2)
+int addafter(int b, DWORD *t)
 {
 	DWORD *v2; // ecx
 	int result; // eax
 
-	v2 = *(DWORD **)(a1 + 4);
-	a2[1] = v2;
-	*a2 = a1;
-	*v2 = a2;
-	result = *a2;
-	*(DWORD *)(*a2 + 4) = a2;
+	v2 = *(DWORD **)(b + 4);
+	t[1] = v2;
+	*t = b;
+	*v2 = t;
+	result = *t;
+	*(DWORD *)(*t + 4) = t;
 	return result;
 }
 
-DWORD * removeblk(DWORD **a1)
+DWORD * removeblk(DWORD **b)
 {
 	DWORD *result; // eax
 
-	*a1[1] = *a1;
-	result = a1[1];
-	(*a1)[1] = result;
+	*b[1] = *b;
+	result = b[1];
+	(*b)[1] = result;
 	return result;
 }
 
-DWORD * memory_clear(DWORD *a1)
+DWORD * memory_clear(DWORD *memory)
 {
+	// t, base, b
 	DWORD *v1; // edi
 	DWORD *result; // eax
 	signed int v3; // esi
 	DWORD *v4; // eax
 
-	v1 = a1 + 2;
-	result = a1 + 6;
+	v1 = memory + 2;
+	result = memory + 6;
 	v3 = 8;
-	a1[3] = a1 + 2;
+	memory[3] = memory + 2;
 	*v1 = v1;
-	a1[7] = a1 + 6;
+	memory[7] = memory + 6;
 	*result = result;
-	for ( a1[11] = 0; a1[1] > v3; result = addbefore(v1, v4) )
+	for (memory[11] = 0; memory[1] > v3; result = addbefore(v1, v4) )
 	{
-		v4 = (DWORD *)newblock((int)a1);
-		v4[3] = 2097144;
+		v4 = (DWORD *)newblock((int)memory);
+		v4[3] = 0x200000 - 8;
 		v4[2] = v3;
 		v3 += 0x200000;
 	}
 	return result;
 }
 
-DWORD * memory_alloc(int a1, int a2, DWORD *a3)
+DWORD * memory_alloc(int memory, int size, DWORD *base)
 {
 	int v3; // ebx
 	signed int v4; // edi
@@ -83,13 +87,13 @@ DWORD * memory_alloc(int a1, int a2, DWORD *a3)
 	DWORD *v6; // ebp
 	int v7; // [esp+10h] [ebp-4h]
 
-	v3 = *(DWORD *)(a1 + 12);
-	v4 = (a2 + 7) & 0xFFFFFFF8;
-	if ( a1 - v3 == -8 )
+	v3 = *(DWORD *)(memory + 12);
+	v4 = (size + 7) & 0xFFFFFFF8;
+	if (memory - v3 == -8 )
 	{
 LABEL_4:
-		x_log("allocate %6i bytes: failed\n", (a2 + 7) & 0xFFFFFFF8);
-		*a3 = 0;
+		x_log("allocate %6i bytes: failed\n", (size + 7) & 0xFFFFFFF8);
+		*base = 0;
 		result = 0;
 	}
 	else
@@ -97,19 +101,19 @@ LABEL_4:
 		while ( *(DWORD *)(v3 + 12) < v4 )
 		{
 			v3 = *(DWORD *)(v3 + 4);
-			if ( a1 - v3 == -8 )
+			if (memory - v3 == -8 )
 				goto LABEL_4;
 		}
 		v7 = *(DWORD *)(v3 + 12) - v4;
-		*a3 = *(DWORD *)(v3 + 8);
+		*base = *(DWORD *)(v3 + 8);
 		if ( v7 >= 1024 )
 		{
-			v6 = (DWORD *)newblock(a1);
+			v6 = (DWORD *)newblock(memory);
 			if ( v6 )
 			{
 				v6[2] = *(DWORD *)(v3 + 8);
 				v6[3] = v4;
-				addafter(a1 + 24, v6);
+				addafter(memory + 24, v6);
 				result = v6;
 				*(DWORD *)(v3 + 12) = v7;
 				*(DWORD *)(v3 + 8) += v4;
@@ -122,57 +126,55 @@ LABEL_4:
 		else
 		{
 			removeblk((DWORD **)v3);
-			addbefore((DWORD *)(a1 + 24), (DWORD *)v3);
+			addbefore((DWORD *)(memory + 24), (DWORD *)v3);
 			result = (DWORD *)v3;
 		}
 	}
 	return result;
 }
 
-int memory_free(int a1, DWORD **a2)
+int memory_free(int memory, DWORD **handle)
 {
-	removeblk(a2);
-	return addafter(a1 + 8, a2);
+	removeblk(handle);
+	return addafter(memory + 8, handle);
 }
 
-signed int * memory_create(signed int a1, signed int a2)
+xt_memory* memory_create(int min, int max)
 {
-	signed int v2; // esi
-	signed int *v3; // ebx
+	xt_memory* mem; // ebx
 
-	v2 = a1;
-	x_log("%iMB\n", ((a2 - a1) / 1024 + 512) / 1024);
-	v3 = (signed int *)x_alloc(48);
-	if ( !a1 )
-		v2 = 8;
-	*v3 = v2;
-	v3[1] = a2;
-	v3[5] = -1;
-	v3[9] = -1;
-	v3[10] = x_alloc(0x8000);
-	v3[11] = 0;
-	memory_clear(v3);
-	return v3;
+	x_log("%iMB\n", ((max - min) / 1024 + 512) / 1024);
+	mem = (xt_memory *)x_alloc(sizeof(xt_memory));
+	if ( !min)
+		min = 8;
+
+	mem->min = min;
+	mem->max = max;
+	mem->free.size = -1;
+	mem->used.size = -1;
+	mem->table = x_alloc(X_MAX_BLOCKS * sizeof(t_block));	// 0x8000
+	mem->tableind = 0;
+	memory_clear(mem);
+	return mem;
 }
 
-void memory_delete(uint8_t* memory)
+void memory_delete(xt_memory* memory)
 {
-	x_free(*(DWORD *)(memory + 40));
+	x_free(memory->table);
 	x_free(memory);
 }
 
-int freetexmem(DWORD *a1)
+void freetexmem(DWORD *txt)
 {
 	signed int v1; // esi
 	int v2; // ebx
-	int result; // eax
 
 	v1 = 4;
-	v2 = (int)(a1 + 18);
+	v2 = (int)(txt + 18);
 	do
 	{
 		if ( *(DWORD *)v2 )
-			memory_free(mem_S1205[*(DWORD *)(v2 + 32)], *(DWORD ***)(v2 + 48));
+			memory_free(mem[*(DWORD *)(v2 + 32)], *(DWORD ***)(v2 + 48));
 		*(DWORD *)(v2 + 16) = 0;
 		v2 += 4;
 		--v1;
@@ -180,15 +182,14 @@ int freetexmem(DWORD *a1)
 		*(DWORD *)(v2 + 44) = 0;
 	}
 	while ( v1 );
-	result = 0;
-	a1[26] = 0;
-	a1[27] = 1;
-	a1[28] = 0;
-	a1[29] = 1;
-	return result;
+
+	txt[26] = 0;
+	txt[27] = 1;
+	txt[28] = 0;
+	txt[29] = 1;
 }
 
-int makespace()
+void makespace()
 {
 	int v0; // esi
 	signed int v1; // ebx
@@ -199,7 +200,7 @@ int makespace()
 	v1 = 1;
 	if ( g_lasttexture >= 1 )
 	{
-		v2 = (DWORD *)((char *)&g_texture + 152);
+		v2 = (DWORD *)(&g_texture[1]);
 		do
 		{
 			if ( *v2 )
@@ -222,17 +223,17 @@ int makespace()
 	x_log("texture: makespace %i..%i freed %i bytes\n", 1, g_lasttexture, v0);
 }
 
-int clearspace()
+void clearspace()
 {
 	signed int v0; // esi
 	DWORD *v1; // edi
 
 	v0 = 1;
-	memory_clear((DWORD *)mem_S1205[0]);
-	memory_clear((DWORD *)dword_131C);
+	memory_clear(mem[0]);
+	memory_clear(mem[1]);
 	if ( g_lasttexture >= 1 )
 	{
-		v1 = (DWORD *)((char *)&g_texture + 152);
+		v1 = (DWORD *)(&g_texture[1]);
 		do
 		{
 			if ( *v1 && v1[21] + v1[20] + v1[19] + v1[18] )
@@ -263,7 +264,7 @@ int picktmu()
 	return result;
 }
 
-signed int fxloadtexturepart(DWORD *a1, int a2)
+signed int fxloadtexturepart(DWORD *txt, int texturepart)
 {
 	int v2; // ebx
 	signed int v3; // ebp
@@ -274,9 +275,9 @@ signed int fxloadtexturepart(DWORD *a1, int a2)
 	int v8; // [esp+14h] [ebp-8h]
 	DWORD *v9; // [esp+18h] [ebp-4h]
 
-	a1[11] = g_state.frame;
-	v2 = a1[a2 + 26];
-	switch ( a2 )
+	txt[11] = g_state.frame;
+	v2 = txt[texturepart + 26];
+	switch (texturepart)
 	{
 		case 0:
 			v3 = 3;
@@ -291,56 +292,57 @@ signed int fxloadtexturepart(DWORD *a1, int a2)
 			v3 = 2;
 			break;
 		default:
-			v3 = v8;
+			// TODO: uninitialized local variable 'v8' used
+			v3 = 0;// v8;
 			break;
 	}
-	if ( !a1[a2 + 18] )
+	if ( !txt[texturepart + 18] )
 	{
-		v7 = grTexTextureMemRequired(v3, a1 + 13);
-		v9 = memory_alloc(mem_S1205[v2], v7, &v8);
+		v7 = grTexTextureMemRequired(v3, txt + 13);
+		v9 = memory_alloc(mem[v2], v7, &v8);
 		if ( !v7 )
-			x_fatal("texture: zero size for handle %i (part=%i,mask=%i)\n", a1[1], a2, v3);
+			x_fatal("texture: zero size for handle %i (part=%i,mask=%i)\n", txt[1], texturepart, v3);
 		if ( !v9 )
 			return -1;
 		v5 = v9;
 		v6 = v8;
-		a1[a2 + 18] = v7;
-		a1[a2 + 30] = v5;
-		a1[a2 + 22] = v6;
-		a1[12] = 1;
+		txt[texturepart + 18] = v7;
+		txt[texturepart + 30] = v5;
+		txt[texturepart + 22] = v6;
+		txt[12] = 1;
 	}
-	if ( a1[12] )
+	if (txt[12] )
 	{
-		grTexDownloadMipMap(v2, a1[a2 + 22], v3, a1 + 13);
-		a1[12] = 0;
-		g_stats.text_uploaded += a1[a2 + 18];
+		grTexDownloadMipMap(v2, txt[texturepart + 22], v3, txt + 13);
+		txt[12] = 0;
+		g_stats.text_uploaded += txt[texturepart + 18];
 	}
-	grTexSource(v2, a1[a2 + 22], v3, a1 + 13);
+	grTexSource(v2, txt[texturepart + 22], v3, txt + 13);
 	result = 0;
-	a1[a2 + 34] = a1[a2 + 18];
+	txt[texturepart + 34] = txt[texturepart + 18];
 	return result;
 }
 
-signed int fxloadtexture_single(DWORD *a1)
+signed int fxloadtexture_single(DWORD *txt)
 {
 	signed int v1; // edi
 	signed int v2; // ebx
 
 	v1 = 0;
-	if ( g_state.tmus > 1 && a1[18] <= 0 )
+	if ( g_state.tmus > 1 && txt[18] <= 0 )
 	{
-		if ( a1[19] <= 0 )
+		if (txt[19] <= 0 )
 			v1 = picktmu();
 		else
 			v1 = 1;
 	}
 	v2 = 0;
-	a1[v1 + 26] = v1;
-	g_state.texturexmul = a1[9];
-	g_state.textureymul = a1[10];
+	txt[v1 + 26] = v1;
+	g_state.texturexmul = txt[9];
+	g_state.textureymul = txt[10];
 	do
 	{
-		if ( fxloadtexturepart(a1, v1) >= 0 )
+		if ( fxloadtexturepart(txt, v1) >= 0 )
 			break;
 		if ( !v2 )
 			makespace();
@@ -354,23 +356,23 @@ signed int fxloadtexture_single(DWORD *a1)
 	return v1;
 }
 
-int fxloadtexture_trilin(DWORD *a1)
+int fxloadtexture_trilin(DWORD *txt)
 {
 	int v1; // eax
 	signed int v2; // esi
 
-	if ( !a1[20] && !a1[21] )
+	if ( !txt[20] && !txt[21] )
 	{
 		v1 = picktmu();
-		a1[28] = v1;
-		a1[29] = v1 ^ 1;
+		txt[28] = v1;
+		txt[29] = v1 ^ 1;
 	}
 	v2 = 0;
-	g_state.texturexmul = a1[9];
-	g_state.textureymul = a1[10];
+	g_state.texturexmul = txt[9];
+	g_state.textureymul = txt[10];
 	do
 	{
-		if ( fxloadtexturepart(a1, 2) >= 0 && fxloadtexturepart(a1, 3) >= 0 )
+		if ( fxloadtexturepart(txt, 2) >= 0 && fxloadtexturepart(txt, 3) >= 0 )
 			break;
 		if ( !v2 )
 			makespace();
@@ -381,19 +383,19 @@ int fxloadtexture_trilin(DWORD *a1)
 		++v2;
 	}
 	while ( v2 < 3 );
-	return a1[28];
+	return txt[28];
 }
 
-int fxloadtexture_multi(DWORD *a1, DWORD *a2)
+int fxloadtexture_multi(DWORD *txt1, DWORD *txt2)
 {
 	signed int v2; // ebx
 
 	v2 = 0;
-	g_state.texturexmul = a1[9];
-	g_state.textureymul = a1[10];
+	g_state.texturexmul = txt1[9];
+	g_state.textureymul = txt1[10];
 	do
 	{
-		if ( fxloadtexturepart(a1, 0) >= 0 && fxloadtexturepart(a2, 1) >= 0 )
+		if ( fxloadtexturepart(txt1, 0) >= 0 && fxloadtexturepart(txt2, 1) >= 0 )
 			break;
 		if ( !v2 )
 			makespace();
@@ -407,83 +409,82 @@ int fxloadtexture_multi(DWORD *a1, DWORD *a2)
 	return 0;
 }
 
-signed int *text_init()
+void text_init()
 {
 	signed int v0; // ST04_4
 	int v1; // eax
-	signed int *result; // eax
+	xt_memory *result; // eax
 	signed int v3; // ST04_4
 	int v4; // eax
 
 	x_log("Texture memory TMU0: ");
-	v0 = grTexMaxAddress(GR_TMU0);
 	v1 = grTexMinAddress(GR_TMU0);
-	mem_S1205[0] = (int)memory_create(v1 + 256, v0);
+	v0 = grTexMaxAddress(GR_TMU0);
+	mem[0] = memory_create(v1 + 256, v0);
 	x_log("Texture memory TMU1: ");
 	if ( g_state.tmus >= 2 )
 	{
-		v3 = grTexMaxAddress(GR_TMU1);
 		v4 = grTexMinAddress(GR_TMU1);
+		v3 = grTexMaxAddress(GR_TMU1);
 		result = memory_create(v4 + 256, v3);
 	}
 	else
 	{
 		result = memory_create(0, 0);
 	}
-	dword_131C = (int)result;
-	return result;
+	mem[1] = result;
 }
 
 void text_deinit()
 {
-	if ( mem_S1205[0] )
-		memory_delete(mem_S1205[0]);
-	if ( dword_131C )
-		memory_delete(dword_131C);
-	mem_S1205[0] = 0;
-	dword_131C = 0;
+	if ( mem[0] )
+		memory_delete(mem[0]);
+	if ( mem[1])
+		memory_delete(mem[1]);
+	mem[0] = 0;
+	mem[1] = 0;
 }
 
-int accesstexture(DWORD *a1, int a2, signed int *a3, signed int *a4)
+int accesstexture(DWORD *txt, int level, int *xsize, int *ysize)
 {
 	signed int v4; // ebp
 	signed int v5; // ebx
-	__int64 v6; // rax
+	int v6[2];
 
-	if ( a1[7] < a2 )
+	if (txt[7] < level)
 		x_fatal("access texture illegal level");
 	v4 = 0;
 	v5 = 0;
-	v6 = 0i64;
-	if ( a2 >= 0 )
+	v6[0] = v6[1] = 0;
+	if (level >= 0 )
 	{
 		do
 		{
-			v4 = a1[2] >> SBYTE4(v6);
+			v4 = txt[2] >> (v6[1] & 0xf);
 			if ( !v4 )
 				v4 = 1;
-			v5 = a1[3] >> SBYTE4(v6);
+			v5 = txt[3] >> (v6[1] & 0xf);
 			if ( !v5 )
 				v5 = 1;
-			if ( HIDWORD(v6) != a2 )
-				LODWORD(v6) = v4 * v5 + v6;
-			++HIDWORD(v6);
+			if ( v6[0] != level)
+				v6[1] = v4 * v5 + v6;
+			++v6[0];
 		}
-		while ( SHIDWORD(v6) <= a2 );
+		while ( v6[0] <= level);
 	}
-	if ( a1[7] == a2 )
+	if (txt[7] == level)
 	{
 		v4 = 0;
 		v5 = 0;
 	}
-	if ( a3 )
-		*a3 = v4;
-	if ( a4 )
-		*a4 = v5;
-	return v6;
+	if (xsize)
+		*xsize = v4;
+	if (ysize)
+		*ysize = v5;
+	return v6[1];
 }
 
-int text_allocdata(int a1)
+int text_allocdata(int txt)
 {
 	signed int v1; // ebx
 	int v2; // ebp
@@ -500,16 +501,16 @@ int text_allocdata(int a1)
 	signed int v13; // eax
 	int result; // eax
 
-	v1 = *(DWORD *)(a1 + 8);
-	if ( v1 < *(DWORD *)(a1 + 12) )
+	v1 = *(DWORD *)(txt + 8);
+	if ( v1 < *(DWORD *)(txt + 12) )
 	{
-		v2 = *(DWORD *)(a1 + 8);
+		v2 = *(DWORD *)(txt + 8);
 		v3 = 0;
-		v1 = *(DWORD *)(a1 + 12);
+		v1 = *(DWORD *)(txt + 12);
 	}
 	else
 	{
-		v2 = *(DWORD *)(a1 + 12);
+		v2 = *(DWORD *)(txt + 12);
 		v3 = 1;
 	}
 	if ( v1 > 8 )
@@ -517,24 +518,24 @@ int text_allocdata(int a1)
 		switch ( v1 )
 		{
 			case 16:
-				*(DWORD *)(a1 + 56) = 4;
-				*(DWORD *)(a1 + 28) = 5;
+				*(DWORD *)(txt + 56) = 4;
+				*(DWORD *)(txt + 28) = 5;
 				break;
 			case 32:
-				*(DWORD *)(a1 + 56) = 3;
-				*(DWORD *)(a1 + 28) = 6;
+				*(DWORD *)(txt + 56) = 3;
+				*(DWORD *)(txt + 28) = 6;
 				break;
 			case 64:
-				*(DWORD *)(a1 + 56) = 2;
-				*(DWORD *)(a1 + 28) = 7;
+				*(DWORD *)(txt + 56) = 2;
+				*(DWORD *)(txt + 28) = 7;
 				break;
 			case 128:
-				*(DWORD *)(a1 + 56) = 1;
-				*(DWORD *)(a1 + 28) = 8;
+				*(DWORD *)(txt + 56) = 1;
+				*(DWORD *)(txt + 28) = 8;
 				break;
 			case 256:
-				*(DWORD *)(a1 + 56) = 0;
-				*(DWORD *)(a1 + 28) = 9;
+				*(DWORD *)(txt + 56) = 0;
+				*(DWORD *)(txt + 28) = 9;
 				break;
 			default:
 				goto $L1425;
@@ -545,20 +546,20 @@ int text_allocdata(int a1)
 		switch ( v1 )
 		{
 			case 8:
-				*(DWORD *)(a1 + 56) = 5;
-				*(DWORD *)(a1 + 28) = 4;
+				*(DWORD *)(txt + 56) = 5;
+				*(DWORD *)(txt + 28) = 4;
 				break;
 			case 1:
-				*(DWORD *)(a1 + 56) = 8;
-				*(DWORD *)(a1 + 28) = 1;
+				*(DWORD *)(txt + 56) = 8;
+				*(DWORD *)(txt + 28) = 1;
 				break;
 			case 2:
-				*(DWORD *)(a1 + 56) = 7;
-				*(DWORD *)(a1 + 28) = 2;
+				*(DWORD *)(txt + 56) = 7;
+				*(DWORD *)(txt + 28) = 2;
 				break;
 			case 4:
-				*(DWORD *)(a1 + 56) = 6;
-				*(DWORD *)(a1 + 28) = 3;
+				*(DWORD *)(txt + 56) = 6;
+				*(DWORD *)(txt + 28) = 3;
 				break;
 			default:
 $L1425:
@@ -566,12 +567,12 @@ $L1425:
 				break;
 		}
 	}
-	if ( !(*(BYTE *)(a1 + 17) & 2) )
-		*(DWORD *)(a1 + 28) = 1;
+	if ( !(*(BYTE *)(txt + 17) & 2) )
+		*(DWORD *)(txt + 28) = 1;
 	switch ( v1 / v2 )
 	{
 		case 1:
-			*(DWORD *)(a1 + 60) = 3;
+			*(DWORD *)(txt + 60) = 3;
 			break;
 		case 2:
 			v4 = v3 < 1 ? 4 : 2;
@@ -582,63 +583,63 @@ $L1425:
 		case 8:
 			v4 = v3 < 1 ? 6 : 0;
 LABEL_28:
-			*(DWORD *)(a1 + 60) = v4;
+			*(DWORD *)(txt + 60) = v4;
 			break;
 		default:
 			x_fatal("Illegal texture aspect %i/%i", v1, v2);
 			break;
 	}
-	switch ( *(DWORD *)(a1 + 60) )
+	switch ( *(DWORD *)(txt + 60) )
 	{
 		case 0:
-			*(DWORD *)(a1 + 36) = 256.0f;
-			*(DWORD *)(a1 + 40) = 32.0f;
+			*(DWORD *)(txt + 36) = 256.0f;
+			*(DWORD *)(txt + 40) = 32.0f;
 			break;
 		case 1:
-			*(DWORD *)(a1 + 36) = 256.0f;
-			*(DWORD *)(a1 + 40) = 64.0f;
+			*(DWORD *)(txt + 36) = 256.0f;
+			*(DWORD *)(txt + 40) = 64.0f;
 			break;
 		case 2:
-			*(DWORD *)(a1 + 36) = 256.0f;
-			*(DWORD *)(a1 + 40) = 128.0f;
+			*(DWORD *)(txt + 36) = 256.0f;
+			*(DWORD *)(txt + 40) = 128.0f;
 			break;
 		case 3:
-			*(DWORD *)(a1 + 36) = 256.0f;
-			*(DWORD *)(a1 + 40) = 256.0f;
+			*(DWORD *)(txt + 36) = 256.0f;
+			*(DWORD *)(txt + 40) = 256.0f;
 			break;
 		case 4:
-			*(DWORD *)(a1 + 36) = 128.0f;
+			*(DWORD *)(txt + 36) = 128.0f;
 			goto LABEL_37;
 		case 5:
-			*(DWORD *)(a1 + 36) = 64.0f;
+			*(DWORD *)(txt + 36) = 64.0f;
 			goto LABEL_37;
 		case 6:
-			*(DWORD *)(a1 + 36) = 32.0f;
+			*(DWORD *)(txt + 36) = 32.0f;
 LABEL_37:
-			*(DWORD *)(a1 + 40) = 256.0f;
+			*(DWORD *)(txt + 40) = 256.0f;
 			break;
 		default:
 			break;
 	}
-	v5 = v1 >> (*(unsigned int *)(a1 + 28) - 1);
+	v5 = v1 >> (*(unsigned int *)(txt + 28) - 1);
 	if ( v5 > 8 )
 	{
 		switch ( v5 )
 		{
 			case 16:
-				*(DWORD *)(a1 + 52) = 4;
+				*(DWORD *)(txt + 52) = 4;
 				break;
 			case 32:
-				*(DWORD *)(a1 + 52) = 3;
+				*(DWORD *)(txt + 52) = 3;
 				break;
 			case 64:
-				*(DWORD *)(a1 + 52) = 2;
+				*(DWORD *)(txt + 52) = 2;
 				break;
 			case 128:
-				*(DWORD *)(a1 + 52) = 1;
+				*(DWORD *)(txt + 52) = 1;
 				break;
 			case 256:
-				*(DWORD *)(a1 + 52) = 0;
+				*(DWORD *)(txt + 52) = 0;
 				break;
 			default:
 				goto $L1462;
@@ -649,16 +650,16 @@ LABEL_37:
 		switch ( v5 )
 		{
 			case 8:
-				*(DWORD *)(a1 + 52) = 5;
+				*(DWORD *)(txt + 52) = 5;
 				break;
 			case 1:
-				*(DWORD *)(a1 + 52) = 8;
+				*(DWORD *)(txt + 52) = 8;
 				break;
 			case 2:
-				*(DWORD *)(a1 + 52) = 7;
+				*(DWORD *)(txt + 52) = 7;
 				break;
 			case 4:
-				*(DWORD *)(a1 + 52) = 6;
+				*(DWORD *)(txt + 52) = 6;
 				break;
 			default:
 $L1462:
@@ -666,40 +667,40 @@ $L1462:
 				break;
 		}
 	}
-	switch ( *(DWORD *)(a1 + 16) & 0xFF )
+	switch ( *(DWORD *)(txt + 16) & X_FORMATMASK)
 	{
-		case 0:
-			v6 = (DWORD *)(a1 + 24);
-			v8 = accesstexture((DWORD *)a1, *(DWORD *)(a1 + 28), 0, 0);
-			*(DWORD *)(a1 + 20) = 0;
-			*(DWORD *)(a1 + 64) = 11;
-			*(DWORD *)(a1 + 24) = 2 * v8;
+		case X_RGBA5551:
+			v6 = (DWORD *)(txt + 24);
+			v8 = accesstexture((DWORD *)txt, *(DWORD *)(txt + 28), 0, 0);
+			*(DWORD *)(txt + 20) = 0;
+			*(DWORD *)(txt + 64) = 11;
+			*(DWORD *)(txt + 24) = 2 * v8;
 			break;
-		case 3:
-			v6 = (DWORD *)(a1 + 24);
-			v9 = accesstexture((DWORD *)a1, *(DWORD *)(a1 + 28), 0, 0);
-			*(DWORD *)(a1 + 20) = 3;
-			*(DWORD *)(a1 + 64) = 10;
-			*(DWORD *)(a1 + 24) = 2 * v9;
+		case X_RGB565:
+			v6 = (DWORD *)(txt + 24);
+			v9 = accesstexture((DWORD *)txt, *(DWORD *)(txt + 28), 0, 0);
+			*(DWORD *)(txt + 20) = 3;
+			*(DWORD *)(txt + 64) = 10;
+			*(DWORD *)(txt + 24) = 2 * v9;
 			break;
-		case 4:
-			v6 = (DWORD *)(a1 + 24);
-			v10 = accesstexture((DWORD *)a1, *(DWORD *)(a1 + 28), 0, 0);
-			*(DWORD *)(a1 + 20) = 4;
-			*(DWORD *)(a1 + 64) = 3;
-			*(DWORD *)(a1 + 24) = 2 * v10;
+		case X_I8:
+			v6 = (DWORD *)(txt + 24);
+			v10 = accesstexture((DWORD *)txt, *(DWORD *)(txt + 28), 0, 0);
+			*(DWORD *)(txt + 20) = 4;
+			*(DWORD *)(txt + 64) = 3;
+			*(DWORD *)(txt + 24) = 2 * v10;
 			break;
 		default:
-			v6 = (DWORD *)(a1 + 24);
-			v7 = accesstexture((DWORD *)a1, *(DWORD *)(a1 + 28), 0, 0);
-			*(DWORD *)(a1 + 20) = 1;
-			*(DWORD *)(a1 + 64) = 12;
-			*(DWORD *)(a1 + 24) = 2 * v7;
+			v6 = (DWORD *)(txt + 24);
+			v7 = accesstexture((DWORD *)txt, *(DWORD *)(txt + 28), 0, 0);
+			*(DWORD *)(txt + 20) = 1;
+			*(DWORD *)(txt + 64) = 12;
+			*(DWORD *)(txt + 24) = 2 * v7;
 			break;
 	}
 	v11 = x_alloc(*v6);
-	v12 = (DWORD *)(a1 + 72);
-	*(DWORD *)(a1 + 68) = v11;
+	v12 = (DWORD *)(txt + 72);
+	*(DWORD *)(txt + 68) = v11;
 	v13 = 4;
 	do
 	{
@@ -710,14 +711,14 @@ $L1462:
 	}
 	while ( v13 );
 	result = 0;
-	*(DWORD *)(a1 + 104) = 0;
-	*(DWORD *)(a1 + 108) = 1;
-	*(DWORD *)(a1 + 112) = 0;
-	*(DWORD *)(a1 + 116) = 1;
+	*(DWORD *)(txt + 104) = 0;
+	*(DWORD *)(txt + 108) = 1;
+	*(DWORD *)(txt + 112) = 0;
+	*(DWORD *)(txt + 116) = 1;
 	return result;
 }
 
-unsigned int text_loadlevel(DWORD *a1, int a2, unsigned int a3)
+unsigned int text_loadlevel(DWORD *txt, int level, unsigned int data)
 {
 	unsigned int result; // eax
 	int v4; // esi
@@ -738,15 +739,15 @@ unsigned int text_loadlevel(DWORD *a1, int a2, unsigned int a3)
 	int v19; // [esp+Ch] [ebp-8h]
 	int v20; // [esp+10h] [ebp-4h]
 
-	result = a1[16];
+	result = txt[16];
 	switch ( result )
 	{
 		case 3u:
-			v4 = accesstexture(a1, a2, &v20, &v19) + a1[17];
+			v4 = accesstexture(txt, level, &v20, &v19) + txt[17];
 			result = v20 * v19;
-			v5 = a3;
-			v6 = a3 + 4 * v20 * v19;
-			if ( v6 > a3 )
+			v5 = data;
+			v6 = data + 4 * v20 * v19;
+			if ( v6 > data)
 			{
 				do
 				{
@@ -759,11 +760,11 @@ unsigned int text_loadlevel(DWORD *a1, int a2, unsigned int a3)
 			}
 			break;
 		case 0xAu:
-			v7 = accesstexture(a1, a2, &v20, &v19);
-			v8 = a3;
-			result = a1[17] + 2 * v7;
-			v9 = a3 + 4 * v20 * v19;
-			if ( v9 > a3 )
+			v7 = accesstexture(txt, level, &v20, &v19);
+			v8 = data;
+			result = txt[17] + 2 * v7;
+			v9 = data + 4 * v20 * v19;
+			if ( v9 > data)
 			{
 				do
 				{
@@ -776,11 +777,11 @@ unsigned int text_loadlevel(DWORD *a1, int a2, unsigned int a3)
 			}
 			break;
 		case 0xBu:
-			v11 = accesstexture(a1, a2, &v20, &v19);
-			v12 = a3;
-			v13 = a1[17] + 2 * v11;
-			result = a3 + 4 * v20 * v19;
-			if ( result > a3 )
+			v11 = accesstexture(txt, level, &v20, &v19);
+			v12 = data;
+			v13 = txt[17] + 2 * v11;
+			result = data + 4 * v20 * v19;
+			if ( result > data)
 			{
 				do
 				{
@@ -793,11 +794,11 @@ unsigned int text_loadlevel(DWORD *a1, int a2, unsigned int a3)
 			}
 			break;
 		case 0xCu:
-			v15 = accesstexture(a1, a2, &v20, &v19);
-			v16 = a3;
-			v17 = a1[17] + 2 * v15;
-			result = a3 + 4 * v20 * v19;
-			if ( result > a3 )
+			v15 = accesstexture(txt, level, &v20, &v19);
+			v16 = data;
+			v17 = txt[17] + 2 * v15;
+			result = data + 4 * v20 * v19;
+			if ( result > data)
 			{
 				do
 				{
@@ -812,37 +813,37 @@ unsigned int text_loadlevel(DWORD *a1, int a2, unsigned int a3)
 		default:
 			break;
 	}
-	a1[12] = 1;
+	txt[12] = 1;
 	return result;
 }
 
-void text_freedata(DWORD *a1)
+void text_freedata(DWORD *txt)
 {
-	freetexmem(a1);
-	if ( a1[17] )
-		x_free(a1[17]);		// +68
-	memset(a1, 0, 0x98u);
+	freetexmem(txt);
+	if (txt[17] )
+		x_free(txt[17]);		// +68
+	memset(txt, 0, 0x98u);
 }
 
-int text_cleartexmem()
+void text_cleartexmem()
 {
-	return clearspace();
+	clearspace();
 }
 
-int text_opendata(int a1)
+int text_opendata(int txt)
 {
-	return *(DWORD *)(a1 + 68);
+	return *(DWORD *)(txt + 68);
 }
 
-void text_closedata(int a1)
+void text_closedata(int txt)
 {
 	int result; // eax
 
-	*(DWORD *)(a1 + 48) = 1;
-	if ( *(DWORD *)(a1 + 4) == g_state.active.text1)
+	*(DWORD *)(txt + 48) = 1;
+	if ( *(DWORD *)(txt + 4) == g_state.active.text1)
 		g_state.active.text1 = 0;
 	result = g_state.active.text2;
-	if ( *(DWORD *)(a1 + 4) == result )
+	if ( *(DWORD *)(txt + 4) == result )
 		g_state.active.text1 = 0;
 }
 
@@ -860,7 +861,7 @@ int text_frameend()
 	g_stats.text_used = 0;
 	if ( g_lasttexture >= 1 )
 	{
-		v2 = (DWORD *)((char *)&g_texture + 152);
+		v2 = (DWORD *)(&g_texture[1]);
 		do
 		{
 			if ( *v2 )

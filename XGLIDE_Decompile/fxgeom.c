@@ -68,11 +68,11 @@ void x_cameramatrix(xt_matrix* a1)
 	if ( v2 )
 	{
 LABEL_10:
-		g_state[233] = 0;
+		g_state.campresent = 0;
 	}
 	else
 	{
-		g_state[233] = 1;
+		g_state.campresent = 1;
 		memcpy(&g_state[201], a1, 0x40u);
 	}
 }
@@ -158,7 +158,7 @@ void x_matrix(xt_matrix* matrix)
 		g_state.usexformmode = g_state.xformmode;
 		x_flush();
 		memcpy(&g_state[169], matrix, 0x40u);
-		if ( g_state.xformmode != 1 && g_state[233] )
+		if ( g_state.xformmode != 1 && g_state.campresent)
 		{
 			v1 = &v22;
 			v2 = (float *)&g_state[201];
@@ -228,6 +228,7 @@ void x_matrix(xt_matrix* matrix)
 			v12 += 4;
 		}
 		while ( v12 < (float *)&g_state[233] );
+
 		if ( g_state.geometry & X_DUMPDATA)
 		{
 			dumpmatrix(v21, "Modelview");

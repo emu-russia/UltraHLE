@@ -4,7 +4,7 @@
 /// <summary>
 /// Contains pixel output and texturing modes. What in modern video cards is essentially realized with the use of pixel shaders.
 /// </summary>
-typedef struct _xt_mode
+typedef struct _xt_rendmode
 {
 	int mask;		// 291
 	int masktst;	// 292
@@ -26,12 +26,10 @@ typedef struct _xt_mode
 	int text2;			// 311
 	uint32_t envc;		// 312 - combined env color
 	float env[4];		// 313(r), 314(g), 315(b), 316(a)
-} xt_mode;
+} xt_rendmode;
 
 typedef struct _xt_state
 {
-
-//xt_rendmode
 	int used;		// 159  1: This state is the current state in use
 	int tmus;		// g_state[160]
 	void* hdc;		// 161
@@ -49,7 +47,7 @@ typedef struct _xt_state
 //xform
 //camxform
 //projxform
-//campresent
+	int campresent;		// 233
 
 	int projchanged;	// 234
 	int matrixnull;		// 235
@@ -83,12 +81,12 @@ typedef struct _xt_state
 	int geometryon;		// 259
 	int geometryoff;	// 260
 
-	xt_mode active;		// [263 ... 288]   Actual set modes, corresponding to what was set in Glide API. The values get here from `currentmode`.
+	xt_rendmode active;		// [263 ... 288]   Actual set modes, corresponding to what was set in Glide API. The values get here from `currentmode`.
 
 	int setnew;		// 289  -- new geometry
 	int changed;	// 290   -- mode changed
 
-	xt_mode currentmode;	// [291 ... 316]  Used by X api calls to set new values for different modes. But they are not set immediately yet.
+	xt_rendmode currentmode;	// [291 ... 316]  Used by X api calls to set new values for different modes. But they are not set immediately yet.
 
 	int geometry;		// 317
 
