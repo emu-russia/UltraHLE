@@ -292,7 +292,7 @@ void x_projection(float fov, float znear, float zfar)
 	x_flush();
 	if ( fov >= 1.0 )
 	{
-		v6 = tan(fov * 0.0174532925199433 * 0.5) * zfar;
+		v6 = tan(fov * (PI/180.0f) * 0.5) * zfar;
 		*(float *)&v7 = 0.75 * v6;
 		*(float *)&v8 = -(0.75 * v6);
 		*(float *)&v9 = v6;
