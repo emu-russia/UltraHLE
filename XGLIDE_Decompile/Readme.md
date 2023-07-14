@@ -138,7 +138,7 @@ Overall status: Not yet buildable, but its something already.
 |log_open|Ready| |
 |x_log|Ready| |
 |breakpoint|Ready|Uses __debugbreak|
-|x_fatal|Ready|Does a repeated log_open to dump the contents into x.log|
+|x_fatal|Ready|Does a repeated log_open to flush the contents into x.log|
 |x_allocfast|Ready|malloc|
 |x_alloc|Ready|malloc+memset|
 |x_realloc|Ready| |

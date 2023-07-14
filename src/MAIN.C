@@ -113,7 +113,7 @@ int main_start(void)
 
     dlist_ignoregraphics(0);
 
-    breakcommand("sgo");
+    breakcommand("go");
 
     // wait for execution to start (up to 0.5 sec)
     for(i=0;i<500;i+=10)
