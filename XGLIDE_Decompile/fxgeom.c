@@ -50,19 +50,17 @@ void geom_init()
 
 void x_cameramatrix(xt_matrix* a1)
 {
-	BYTE *result; // eax
 	int v2; // zf  - bool
 	BYTE *v3; // edi
 	signed int v4; // ecx
 	BYTE *v5; // esi
 
-	result = a1;
 	v2 = a1 == 0;
 	if ( !a1 )
 		goto LABEL_10;
-	v3 = &identmatrix;
+	v3 = (BYTE *)identmatrix;
 	v4 = 64;
-	v5 = a1;
+	v5 = (BYTE *)a1;
 	do
 	{
 		if ( !v4 )
@@ -71,6 +69,7 @@ void x_cameramatrix(xt_matrix* a1)
 		--v4;
 	}
 	while ( v2 );
+
 	if ( v2 )
 	{
 LABEL_10:
@@ -147,7 +146,7 @@ void x_matrix(xt_matrix* matrix)
 	}
 	else
 	{
-		matrix = &identmatrix;
+		matrix = identmatrix;
 		g_state[XST].matrixnull = 1;
 	}
 	if ( g_state[XST].projchanged )

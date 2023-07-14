@@ -236,7 +236,7 @@ void x_projmatrix(xt_matrix* a1)
 	else
 	{
 		g_state[XST].projnull = 1;
-		v2 = &identmatrix;
+		v2 = identmatrix;
 	}
 	memcpy(g_state[XST].projxform, v2, 0x40u);
 	g_state[XST].xformmode = 2;
