@@ -589,31 +589,31 @@ LABEL_28:
 	switch ( *(DWORD *)(a1 + 60) )
 	{
 		case 0:
-			*(DWORD *)(a1 + 36) = 1132462080;
-			*(DWORD *)(a1 + 40) = 1107296256;
+			*(DWORD *)(a1 + 36) = 256.0f;
+			*(DWORD *)(a1 + 40) = 32.0f;
 			break;
 		case 1:
-			*(DWORD *)(a1 + 36) = 1132462080;
-			*(DWORD *)(a1 + 40) = 1115684864;
+			*(DWORD *)(a1 + 36) = 256.0f;
+			*(DWORD *)(a1 + 40) = 64.0f;
 			break;
 		case 2:
-			*(DWORD *)(a1 + 36) = 1132462080;
-			*(DWORD *)(a1 + 40) = 1124073472;
+			*(DWORD *)(a1 + 36) = 256.0f;
+			*(DWORD *)(a1 + 40) = 128.0f;
 			break;
 		case 3:
-			*(DWORD *)(a1 + 36) = 1132462080;
-			*(DWORD *)(a1 + 40) = 1132462080;
+			*(DWORD *)(a1 + 36) = 256.0f;
+			*(DWORD *)(a1 + 40) = 256.0f;
 			break;
 		case 4:
-			*(DWORD *)(a1 + 36) = 1124073472;
+			*(DWORD *)(a1 + 36) = 128.0f;
 			goto LABEL_37;
 		case 5:
-			*(DWORD *)(a1 + 36) = 1115684864;
+			*(DWORD *)(a1 + 36) = 64.0f;
 			goto LABEL_37;
 		case 6:
-			*(DWORD *)(a1 + 36) = 1107296256;
+			*(DWORD *)(a1 + 36) = 32.0f;
 LABEL_37:
-			*(DWORD *)(a1 + 40) = 1132462080;
+			*(DWORD *)(a1 + 40) = 256.0f;
 			break;
 		default:
 			break;
@@ -818,7 +818,7 @@ void text_freedata(DWORD *a1)
 {
 	freetexmem(a1);
 	if ( a1[17] )
-		x_free(a1[17]);
+		x_free(a1[17]);		// +68
 	memset(a1, 0, 0x98u);
 }
 
