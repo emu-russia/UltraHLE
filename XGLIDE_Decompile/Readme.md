@@ -56,25 +56,25 @@ Overall status: Not yet buildable, but its something already.
 |x_fog|Ready| |
 |x_fullscreen|Ready|Calls `init_fullscreen`|
 |**fx.c**|||
-|init_name| | |
-|init_fullscreen| | |
-|init_query| | |
-|init_reinit| | |
-|init_init| | |
-|init_deinit| | |
-|init_activate| | |
-|init_resize| | |
-|init_bufferswap| | |
-|init_clear| | |
-|init_readfb| | |
-|init_writefb| | |
-|mode_init| | |
-|mode_texturemode| | |
-|mode_loadtexture| | |
-|mode_loadmultitexture| | |
-|fixfogtable| | |
-|generatefogtable| | |
-|mode_change| | |
+|init_name|Ready|return "Glide"|
+|init_fullscreen|Ready| |
+|init_query|Ready|Badly decompiled and not used|
+|init_reinit|Ready| |
+|init_init|Ready| |
+|init_deinit|Ready| |
+|init_activate|Ready|empty|
+|init_resize|Ready| |
+|init_bufferswap|Ready|:construction: Might be worth a little cleanup.|
+|init_clear|Ready|:construction: Might be worth a little cleanup.|
+|init_readfb|Ready|:construction: Might be worth a little cleanup.|
+|init_writefb|Ready|empty (not implemented)|
+|mode_init|Ready| |
+|mode_texturemode| |:construction: Needs to be converted to `xt_texture`|
+|mode_loadtexture| |:construction: Needs to be converted to `xt_texture`|
+|mode_loadmultitexture| |:construction: Needs to be converted to `xt_texture`|
+|fixfogtable|Ready| |
+|generatefogtable|Ready| |
+|mode_change|Ready (almost)|Pretty much done, but need to check a couple places that probably didn't decompile well (marked TODO).|
 |**fxgeom.c**|||
 |geom_init| | |
 |x_cameramatrix| | |
