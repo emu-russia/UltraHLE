@@ -1651,10 +1651,10 @@ void flush_reordertables()
 	}
 	if ( v1 <= vertices)
 	{
-		memmove(&xfpos[v2], &xfpos[vertices - v1], 20 * v1);
-		memmove(&grvx[v2], &grvx[vertices - v1], 60 * v1);
-		memmove(&tex[v2], &tex[vertices - v1], 8 * v1);
-		memmove(&texp[v2], &texp[vertices - v1], 8 * v1);
+		memmove(&xfpos[v2], &xfpos[vertices - v1], v1 * sizeof(xt_xfpos));
+		memmove(&grvx[v2], &grvx[vertices - v1], v1 * sizeof(GrVertex));
+		memmove(&tex[v2], &tex[vertices - v1], v1 * sizeof(xt_tex));
+		memmove(&texp[v2], &texp[vertices - v1], v1 * sizeof(xt_tex));
 	}
 	else
 	{
