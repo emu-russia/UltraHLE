@@ -892,7 +892,7 @@ LABEL_92:
 
 int setuprvx(int a1, int a2)
 {
-	float *v2; // esi
+	xt_xfpos* v2; // esi
 	float *v3; // ebx
 	float *v4; // edi
 	float *v5; // ebp
@@ -936,12 +936,12 @@ int setuprvx(int a1, int a2)
 			result = debugcount;
 			do
 			{
-				*v3 = *v2 * v21 + v19;
-				v3[1] = v2[1] * v22 + v20;
-				v3[8] = v2[3] * v23;
-				v8 = *v3 + 786432.0;
-				*v3 = v8;
-				*v3 = v8 - 786432.0;
+				v3[0] = v2->x * v21 + v19;
+				v3[1] = v2->y * v22 + v20;
+				v3[8] = v2->invz * v23;
+				v8 = v3[0] + 786432.0;
+				v3[0] = v8;
+				v3[0] = v8 - 786432.0;
 				v3[1] = v3[1] + 786432.0;
 				v3[1] = v3[1] - 786432.0;
 				v9 = *((DWORD *)v3 + 8);
@@ -959,7 +959,7 @@ int setuprvx(int a1, int a2)
 				}
 				v5 += 2;
 				v4 += 2;
-				v2 += 5;
+				v2 ++;
 				v3 += 15;
 				--v7;
 			}
@@ -974,14 +974,14 @@ int setuprvx(int a1, int a2)
 		v25 = a2;
 		while ( 1 )
 		{
-			if ( !*((DWORD *)v2 + 4) )
+			if ( !v2->clip )
 			{
-				*v3 = v2[3] * *v2 * v21 + v19;
-				v3[1] = v2[1] * v2[3] * v22 + v20;
-				v3[8] = v2[3] * v23;
-				v10 = *v3 + 786432.0;
-				*v3 = v10;
-				*v3 = v10 - 786432.0;
+				v3[0] = v2->invz * v2->x * v21 + v19;
+				v3[1] = v2->y * v2->invz * v22 + v20;
+				v3[8] = v2->invz * v23;
+				v10 = v3[0] + 786432.0;
+				v3[0] = v10;
+				v3[0] = v10 - 786432.0;
 				v3[1] = v3[1] + 786432.0;
 				v3[1] = v3[1] - 786432.0;
 				result = (int *)*((DWORD *)v3 + 8);
@@ -1014,22 +1014,18 @@ int setuprvx(int a1, int a2)
 LABEL_23:
 			if ( g_state[XST].geometry & X_DUMPDATA)
 			{
-				x_log(
-					"#x_vx[ %13.5f %13.5f %13.5f ]\n",
-					pos_S1208[3 * (((char *)v2 - (char *)xfpos_S1212) / 20)],
-					pos_S1208[3 * (((char *)v2 - (char *)xfpos_S1212) / 20) + 1],
-					pos_S1208[3 * (((char *)v2 - (char *)xfpos_S1212) / 20) + 2]);
-				if ( *((DWORD *)v2 + 4) )
-					x_log("#clip[ %13.5f %13.5f %13.5f clip %08X ]\n", v2[0], v2[1], v2[2], *((DWORD*)v2 + 4));
+				x_log("#x_vx[ %13.5f %13.5f %13.5f ]\n", pos[a1].x, pos[a1].y, pos[a1].z);
+				if ( v2->clip )
+					x_log("#clip[ %13.5f %13.5f %13.5f clip %08X ]\n", v2->x, v2->y, v2->z, v2->clip);
 				else
-					x_log("#clip[ %13.5f %13.5f %13.5f   w:%13.5f ]\n", v2[0], v2[1], v2[2], (double)(1.0 / v2[3]));
-				if ( !*((DWORD *)v2 + 4) )
+					x_log("#clip[ %13.5f %13.5f %13.5f   w:%13.5f ]\n", v2->x, v2->y, v2->z, (double)(1.0f / v2->invz));
+				if ( !v2->clip )
 					x_log("#scrn[ %13.5f %13.5f %13.5f oow:%13.5f ]\n", v3[0], v3[1], v3[2], v3[8]);
 				x_log("#\n");
 			}
 			v5 += 2;
 			v4 += 2;
-			v2 += 5;
+			v2 ++;
 			v3 += 15;
 			v24 += 2;
 			if ( !--v25 )
@@ -1044,11 +1040,11 @@ LABEL_23:
 		result = debugcount;
 		while ( 1 )
 		{
-			if ( !*((DWORD *)v2 + 4) )
+			if ( !v2->clip )
 			{
-				*v3 = v2[3] * *v2 * v21 + v19;
-				v3[1] = v2[1] * v2[3] * v22 + v20;
-				v3[8] = v2[3] * v23;
+				*v3 = v2->invz * v2->x * v21 + v19;
+				v3[1] = v2->y * v2->invz * v22 + v20;
+				v3[8] = v2->invz * v23;
 				v14 = *v3 + 786432.0;
 				*v3 = v14;
 				*v3 = v14 - 786432.0;
@@ -1099,9 +1095,9 @@ LABEL_55:
 		{
 			if ( !*((DWORD *)v2 + 4) )
 			{
-				*v3 = v2[3] * *v2 * v21 + v19;
-				v3[1] = v2[1] * v2[3] * v22 + v20;
-				v3[8] = v2[3] * v23;
+				*v3 = v2->invz * v2->x * v21 + v19;
+				v3[1] = v2->y * v2->invz * v22 + v20;
+				v3[8] = v2->invz * v23;
 				v12 = *v3 + 786432.0;
 				*v3 = v12;
 				*v3 = v12 - 786432.0;
@@ -1401,7 +1397,6 @@ int clipfinish(DWORD *a1)
 	int v1; // edx
 	xt_xfpos* v2; // ecx
 	int v3; // eax
-	long double v4; // fst6
 	signed int result; // eax
 	DWORD *v6; // ecx
 
@@ -1415,6 +1410,7 @@ int clipfinish(DWORD *a1)
 			v1 &= v2->clip;
 			--v3;
 			v2->clip = 0;
+			// TODO: Make the invz calculation location more prominent, not in the clipping termination procedure
 			v2->invz = 1.0f / v2->z;		// TODO: Potential division by 0
 			if ( !v3 )
 				break;
@@ -1808,6 +1804,7 @@ signed int flush_drawfx()
 					break;
 				default:
 					g_stats.out_tri += i - 2;
+					// TODO: The call parameters were badly decompiled
 					grDrawPlanarPolygon(v2, v1, i, v0, grvx);
 					break;
 			}
