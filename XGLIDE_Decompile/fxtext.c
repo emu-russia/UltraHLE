@@ -3,7 +3,7 @@
 #include "pch.h"
 
 int g_lasttexture;
-xt_texture g_texture[X_MAX_TEXTURES];		// The 0th entry is not used
+xt_texture g_texture[MAXTEXTURES];		// The 0th entry is not used
 
 static xt_memory* mem[GLIDE_NUM_TMU];
 

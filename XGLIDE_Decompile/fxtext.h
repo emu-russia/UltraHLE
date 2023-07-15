@@ -2,7 +2,6 @@
 #pragma once
 
 #define X_MAX_BLOCKS 2048				// Maximum number of blocks that can be addressed by xt_memory
-#define X_MAX_TEXTURES 1024
 
 /// <summary>
 /// Texture block
@@ -57,7 +56,7 @@ typedef struct _xt_texture		// 152 bytes (38 dwords)
 } xt_texture;
 
 extern int g_lasttexture;
-extern xt_texture g_texture[X_MAX_TEXTURES];
+extern xt_texture g_texture[MAXTEXTURES];
 
 int newblock(int m);
 DWORD* addbefore(DWORD* b, DWORD* t);

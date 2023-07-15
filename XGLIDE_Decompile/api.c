@@ -316,7 +316,7 @@ xt_texture* texture_get(int t)
 {
 	xt_texture* txt;
 
-	if ( t <= 0 || t > X_MAX_TEXTURES)
+	if ( t <= 0 || t > MAXTEXTURES)
 	{
 		g_state[XST].error |= X_ERROR_GET_TEXTURE;
 		txt = 0;
@@ -355,9 +355,9 @@ int x_createtexture(int format, int width, int height)
 		v3++;		// next texture
 		++v4;
 	}
-	while ( v3 < &g_texture[X_MAX_TEXTURES] );
+	while ( v3 < &g_texture[MAXTEXTURES] );
 
-	if ( v4 == X_MAX_TEXTURES)
+	if ( v4 == MAXTEXTURES)
 	{
 		x_log("too many textures\n");
 		result = -1;
