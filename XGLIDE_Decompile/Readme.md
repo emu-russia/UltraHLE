@@ -2,7 +2,7 @@
 
 The decompilation is done in IDA, using HexRays. After that, additional manual processing for buildability is performed.
 
-Overall status: Not yet buildable, but its something already.
+Overall status: The compilation goes without errors, but we need to check how it decompiled and fix possible bugs.
 
 ## Decompilation status
 

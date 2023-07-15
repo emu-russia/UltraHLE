@@ -584,7 +584,8 @@ void xform(int a1, xt_pos* a2, int a3, char *a4)
 	float *v29; // esi
 	BYTE *v30; // edi
 	BYTE *v31; // eax
-	char v33; // c3
+	// TODO: uninitialized local variable 'v33' used
+	char v33 = 0; // c3
 	signed int v34; // eax
 	int v35; // ecx
 	int v36; // ebx
@@ -681,11 +682,11 @@ LABEL_11:
 						*(DWORD *)(v11 + 12) = *(DWORD *)(v21 + v11 + 12);
 						v15 = 0;
 						v22 = *(float *)v11;
-						if ( !(v25 | v26) )
+						v24 = -v55;
+						if (*(float*)v11 < v24)
 							v15 = X_CLIPX1;
 						if ( *(float *)v11 > v55 )
 							v15 |= X_CLIPX2;
-						v24 = -v55;
 						if ( *(float *)(v11 + 4) < v24 )
 							v15 |= X_CLIPY1;
 						if ( *(float *)(v11 + 4) > v55 )
@@ -717,11 +718,11 @@ LABEL_47:
 						+ g_state[XST].xform[196 - 185];
 				*(float *)(v11 + 8) = v54;
 				v16 = *(float *)v11;
-				if ( !(v19 | v20) )
+				v18 = -v54;
+				if (*(float*)v11 < v18)
 					v15 = X_CLIPX1;
 				if ( *(float *)v11 > v54 )
 					v15 |= X_CLIPX2;
-				v18 = -v54;
 				if ( *(float *)(v11 + 4) < v18 )
 					v15 |= X_CLIPY1;
 				if ( *(float *)(v11 + 4) > v54 )
@@ -816,11 +817,11 @@ LABEL_46:
 							+ g_state[XST].xform[200 - 185];
 					*(float *)(v37 + 8) = v56;
 					v42 = *(float *)v37;
-					if ( !(v45 | v46) )
+					v44 = -v56;
+					if (*(float*)v37 < v44)
 						v41 = X_CLIPX1;
 					if ( *(float *)v37 > v56 )
 						v41 |= X_CLIPX2;
-					v44 = -v56;
 					if ( *(float *)(v37 + 4) < v44 )
 						v41 |= X_CLIPY1;
 					if ( *(float *)(v37 + 4) > v56 )
@@ -861,11 +862,11 @@ LABEL_92:
 						v57 = v38[2];
 						*(float *)(v37 + 8) = v57;
 						v49 = *(float *)v37;
-						if ( !(v52 | v53) )
+						v51 = -v57;
+						if (*(float*)v37 > v57 < v51)
 							v48 = X_CLIPX1;
 						if ( *(float *)v37 > v57 )
 							v48 |= X_CLIPX2;
-						v51 = -v57;
 						if ( *(float *)(v37 + 4) < v51 )
 							v48 |= X_CLIPY1;
 						if ( *(float *)(v37 + 4) > v57 )
@@ -1214,8 +1215,6 @@ int doclipvertex(signed int a1, int a2, int a3)
 	float v11; // et1
 	signed int v12; // edx
 	float v14; // ST14_4
-	unsigned __int8 v15; // c0
-	unsigned __int8 v16; // c3
 	int v17; // edx
 	int v18; // eax
 	float *v20; // eax
@@ -1314,11 +1313,11 @@ LABEL_5:
 	}
 	v11 = xfpos[clipnewvx].x;
 	v12 = 0;
-	if ( !(v15 | v16) )
+	v14 = -v25;
+	if (xfpos[clipnewvx].x < v14)
 		v12 = X_CLIPX1;
 	if ( xfpos[clipnewvx].x > v25 )
 		v12 |= X_CLIPX2;
-	v14 = -v25;
 	if (xfpos[clipnewvx].y < v14 )
 		v12 |= X_CLIPY1;
 	if (xfpos[clipnewvx].y > v25 )
