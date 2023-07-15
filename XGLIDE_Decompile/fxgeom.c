@@ -654,7 +654,7 @@ LABEL_12:
 					 + v6[2] * g_state[XST].xform[195 - 185]
 					 + g_state[XST].xform[196 - 185];
 				*(float *)(v5 + 8) = v9;
-				*(float *)(v5 + 12) = 1.0 / v9;
+				*(float *)(v5 + 12) = 1.0f / v9;
 LABEL_11:
 				*(DWORD *)(v5 + 16) = 0;
 				goto LABEL_12;
@@ -682,18 +682,18 @@ LABEL_11:
 						v15 = 0;
 						v22 = *(float *)v11;
 						if ( !(v25 | v26) )
-							v15 = 256;
-						if ( *(float *)v11 > (long double)v55 )
-							v15 |= 0x200u;
+							v15 = X_CLIPX1;
+						if ( *(float *)v11 > v55 )
+							v15 |= X_CLIPX2;
 						v24 = -v55;
-						if ( *(float *)(v11 + 4) < (long double)v24 )
-							v15 |= 0x400u;
-						if ( *(float *)(v11 + 4) > (long double)v55 )
-							v15 |= 0x800u;
-						if ( g_state[XST].znear > (long double)v55 )
-							v15 |= 0x1000u;
-						if ( g_state[XST].zfar < (long double)v55 )
-							v15 |= 0x2000u;
+						if ( *(float *)(v11 + 4) < v24 )
+							v15 |= X_CLIPY1;
+						if ( *(float *)(v11 + 4) > v55 )
+							v15 |= X_CLIPY2;
+						if ( g_state[XST].znear > v55 )
+							v15 |= X_CLIPZ1;
+						if ( g_state[XST].zfar < v55 )
+							v15 |= X_CLIPZ2;
 						goto LABEL_46;
 					}
 LABEL_47:
@@ -718,20 +718,20 @@ LABEL_47:
 				*(float *)(v11 + 8) = v54;
 				v16 = *(float *)v11;
 				if ( !(v19 | v20) )
-					v15 = 256;
-				if ( *(float *)v11 > (long double)v54 )
-					v15 |= 0x200u;
+					v15 = X_CLIPX1;
+				if ( *(float *)v11 > v54 )
+					v15 |= X_CLIPX2;
 				v18 = -v54;
-				if ( *(float *)(v11 + 4) < (long double)v18 )
-					v15 |= 0x400u;
-				if ( *(float *)(v11 + 4) > (long double)v54 )
-					v15 |= 0x800u;
-				if ( g_state[XST].znear > (long double)v54 )
-					v15 |= 0x1000u;
-				if ( g_state[XST].zfar < (long double)v54 )
-					v15 |= 0x2000u;
+				if ( *(float *)(v11 + 4) < v18 )
+					v15 |= X_CLIPY1;
+				if ( *(float *)(v11 + 4) > v54 )
+					v15 |= X_CLIPY2;
+				if ( g_state[XST].znear > v54 )
+					v15 |= X_CLIPZ1;
+				if ( g_state[XST].zfar < v54 )
+					v15 |= X_CLIPZ2;
 				if ( !v15 )
-					*(float *)(v11 + 12) = 1.0 / v54;
+					*(float *)(v11 + 12) = 1.0f / v54;
 LABEL_46:
 				*(DWORD *)(v11 + 16) = v15;
 				goto LABEL_47;
@@ -763,16 +763,16 @@ LABEL_46:
 						if ( v33 )
 							*(DWORD *)(v28 + 12) = g_state[XST].invznear;
 						else
-							*(float *)(v28 + 12) = 1.0 / *(float *)(v28 + 8);
+							*(float *)(v28 + 12) = 1.0f / *(float *)(v28 + 8);
 						v34 = 0;
 						if ( *(DWORD *)v28 > -1.0f)
-							v34 = 256;
+							v34 = X_CLIPX1;
 						if ( *(DWORD *)v28 > 1.0f )
-							v34 |= 0x200u;
+							v34 |= X_CLIPX2;
 						if ( *(DWORD *)(v28 + 4) > -1.0f)
-							v34 |= 0x400u;
+							v34 |= X_CLIPY1;
 						if ( *(DWORD *)(v28 + 4) > 1.0f)
-							v34 |= 0x800u;
+							v34 |= X_CLIPY2;
 						*(DWORD *)(v28 + 16) = v34;
 					}
 					v29 += 3;
@@ -817,18 +817,18 @@ LABEL_46:
 					*(float *)(v37 + 8) = v56;
 					v42 = *(float *)v37;
 					if ( !(v45 | v46) )
-						v41 = 256;
-					if ( *(float *)v37 > (long double)v56 )
-						v41 |= 0x200u;
+						v41 = X_CLIPX1;
+					if ( *(float *)v37 > v56 )
+						v41 |= X_CLIPX2;
 					v44 = -v56;
-					if ( *(float *)(v37 + 4) < (long double)v44 )
-						v41 |= 0x400u;
-					if ( *(float *)(v37 + 4) > (long double)v56 )
-						v41 |= 0x800u;
-					if ( g_state[XST].znear > (long double)v56 )
-						v41 |= 0x1000u;
-					if ( g_state[XST].zfar < (long double)v56 )
-						v41 |= 0x2000u;
+					if ( *(float *)(v37 + 4) < v44 )
+						v41 |= X_CLIPY1;
+					if ( *(float *)(v37 + 4) > v56 )
+						v41 |= X_CLIPY2;
+					if ( g_state[XST].znear > v56 )
+						v41 |= X_CLIPZ1;
+					if ( g_state[XST].zfar < v56 )
+						v41 |= X_CLIPZ2;
 					if ( !v41 )
 						*(float *)(v37 + 12) = 1.0 / v56;
 					*(DWORD *)(v37 + 16) = v41;
@@ -862,18 +862,18 @@ LABEL_92:
 						*(float *)(v37 + 8) = v57;
 						v49 = *(float *)v37;
 						if ( !(v52 | v53) )
-							v48 = 256;
-						if ( *(float *)v37 > (long double)v57 )
-							v48 |= 0x200u;
+							v48 = X_CLIPX1;
+						if ( *(float *)v37 > v57 )
+							v48 |= X_CLIPX2;
 						v51 = -v57;
-						if ( *(float *)(v37 + 4) < (long double)v51 )
-							v48 |= 0x400u;
-						if ( *(float *)(v37 + 4) > (long double)v57 )
-							v48 |= 0x800u;
-						if ( g_state[XST].znear > (long double)v57 )
-							v48 |= 0x1000u;
-						if ( g_state[XST].zfar < (long double)v57 )
-							v48 |= 0x2000u;
+						if ( *(float *)(v37 + 4) < v51 )
+							v48 |= X_CLIPY1;
+						if ( *(float *)(v37 + 4) > v57 )
+							v48 |= X_CLIPY2;
+						if ( g_state[XST].znear > v57 )
+							v48 |= X_CLIPZ1;
+						if ( g_state[XST].zfar < v57 )
+							v48 |= X_CLIPZ2;
 						if ( !v48 )
 							*(float *)(v37 + 12) = 1.0 / v57;
 						*(DWORD *)(v37 + 16) = v48;
@@ -1686,7 +1686,7 @@ signed int flush_drawfx()
 
 	if ( !allxformed)
 		xform(xfpos, pos, vertices, xformed);
-	v0 = &dword_A228;
+	v0 = (int *)(corner + 1);
 	setuprvx(0, vertices);
 	result = corners;
 	corner[corners] = 0;
@@ -1719,7 +1719,7 @@ signed int flush_drawfx()
 			{
 				if ( i == 2 )
 				{
-					result = clipline(*v0, v0[1], &v16);
+					result = clipline(v0[0], v0[1], &v16);
 					if ( result >= 2 )
 					{
 						v9 = v16;
