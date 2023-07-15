@@ -156,7 +156,7 @@ void x_matrix(xt_matrix* matrix)
 	}
 	if ( g_state[XST].projnull && g_state[XST].matrixnull)
 	{
-		g_state[XST].usexformmode = 3;
+		g_state[XST].usexformmode = XFORM_MODE_NONE;
 	}
 	else
 	{
@@ -244,13 +244,10 @@ void x_matrix(xt_matrix* matrix)
 	}
 }
 
-int recalc_projection()
+void recalc_projection()
 {
 	long double v1; // fst7
 	long double v2; // fst6
-	float v6; // eax
-	int result; // eax
-	long double v8; // fst7
 	long double v9; // fst7
 	long double v10; // fst6
 	long double v11; // fst5
@@ -264,23 +261,22 @@ int recalc_projection()
 	g_state[XST].projyadd = v2 + g_state[XST].view_y0 + 0.2f;
 	// TODO: Check. Hard place for decompiler.
 	grClipWindow(g_state[XST].view_x0, g_state[XST].view_y0, g_state[XST].view_x1, g_state[XST].view_y1);
-	v6 = g_state[XST].xformmode;
-	if ( v6 == 0 )
+
+	if (g_state[XST].xformmode == XFORM_MODE_FRUSTUM)
 	{
 		memset(g_state[XST].projxform, 0, 0x40u);
-		v8 = g_state[XST].znear / g_state[XST].xmax;
 		g_state[XST].projxform[227 - 217] = 1.0f;
 		g_state[XST].projxform[232 - 217] = 1.0f;
-		g_state[XST].projxform[217 - 217] = v8;
+		g_state[XST].projxform[217 - 217] = g_state[XST].znear / g_state[XST].xmax;;
 		g_state[XST].projxform[222 - 217] = g_state[XST].znear / g_state[XST].ymax;
-		result = projrecalced();
+		projrecalced();
 	}
 	else
 	{
-		if ( v6 == 1 )
+		if (g_state[XST].xformmode == XFORM_MODE_ORTHO)
 		{
-			v9 = 2.0 / (g_state[XST].xmax - g_state[XST].xmin);
-			v10 = 2.0 / (g_state[XST].ymax - g_state[XST].ymin);
+			v9 = 2.0f / (g_state[XST].xmax - g_state[XST].xmin);
+			v10 = 2.0f / (g_state[XST].ymax - g_state[XST].ymin);
 			v11 = (g_state[XST].xmin + g_state[XST].xmax) * 0.5f;
 			v12 = (g_state[XST].ymax + g_state[XST].ymin) * 0.5f;
 			memset(g_state[XST].projxform, 0, 0x40u);
@@ -292,9 +288,8 @@ int recalc_projection()
 			g_state[XST].projxform[220 - 217] = -(v11 * v9);
 			g_state[XST].projxform[224 - 217] = -(v10 * v12);
 		}
-		result = projrecalced();
+		projrecalced();
 	}
-	return result;
 }
 
 void x_begin(int a1)
@@ -599,7 +594,7 @@ void xform(int a1, xt_pos* a2, int a3, char *a4)
 
 	switch ( g_state[XST].usexformmode)
 	{
-		case 0:
+		case XFORM_MODE_FRUSTUM:
 			v4 = a3;
 			if ( g_state[XST].setnew & 8 )
 			{
@@ -726,7 +721,7 @@ LABEL_46:
 				goto LABEL_47;
 			}
 			return;
-		case 1:
+		case XFORM_MODE_ORTHO:
 			v27 = a3;
 			if ( a3 > 0 )
 			{
@@ -749,6 +744,7 @@ LABEL_46:
 																+ v29[1] * g_state[XST].xform[194 - 185]
 																+ v29[2] * g_state[XST].xform[195 - 185]
 																+ g_state[XST].xform[196 - 185];
+						// TODO: uninitialized local variable 'v33' used
 						if ( v33 )
 							*(DWORD *)(v28 + 12) = g_state[XST].invznear;
 						else
@@ -771,7 +767,7 @@ LABEL_46:
 				while ( v27 );
 			}
 			return;
-		case 2:
+		case XFORM_MODE_PROJECT:
 			v35 = a3;
 			if ( a3 <= 0 )
 			{
@@ -828,7 +824,7 @@ LABEL_46:
 			}
 			while ( v36 );
 			goto LABEL_92;
-		case 3:
+		case XFORM_MODE_NONE:
 			v37 = a1;
 			v38 = a2;
 			v35 = a3;
@@ -917,7 +913,7 @@ int setuprvx(int a1, int a2)
 	v5 = &tex2[a1];
 	result = &texp[a1];
 	v24 = &texp[a1];
-	if ( g_state[XST].xformmode == 1 )
+	if ( g_state[XST].xformmode == XFORM_MODE_ORTHO)
 	{
 		v7 = a2;
 		if ( a2 > 0 )
@@ -956,7 +952,7 @@ int setuprvx(int a1, int a2)
 		}
 		return result;
 	}
-	if ( g_state[XST].xformmode == 2 )
+	if ( g_state[XST].xformmode == XFORM_MODE_PROJECT)
 	{
 		if ( a2 <= 0 )
 			return result;
@@ -1137,14 +1133,14 @@ void x_vxa(int a1, xt_data* a2)
 	vertexdata(a2);
 }
 
-void x_vxrel(float *a1, float *a2)
+void x_vxrel(xt_pos* a1, xt_data* a2)
 {
 	float *v2; // edx
 
 	v2 = &pos[vertices];
-	v2[0] = a1[0];
-	v2[1] = a1[1];
-	v2[2] = a1[2];
+	v2[0] = a1->x;
+	v2[1] = a1->y;
+	v2[2] = a1->z;
 	allxformed = 0;
 	xformed[vertices] = vertices - vertices_lastnonrel + 16;
 	vertexdata(a2);
@@ -1377,7 +1373,7 @@ int clipfinish(DWORD *a1)
 			v1 &= v2->clip;
 			--v3;
 			v2->clip = 0;
-			// TODO: Make the invz calculation location more prominent, not in the clipping termination procedure
+			// Update clipped invz
 			v2->invz = 1.0f / v2->z;		// TODO: Potential division by 0
 			if ( !v3 )
 				break;
@@ -1468,7 +1464,7 @@ int docliplineend(int a1, int a2)
 	return result;
 }
 
-signed int clipline(int a1, int a2, DWORD *a3)
+int clipline(int a1, int a2, DWORD *a3)
 {
 	int v3; // eax
 	int v4; // esi
@@ -1485,7 +1481,7 @@ signed int clipline(int a1, int a2, DWORD *a3)
 	return clipfinish(clipbuf1);
 }
 
-signed int splitpoly(int a1, int a2, DWORD *a3)
+int splitpoly(int a1, int a2, DWORD *a3)
 {
 	signed int v3; // edx
 	signed int i; // edi
@@ -1630,12 +1626,12 @@ void flush_reordertables()
 	corners = 0;
 }
 
-signed int flush_drawfx()
+int flush_drawfx()
 {
 	int *v0; // edi
 	unsigned int v1; // edx
 	int v2; // ecx
-	signed int result; // eax
+	int result; // eax
 	int i; // esi
 	int v5; // ebx
 	int v6; // ebp

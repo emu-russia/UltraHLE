@@ -217,7 +217,7 @@ void x_frustum(float xmin, float xmax, float ymin, float ymax, float znear, floa
 	g_state[XST].ymax = ymax;
 	g_state[XST].znear = znear;
 	g_state[XST].zfar = zfar;
-	g_state[XST].xformmode = 0;
+	g_state[XST].xformmode = XFORM_MODE_FRUSTUM;
 	g_state[XST].projchanged = 1;
 	g_state[XST].invzfar = 1.0f / zfar;
 	g_state[XST].invznear = 1.0f / znear;
@@ -239,7 +239,7 @@ void x_projmatrix(xt_matrix* a1)
 		v2 = identmatrix;
 	}
 	memcpy(g_state[XST].projxform, v2, 0x40u);
-	g_state[XST].xformmode = 2;
+	g_state[XST].xformmode = XFORM_MODE_PROJECT;
 	g_state[XST].projchanged = 1;
 }
 
@@ -256,7 +256,7 @@ void x_ortho(float xmin, float ymin, float xmax, float ymax, float znear, float 
 	g_state[XST].ymax = ymax;
 	g_state[XST].znear = znear;
 	g_state[XST].zfar = zfar;
-	g_state[XST].xformmode = 1;
+	g_state[XST].xformmode = XFORM_MODE_ORTHO;
 	g_state[XST].projchanged = 1;
 	g_state[XST].invzfar = 1.0f / zfar;
 	g_state[XST].invznear = 1.0f / znear;
@@ -606,7 +606,7 @@ int x_envcolor(float r, float g, float b, float a)
 	g_state[XST].currentmode.env[1] = g;
 	g_state[XST].currentmode.env[2] = b;
 	g_state[XST].currentmode.env[3] = a;
-	// Buggy (decompile bug?)
+	// TODO: Buggy (decompile bug?)
 	g_state[XST].currentmode.envc =
 		(unsigned __int8)(signed __int64)(r * 255.0) | 
 		((unsigned __int8)(signed __int64)(b * 255.0) << 16) | 
