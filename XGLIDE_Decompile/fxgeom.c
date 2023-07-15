@@ -337,13 +337,9 @@ void x_end()
 
 void vertexdata(xt_data* a1)
 {
-	int v1; // eax
 	float *v2; // ecx
-	int v3; // eax
 	long double v4; // fst7
-	int v5; // eax
 	int result; // eax
-	int v7; // ecx
 	int v8; // eax
 	int v9; // ecx
 	int v10; // ecx
@@ -572,13 +568,9 @@ void xform(int a1, xt_pos* a2, int a3, char *a4)
 	signed int v15; // ebx
 	float v16; // et1
 	float v18; // ST14_4
-	unsigned __int8 v19; // c0
-	unsigned __int8 v20; // c3
 	int v21; // eax
 	float v22; // et1
 	float v24; // ST14_4
-	unsigned __int8 v25; // c0
-	unsigned __int8 v26; // c3
 	int v27; // ecx
 	int v28; // edx
 	float *v29; // esi
@@ -596,14 +588,10 @@ void xform(int a1, xt_pos* a2, int a3, char *a4)
 	signed int v41; // ebp
 	float v42; // et1
 	float v44; // ST14_4
-	unsigned __int8 v45; // c0
-	unsigned __int8 v46; // c3
 	int v47; // eax
 	signed int v48; // ebx
 	float v49; // et1
 	float v51; // ST14_4
-	unsigned __int8 v52; // c0
-	unsigned __int8 v53; // c3
 	float v54; // [esp+10h] [ebp-8h]
 	float v55; // [esp+10h] [ebp-8h]
 	float v56; // [esp+10h] [ebp-8h]
@@ -1206,19 +1194,11 @@ int doclipvertex(signed int a1, int a2, int a3)
 {
 	int v3; // edx
 	int v4; // esi
-	int v5; // edi
-	int v6; // zf  - bool
-	int v7; // ebx
-	int v8; // ebx
-	int v9; // esi
-	int v10; // ebx
 	float v11; // et1
 	signed int v12; // edx
 	float v14; // ST14_4
 	int v17; // edx
 	int v18; // eax
-	float *v20; // eax
-	float *v21; // eax
 	float v22; // [esp+10h] [ebp-10h]
 	float v23; // [esp+10h] [ebp-10h]
 	float v24; // [esp+14h] [ebp-Ch]
@@ -1576,7 +1556,6 @@ void flush_reordertables()
 {
 	signed int v1; // ebx
 	signed int v2; // esi
-	float v3; // ebp
 	xt_tex* v4; // eax
 	float v5; // edx
 	float v6; // ebp
