@@ -244,7 +244,7 @@ typedef struct _xt_memory // 48 bytes
 
 ## xt_texture
 
-Texture descriptor (TODO)
+Texture descriptor.
 
 ```
 typedef struct _xt_texture    // 152 bytes (38 dwords)
@@ -261,15 +261,15 @@ typedef struct _xt_texture    // 152 bytes (38 dwords)
   float xmul;       // 9
   float ymul;       // 10
   int lastframeused;    // 11
-  //reload
-  //GrTexInfo ti
-  //size
-  //base
-  //tmu
-  //xblock
-  //usedsize
-
-  uint32_t unknown[38 - 12/*known*/];
-
+  int reload;       // 12
+  GrTexInfo ti;     // 13, 14, 15, 16, 17[data]
+  struct
+  {
+    int   size;   // 18  23  28  33
+    int   base;   // 19  24  29  34
+    int   tmu;    // 20  25  30  35
+    int   xblock;   // 21  26  31  36
+    int   usedsize; // 22  27  32  37
+  } part[4];
 } xt_texture;
 ```

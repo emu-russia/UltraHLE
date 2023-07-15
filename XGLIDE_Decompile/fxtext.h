@@ -33,33 +33,28 @@ typedef struct _xt_memory	// 48 bytes
 /// </summary>
 typedef struct _xt_texture		// 152 bytes (38 dwords)
 {
-	union
+	int state;				// 0  - Active number of the state (g_state). 0: texture is not used.
+	int handle;				// 1
+	int width;				// 2
+	int height;				// 3
+	int format;				// 4
+	int memformat;			// 5
+	int bytes;				// 6
+	int levels;				// 7  (1 - no mipmap)
+	int levelsloaded;		// 8
+	float xmul;				// 9
+	float ymul;				// 10
+	int lastframeused;		// 11
+	int reload;				// 12
+	GrTexInfo ti;			// 13, 14, 15, 16, 17[data]
+	struct
 	{
-		struct
-		{
-			int state;				// 0  - Active number of the state (g_state). 0: texture is not used.
-			int handle;				// 1
-			int width;				// 2
-			int height;				// 3
-			int format;				// 4
-			int memformat;			// 5
-			int bytes;				// 6
-			int levels;				// 7  (1 - no mipmap)
-			int levelsloaded;		// 8
-			float xmul;				// 9
-			float ymul;				// 10
-			int lastframeused;		// 11
-			//reload
-			//GrTexInfo ti
-			//size
-			//base
-			//tmu
-			//xblock
-			//usedsize
-		};
-		uint32_t unknown[38 - 12/*known*/];
-	};
-
+		int		size;		// 18  23  28  33
+		int		base;		// 19  24  29  34
+		int		tmu;		// 20  25  30  35
+		int		xblock;		// 21  26  31  36
+		int		usedsize;	// 22  27  32  37
+	} part[4];
 } xt_texture;
 
 extern int g_lasttexture;
@@ -78,8 +73,8 @@ void freetexmem(DWORD* txt);
 void makespace();
 void clearspace();
 int picktmu();
-signed int fxloadtexturepart(DWORD* txt, int texturepart);
-signed int fxloadtexture_single(DWORD* txt);
+int fxloadtexturepart(DWORD* txt, int texturepart);
+int fxloadtexture_single(DWORD* txt);
 int fxloadtexture_trilin(DWORD* txt);
 int fxloadtexture_multi(DWORD* txt1, DWORD* txt2);
 void text_init();

@@ -264,11 +264,11 @@ int picktmu()
 	return result;
 }
 
-signed int fxloadtexturepart(DWORD *txt, int texturepart)
+int fxloadtexturepart(DWORD *txt, int texturepart)
 {
 	int v2; // ebx
 	signed int v3; // ebp
-	signed int result; // eax
+	int result; // eax
 	DWORD *v5; // ecx
 	int v6; // edx
 	int v7; // [esp+10h] [ebp-Ch]
@@ -323,7 +323,7 @@ signed int fxloadtexturepart(DWORD *txt, int texturepart)
 	return result;
 }
 
-signed int fxloadtexture_single(DWORD *txt)
+int fxloadtexture_single(DWORD *txt)
 {
 	signed int v1; // edi
 	signed int v2; // ebx
@@ -822,7 +822,7 @@ void text_freedata(DWORD *txt)
 	freetexmem(txt);
 	if (txt[17] )
 		x_free(txt[17]);		// +68
-	memset(txt, 0, 0x98u);
+	memset(txt, 0, sizeof(xt_texture));
 }
 
 void text_cleartexmem()
