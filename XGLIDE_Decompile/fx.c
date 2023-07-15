@@ -140,8 +140,8 @@ void init_resize(int xs, int ys)
 
 void init_bufferswap()
 {
-	signed int v0; // esi
-	signed int v1; // eax
+	int v0;
+	int v1;
 
 	v0 = 0;
 	while ( grBufferNumPending() > 3 )

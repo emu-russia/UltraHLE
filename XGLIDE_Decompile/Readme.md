@@ -64,7 +64,7 @@ Overall status: The compilation goes without errors, but we need to check how it
 |init_deinit|Ready| |
 |init_activate|Ready|empty|
 |init_resize|Ready| |
-|init_bufferswap|Ready|:construction: Might be worth a little cleanup.|
+|init_bufferswap|Ready| |
 |init_clear|Ready|:construction: Might be worth a little cleanup.|
 |init_readfb|Ready|:construction: Might be worth a little cleanup.|
 |init_writefb|Ready|empty (not implemented)|
@@ -115,7 +115,7 @@ Overall status: The compilation goes without errors, but we need to check how it
 |freetexmem| | |
 |makespace| | |
 |clearspace| | |
-|picktmu| | |
+|picktmu|Ready| |
 |fxloadtexturepart| | |
 |fxloadtexture_single| | |
 |fxloadtexture_trilin| | |
@@ -247,6 +247,7 @@ typedef struct _xt_memory // 48 bytes
 Texture descriptor.
 
 ```
+#define X_TEXPARTS 4
 typedef struct _xt_texture    // 152 bytes (38 dwords)
 {
   int state;        // 0  - Active number of the state (g_state). 0: texture is not used.
@@ -263,13 +264,10 @@ typedef struct _xt_texture    // 152 bytes (38 dwords)
   int lastframeused;    // 11
   int reload;       // 12
   GrTexInfo ti;     // 13, 14, 15, 16, 17[data]
-  struct
-  {
-    int   size;   // 18  23  28  33
-    int   base;   // 19  24  29  34
-    int   tmu;    // 20  25  30  35
-    int   xblock;   // 21  26  31  36
-    int   usedsize; // 22  27  32  37
-  } part[4];
+  int size[X_TEXPARTS];   // 18  19  20  21 
+  int base[X_TEXPARTS];   // 22  23  24  25
+  int tmu[X_TEXPARTS];    // 26  27  28  29
+  int xblock[X_TEXPARTS];   // 30  31  32  33
+  int usedsize[X_TEXPARTS]; // 34  35  36  37
 } xt_texture;
 ```
