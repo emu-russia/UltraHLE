@@ -43,7 +43,7 @@ typedef struct _xt_texture		// 152 bytes (38 dwords)
 	int memformat;			// 5
 	int bytes;				// 6
 	int levels;				// 7  (1 - no mipmap)
-	int levelsloaded;		// 8
+	int levelsloaded;		// 8   mask
 	float xmul;				// 9
 	float ymul;				// 10
 	int lastframeused;		// 11

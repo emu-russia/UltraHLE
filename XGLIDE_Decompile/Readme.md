@@ -31,14 +31,14 @@ Overall status: The compilation goes without errors, but we need to check how it
 |x_zrange|Ready| |
 |x_zdecal|Ready| |
 |texture_get|Ready| |
-|x_createtexture| |:construction: Needs to be converted to `xt_texture`|
+|x_createtexture|Ready| |
 |x_gettextureinfo|Ready| |
-|x_loadtexturelevel| |:construction: Needs to be converted to `xt_texture`|
-|x_freetexture| |:construction: Needs to be converted to `xt_texture`|
+|x_loadtexturelevel|Ready| |
+|x_freetexture|Ready| |
 |x_texture_getinfo|Ready|Copy-paste of `x_gettextureinfo`|
 |x_cleartexmem|Ready|Calls `text_cleartexmem`|
-|x_opentexturedata| |:construction: Needs to be converted to `xt_texture`|
-|x_closetexturedata| |:construction: Needs to be converted to `xt_texture`|
+|x_opentexturedata|Ready| |
+|x_closetexturedata|Ready| |
 |x_forcegeometry|Ready| |
 |x_geometry|Ready| |
 |x_mask|Ready| |

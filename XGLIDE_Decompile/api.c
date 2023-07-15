@@ -223,13 +223,14 @@ void x_frustum(float xmin, float xmax, float ymin, float ymax, float znear, floa
 	g_state[XST].invznear = 1.0f / znear;
 }
 
-void x_projmatrix(xt_matrix* a1)
+void x_projmatrix(xt_matrix* m)
 {
-	const void *v2; // esi
+	float *v2;
 
 	x_flush();
-	v2 = a1;
-	if ( a1 )
+	// Not a very proper type-casting, but it'll do.
+	v2 = (float *)m;
+	if ( m )
 	{
 		g_state[XST].projnull = 0;
 	}
@@ -245,6 +246,7 @@ void x_projmatrix(xt_matrix* a1)
 
 void projrecalced()
 {
+	// Not used. Called from recalc_projection to notify that projection matrices are recalculated.
 }
 
 void x_ortho(float xmin, float ymin, float xmax, float ymax, float znear, float zfar)
@@ -282,14 +284,14 @@ void x_projection(float fov, float znear, float zfar)
 	double v6; // st7
 
 	x_flush();
-	if ( fov >= 1.0 )
+	if ( fov >= 1.0f )
 	{
 		v6 = tan(fov * (PI/180.0f) * 0.5f) * zfar;
 		x_frustum(-v6, v6, -(0.75f * v6), 0.75f * v6, znear, zfar);
 	}
 	else
 	{
-		x_ortho(0, (float)g_state[XST].xs, (float)g_state[XST].ys, 0, znear, zfar);
+		x_ortho(0, (float)g_state[XST].xs, (float)g_state[XST].ys, 0.0f, znear, zfar);
 	}
 }
 
@@ -337,7 +339,7 @@ int x_createtexture(int format, int width, int height)
 	xt_texture *v3; // eax
 	signed int v4; // esi
 	signed int result; // eax
-	DWORD *v6; // ebx
+	xt_texture *v6; // ebx
 	signed int v7; // edx
 	signed int v8; // ecx
 	int v9; // eax
@@ -372,11 +374,11 @@ int x_createtexture(int format, int width, int height)
 			memset(v6, 0, sizeof(xt_texture));
 			v7 = width;
 			v8 = height;
-			v6[1] = v4;
-			v6[0] = g_activestateindex;
-			v6[2] = width;
-			v6[3] = height;
-			v6[4] = format;
+			v6->handle = v4;
+			v6->state = g_activestateindex;
+			v6->width = width;
+			v6->height = height;
+			v6->format = format;
 			if (format & X_MIPMAP)
 			{
 				v9 = 0;
@@ -386,14 +388,14 @@ int x_createtexture(int format, int width, int height)
 					++v9;
 					v8 >>= 1;
 				}
-				v6[7] = v9;
+				v6->levels = v9;
 			}
 			else
 			{
-				v6[7] = 1;
+				v6->levels = 1;
 			}
 			text_allocdata(v6);
-			g_stats.text_total += v6[6];
+			g_stats.text_total += v6->bytes;
 			result = v4;
 		}
 		else
@@ -424,28 +426,28 @@ int x_gettextureinfo(int handle, int* format, int* memformat, int* width, int* h
 
 int x_loadtexturelevel(int handle, int level, char* data)
 {
-	DWORD *v3; // eax
-	DWORD *v4; // esi
+	xt_texture* v3; // eax
+	xt_texture* v4; // esi
 	int v6; // edx
 
 	v3 = texture_get(handle);
 	v4 = v3;
 	if ( !v3 )
 		return 0;
-	if ( v3[7] < level + 1 )
-		v3[7] = level + 1;
+	if ( v3->levels < level + 1 )
+		v3->levels = level + 1;
 	if (level > 31 )
 		return 0;
-	v6 = v3[8];
+	v6 = v3->levelsloaded;
 	if ( !(v6 & (1 << level)) )
-		v3[8] = (1 << level) | v6;
+		v3->levelsloaded = (1 << level) | v6;
 	text_loadlevel(v3, level, data);
-	return 2 - ((v4[4] & 0x200u) < 1);
+	return 2 - ((v4->format & X_MIPMAP) < 1);
 }
 
 void x_freetexture(int handle)
 {
-	DWORD *result; // eax
+	xt_texture* result; // eax
 
 	result = texture_get(handle);
 	if ( result )
@@ -475,27 +477,27 @@ void x_cleartexmem(void)
 	text_cleartexmem();
 }
 
-uchar* x_opentexturedata(int a1)
+uchar* x_opentexturedata(int handle)
 {
-	DWORD *v1; // eax
+	xt_texture *v1; // eax
 	int result; // eax
 
-	v1 = texture_get(a1);
-	if ( v1 && *((BYTE *)v1 + 17) & 4 )
+	v1 = texture_get(handle);
+	if ( v1 && (v1->format & X_DYNAMIC))
 		result = text_opendata(v1);
 	else
 		result = 0;
 	return result;
 }
 
-void x_closetexturedata(int a1)
+void x_closetexturedata(int handle)
 {
-	DWORD *result; // eax
+	xt_texture *result; // eax
 
-	result = texture_get(a1);
+	result = texture_get(handle);
 	if ( result )
 	{
-		if ( *((BYTE *)result + 17) & 4 )
+		if ( result->format & X_DYNAMIC )
 			text_closedata(result);
 	}
 }
