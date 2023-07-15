@@ -1139,32 +1139,25 @@ void x_vx(xt_pos* a1, xt_data* a2)
 
 void x_vxa(int a1, xt_data* a2)
 {
-	int v2; // ecx
-
 	if ( a1 < 0 || a1 >= posarraysize)
 		x_fatal("invalid vertex for x_vxa");
 	vertices_lastnonrel = vertices;
 	memcpy(&xfpos[vertices], &posarray[a1], 0x14u);
-	v2 = vertices;
 	++g_stats.in_vx;
-	xformed[v2] = 1;
+	xformed[vertices] = 1;
 	vertexdata(a2);
 }
 
 void x_vxrel(float *a1, float *a2)
 {
 	float *v2; // edx
-	int v3; // eax
-	int v4; // ecx
 
 	v2 = &pos[vertices];
-	*v2 = *a1;
+	v2[0] = a1[0];
 	v2[1] = a1[1];
-	v3 = vertices;
-	v4 = *((DWORD *)a1 + 2);
+	v2[2] = a1[2];
 	allxformed = 0;
-	*((DWORD *)v2 + 2) = v4;
-	xformed[v3] = vertices - vertices_lastnonrel + 16;
+	xformed[vertices] = vertices - vertices_lastnonrel + 16;
 	vertexdata(a2);
 }
 
