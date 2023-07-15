@@ -1127,18 +1127,13 @@ LABEL_55:
 
 void x_vx(xt_pos* a1, xt_data* a2)
 {
-	float *v2; // edx
-	int v3; // edx
-
 	vertices_lastnonrel = vertices;
-	v2 = &pos[vertices];
-	v2[0] = a1->v[0];
-	v2[1] = a1->v[1];
-	v2[2] = a1->v[2];
-	v3 = vertices;
+	pos[vertices].x = a1->x;
+	pos[vertices].y = a1->y;
+	pos[vertices].z = a1->z;
 	allxformed = 0;
 	++g_stats.in_vx;
-	xformed[v3] = 0;
+	xformed[vertices] = 0;
 	vertexdata(a2);
 }
 
