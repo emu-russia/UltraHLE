@@ -28,13 +28,13 @@ static int corners;
 
 static int clipnewvx;
 static int clipor;
-static int clipbuf1[0x10];		// TODO: not sure of the size
-static int clipbuf2[0x10];		// TODO: not sure of the size
+static int clipbuf1[0x100];		// TODO: not sure of the size
+static int clipbuf2[0x100];		// TODO: not sure of the size
 static int* clipin;
 static int* clipout;
 
 static GrVertex grvx[0x200];		// Item size: 60 bytes
-static float corner[0x200 * 5];
+static int corner[0x200 * 5];
 static xt_pos pos[0x200];
 static xt_tex tex[0x200];
 static xt_tex tex2[0x200];
@@ -42,7 +42,7 @@ static xt_tex texp[0x200];
 static xt_xfpos xfpos[0x200];		// Item size: 20 bytes
 static uint8_t xformed[0x200];			// Contains an indication that the vertex has been transformed (?)
 
-static int splitbuf[0x10];		// TODO: not sure of the size
+static int splitbuf[0x100];		// TODO: not sure of the size
 
 void geom_init()
 {
@@ -1317,9 +1317,9 @@ int doclip(signed int a1)
 	int result; // eax
 
 	v1 = (int *)clipout;
-	v2 = *clipin;
-	v3 = *(DWORD *)(clipin + 4);
-	v4 = (int *)(clipin + 8);
+	v2 = clipin[0];
+	v3 = clipin[1];
+	v4 = clipin[2];
 	if ( *clipin != -1 && v3 != -1 )
 	{
 		while ( a1 & xfpos[v3].clip )
@@ -1345,8 +1345,9 @@ LABEL_9:
 		goto LABEL_9;
 	}
 LABEL_11:
-	*v1 = *clipout;
+	v1[0] = clipout[0];
 	v1[1] = -1;
+	// swap
 	result = clipout;
 	clipout = clipin;
 	clipin = result;
@@ -1421,7 +1422,7 @@ int clippoly(int a1, int a2, int *a3, DWORD *a4)
 		}
 		while ( v5 );
 	}
-	*v4 = *a3;
+	v4[0] = *a3;
 	v4[1] = -1;
 	if ( clipor & X_CLIPZ1)
 		doclip(X_CLIPZ1);
@@ -1675,7 +1676,7 @@ int flush_drawfx()
 		}
 		if ( v5 )
 		{
-			if ( !result && g_state[XST].xformmode != 1 )
+			if ( !result && g_state[XST].xformmode != XFORM_MODE_ORTHO)
 			{
 				if ( i == 2 )
 				{
