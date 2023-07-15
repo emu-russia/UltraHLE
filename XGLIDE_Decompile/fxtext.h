@@ -33,27 +33,32 @@ typedef struct _xt_memory	// 48 bytes
 /// </summary>
 typedef struct _xt_texture		// 152 bytes (38 dwords)
 {
-	int state;				// 0  - Active number of the state (g_state). 0: texture is not used.
-	int handle;				// 1
-	int width;				// 2
-	int height;				// 3
-	int format;				// 4
-	int memformat;			// 5
-	int bytes;				// 6
-	int levels;				// 7  (1 - no mipmap)
-	int levelsloaded;		// 8
-	float xmul;				// 9
-	float ymul;				// 10
-	int lastframeused;		// 11
-	//reload
-	//GrTexInfo ti
-	//size
-	//base
-	//tmu
-	//xblock
-	//usedsize
-
-	uint32_t unknown[38 - 12/*known*/];
+	union
+	{
+		struct
+		{
+			int state;				// 0  - Active number of the state (g_state). 0: texture is not used.
+			int handle;				// 1
+			int width;				// 2
+			int height;				// 3
+			int format;				// 4
+			int memformat;			// 5
+			int bytes;				// 6
+			int levels;				// 7  (1 - no mipmap)
+			int levelsloaded;		// 8
+			float xmul;				// 9
+			float ymul;				// 10
+			int lastframeused;		// 11
+			//reload
+			//GrTexInfo ti
+			//size
+			//base
+			//tmu
+			//xblock
+			//usedsize
+		};
+		uint32_t unknown[38 - 12/*known*/];
+	};
 
 } xt_texture;
 
