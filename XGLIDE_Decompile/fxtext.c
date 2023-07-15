@@ -267,7 +267,7 @@ int picktmu()
 int fxloadtexturepart(DWORD *txt, int texturepart)
 {
 	int v2; // ebx
-	signed int v3; // ebp
+	FxU32 v3; // ebp
 	int result; // eax
 	DWORD *v5; // ecx
 	int v6; // edx
@@ -280,16 +280,16 @@ int fxloadtexturepart(DWORD *txt, int texturepart)
 	switch (texturepart)
 	{
 		case 0:
-			v3 = 3;
+			v3 = GR_MIPMAPLEVELMASK_BOTH;
 			break;
 		case 1:
-			v3 = 3;
+			v3 = GR_MIPMAPLEVELMASK_BOTH;
 			break;
 		case 2:
-			v3 = 1;
+			v3 = GR_MIPMAPLEVELMASK_EVEN;
 			break;
 		case 3:
-			v3 = 2;
+			v3 = GR_MIPMAPLEVELMASK_ODD;
 			break;
 		default:
 			// TODO: uninitialized local variable 'v8' used
@@ -445,13 +445,13 @@ void text_deinit()
 	mem[1] = 0;
 }
 
-int accesstexture(DWORD *txt, int level, int *xsize, int *ysize)
+int accesstexture(xt_texture *txt, int level, int *xsize, int *ysize)
 {
 	signed int v4; // ebp
 	signed int v5; // ebx
 	int v6[2];
 
-	if (txt[7] < level)
+	if (txt->levels < level)
 		x_fatal("access texture illegal level");
 	v4 = 0;
 	v5 = 0;
@@ -460,10 +460,10 @@ int accesstexture(DWORD *txt, int level, int *xsize, int *ysize)
 	{
 		do
 		{
-			v4 = txt[2] >> (v6[1] & 0xf);
+			v4 = txt->width >> (v6[1] & 0xf);
 			if ( !v4 )
 				v4 = 1;
-			v5 = txt[3] >> (v6[1] & 0xf);
+			v5 = txt->height >> (v6[1] & 0xf);
 			if ( !v5 )
 				v5 = 1;
 			if ( v6[0] != level)
@@ -472,7 +472,7 @@ int accesstexture(DWORD *txt, int level, int *xsize, int *ysize)
 		}
 		while ( v6[0] <= level);
 	}
-	if (txt[7] == level)
+	if (txt->levels == level)
 	{
 		v4 = 0;
 		v5 = 0;
@@ -742,7 +742,7 @@ unsigned int text_loadlevel(DWORD *txt, int level, unsigned int data)
 	result = txt[16];
 	switch ( result )
 	{
-		case 3u:
+		case GR_TEXFMT_INTENSITY_8:
 			v4 = accesstexture(txt, level, &v20, &v19) + txt[17];
 			result = v20 * v19;
 			v5 = data;
@@ -759,7 +759,7 @@ unsigned int text_loadlevel(DWORD *txt, int level, unsigned int data)
 				while ( v6 > v5 );
 			}
 			break;
-		case 0xAu:
+		case GR_TEXFMT_RGB_565:
 			v7 = accesstexture(txt, level, &v20, &v19);
 			v8 = data;
 			result = txt[17] + 2 * v7;
@@ -771,12 +771,14 @@ unsigned int text_loadlevel(DWORD *txt, int level, unsigned int data)
 					v10 = *(BYTE *)(v8 + 1);
 					v8 += 4;
 					result += 2;
-					*(WORD *)(result - 2) = ((char)(*(BYTE *)(v8 - 4) >> 3) << 11) | (*(BYTE *)(v8 - 2) >> 3) & 0x1F | 32 * (v10 >> 2);
+					*(WORD *)(result - 2) = ((char)(*(BYTE *)(v8 - 4) >> 3) << 11) | 
+						(*(BYTE *)(v8 - 2) >> 3) & 0x1F | 
+						32 * (v10 >> 2);
 				}
 				while ( v9 > v8 );
 			}
 			break;
-		case 0xBu:
+		case GR_TEXFMT_ARGB_1555:
 			v11 = accesstexture(txt, level, &v20, &v19);
 			v12 = data;
 			v13 = txt[17] + 2 * v11;
@@ -788,12 +790,15 @@ unsigned int text_loadlevel(DWORD *txt, int level, unsigned int data)
 					v14 = *(BYTE *)(v12 + 3);
 					v12 += 4;
 					v13 += 2;
-					*(WORD *)(v13 - 2) = (*(BYTE *)(v12 - 2) >> 3) & 0x1F | (((*(BYTE *)(v12 - 4) >> 3) & 0x1F) << 10) | 32 * ((*(BYTE *)(v12 - 3) >> 3) & 0x1F | ((char)(v14 >> 7) << 10));
+					*(WORD *)(v13 - 2) = (*(BYTE *)(v12 - 2) >> 3) & 0x1F | 
+						(((*(BYTE *)(v12 - 4) >> 3) & 0x1F) << 10) | 
+						32 * ((*(BYTE *)(v12 - 3) >> 3) & 0x1F | 
+						((char)(v14 >> 7) << 10));
 				}
 				while ( result > v12 );
 			}
 			break;
-		case 0xCu:
+		case GR_TEXFMT_ARGB_4444:
 			v15 = accesstexture(txt, level, &v20, &v19);
 			v16 = data;
 			v17 = txt[17] + 2 * v15;
@@ -805,7 +810,10 @@ unsigned int text_loadlevel(DWORD *txt, int level, unsigned int data)
 					v18 = *(BYTE *)(v16 + 3);
 					v16 += 4;
 					v17 += 2;
-					*(WORD *)(v17 - 2) = (((*(BYTE *)(v16 - 4) >> 4) & 0xF) << 8) | (*(BYTE *)(v16 - 2) >> 4) & 0xF | 16 * ((*(BYTE *)(v16 - 3) >> 4) & 0xF | ((char)(v18 >> 4) << 8));
+					*(WORD *)(v17 - 2) = (((*(BYTE *)(v16 - 4) >> 4) & 0xF) << 8) | 
+						(*(BYTE *)(v16 - 2) >> 4) & 0xF | 
+						16 * ((*(BYTE *)(v16 - 3) >> 4) & 0xF | 
+						((char)(v18 >> 4) << 8));
 				}
 				while ( result > v16 );
 			}
@@ -817,11 +825,11 @@ unsigned int text_loadlevel(DWORD *txt, int level, unsigned int data)
 	return result;
 }
 
-void text_freedata(DWORD *txt)
+void text_freedata(xt_texture *txt)
 {
 	freetexmem(txt);
-	if (txt[17] )
-		x_free(txt[17]);		// +68
+	if (txt->ti.data )
+		x_free(txt->ti.data);
 	memset(txt, 0, sizeof(xt_texture));
 }
 
@@ -830,21 +838,18 @@ void text_cleartexmem()
 	clearspace();
 }
 
-int text_opendata(int txt)
+void* text_opendata(xt_texture* txt)
 {
-	return *(DWORD *)(txt + 68);
+	return txt->ti.data;
 }
 
-void text_closedata(int txt)
+void text_closedata(xt_texture* txt)
 {
-	int result; // eax
-
-	*(DWORD *)(txt + 48) = 1;
-	if ( *(DWORD *)(txt + 4) == g_state[XST].active.text1)
+	txt->reload = 1;
+	if ( txt->handle == g_state[XST].active.text1)
 		g_state[XST].active.text1 = 0;
-	result = g_state[XST].active.text2;
-	if ( *(DWORD *)(txt + 4) == result )
-		g_state[XST].active.text1 = 0;
+	if ( txt->handle == g_state[XST].active.text2)
+		g_state[XST].active.text1 = 0;		// TODO: Check, there seems to be a typo here (should be text2)
 }
 
 int text_frameend()

@@ -122,13 +122,13 @@ Overall status: The compilation goes without errors, but we need to check how it
 |fxloadtexture_multi| | |
 |text_init| | |
 |text_deinit| | |
-|accesstexture| | |
+|accesstexture|Ready| |
 |text_allocdata| | |
 |text_loadlevel| | |
-|text_freedata| | |
-|text_cleartexmem| | |
-|text_opendata| | |
-|text_closedata| | |
+|text_freedata|Ready| |
+|text_cleartexmem|Ready| |
+|text_opendata|Ready| |
+|text_closedata|Ready|TODO: Check, there seems to be a typo here (should be text2)|
 |text_frameend| | |
 |**main.c**|||
 |zerobase|Ready|empty|
