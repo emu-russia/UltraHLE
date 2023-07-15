@@ -94,6 +94,7 @@ void x_free(void *Memory)
 /// </summary>
 void x_fastfpu(int fast)
 {
+#if 0
 	static int state = 0;
 	static int newcontrol = 0;
 	static int originalcontrol = 0;
@@ -128,6 +129,7 @@ void x_fastfpu(int fast)
 	newcontrol = result;
 
 	_controlfp(newcontrol, _MCW_PC);
+#endif
 }
 
 void x_timereset(void)
