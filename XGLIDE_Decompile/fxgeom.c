@@ -232,7 +232,7 @@ void x_matrix(xt_matrix* matrix)
 			while ( v14 );
 			v12 += 4;
 		}
-		while ( v12 < (float *)g_state[XST].projxform[4*4]);
+		while ( v12 < (float *)&g_state[XST].projxform[4*4]);
 
 		if ( g_state[XST].geometry & X_DUMPDATA)
 		{
@@ -395,24 +395,21 @@ void vertexdata(xt_data* a1)
 	{
 		if ( g_state[XST].setnew & 0x10 )
 		{
-			v3 = 2 * vertices;
-			texp_S1211[v3] = *((DWORD *)v2 + 7);
-			tex_S1209[v3] = v2[5] * v2[7] * v35;
+			texp[vertices].s = *((DWORD *)v2 + 7);
+			tex[vertices].s = v2[5] * v2[7] * v35;
 			v4 = v2[6] * v2[7];
 		}
 		else
 		{
-			v3 = 2 * vertices;
-			tex_S1209[2 * vertices] = v2[5] * v35;
+			tex[vertices].s = v2[5] * v35;
 			v4 = v2[6];
 		}
-		flt_E230[v3] = v4 * v36;
+		tex[vertices].t = v4 * v36;
 	}
 	if ( g_state[XST].send & 4 )
 	{
-		v5 = 2 * vertices;
-		tex2_S1210[v5] = v2[8] * v35;
-		flt_F440[v5] = v2[9] * v36;
+		tex2[vertices].s = v2[8] * v35;
+		tex2[vertices].t = v2[9] * v36;
 	}
 	result = mode - 1;
 	switch (mode)
@@ -1338,18 +1335,16 @@ LABEL_5:
 	{
 		v8 = 2 * clipnewvx;
 		v6 = (g_state[XST].setnew & 0x10) == 0;
-		tex_S1209[v8] = (tex_S1209[2 * v4] - tex_S1209[2 * v3]) * v23 + tex_S1209[2 * v3];
-		flt_E230[v8] = (flt_E230[2 * v4] - flt_E230[2 * v3]) * v23 + flt_E230[2 * v3];
+		tex[clipnewvx].s = (tex[v4].s - tex[v3].s) * v23 + tex[v3].s;
+		tex[clipnewvx].t = (tex[v4].t - tex[v3].t) * v23 + tex[v3].t;
 		if ( !v6 )
-			*(float *)&texp_S1211[v8] = (*(float *)&texp_S1211[2 * v4] - *(float *)&texp_S1211[2 * v3]) * v23
-																+ *(float *)&texp_S1211[2 * v3];
+			texp[clipnewvx].s = (texp[v4].s - texp[v3].s) * v23
+											+ texp[v3].s;
 	}
 	if ( g_state[XST].send & 4 )
 	{
-		v9 = 2 * v4;
-		v10 = 2 * clipnewvx;
-		tex2_S1210[v10] = (tex2_S1210[v9] - tex2_S1210[2 * v3]) * v23 + tex2_S1210[2 * v3];
-		flt_F440[v10] = (flt_F440[v9] - flt_F440[2 * v3]) * v23 + flt_F440[2 * v3];
+		tex2[clipnewvx].s = (tex2[v4].s - tex2[v3].s) * v23 + tex2[v3].s;
+		tex2[clipnewvx].t = (tex2[v4].t - tex2[v3].t) * v23 + tex2[v3].t;
 	}
 	v11 = xfpos_S1212[v5];
 	v12 = 0;
@@ -1627,9 +1622,9 @@ void flush_reordertables()
 	signed int v1; // ebx
 	signed int v2; // esi
 	float v3; // ebp
-	int *v4; // eax
-	int v5; // edx
-	int v6; // ebp
+	xt_tex* v4; // eax
+	float v5; // edx
+	float v6; // ebp
 	signed int v8; // ebx
 
 	if (mode == 0) {
@@ -1670,13 +1665,12 @@ void flush_reordertables()
 	{
 		memcpy(grvx, &grvx[vertices_base], 0x3Cu);
 		memcpy(xfpos, &xfpos[vertices_base], 0x14u);
-		v3 = flt_E230[2 * vertices_base];
-		tex_S1209[0] = tex_S1209[2 * vertices_base];
+		tex[0].s = tex[vertices_base].s;
 		v4 = &texp[vertices_base];
 		v2 = 1;
-		flt_E230[0] = v3;
-		v5 = *v4;
-		v6 = v4[1];
+		tex[0].t = tex[vertices_base].t;
+		v5 = v4->s;
+		v6 = v4->t;
 		vertices_base = 0;
 		texp[0].s = v5;
 		texp[0].t = v6;
