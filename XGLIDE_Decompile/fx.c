@@ -239,49 +239,42 @@ void mode_init()
 	grTexFilterMode(GR_TMU1, GR_TEXTUREFILTER_BILINEAR, GR_TEXTUREFILTER_BILINEAR);
 }
 
-void mode_texturemode(int a1, __int16 a2, int a3)
+void mode_texturemode(int tmu, int format, int trilin)
 {
-	int v3; // esi
-	__int16 v4; // di
-
-	if ( a3 )
+	if (trilin)
 	{
-		v3 = a1;
-		grTexMipMapMode(a1, 1, 1);
-		v4 = a2;
+		grTexMipMapMode(tmu, 1, 1);
 	}
 	else
 	{
-		v4 = a2;
-		v3 = a1;
-		grTexMipMapMode(a1, (a2 & 0x200) != 0, 0);
+		grTexMipMapMode(tmu, (format & X_MIPMAP) != 0, 0);
 	}
-	if ( v4 & 0x100 )
-		grTexClampMode(v3, (v4 & 0x1000u) < 1, (v4 & 0x2000u) < 1);
+	if (format & X_CLAMP)
+		grTexClampMode(tmu, (format & X_CLAMPNOX) < 1, (format & X_CLAMPNOY) < 1);
 	else
-		grTexClampMode(v3, 0, 0);
-	if ( v4 & 0x800 )
-		grTexFilterMode(v3, 0, 0);
+		grTexClampMode(tmu, 0, 0);
+	if (format & X_NOBILIN)
+		grTexFilterMode(tmu, 0, 0);
 	else
-		grTexFilterMode(v3, 1, 1);
+		grTexFilterMode(tmu, 1, 1);
 }
 
-void mode_loadtexture(int a1)
+void mode_loadtexture(int txtind)
 {
 	signed int v1; // ebx
-	int result; // eax
-	int v3; // esi
+	xt_texture* result; // eax
+	xt_texture* v3; // esi
 	int v4; // edi
 
 	v1 = 1;
 	if ( g_state[XST].tmus < 2 )
 		v1 = 0;
-	result = texture_get(a1);
+	result = texture_get(txtind);
 	v3 = result;
 	if ( result )
 	{
-		v4 = *(DWORD *)(result + 16);
-		if ( !(v4 & 0x200) )
+		v4 = result->format;
+		if ( !(v4 & X_MIPMAP) )
 			v1 = 0;
 		grTexCombine(1, 1, 0, 1, 0, 0, 0);
 		if ( v1 )
@@ -308,22 +301,22 @@ void mode_loadtexture(int a1)
 	}
 }
 
-void mode_loadmultitexture(int a1, int a2)
+void mode_loadmultitexture(int txtind1, int txtind2)
 {
-	int result; // eax
-	int v3; // ebx
+	xt_texture* result; // eax
+	xt_texture* v3; // ebx
 	int v4; // edi
 	int v5; // esi
 
-	result = texture_get(a1);
+	result = texture_get(txtind1);
 	v3 = result;
 	if ( result )
 	{
-		v4 = *(DWORD *)(result + 16);
-		result = texture_get(a2);
+		v4 = result->format;
+		result = texture_get(txtind2);
 		if ( result )
 		{
-			v5 = *(DWORD *)(result + 16);
+			v5 = result->format;
 			fxloadtexture_multi(v3, result);
 			mode_texturemode(0, v4, 0);
 			mode_texturemode(1, v5, 0);
@@ -331,18 +324,18 @@ void mode_loadmultitexture(int a1, int a2)
 	}
 }
 
-void fixfogtable(GrFog_t* a1, int a2)
+void fixfogtable(GrFog_t* fogtable, int size)
 {
 	int i; // esi
 	unsigned __int8 v3; // dl
 	int v4; // ecx
 
-	for ( i = a2 - 1; i >= 0; --i )
+	for ( i = size - 1; i >= 0; --i )
 	{
-		v3 = *(BYTE *)(i + a1);
-		v4 = *(unsigned __int8 *)(i + a1 + 1) - v3;
+		v3 = *(BYTE *)(i + fogtable);
+		v4 = *(unsigned __int8 *)(i + fogtable + 1) - v3;
 		if ( v4 > 60 )
-			*(BYTE *)(i + a1) = v3 + v4 - 60;
+			*(BYTE *)(i + fogtable) = v3 + v4 - 60;
 	}
 }
 

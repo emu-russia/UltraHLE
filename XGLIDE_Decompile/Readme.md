@@ -69,9 +69,9 @@ Overall status: The compilation goes without errors, but we need to check how it
 |init_readfb|Ready|:construction: Might be worth a little cleanup.|
 |init_writefb|Ready|empty (not implemented)|
 |mode_init|Ready| |
-|mode_texturemode| |:construction: Needs to be converted to `xt_texture`|
-|mode_loadtexture| |:construction: Needs to be converted to `xt_texture`|
-|mode_loadmultitexture| |:construction: Needs to be converted to `xt_texture`|
+|mode_texturemode|Ready| |
+|mode_loadtexture|Ready| |
+|mode_loadmultitexture|Ready| |
 |fixfogtable|Ready| |
 |generatefogtable|Ready| |
 |mode_change|Ready (almost)|Pretty much done, but need to check a couple places that probably didn't decompile well (marked TODO).|
