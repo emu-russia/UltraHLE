@@ -295,7 +295,6 @@ List:
 - grTexFilterMode
 - grTexMipMapMode
 - grTexClampMode
-- grTexFilterMode
 - grTexCombine
 - guFogGenerateLinear
 - guFogGenerateExp
