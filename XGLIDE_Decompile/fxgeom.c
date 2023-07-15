@@ -1396,10 +1396,10 @@ LABEL_11:
 	return result;
 }
 
-signed int clipfinish(DWORD *a1)
+int clipfinish(DWORD *a1)
 {
-	signed int v1; // edx
-	int *v2; // ecx
+	int v1; // edx
+	xt_xfpos* v2; // ecx
 	int v3; // eax
 	long double v4; // fst6
 	signed int result; // eax
@@ -1408,20 +1408,18 @@ signed int clipfinish(DWORD *a1)
 	v1 = -1;
 	if (vertices < clipnewvx )
 	{
-		v2 = &dword_1145C[5 * vertices];
+		v2 = &xfpos[vertices];
 		v3 = clipnewvx - vertices;
 		while ( 1 )
 		{
-			v1 &= *v2;
-			v2 += 5;
+			v1 &= v2->clip;
 			--v3;
-			*(v2 - 5) = 0;
-			v4 = 1.0 / *((float *)v2 - 7);
+			v2->clip = 0;
+			v2->invz = 1.0f / v2->z;		// TODO: Potential division by 0
 			if ( !v3 )
 				break;
-			*((float *)v2 - 6) = v4;
+			v2 ++;
 		}
-		*((float *)v2 - 6) = v4;
 	}
 	if ( v1 )
 		return 0;
@@ -1439,7 +1437,7 @@ signed int clipfinish(DWORD *a1)
 	return result;
 }
 
-signed int clippoly(int a1, int a2, int *a3, DWORD *a4)
+int clippoly(int a1, int a2, int *a3, DWORD *a4)
 {
 	int *v4; // edi
 	int v5; // ecx
