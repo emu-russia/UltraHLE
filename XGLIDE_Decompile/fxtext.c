@@ -538,7 +538,8 @@ int text_allocdata(int txt)
 				*(DWORD *)(txt + 28) = 9;
 				break;
 			default:
-				goto $L1425;
+				x_fatal("Illegal texture size %ix%i", v1, v2);
+				break;
 		}
 	}
 	else
@@ -562,7 +563,6 @@ int text_allocdata(int txt)
 				*(DWORD *)(txt + 28) = 3;
 				break;
 			default:
-$L1425:
 				x_fatal("Illegal texture size %ix%i", v1, v2);
 				break;
 		}
@@ -576,14 +576,15 @@ $L1425:
 			break;
 		case 2:
 			v4 = v3 < 1 ? 4 : 2;
-			goto LABEL_28;
+			*(DWORD*)(txt + 60) = v4;
+			break;
 		case 4:
 			v4 = v3 < 1 ? 5 : 1;
-			goto LABEL_28;
+			*(DWORD*)(txt + 60) = v4;
+			break;
 		case 8:
 			v4 = v3 < 1 ? 6 : 0;
-LABEL_28:
-			*(DWORD *)(txt + 60) = v4;
+			*(DWORD*)(txt + 60) = v4;
 			break;
 		default:
 			x_fatal("Illegal texture aspect %i/%i", v1, v2);
@@ -609,13 +610,14 @@ LABEL_28:
 			break;
 		case 4:
 			*(DWORD *)(txt + 36) = 128.0f;
-			goto LABEL_37;
+			*(DWORD*)(txt + 40) = 256.0f;
+			break;
 		case 5:
 			*(DWORD *)(txt + 36) = 64.0f;
-			goto LABEL_37;
+			*(DWORD*)(txt + 40) = 256.0f;
+			break;
 		case 6:
 			*(DWORD *)(txt + 36) = 32.0f;
-LABEL_37:
 			*(DWORD *)(txt + 40) = 256.0f;
 			break;
 		default:
@@ -642,7 +644,8 @@ LABEL_37:
 				*(DWORD *)(txt + 52) = 0;
 				break;
 			default:
-				goto $L1462;
+				x_fatal("Illegal texture small size");
+				break;
 		}
 	}
 	else
@@ -662,7 +665,6 @@ LABEL_37:
 				*(DWORD *)(txt + 52) = 6;
 				break;
 			default:
-$L1462:
 				x_fatal("Illegal texture small size");
 				break;
 		}
