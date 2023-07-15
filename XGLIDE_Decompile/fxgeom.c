@@ -570,10 +570,8 @@ void xform(xt_xfpos* dst, xt_pos* src, int count, char* mask)
 	char *v13; // edi
 	signed int v14; // eax
 	signed int v15; // ebx
-	float v16; // et1
 	float v18; // ST14_4
 	int v21; // eax
-	float v22; // et1
 	float v24; // ST14_4
 	int v27; // ecx
 	xt_xfpos* v28; // edx
@@ -590,11 +588,9 @@ void xform(xt_xfpos* dst, xt_pos* src, int count, char* mask)
 	char *v39; // edi
 	int v40; // eax
 	signed int v41; // ebp
-	float v42; // et1
 	float v44; // ST14_4
 	int v47; // eax
 	signed int v48; // ebx
-	float v49; // et1
 	float v51; // ST14_4
 	float v54; // [esp+10h] [ebp-8h]
 	float v55; // [esp+10h] [ebp-8h]
@@ -673,7 +669,6 @@ LABEL_11:
 						v11->z = v55;
 						v11->invz = v11[v21].invz;
 						v15 = 0;
-						v22 = v11->x;
 						v24 = -v55;
 						if (v11->x < v24)
 							v15 = X_CLIPX1;
@@ -709,7 +704,6 @@ LABEL_47:
 						+ v12[2] * g_state[XST].xform[195 - 185]
 						+ g_state[XST].xform[196 - 185];
 				v11->z = v54;
-				v16 = v11->x;
 				v18 = -v54;
 				if (v11->x < v18)
 					v15 = X_CLIPX1;
@@ -809,7 +803,6 @@ LABEL_46:
 							+ v38[2] * g_state[XST].xform[199 - 185]
 							+ g_state[XST].xform[200 - 185];
 					v37->z = v56;
-					v42 = v37->x;
 					v44 = -v56;
 					if (v37->x < v44)
 						v41 = X_CLIPX1;
@@ -854,7 +847,6 @@ LABEL_92:
 						v48 = 0;
 						v57 = v38[2];
 						v37->z = v57;
-						v49 = v37->x;
 						v51 = -v57;
 						if (v37->x < v51)
 							v48 = X_CLIPX1;
@@ -1119,53 +1111,52 @@ LABEL_55:
 	return result;
 }
 
-void x_vx(xt_pos* a1, xt_data* a2)
+void x_vx(xt_pos* p, xt_data* d)
 {
 	vertices_lastnonrel = vertices;
-	pos[vertices].x = a1->x;
-	pos[vertices].y = a1->y;
-	pos[vertices].z = a1->z;
+	pos[vertices].x = p->x;
+	pos[vertices].y = p->y;
+	pos[vertices].z = p->z;
 	allxformed = 0;
 	++g_stats.in_vx;
 	xformed[vertices] = 0;
-	vertexdata(a2);
+	vertexdata(d);
 }
 
-void x_vxa(int a1, xt_data* a2)
+void x_vxa(int arrayindex, xt_data* d)
 {
-	if ( a1 < 0 || a1 >= posarraysize)
+	if (arrayindex < 0 || arrayindex >= posarraysize)
 		x_fatal("invalid vertex for x_vxa");
 	vertices_lastnonrel = vertices;
-	memcpy(&xfpos[vertices], &posarray[a1], 0x14u);
+	memcpy(&xfpos[vertices], &posarray[arrayindex], sizeof(xt_xfpos));
 	++g_stats.in_vx;
 	xformed[vertices] = 1;
-	vertexdata(a2);
+	vertexdata(d);
 }
 
-void x_vxrel(xt_pos* a1, xt_data* a2)
+void x_vxrel(xt_pos* p, xt_data* d)
 {
-	float *v2; // edx
-
+	xt_pos *v2;
 	v2 = &pos[vertices];
-	v2[0] = a1->x;
-	v2[1] = a1->y;
-	v2[2] = a1->z;
+	v2->x = p->x;
+	v2->y = p->y;
+	v2->z = p->z;
 	allxformed = 0;
 	xformed[vertices] = vertices - vertices_lastnonrel + 16;
-	vertexdata(a2);
+	vertexdata(d);
 }
 
-void x_vxarray(xt_pos* pos, int size, char* mask)
+void x_vxarray(xt_pos* src, int count, char* mask)
 {
 	int v3; // eax
 
-	if (pos && size)
+	if (src && count)
 	{
 		x_begin(0);
-		if (posarrayallocsize < size)
+		if (posarrayallocsize < count)
 		{
-			v3 = size + 256;
-			posarrayallocsize = size + 256;
+			v3 = count + 256;
+			posarrayallocsize = count + 256;
 			if ( posarray )
 			{
 				x_free(posarray);
@@ -1176,9 +1167,9 @@ void x_vxarray(xt_pos* pos, int size, char* mask)
 			if ( !posarray )
 				x_fatal("out of memory");
 		}
-		posarraysize = size;
+		posarraysize = count;
 		x_fastfpu(1);
-		xform(posarray, pos, size, mask);
+		xform(posarray, src, count, mask);
 		x_fastfpu(0);
 	}
 	else
@@ -1199,7 +1190,6 @@ int doclipvertex(signed int a1, int a2, int a3)
 {
 	int v3; // edx
 	int v4; // esi
-	float v11; // et1
 	signed int v12; // edx
 	float v14; // ST14_4
 	int v17; // edx
@@ -1296,7 +1286,6 @@ LABEL_5:
 		tex2[clipnewvx].s = (tex2[v4].s - tex2[v3].s) * v23 + tex2[v3].s;
 		tex2[clipnewvx].t = (tex2[v4].t - tex2[v3].t) * v23 + tex2[v3].t;
 	}
-	v11 = xfpos[clipnewvx].x;
 	v12 = 0;
 	v14 = -v25;
 	if (xfpos[clipnewvx].x < v14)

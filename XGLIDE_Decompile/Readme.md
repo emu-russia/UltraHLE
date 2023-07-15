@@ -76,31 +76,31 @@ Overall status: The compilation goes without errors, but we need to check how it
 |generatefogtable|Ready| |
 |mode_change|Ready (almost)|Pretty much done, but need to check a couple places that probably didn't decompile well (marked TODO).|
 |**fxgeom.c**|||
-|geom_init| | |
-|x_cameramatrix| | |
-|x_getmatrix| | |
-|dumpmatrix| | |
+|geom_init|Ready|empty|
+|x_cameramatrix|Ready| |
+|x_getmatrix|Ready| |
+|dumpmatrix|Ready| |
 |x_matrix| | |
-|recalc_projection| | |
-|x_begin| | |
-|x_end| | |
-|vertexdata| | |
-|xform| | |
+|recalc_projection|Ready| |
+|x_begin|Ready| |
+|x_end|Ready| |
+|vertexdata|Ready| |
+|xform|Ready| |
 |setuprvx| | |
-|x_vx| | |
-|x_vxa| | |
-|x_vxrel| | |
-|x_vxarray| | |
-|clear| | |
-|doclipvertex| | |
-|doclip| | |
-|clipfinish| | |
-|clippoly| | |
-|docliplineend| | |
-|clipline| | |
+|x_vx|Ready| |
+|x_vxa|Ready| |
+|x_vxrel|Ready| |
+|x_vxarray|Ready| |
+|clear|Ready| |
+|doclipvertex|Ready| |
+|doclip|Ready| |
+|clipfinish|Ready| |
+|clippoly|Ready| |
+|docliplineend|Ready| |
+|clipline|Ready| |
 |splitpoly| | |
-|flush_reordertables| | |
-|flush_drawfx| | |
+|flush_reordertables|Ready| |
+|flush_drawfx| |Check grDrawPlanarPolygon|
 |x_flush|Ready| |
 |**fxtext.c**|||
 |newblock| | |
