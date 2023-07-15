@@ -7,10 +7,10 @@
 #define XFORM_MODE_NONE 3
 
 void geom_init();
-void dumpmatrix(float* a1, int a2);
+void dumpmatrix(float* f, char* name);
 void recalc_projection();
-void vertexdata(xt_data* a1);
-void xform(int a1, xt_pos* a2, int a3, char* a4);
+void vertexdata(xt_data* data);
+void xform(xt_xfpos* dst, xt_pos* src, int count, char* mask);
 int setuprvx(int a1, int a2);
 void x_vxrel(xt_pos* a1, xt_data* a2);
 void clear();

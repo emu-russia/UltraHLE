@@ -87,7 +87,7 @@ void x_getmatrix(xt_matrix* matrix)
 	memcpy(matrix, g_state[XST].matrix, 0x40u);
 }
 
-void dumpmatrix(float *a1, int a2)
+void dumpmatrix(float *f, char* name)
 {
 	signed int v2; // esi
 	float *v3; // ebx
@@ -95,8 +95,8 @@ void dumpmatrix(float *a1, int a2)
 	long double v5; // fst7
 
 	v2 = 4;
-	x_log("%s matrix:\n", a2);
-	v3 = a1;
+	x_log("%s matrix:\n", name);
+	v3 = f;
 	do
 	{
 		v4 = 4;
@@ -292,13 +292,13 @@ void recalc_projection()
 	}
 }
 
-void x_begin(int a1)
+void x_begin(int type)
 {
 	int result; // eax
 
 	if ( g_state[XST].changed || g_state[XST].projchanged )
 		x_flush();
-	mode = a1;
+	mode = type;
 	result = 0;
 	vertices_base = vertices;
 	corners_base = corners;
@@ -330,7 +330,7 @@ void x_end()
 	}
 }
 
-void vertexdata(xt_data* a1)
+void vertexdata(xt_data* data)
 {
 	float *v2; // ecx
 	long double v4; // fst7
@@ -371,15 +371,15 @@ void vertexdata(xt_data* a1)
 		x_fatal("vertex without begin");
 	if ( g_state[XST].send & 1 )
 	{
-		v2 = a1;
-		grvx[vertices].r = a1->r * 256.0;
-		grvx[vertices].g = a1->g * 256.0;
-		grvx[vertices].b = a1->b * 256.0;
-		grvx[vertices].a = a1->a * 256.0;
+		v2 = data;
+		grvx[vertices].r = data->r * 256.0;
+		grvx[vertices].g = data->g * 256.0;
+		grvx[vertices].b = data->b * 256.0;
+		grvx[vertices].a = data->a * 256.0;
 	}
 	else
 	{
-		v2 = a1;
+		v2 = data;
 	}
 	if ( g_state[XST].send & 2 )
 	{
@@ -547,16 +547,25 @@ void vertexdata(xt_data* a1)
 		x_flush();
 }
 
-void xform(int a1, xt_pos* a2, int a3, char *a4)
+/// <summary>
+/// It looks scary, but in reality, macro programming or inline programming is most likely applied here.
+/// Works in 1 of 4 modes (XFORM_MODE). First it performs matrix multiplication, then it checks if clipping 
+/// should be done and sets `clip` flags.
+/// </summary>
+/// <param name="dst"></param>
+/// <param name="src"></param>
+/// <param name="count"></param>
+/// <param name="mask"></param>
+void xform(xt_xfpos* dst, xt_pos* src, int count, char* mask)
 {
 	int v4; // ecx
-	int v5; // edx
+	xt_xfpos* v5; // edx
 	float *v6; // esi
 	char *v7; // edi
 	signed int v8; // eax
 	long double v9; // fst7
-	int v10; // eax
-	int v11; // edx
+	xt_xfpos* v10; // eax
+	xt_xfpos* v11; // edx
 	float *v12; // esi
 	char *v13; // edi
 	signed int v14; // eax
@@ -567,7 +576,7 @@ void xform(int a1, xt_pos* a2, int a3, char *a4)
 	float v22; // et1
 	float v24; // ST14_4
 	int v27; // ecx
-	int v28; // edx
+	xt_xfpos* v28; // edx
 	float *v29; // esi
 	BYTE *v30; // edi
 	BYTE *v31; // eax
@@ -576,7 +585,7 @@ void xform(int a1, xt_pos* a2, int a3, char *a4)
 	signed int v34; // eax
 	int v35; // ecx
 	int v36; // ebx
-	int v37; // edx
+	xt_xfpos* v37; // edx
 	float *v38; // esi
 	char *v39; // edi
 	int v40; // eax
@@ -595,14 +604,14 @@ void xform(int a1, xt_pos* a2, int a3, char *a4)
 	switch ( g_state[XST].usexformmode)
 	{
 		case XFORM_MODE_FRUSTUM:
-			v4 = a3;
+			v4 = count;
 			if ( g_state[XST].setnew & 8 )
 			{
-				if ( a3 <= 0 )
+				if (count <= 0 )
 					return;
-				v5 = a1;
-				v6 = a2;
-				v7 = a4;
+				v5 = dst;
+				v6 = src;
+				v7 = mask;
 				while ( 1 )
 				{
 					v8 = 0;
@@ -612,42 +621,42 @@ void xform(int a1, xt_pos* a2, int a3, char *a4)
 						break;
 					if ( v8 > 16 )
 					{
-						v10 = v5 + 20 * (16 - v8);
-						*(float *)v5 = *v6 + *(float *)v10;
-						*(float *)(v5 + 4) = v6[1] + *(float *)(v10 + 4);
-						*(DWORD *)(v5 + 8) = *(DWORD *)(v10 + 8);
-						*(DWORD *)(v5 + 12) = *(DWORD *)(v10 + 12);
+						v10 = v5 + (16 - v8);
+						v5->x = *v6 + v10->x;
+						v5->y = v6[1] + v10->y;
+						v5->z = v10->z;
+						v5->invz = v10->invz;
 						goto LABEL_11;
 					}
 LABEL_12:
 					v6 += 3;
-					v5 += 20;
+					v5 ++;
 					if ( !--v4 )
 						return;
 				}
-				*(float *)v5 = *v6 * g_state[XST].xform[185 - 185]
+				v5->x = *v6 * g_state[XST].xform[185 - 185]
 										 + v6[1] * g_state[XST].xform[186 - 185]
 										 + v6[2] * g_state[XST].xform[187 - 185]
 										 + g_state[XST].xform[188 - 185];
-				*(float *)(v5 + 4) = *v6 * g_state[XST].xform[189 - 185]
-													 + v6[1] * g_state[XST].xform[190 - 185]
-													 + v6[2] * g_state[XST].xform[191 - 185]
-													 + g_state[XST].xform[192 - 185];
+				v5->y = *v6 * g_state[XST].xform[189 - 185]
+										+ v6[1] * g_state[XST].xform[190 - 185]
+										+ v6[2] * g_state[XST].xform[191 - 185]
+										+ g_state[XST].xform[192 - 185];
 				v9 = *v6 * g_state[XST].xform[193 - 185]
 					 + v6[1] * g_state[XST].xform[194 - 185]
 					 + v6[2] * g_state[XST].xform[195 - 185]
 					 + g_state[XST].xform[196 - 185];
-				*(float *)(v5 + 8) = v9;
-				*(float *)(v5 + 12) = 1.0f / v9;
+				v5->z = v9;
+				v5->invz = 1.0f / v9;		// TODO: div by 0
 LABEL_11:
-				*(DWORD *)(v5 + 16) = 0;
+				v5->clip = 0;
 				goto LABEL_12;
 			}
-			if ( a3 > 0 )
+			if (count > 0 )
 			{
-				v11 = a1;
-				v12 = a2;
-				v13 = a4;
+				v11 = dst;
+				v12 = src;
+				v13 = mask;
 				while ( 1 )
 				{
 					v14 = 0;
@@ -657,22 +666,22 @@ LABEL_11:
 						break;
 					if ( v14 > 16 )
 					{
-						v21 = 20 * (16 - v14);
-						*(float *)v11 = *v12 + *(float *)(v21 + v11);
-						*(float *)(v11 + 4) = v12[1] + *(float *)(v21 + v11 + 4);
-						v55 = *(float *)(v21 + v11 + 8);
-						*(float *)(v11 + 8) = v55;
-						*(DWORD *)(v11 + 12) = *(DWORD *)(v21 + v11 + 12);
+						v21 = (16 - v14);
+						v11->x = *v12 + v11[v21].x;
+						v11->y = v12[1] + v11[v21].y;
+						v55 = v11[v21].z;
+						v11->z = v55;
+						v11->invz = v11[v21].invz;
 						v15 = 0;
-						v22 = *(float *)v11;
+						v22 = v11->x;
 						v24 = -v55;
-						if (*(float*)v11 < v24)
+						if (v11->x < v24)
 							v15 = X_CLIPX1;
-						if ( *(float *)v11 > v55 )
+						if ( v11->x > v55 )
 							v15 |= X_CLIPX2;
-						if ( *(float *)(v11 + 4) < v24 )
+						if ( v11->y < v24 )
 							v15 |= X_CLIPY1;
-						if ( *(float *)(v11 + 4) > v55 )
+						if ( v11->y > v55 )
 							v15 |= X_CLIPY2;
 						if ( g_state[XST].znear > v55 )
 							v15 |= X_CLIPZ1;
@@ -682,103 +691,103 @@ LABEL_11:
 					}
 LABEL_47:
 					v12 += 3;
-					v11 += 20;
+					v11 ++;
 					if ( !--v4 )
 						return;
 				}
 				v15 = 0;
-				*(float *)v11 = *v12 * g_state[XST].xform[185 - 185]
+				v11->x = *v12 * g_state[XST].xform[185 - 185]
 											+ v12[1] * g_state[XST].xform[186 - 185]
 											+ v12[2] * g_state[XST].xform[187 - 185]
 											+ g_state[XST].xform[188 - 185];
-				*(float *)(v11 + 4) = *v12 * g_state[XST].xform[189 - 185]
-														+ v12[1] * g_state[XST].xform[190 - 185]
-														+ v12[2] * g_state[XST].xform[191 - 185]
-														+ g_state[XST].xform[192 - 185];
+				v11->y = *v12 * g_state[XST].xform[189 - 185]
+											+ v12[1] * g_state[XST].xform[190 - 185]
+											+ v12[2] * g_state[XST].xform[191 - 185]
+											+ g_state[XST].xform[192 - 185];
 				v54 = *v12 * g_state[XST].xform[193 - 185]
 						+ v12[1] * g_state[XST].xform[194 - 185]
 						+ v12[2] * g_state[XST].xform[195 - 185]
 						+ g_state[XST].xform[196 - 185];
-				*(float *)(v11 + 8) = v54;
-				v16 = *(float *)v11;
+				v11->z = v54;
+				v16 = v11->x;
 				v18 = -v54;
-				if (*(float*)v11 < v18)
+				if (v11->x < v18)
 					v15 = X_CLIPX1;
-				if ( *(float *)v11 > v54 )
+				if ( v11->x > v54 )
 					v15 |= X_CLIPX2;
-				if ( *(float *)(v11 + 4) < v18 )
+				if ( v11->y < v18 )
 					v15 |= X_CLIPY1;
-				if ( *(float *)(v11 + 4) > v54 )
+				if ( v11->y > v54 )
 					v15 |= X_CLIPY2;
 				if ( g_state[XST].znear > v54 )
 					v15 |= X_CLIPZ1;
 				if ( g_state[XST].zfar < v54 )
 					v15 |= X_CLIPZ2;
 				if ( !v15 )
-					*(float *)(v11 + 12) = 1.0f / v54;
+					v11->invz = 1.0f / v54;			// TODO: div by 0
 LABEL_46:
-				*(DWORD *)(v11 + 16) = v15;
+				v11->clip = v15;
 				goto LABEL_47;
 			}
 			return;
 		case XFORM_MODE_ORTHO:
-			v27 = a3;
-			if ( a3 > 0 )
+			v27 = count;
+			if (count > 0 )
 			{
-				v28 = a1;
-				v29 = a2;
-				v30 = a4;
+				v28 = dst;
+				v29 = src;
+				v30 = mask;
 				do
 				{
 					if ( !v30 || (v31 = v30, ++v30, !*v31) )
 					{
-						*(float *)v28 = *v29 * g_state[XST].xform[185 - 185]
+						v28->x = *v29 * g_state[XST].xform[185 - 185]
 													+ v29[1] * g_state[XST].xform[186 - 185]
 													+ v29[2] * g_state[XST].xform[187 - 185]
 													+ g_state[XST].xform[188 - 185];
-						*(float *)(v28 + 4) = *v29 * g_state[XST].xform[189 - 185]
-																+ v29[1] * g_state[XST].xform[190 - 185]
-																+ v29[2] * g_state[XST].xform[191 - 185]
-																+ g_state[XST].xform[192 - 185];
-						*(float *)(v28 + 8) = *v29 * g_state[XST].xform[193 - 185]
-																+ v29[1] * g_state[XST].xform[194 - 185]
-																+ v29[2] * g_state[XST].xform[195 - 185]
-																+ g_state[XST].xform[196 - 185];
+						v28->y = *v29 * g_state[XST].xform[189 - 185]
+													+ v29[1] * g_state[XST].xform[190 - 185]
+													+ v29[2] * g_state[XST].xform[191 - 185]
+													+ g_state[XST].xform[192 - 185];
+						v28->z = *v29 * g_state[XST].xform[193 - 185]
+													+ v29[1] * g_state[XST].xform[194 - 185]
+													+ v29[2] * g_state[XST].xform[195 - 185]
+													+ g_state[XST].xform[196 - 185];
 						// TODO: uninitialized local variable 'v33' used
 						if ( v33 )
-							*(DWORD *)(v28 + 12) = g_state[XST].invznear;
+							v28->invz = g_state[XST].invznear;
 						else
-							*(float *)(v28 + 12) = 1.0f / *(float *)(v28 + 8);
+							v28->invz = 1.0f / v28->z;		// TODO: div by 0
 						v34 = 0;
-						if ( *(DWORD *)v28 > -1.0f)
+						if ( v28->x > -1.0f)
 							v34 = X_CLIPX1;
-						if ( *(DWORD *)v28 > 1.0f )
+						if ( v28->x > 1.0f )
 							v34 |= X_CLIPX2;
-						if ( *(DWORD *)(v28 + 4) > -1.0f)
+						if ( v28->y > -1.0f)
 							v34 |= X_CLIPY1;
-						if ( *(DWORD *)(v28 + 4) > 1.0f)
+						if ( v28->y > 1.0f)
 							v34 |= X_CLIPY2;
-						*(DWORD *)(v28 + 16) = v34;
+						v28->clip = v34;
 					}
 					v29 += 3;
-					v28 += 20;
+					v28 ++;
 					--v27;
 				}
 				while ( v27 );
 			}
 			return;
 		case XFORM_MODE_PROJECT:
-			v35 = a3;
-			if ( a3 <= 0 )
+			v35 = count;
+			if (count <= 0 )
 			{
-				v37 = a1;
-				v38 = a2;
+				v37 = dst;
+				v38 = src;
 				goto LABEL_91;
 			}
-			v36 = a3;
-			v37 = a1;
-			v38 = a2;
-			v39 = a4;
+			v36 = count;
+			v37 = dst;
+			v38 = src;
+			v39 = mask;
 			do
 			{
 				v40 = 0;
@@ -787,49 +796,49 @@ LABEL_46:
 				if ( !v40 )
 				{
 					v41 = 0;
-					*(float *)v37 = *v38 * g_state[XST].xform[185 - 185]
+					v37->x = *v38 * g_state[XST].xform[185 - 185]
 												+ v38[1] * g_state[XST].xform[186 - 185]
 												+ v38[2] * g_state[XST].xform[187 - 185]
 												+ g_state[XST].xform[188 - 185];
-					*(float *)(v37 + 4) = *v38 * g_state[XST].xform[189 - 185]
-															+ v38[1] * g_state[XST].xform[190 - 185]
-															+ v38[2] * g_state[XST].xform[191 - 185]
-															+ g_state[XST].xform[192 - 185];
+					v37->y = *v38 * g_state[XST].xform[189 - 185]
+												+ v38[1] * g_state[XST].xform[190 - 185]
+												+ v38[2] * g_state[XST].xform[191 - 185]
+												+ g_state[XST].xform[192 - 185];
 					v56 = *v38 * g_state[XST].xform[197 - 185]
 							+ v38[1] * g_state[XST].xform[198 - 185]
 							+ v38[2] * g_state[XST].xform[199 - 185]
 							+ g_state[XST].xform[200 - 185];
-					*(float *)(v37 + 8) = v56;
-					v42 = *(float *)v37;
+					v37->z = v56;
+					v42 = v37->x;
 					v44 = -v56;
-					if (*(float*)v37 < v44)
+					if (v37->x < v44)
 						v41 = X_CLIPX1;
-					if ( *(float *)v37 > v56 )
+					if ( v37->x > v56 )
 						v41 |= X_CLIPX2;
-					if ( *(float *)(v37 + 4) < v44 )
+					if ( v37->y < v44 )
 						v41 |= X_CLIPY1;
-					if ( *(float *)(v37 + 4) > v56 )
+					if ( v37->y > v56 )
 						v41 |= X_CLIPY2;
 					if ( g_state[XST].znear > v56 )
 						v41 |= X_CLIPZ1;
 					if ( g_state[XST].zfar < v56 )
 						v41 |= X_CLIPZ2;
 					if ( !v41 )
-						*(float *)(v37 + 12) = 1.0 / v56;
-					*(DWORD *)(v37 + 16) = v41;
+						v37->invz = 1.0f / v56;			// TODO: div by 0
+					v37->clip = v41;
 				}
 				v38 += 3;
-				v37 += 20;
+				v37 ++;
 				--v36;
 			}
 			while ( v36 );
 			goto LABEL_92;
 		case XFORM_MODE_NONE:
-			v37 = a1;
-			v38 = a2;
-			v35 = a3;
+			v37 = dst;
+			v38 = src;
+			v35 = count;
 LABEL_91:
-			v39 = a4;
+			v39 = mask;
 LABEL_92:
 			if ( v35 > 0 )
 			{
@@ -840,31 +849,31 @@ LABEL_92:
 						v47 = *v39++;
 					if ( !v47 )
 					{
-						*(float *)v37 = *v38;
-						*(float *)(v37 + 4) = v38[1];
+						v37->x = *v38;
+						v37->y = v38[1];
 						v48 = 0;
 						v57 = v38[2];
-						*(float *)(v37 + 8) = v57;
-						v49 = *(float *)v37;
+						v37->z = v57;
+						v49 = v37->x;
 						v51 = -v57;
-						if (*(float*)v37 > v57 < v51)
+						if (v37->x < v51)
 							v48 = X_CLIPX1;
-						if ( *(float *)v37 > v57 )
+						if ( v37->x > v57 )
 							v48 |= X_CLIPX2;
-						if ( *(float *)(v37 + 4) < v51 )
+						if ( v37->y < v51 )
 							v48 |= X_CLIPY1;
-						if ( *(float *)(v37 + 4) > v57 )
+						if ( v37->y > v57 )
 							v48 |= X_CLIPY2;
 						if ( g_state[XST].znear > v57 )
 							v48 |= X_CLIPZ1;
 						if ( g_state[XST].zfar < v57 )
 							v48 |= X_CLIPZ2;
 						if ( !v48 )
-							*(float *)(v37 + 12) = 1.0 / v57;
-						*(DWORD *)(v37 + 16) = v48;
+							v37->invz = 1.0f / v57;			// TODO: div by 0
+						v37->clip = v48;
 					}
 					v38 += 3;
-					v37 += 20;
+					v37 ++;
 					--v35;
 				}
 				while ( v35 );
@@ -1146,17 +1155,17 @@ void x_vxrel(xt_pos* a1, xt_data* a2)
 	vertexdata(a2);
 }
 
-void x_vxarray(xt_pos* a1, int a2, char* a3)
+void x_vxarray(xt_pos* pos, int size, char* mask)
 {
 	int v3; // eax
 
-	if ( a1 && a2 )
+	if (pos && size)
 	{
 		x_begin(0);
-		if (posarrayallocsize < a2 )
+		if (posarrayallocsize < size)
 		{
-			v3 = a2 + 256;
-			posarrayallocsize = a2 + 256;
+			v3 = size + 256;
+			posarrayallocsize = size + 256;
 			if ( posarray )
 			{
 				x_free(posarray);
@@ -1167,9 +1176,9 @@ void x_vxarray(xt_pos* a1, int a2, char* a3)
 			if ( !posarray )
 				x_fatal("out of memory");
 		}
-		posarraysize = a2;
+		posarraysize = size;
 		x_fastfpu(1);
-		xform(posarray, a1, a2, a3);
+		xform(posarray, pos, size, mask);
 		x_fastfpu(0);
 	}
 	else
