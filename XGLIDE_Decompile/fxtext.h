@@ -2,7 +2,7 @@
 #pragma once
 
 #define X_MAX_BLOCKS 2048				// Maximum number of blocks that can be addressed by xt_memory
-#define X_MAX_TEXTURES 0x100			// Defined as 256, but api.c checks as max=1024 (typo?).
+#define X_MAX_TEXTURES 1024
 
 /// <summary>
 /// Texture block

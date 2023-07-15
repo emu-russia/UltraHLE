@@ -30,7 +30,7 @@ Overall status: The compilation goes without errors, but we need to check how it
 |x_projection|Ready| |
 |x_zrange|Ready| |
 |x_zdecal|Ready| |
-|texture_get|Ready|Nothing special, but seems to contain a typo of checking the number of texture entries (1024 != X_MAX_TEXTURES)|
+|texture_get|Ready| |
 |x_createtexture| |:construction: Needs to be converted to `xt_texture`|
 |x_gettextureinfo|Ready| |
 |x_loadtexturelevel| |:construction: Needs to be converted to `xt_texture`|
