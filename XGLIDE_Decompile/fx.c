@@ -481,8 +481,7 @@ $L1409:
 		}
 		if ( g_state[XST].currentmode.envc != g_state[XST].active.envc)
 		{
-			// TODO: Check wtf here (NaN)
-			g_state[XST].active.colortext1 = -6.8056469e38/*NaN*/;
+			g_state[XST].active.colortext1 = 0xfffffff;
 			g_state[XST].active.envc = g_state[XST].currentmode.envc;
 		}
 		if ( g_state[XST].currentmode.colortext1 != g_state[XST].active.colortext1 )
@@ -497,7 +496,7 @@ $L1409:
 					break;
 				case X_COLOR:
 					guColorCombineFunction(GR_COLORCOMBINE_ITRGB);
-					guAlphaSource(1);
+					guAlphaSource(GR_ALPHASOURCE_ITERATED_ALPHA);
 					g_state[XST].send |= 1u;
 					break;
 				case X_TEXTURE:
@@ -591,19 +590,22 @@ LABEL_56:
 				{
 					case X_ADD:
 						grTexCombine(0, 4, 8, 4, 8, 0, 0);
-						goto LABEL_70;
+						g_state[XST].send |= 4u;
+						break;
 					case X_MUL:
 						grTexCombine(0, 3, 1, 3, 1, 0, 0);
-						goto LABEL_70;
+						g_state[XST].send |= 4u;
+						break;
 					case X_DECAL:
 						grTexCombine(0, 7, 11, 7, 11, 0, 0);
-						goto LABEL_70;
+						g_state[XST].send |= 4u;
+						break;
 					case X_MULADD:
 						grTexCombine(0, 4, 1, 4, 1, 0, 0);
-						goto LABEL_70;
+						g_state[XST].send |= 4u;
+						break;
 					case X_SUB:
 						grTexCombine(0, 6, 8, 6, 8, 0, 0);
-LABEL_70:
 						g_state[XST].send |= 4u;
 						break;
 					default:
@@ -620,7 +622,7 @@ LABEL_70:
 		if ( g_state[XST].active.alphatest != g_state[XST].currentmode.alphatest)
 		{
 			// TODO: Check to see what kind of decompilation is so crooked
-			if ( g_state[XST].currentmode.alphatest < 1065353216 && g_state[XST].currentmode.alphatest != 0 /*???*/)
+			if ( g_state[XST].currentmode.alphatest < 1.0f && g_state[XST].currentmode.alphatest != 0 /*???*/)
 			{
 				v16 = (int)(g_state[XST].currentmode.alphatest * 256.0);
 				// Clamp
@@ -663,10 +665,10 @@ LABEL_70:
 					break;
 				case X_INVALPHA:
 					v18 = 5;
-					goto LABEL_93;
+					v17 = v18;
+					break;
 				case X_INVOTHERALPHA:
 					v18 = 7;
-LABEL_93:
 					v17 = v18;
 					break;
 				default:
@@ -678,27 +680,30 @@ LABEL_93:
 			{
 				case X_ONE:
 					v20 = 4;
-					goto LABEL_103;
+					v19 = v20;
+					break;
 				case X_OTHER:
 					v19 = 2;
 					v20 = 1;
 					break;
 				case X_ALPHA:
 					v20 = 3;
-					goto LABEL_103;
+					v19 = v20;
+					break;
 				case X_OTHERALPHA:
 					v20 = 1;
-					goto LABEL_103;
+					v19 = v20;
+					break;
 				case X_INVOTHER:
 					v19 = 6;
 					v20 = 5;
 					break;
 				case X_INVALPHA:
 					v20 = 7;
-					goto LABEL_103;
+					v19 = v20;
+					break;
 				case X_INVOTHERALPHA:
 					v20 = 5;
-LABEL_103:
 					v19 = v20;
 					break;
 				default:
