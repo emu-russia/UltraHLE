@@ -167,14 +167,14 @@ void x_clear(int writecolor, int writedepth, float cr, float cg, float cb)
 
 int x_readfb(int fb, int x, int y, int xs, int ys, char* buffer, int bufrowlen)
 {
-	if ( fb == X_FB_RGB565)
+	if ((uint8_t)fb == X_FB_RGB565)
 	{
 		if ( 2 * xs > bufrowlen)
 			return 1;
 	}
 	else
 	{
-		if ( fb != X_FB_RGBA8888)
+		if ((uint8_t)fb != X_FB_RGBA8888)
 			return 1;
 		if ( 4 * xs > bufrowlen)
 			return 1;
@@ -184,14 +184,14 @@ int x_readfb(int fb, int x, int y, int xs, int ys, char* buffer, int bufrowlen)
 
 int x_writefb(int fb, int x, int y, int xs, int ys, char* buffer, int bufrowlen)
 {
-	if (fb == X_FB_RGB565)
+	if ((uint8_t)fb == X_FB_RGB565)
 	{
 		if ( 2 * xs > bufrowlen)
 			return 1;
 	}
 	else
 	{
-		if (fb != X_FB_RGBA8888)
+		if ((uint8_t)fb != X_FB_RGBA8888)
 			return 1;
 		if ( 4 * xs > bufrowlen)
 			return 1;

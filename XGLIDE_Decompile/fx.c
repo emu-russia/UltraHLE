@@ -176,7 +176,7 @@ void init_clear(int writecolor, int writedepth, float cr, float cg, float cb)
 	grColorMask(g_state[XST].currentmode.mask & 1, g_state[XST].currentmode.mask & 1);
 }
 
-int init_readfb(__int16 a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int init_readfb(int fb, int x, int y, int xs, int ys, char* buffer, int bufrowlen)
 {
 	BOOL v7; // ecx
 	signed int result; // eax
@@ -185,19 +185,19 @@ int init_readfb(__int16 a1, int a2, int a3, int a4, int a5, int a6, int a7)
 	int v11; // ebx
 	unsigned __int16 v12; // ax
 
-	v7 = (a1 & 0x100u) < 1;
-	if ( (unsigned __int8)a1 == 17 )
+	v7 = (fb & X_FB_FRONT) < 1;
+	if ( (uint8_t)fb == X_FB_RGB565)
 	{
-		grLfbReadRegion(v7, a2, a3, a4, a5, a7, a6);
+		grLfbReadRegion(v7, x, y, xs, ys, bufrowlen, buffer);
 		result = 0;
 	}
-	else if ( (unsigned __int8)a1 == 18 )
+	else if ( (uint8_t)fb == X_FB_RGBA8888)
 	{
-		v9 = a6;
-		v10 = (unsigned __int16 *)(a6 + a5 * a7 / 2);
-		v11 = a4 * a5;
-		grLfbReadRegion(v7, a2, a3, a4, a5, a7 / 2, a6 + a5 * a7 / 2);
-		if ( a4 * a5 > 0 )
+		v9 = buffer;
+		v10 = (unsigned __int16 *)(buffer + ys * bufrowlen / 2);
+		v11 = xs * ys;
+		grLfbReadRegion(v7, x, y, xs, ys, bufrowlen / 2, buffer + ys * bufrowlen / 2);
+		if (xs * ys > 0 )
 		{
 			do
 			{
@@ -221,7 +221,7 @@ int init_readfb(__int16 a1, int a2, int a3, int a4, int a5, int a6, int a7)
 	return result;
 }
 
-int init_writefb()
+int init_writefb(int fb, int x, int y, int xs, int ys, char* buffer, int bufrowlen)
 {
 	// Not implemented
 	return 1;
