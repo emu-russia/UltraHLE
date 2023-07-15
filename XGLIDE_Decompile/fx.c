@@ -485,7 +485,7 @@ $L1409:
 				case X_WHITE:
 					grConstantColorValue(0x7FFF7FFF);
 					guColorCombineFunction(GR_COLORCOMBINE_CCRGB);
-					guAlphaSource(0);
+					guAlphaSource(GR_ALPHASOURCE_CC_ALPHA);
 					break;
 				case X_COLOR:
 					guColorCombineFunction(GR_COLORCOMBINE_ITRGB);
