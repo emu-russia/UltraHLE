@@ -1242,56 +1242,54 @@ int doclipvertex(signed int a1, int a2, int a3)
 	float v25; // [esp+18h] [ebp-8h]
 	int v26; // [esp+1Ch] [ebp-4h]
 
-	if ( a1 > 512 )
+	if ( a1 > X_CLIPX2)
 	{
-		if ( a1 > 2048 )
+		if ( a1 > X_CLIPY2)
 		{
-			if ( a1 == 4096 )
+			if ( a1 == X_CLIPZ1)
 			{
 				v3 = a2;
 				v4 = a3;
-				v20 = &flt_11454[5 * a2];
-				v22 = *v20 - g_state[XST].znear;
-				v24 = *v20 - flt_11454[5 * a3];
+				v22 = xfpos[a2].z - g_state[XST].znear;
+				v24 = xfpos[a2].z - xfpos[a3].z;
 			}
 			else
 			{
-				if ( a1 != 0x2000 )
+				if ( a1 != X_CLIPZ2)
 					goto LABEL_4;
 				v3 = a2;
 				v4 = a3;
-				v21 = &flt_11454[5 * a2];
-				v22 = g_state[XST].zfar - *v21;
-				v24 = flt_11454[5 * a3] - *v21;
+				v22 = g_state[XST].zfar - xfpos[a2].z;
+				v24 = xfpos[a3].z - xfpos[a2].z;
 			}
 		}
-		else if ( a1 == 2048 )
+		else if ( a1 == X_CLIPY2)
 		{
 			v3 = a2;
 			v4 = a3;
-			v22 = flt_11454[5 * a2] - flt_11450[5 * a2];
-			v24 = flt_11450[5 * a3] - flt_11450[5 * a2] - (flt_11454[5 * a3] - flt_11454[5 * a2]);
+			v22 = xfpos[a2].z - xfpos[a2].y;
+			v24 = xfpos[a3].y - xfpos[a2].y - (xfpos[a3].z - xfpos[a2].z);
 		}
 		else
 		{
-			if ( a1 != 1024 )
+			if ( a1 != X_CLIPY1)
 				goto LABEL_4;
 			v3 = a2;
 			v4 = a3;
-			v22 = flt_11450[5 * a2] + flt_11454[5 * a2];
-			v24 = -(flt_11454[5 * a3] - flt_11454[5 * a2] + flt_11450[5 * a3] - flt_11450[5 * a2]);
+			v22 = xfpos[a2].y + xfpos[a2].z;
+			v24 = -(xfpos[a3].z - xfpos[a2].z + xfpos[a3].y - xfpos[a2].y);
 		}
 	}
-	else if ( a1 == 512 )
+	else if ( a1 == X_CLIPX2)
 	{
 		v3 = a2;
 		v4 = a3;
-		v22 = flt_11454[5 * a2] - xfpos_S1212[5 * a2];
-		v24 = xfpos_S1212[5 * a3] - xfpos_S1212[5 * a2] - (flt_11454[5 * a3] - flt_11454[5 * a2]);
+		v22 = xfpos[a2].z - xfpos[a2].x;
+		v24 = xfpos[a3].x - xfpos[a2].x - (xfpos[a3].z - xfpos[a2].z);
 	}
 	else
 	{
-		if ( a1 != 256 )
+		if ( a1 != X_CLIPX1)
 		{
 LABEL_4:
 			v3 = a2;
@@ -1300,19 +1298,18 @@ LABEL_4:
 		}
 		v3 = a2;
 		v4 = a3;
-		v22 = flt_11454[5 * a2] + xfpos_S1212[5 * a2];
-		v24 = -(flt_11454[5 * a3] - flt_11454[5 * a2] + xfpos_S1212[5 * a3] - xfpos_S1212[5 * a2]);
+		v22 = xfpos[a2].z + xfpos[a2].x;
+		v24 = -(xfpos[a3].z - xfpos[a2].z + xfpos[a3].x - xfpos[a2].x);
 	}
+
 LABEL_5:
 	v26 = clipnewvx;
-	v5 = 5 * clipnewvx;
 	v23 = v22 / v24;
-	xfpos_S1212[v5] = (xfpos_S1212[5 * v4] - xfpos_S1212[5 * v3]) * v23 + xfpos_S1212[5 * v3];
-	flt_11450[v5] = (flt_11450[5 * v4] - flt_11450[5 * v3]) * v23 + flt_11450[5 * v3];
-	v6 = (g_state[XST].send & 1) == 0;
-	v25 = (flt_11454[5 * v4] - flt_11454[5 * v3]) * v23 + flt_11454[5 * v3];
-	flt_11454[v5] = v25;
-	if ( !v6 )
+	xfpos[clipnewvx].x = (xfpos[v4].x - xfpos[v3].x) * v23 + xfpos[v3].x;
+	xfpos[clipnewvx].y = (xfpos[v4].y - xfpos[v3].y) * v23 + xfpos[v3].y;
+	v25 = (xfpos[v4].z - xfpos[v3].z) * v23 + xfpos[v3].z;
+	xfpos[clipnewvx].z = v25;
+	if (g_state[XST].send & 1)
 	{
 		grvx[clipnewvx].r = (grvx[v4].r - grvx[v3].r) * v23 + grvx[v3].r;
 		grvx[clipnewvx].g = (grvx[v4].g - grvx[v3].g) * v23 + grvx[v3].g;
@@ -1321,11 +1318,9 @@ LABEL_5:
 	}
 	if ( g_state[XST].send & 2 )
 	{
-		v8 = 2 * clipnewvx;
-		v6 = (g_state[XST].setnew & 0x10) == 0;
 		tex[clipnewvx].s = (tex[v4].s - tex[v3].s) * v23 + tex[v3].s;
 		tex[clipnewvx].t = (tex[v4].t - tex[v3].t) * v23 + tex[v3].t;
-		if ( !v6 )
+		if (g_state[XST].setnew & 0x10)
 			texp[clipnewvx].s = (texp[v4].s - texp[v3].s) * v23 + texp[v3].s;
 	}
 	if ( g_state[XST].send & 4 )
@@ -1333,26 +1328,26 @@ LABEL_5:
 		tex2[clipnewvx].s = (tex2[v4].s - tex2[v3].s) * v23 + tex2[v3].s;
 		tex2[clipnewvx].t = (tex2[v4].t - tex2[v3].t) * v23 + tex2[v3].t;
 	}
-	v11 = xfpos[v5].x;
+	v11 = xfpos[clipnewvx].x;
 	v12 = 0;
 	if ( !(v15 | v16) )
 		v12 = X_CLIPX1;
-	if ( xfpos[v5].x > v25 )
+	if ( xfpos[clipnewvx].x > v25 )
 		v12 |= X_CLIPX2;
 	v14 = -v25;
-	if (xfpos[v5].y < v14 )
+	if (xfpos[clipnewvx].y < v14 )
 		v12 |= X_CLIPY1;
-	if (xfpos[v5].y > v25 )
+	if (xfpos[clipnewvx].y > v25 )
 		v12 |= X_CLIPY2;
 	if ( g_state[XST].znear > v25 )
 		v12 |= X_CLIPZ1;
 	if ( g_state[XST].zfar < v25 )
 		v12 |= X_CLIPZ2;
-	++clipnewvx;
 	v17 = v12 & ~a1;
 	v18 = v17 | clipor;
-	xfpos[v5].clip = v17;
+	xfpos[clipnewvx].clip = v17;
 	clipor = v18;
+	++clipnewvx;
 	return v26;
 }
 
@@ -1549,7 +1544,7 @@ signed int splitpoly(int a1, int a2, DWORD *a3)
 	v3 = 1;
 	for ( i = 0; a1 > v3; ++v3 )
 	{
-		if ( flt_2A28[15 * *(DWORD *)(a2 + 4 * v3)] > (long double)flt_2A28[15 * *(DWORD *)(a2 + 4 * i)] )
+		if ( grvx[*(DWORD *)(a2 + 4 * v3)].y > grvx[*(DWORD *)(a2 + 4 * i)].y )
 			i = v3;
 	}
 	v5 = i - 1;
@@ -1572,7 +1567,7 @@ signed int splitpoly(int a1, int a2, DWORD *a3)
 			v8 -= a1;
 		v16 = (DWORD *)(a2 + 4 * v15);
 		v9 = (DWORD *)(a2 + 4 * v5);
-		if ( flt_2A28[15 * *(DWORD *)(a2 + 4 * v15)] <= (long double)flt_2A28[15 * *v9] )
+		if ( grvx[*(DWORD *)(a2 + 4 * v15)].y <= grvx[*v9].y )
 		{
 			v12 = v6 + 8;
 			v15 = v8;
@@ -1940,17 +1935,17 @@ void x_flush(void)
 //.bss:00011441                 db    ? ;
 //.bss:00011442                 db    ? ;
 //.bss:00011443                 db    ? ;
-//.bss:0001144C _xfpos$S1212    dd ?                    ; DATA XREF: _setuprvx+4B↑o
+//.bss:0001144C _xfpos$S1212    dd ?         x           ; DATA XREF: _setuprvx+4B↑o
 //.bss:0001144C                                         ; _setuprvx+24F↑o ...
-//.bss:00011450 flt_11450       dd ?                    ; DATA XREF: _doclipvertex+7D↑r
+//.bss:00011450 flt_11450       dd ?         y           ; DATA XREF: _doclipvertex+7D↑r
 //.bss:00011450                                         ; _doclipvertex+83↑r ...
-//.bss:00011454 flt_11454       dd ?                    ; DATA XREF: _doclipvertex+99↑r
+//.bss:00011454 flt_11454       dd ?         z           ; DATA XREF: _doclipvertex+99↑r
 //.bss:00011454                                         ; _doclipvertex+9F↑r ...
 //.bss:00011458                 db    ? ;
-//.bss:00011459                 db    ? ;
+//.bss:00011459                 db    ? ;     invz
 //.bss:0001145A                 db    ? ;
 //.bss:0001145B                 db    ? ;
-//.bss:0001145C dword_1145C     dd ?                    ; DATA XREF: _doclipvertex+2DA↑w
+//.bss:0001145C dword_1145C     dd ?          clip          ; DATA XREF: _doclipvertex+2DA↑w
 //.bss:0001145C                                         ; _doclip+2F↑r ...
 //.bss:00011460                 db    ? ;
 //.bss:00011461                 db    ? ;
