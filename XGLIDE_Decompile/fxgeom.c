@@ -1429,18 +1429,18 @@ int clippoly(int a1, int a2, int *a3, DWORD *a4)
 	}
 	*v4 = *a3;
 	v4[1] = -1;
-	if ( *((BYTE *)&clipor + 1) & 0x10 )
-		doclip(4096);
-	if ( *((BYTE *)&clipor + 1) & 0x20 )
-		doclip(0x2000);
-	if ( *((BYTE *)&clipor + 1) & 1 )
-		doclip(256);
-	if ( *((BYTE *)&clipor + 1) & 2 )
-		doclip(512);
-	if ( *((BYTE *)&clipor + 1) & 4 )
-		doclip(1024);
-	if ( *((BYTE *)&clipor + 1) & 8 )
-		doclip(2048);
+	if ( clipor & X_CLIPZ1)
+		doclip(X_CLIPZ1);
+	if ( clipor & X_CLIPZ2)
+		doclip(X_CLIPZ2);
+	if ( clipor & X_CLIPX1)
+		doclip(X_CLIPX1);
+	if ( clipor & X_CLIPX2)
+		doclip(X_CLIPX2);
+	if ( clipor & X_CLIPY1)
+		doclip(X_CLIPY1);
+	if ( clipor & X_CLIPY2)
+		doclip(X_CLIPY2);
 	if ( *clipin == -1 )
 		return 0;
 	v9 = (DWORD *)(clipin + 4);
