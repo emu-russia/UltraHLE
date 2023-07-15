@@ -316,7 +316,7 @@ void x_end()
 {
 	int v0; // eax
 
-	if (mode == 9 )
+	if (mode == X_POLYGON)
 	{
 		v0 = corners - corners_base - 1;
 		if ( v0 >= 3 )
@@ -376,16 +376,15 @@ void vertexdata(xt_data* a1)
 
 	v35 = g_state[XST].texturexmul;
 	v36 = g_state[XST].textureymul;
-	if ( !mode)
+	if ( mode == 0 )
 		x_fatal("vertex without begin");
 	if ( g_state[XST].send & 1 )
 	{
-		v1 = 15 * vertices;
 		v2 = a1;
-		flt_2A30[v1] = a1->r * 256.0;
-		flt_2A34[v1] = a1->g * 256.0;
-		flt_2A38[v1] = a1->b * 256.0;
-		flt_2A40[v1] = a1->a * 256.0;
+		grvx[vertices].r = a1->r * 256.0;
+		grvx[vertices].g = a1->g * 256.0;
+		grvx[vertices].b = a1->b * 256.0;
+		grvx[vertices].a = a1->a * 256.0;
 	}
 	else
 	{
@@ -411,15 +410,12 @@ void vertexdata(xt_data* a1)
 		tex2[vertices].s = v2[8] * v35;
 		tex2[vertices].t = v2[9] * v36;
 	}
-	result = mode - 1;
 	switch (mode)
 	{
 		case X_POINTS:
-			v7 = vertices;
-			result = 4 * corners;
+			corner[corners] = 1;
+			corner[corners + 1] = vertices;
 			corners += 2;
-			*(int *)((char *)corner + result) = 1;
-			*(int *)((char *)&dword_A228 + result) = v7;
 			break;
 		case X_TRIANGLES:
 			if (state >= 2 )
@@ -430,7 +426,6 @@ void vertexdata(xt_data* a1)
 				corner[v9] = vertices - 2;
 				state = 0;
 				corner[corners++] = vertices - 1;
-				result = vertices;
 				v10 = corners++;
 				corner[v10] = vertices;
 			}
@@ -452,7 +447,6 @@ void vertexdata(xt_data* a1)
 					corner[v12] = vertices - 1;
 					v14 = corners++;
 					corner[v14] = vertices - 2;
-					result = corners;
 					corner[corners] = v13;
 				}
 				else
@@ -461,7 +455,6 @@ void vertexdata(xt_data* a1)
 					corner[v15] = vertices - 2;
 					v16 = corners++;
 					corner[v16] = vertices - 1;
-					result = vertices;
 					corner[corners] = vertices;
 				}
 				flip ^= 1u;
@@ -483,7 +476,6 @@ void vertexdata(xt_data* a1)
 				corner[v19] = v18;
 				v20 = corners++;
 				corner[v20] = vertices - 1;
-				result = vertices;
 				v21 = corners++;
 				corner[v21] = vertices;
 			}
@@ -504,7 +496,6 @@ void vertexdata(xt_data* a1)
 				v25 = corners++;
 				state = 0;
 				corner[v25] = vertices - 1;
-				result = vertices;
 				v26 = corners++;
 				corner[v26] = vertices;
 			}
@@ -520,7 +511,6 @@ void vertexdata(xt_data* a1)
 				corner[v27] = 2;
 				v28 = corners++;
 				corner[v28] = vertices - 1;
-				result = vertices;
 				v29 = corners++;
 				corner[v29] = vertices;
 			}
@@ -537,7 +527,6 @@ void vertexdata(xt_data* a1)
 				v31 = corners++;
 				state = 0;
 				corner[v31] = vertices - 1;
-				result = vertices;
 				v32 = corners++;
 				corner[v32] = vertices;
 			}
