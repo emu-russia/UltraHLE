@@ -1314,11 +1314,10 @@ LABEL_5:
 	flt_11454[v5] = v25;
 	if ( !v6 )
 	{
-		v7 = 15 * clipnewvx;
-		flt_2A30[v7] = (flt_2A30[15 * v4] - flt_2A30[15 * v3]) * v23 + flt_2A30[15 * v3];
-		flt_2A34[v7] = (flt_2A34[15 * v4] - flt_2A34[15 * v3]) * v23 + flt_2A34[15 * v3];
-		flt_2A38[v7] = (flt_2A38[15 * v4] - flt_2A38[15 * v3]) * v23 + flt_2A38[15 * v3];
-		flt_2A40[v7] = (flt_2A40[15 * v4] - flt_2A40[15 * v3]) * v23 + flt_2A40[15 * v3];
+		grvx[clipnewvx].r = (grvx[v4].r - grvx[v3].r) * v23 + grvx[v3].r;
+		grvx[clipnewvx].g = (grvx[v4].g - grvx[v3].g) * v23 + grvx[v3].g;
+		grvx[clipnewvx].b = (grvx[v4].b - grvx[v3].b) * v23 + grvx[v3].b;
+		grvx[clipnewvx].a = (grvx[v4].a - grvx[v3].a) * v23 + grvx[v3].a;
 	}
 	if ( g_state[XST].send & 2 )
 	{
@@ -1327,33 +1326,32 @@ LABEL_5:
 		tex[clipnewvx].s = (tex[v4].s - tex[v3].s) * v23 + tex[v3].s;
 		tex[clipnewvx].t = (tex[v4].t - tex[v3].t) * v23 + tex[v3].t;
 		if ( !v6 )
-			texp[clipnewvx].s = (texp[v4].s - texp[v3].s) * v23
-											+ texp[v3].s;
+			texp[clipnewvx].s = (texp[v4].s - texp[v3].s) * v23 + texp[v3].s;
 	}
 	if ( g_state[XST].send & 4 )
 	{
 		tex2[clipnewvx].s = (tex2[v4].s - tex2[v3].s) * v23 + tex2[v3].s;
 		tex2[clipnewvx].t = (tex2[v4].t - tex2[v3].t) * v23 + tex2[v3].t;
 	}
-	v11 = xfpos_S1212[v5];
+	v11 = xfpos[v5].x;
 	v12 = 0;
 	if ( !(v15 | v16) )
-		v12 = 256;
-	if ( xfpos_S1212[v5] > (long double)v25 )
-		v12 |= 0x200u;
+		v12 = X_CLIPX1;
+	if ( xfpos[v5].x > v25 )
+		v12 |= X_CLIPX2;
 	v14 = -v25;
-	if ( flt_11450[v5] < (long double)v14 )
-		v12 |= 0x400u;
-	if ( flt_11450[v5] > (long double)v25 )
-		v12 |= 0x800u;
-	if ( g_state[XST].znear > (long double)v25 )
-		v12 |= 0x1000u;
-	if ( g_state[XST].zfar < (long double)v25 )
-		v12 |= 0x2000u;
+	if (xfpos[v5].y < v14 )
+		v12 |= X_CLIPY1;
+	if (xfpos[v5].y > v25 )
+		v12 |= X_CLIPY2;
+	if ( g_state[XST].znear > v25 )
+		v12 |= X_CLIPZ1;
+	if ( g_state[XST].zfar < v25 )
+		v12 |= X_CLIPZ2;
 	++clipnewvx;
-	v17 = ~a1 & v12;
+	v17 = v12 & ~a1;
 	v18 = v17 | clipor;
-	dword_1145C[v5] = v17;
+	xfpos[v5].clip = v17;
 	clipor = v18;
 	return v26;
 }
@@ -1372,9 +1370,9 @@ int doclip(signed int a1)
 	v4 = (int *)(clipin + 8);
 	if ( *clipin != -1 && v3 != -1 )
 	{
-		while ( a1 & dword_1145C[5 * v3] )
+		while ( a1 & xfpos[v3].clip )
 		{
-			if ( !(a1 & dword_1145C[5 * v2]) )
+			if ( !(a1 & xfpos[v2].clip) )
 			{
 				*v1 = doclipvertex(a1, v2, v3);
 LABEL_9:
@@ -1386,7 +1384,7 @@ LABEL_9:
 			if ( v3 == -1 )
 				goto LABEL_11;
 		}
-		if ( a1 & dword_1145C[5 * v2] )
+		if ( a1 & xfpos[v2].clip )
 		{
 			++v1;
 			*(v1 - 1) = doclipvertex(a1, v3, v2);
@@ -1497,28 +1495,20 @@ signed int clippoly(int a1, int a2, int *a3, DWORD *a4)
 int docliplineend(int a1, int a2)
 {
 	int result; // eax
-	int v3; // esi
 
 	result = a1;
-	if ( dword_1145C[5 * a1] & 0x1000 )
-	{
-		v3 = a2;
-		result = doclipvertex(4096, a2, a1);
-	}
-	else
-	{
-		v3 = a2;
-	}
-	if ( dword_1145C[5 * result] & 0x2000 )
-		result = doclipvertex(0x2000, v3, result);
-	if ( dword_1145C[5 * result] & 0x100 )
-		result = doclipvertex(256, v3, result);
-	if ( dword_1145C[5 * result] & 0x200 )
-		result = doclipvertex(512, v3, result);
-	if ( dword_1145C[5 * result] & 0x400 )
-		result = doclipvertex(1024, v3, result);
-	if ( dword_1145C[5 * result] & 0x800 )
-		result = doclipvertex(2048, v3, result);
+	if ( xfpos[result].clip & X_CLIPZ1)
+		result = doclipvertex(X_CLIPZ1, a2, result);
+	if (xfpos[result].clip & X_CLIPZ2)
+		result = doclipvertex(X_CLIPZ2, a2, result);
+	if (xfpos[result].clip & X_CLIPX1)
+		result = doclipvertex(X_CLIPX1, a2, result);
+	if (xfpos[result].clip & X_CLIPX2)
+		result = doclipvertex(X_CLIPX2, a2, result);
+	if (xfpos[result].clip & X_CLIPY1)
+		result = doclipvertex(X_CLIPY1, a2, result);
+	if (xfpos[result].clip & X_CLIPY2)
+		result = doclipvertex(X_CLIPY2, a2, result);
 	return result;
 }
 
@@ -1727,7 +1717,7 @@ signed int flush_drawfx()
 			{
 				v6 = *(DWORD *)v1;
 				v1 += 4;
-				v7 = dword_1145C[5 * v6];
+				v7 = xfpos[v6].clip;
 				v5 |= v7;
 				result &= v7;
 				--v2;
