@@ -4,6 +4,10 @@ The decompilation is done in IDA, using HexRays. After that, additional manual p
 
 Overall status: The compilation goes without errors, but we need to check how it decompiled and fix possible bugs.
 
+Progress:
+
+![progress](progress.png)
+
 ## Decompilation status
 
 |Module/Function|Status|Notes|
@@ -93,7 +97,7 @@ Overall status: The compilation goes without errors, but we need to check how it
 |x_vxarray|Ready| |
 |clear|Ready| |
 |doclipvertex|Ready| |
-|doclip|Ready| |
+|doclip|Check!|:warning: There is a decompilation error somewhere in here|
 |clipfinish|Ready| |
 |clippoly|Ready| |
 |docliplineend|Ready| |

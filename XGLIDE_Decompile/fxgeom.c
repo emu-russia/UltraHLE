@@ -1310,6 +1310,9 @@ LABEL_5:
 
 int doclip(signed int a1)
 {
+	// TODO: There is a bug somewhere in here, so clipping doesn't work yet :/
+	return 0;
+
 	int *v1; // esi
 	int v2; // ecx
 	int v3; // ebx
