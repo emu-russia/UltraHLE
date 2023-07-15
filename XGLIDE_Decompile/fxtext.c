@@ -467,7 +467,7 @@ int accesstexture(xt_texture *txt, int level, int *xsize, int *ysize)
 			if ( !v5 )
 				v5 = 1;
 			if ( v6[0] != level)
-				v6[1] = v4 * v5 + v6;
+				v6[1] = v4 * v5 + v6[1];
 			++v6[0];
 		}
 		while ( v6[0] <= level);
