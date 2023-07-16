@@ -32,6 +32,8 @@ You don't need to do anything special. You can build in Debug/Release x86 config
 
 x64 build is not supported because UltraHLE uses inline assembler in .C files, which cannot be used in x64.
 
+:warning: The emulator in Release is very unstable, and crashes at the very beginning, right after startup. Somewhere the problem is in incompletely disabled debugging UI.
+
 ## Glide
 
 UltraHLE requires the deprecated Glide 2.0 graphics API.
