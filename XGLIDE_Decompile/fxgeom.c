@@ -28,8 +28,8 @@ static int corners;
 
 static int clipnewvx;
 static int clipor;
-static int clipbuf1[0x100];		// TODO: not sure of the size
-static int clipbuf2[0x100];		// TODO: not sure of the size
+static int clipbuf1[0x200];		// TODO: not sure of the size
+static int clipbuf2[0x200];		// TODO: not sure of the size
 static int* clipin;
 static int* clipout;
 
@@ -42,7 +42,7 @@ static xt_tex texp[0x200];
 static xt_xfpos xfpos[0x200];		// Item size: 20 bytes
 static uint8_t xformed[0x200];			// Contains an indication that the vertex has been transformed (?)
 
-static int splitbuf[0x100];		// TODO: not sure of the size
+static int splitbuf[0x200];		// TODO: not sure of the size
 
 void geom_init()
 {
