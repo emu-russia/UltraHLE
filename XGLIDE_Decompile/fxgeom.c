@@ -876,7 +876,7 @@ LABEL_92:
 	}
 }
 
-int setuprvx(int a1, int a2)
+int setuprvx(int first, int count)
 {
 	xt_xfpos* v2; // esi
 	float *v3; // ebx
@@ -908,16 +908,16 @@ int setuprvx(int a1, int a2)
 	v19 = g_state[XST].projxadd;
 	v20 = g_state[XST].projyadd;
 	v23 = g_state[XST].znear * g_state[XST].zdecal;
-	v2 = &xfpos[a1];
-	v3 = &grvx[a1];
-	v4 = &tex[a1];
-	v5 = &tex2[a1];
-	result = &texp[a1];
-	v24 = &texp[a1];
+	v2 = &xfpos[first];
+	v3 = &grvx[first];
+	v4 = &tex[first];
+	v5 = &tex2[first];
+	result = &texp[first];
+	v24 = &texp[first];
 	if ( g_state[XST].xformmode == XFORM_MODE_ORTHO)
 	{
-		v7 = a2;
-		if ( a2 > 0 )
+		v7 = count;
+		if (count > 0 )
 		{
 			result = debugcount;
 			do
@@ -955,9 +955,9 @@ int setuprvx(int a1, int a2)
 	}
 	if ( g_state[XST].xformmode == XFORM_MODE_PROJECT)
 	{
-		if ( a2 <= 0 )
+		if (count <= 0 )
 			return result;
-		v25 = a2;
+		v25 = count;
 		while ( 1 )
 		{
 			if ( !v2->clip )
@@ -1000,7 +1000,7 @@ int setuprvx(int a1, int a2)
 LABEL_23:
 			if ( g_state[XST].geometry & X_DUMPDATA)
 			{
-				x_log("#x_vx[ %13.5f %13.5f %13.5f ]\n", pos[a1].x, pos[a1].y, pos[a1].z);
+				x_log("#x_vx[ %13.5f %13.5f %13.5f ]\n", pos[first].x, pos[first].y, pos[first].z);
 				if ( v2->clip )
 					x_log("#clip[ %13.5f %13.5f %13.5f clip %08X ]\n", v2->x, v2->y, v2->z, v2->clip);
 				else
@@ -1020,8 +1020,8 @@ LABEL_23:
 	}
 	if ( g_state[XST].currentmode.zbias || g_state[XST].setnew & 0x10 )
 	{
-		v13 = a2;
-		if ( a2 <= 0 )
+		v13 = count;
+		if (count <= 0 )
 			return result;
 		result = debugcount;
 		while ( 1 )
@@ -1073,8 +1073,8 @@ LABEL_55:
 				return result;
 		}
 	}
-	v11 = a2;
-	if ( a2 > 0 )
+	v11 = count;
+	if (count > 0 )
 	{
 		result = 0;
 		do
@@ -1186,7 +1186,7 @@ void clear()
 	corners = 0;
 }
 
-int doclipvertex(signed int a1, int a2, int a3)
+int doclipvertex(int bit, int vi, int vo)
 {
 	int v3; // edx
 	int v4; // esi
@@ -1200,64 +1200,64 @@ int doclipvertex(signed int a1, int a2, int a3)
 	float v25; // [esp+18h] [ebp-8h]
 	int v26; // [esp+1Ch] [ebp-4h]
 
-	if ( a1 > X_CLIPX2)
+	if (bit > X_CLIPX2)
 	{
-		if ( a1 > X_CLIPY2)
+		if (bit > X_CLIPY2)
 		{
-			if ( a1 == X_CLIPZ1)
+			if (bit == X_CLIPZ1)
 			{
-				v3 = a2;
-				v4 = a3;
-				v22 = xfpos[a2].z - g_state[XST].znear;
-				v24 = xfpos[a2].z - xfpos[a3].z;
+				v3 = vi;
+				v4 = vo;
+				v22 = xfpos[vi].z - g_state[XST].znear;
+				v24 = xfpos[vi].z - xfpos[vo].z;
 			}
 			else
 			{
-				if ( a1 != X_CLIPZ2)
+				if (bit != X_CLIPZ2)
 					goto LABEL_4;
-				v3 = a2;
-				v4 = a3;
-				v22 = g_state[XST].zfar - xfpos[a2].z;
-				v24 = xfpos[a3].z - xfpos[a2].z;
+				v3 = vi;
+				v4 = vo;
+				v22 = g_state[XST].zfar - xfpos[vi].z;
+				v24 = xfpos[vo].z - xfpos[vi].z;
 			}
 		}
-		else if ( a1 == X_CLIPY2)
+		else if (bit == X_CLIPY2)
 		{
-			v3 = a2;
-			v4 = a3;
-			v22 = xfpos[a2].z - xfpos[a2].y;
-			v24 = xfpos[a3].y - xfpos[a2].y - (xfpos[a3].z - xfpos[a2].z);
+			v3 = vi;
+			v4 = vo;
+			v22 = xfpos[vi].z - xfpos[vi].y;
+			v24 = xfpos[vo].y - xfpos[vi].y - (xfpos[vo].z - xfpos[vi].z);
 		}
 		else
 		{
-			if ( a1 != X_CLIPY1)
+			if (bit != X_CLIPY1)
 				goto LABEL_4;
-			v3 = a2;
-			v4 = a3;
-			v22 = xfpos[a2].y + xfpos[a2].z;
-			v24 = -(xfpos[a3].z - xfpos[a2].z + xfpos[a3].y - xfpos[a2].y);
+			v3 = vi;
+			v4 = vo;
+			v22 = xfpos[vi].y + xfpos[vi].z;
+			v24 = -(xfpos[vo].z - xfpos[vi].z + xfpos[vo].y - xfpos[vi].y);
 		}
 	}
-	else if ( a1 == X_CLIPX2)
+	else if (bit == X_CLIPX2)
 	{
-		v3 = a2;
-		v4 = a3;
-		v22 = xfpos[a2].z - xfpos[a2].x;
-		v24 = xfpos[a3].x - xfpos[a2].x - (xfpos[a3].z - xfpos[a2].z);
+		v3 = vi;
+		v4 = vo;
+		v22 = xfpos[vi].z - xfpos[vi].x;
+		v24 = xfpos[vo].x - xfpos[vi].x - (xfpos[vo].z - xfpos[vi].z);
 	}
 	else
 	{
-		if ( a1 != X_CLIPX1)
+		if (bit != X_CLIPX1)
 		{
 LABEL_4:
-			v3 = a2;
-			v4 = a3;
+			v3 = vi;
+			v4 = vo;
 			goto LABEL_5;
 		}
-		v3 = a2;
-		v4 = a3;
-		v22 = xfpos[a2].z + xfpos[a2].x;
-		v24 = -(xfpos[a3].z - xfpos[a2].z + xfpos[a3].x - xfpos[a2].x);
+		v3 = vi;
+		v4 = vo;
+		v22 = xfpos[vi].z + xfpos[vi].x;
+		v24 = -(xfpos[vo].z - xfpos[vi].z + xfpos[vo].x - xfpos[vi].x);
 	}
 
 LABEL_5:
@@ -1300,7 +1300,7 @@ LABEL_5:
 		v12 |= X_CLIPZ1;
 	if ( g_state[XST].zfar < v25 )
 		v12 |= X_CLIPZ2;
-	v17 = v12 & ~a1;
+	v17 = v12 & ~bit;
 	v18 = v17 | clipor;
 	xfpos[clipnewvx].clip = v17;
 	clipor = v18;
@@ -1308,28 +1308,25 @@ LABEL_5:
 	return v26;
 }
 
-int doclip(signed int a1)
+int doclip(int bit)
 {
-	// TODO: There is a bug somewhere in here, so clipping doesn't work yet :/
-	return 0;
-
 	int *v1; // esi
 	int v2; // ecx
 	int v3; // ebx
 	int *v4; // ebp
 	int result; // eax
 
-	v1 = (int *)clipout;
+	v1 = clipout;
 	v2 = clipin[0];
 	v3 = clipin[1];
 	v4 = clipin[2];
 	if ( *clipin != -1 && v3 != -1 )
 	{
-		while ( a1 & xfpos[v3].clip )
+		while (bit & xfpos[v3].clip )
 		{
-			if ( !(a1 & xfpos[v2].clip) )
+			if ( !(bit & xfpos[v2].clip) )
 			{
-				*v1 = doclipvertex(a1, v2, v3);
+				*v1 = doclipvertex(bit, v2, v3);
 LABEL_9:
 				++v1;
 			}
@@ -1339,10 +1336,10 @@ LABEL_9:
 			if ( v3 == -1 )
 				goto LABEL_11;
 		}
-		if ( a1 & xfpos[v2].clip )
+		if (bit & xfpos[v2].clip )
 		{
 			++v1;
-			*(v1 - 1) = doclipvertex(a1, v3, v2);
+			*(v1 - 1) = doclipvertex(bit, v3, v2);
 		}
 		*v1 = v3;
 		goto LABEL_9;
@@ -1357,13 +1354,13 @@ LABEL_11:
 	return result;
 }
 
-int clipfinish(DWORD *a1)
+int clipfinish(int *vx)
 {
 	int v1; // edx
 	xt_xfpos* v2; // ecx
 	int v3; // eax
-	signed int result; // eax
-	DWORD *v6; // ecx
+	int result; // eax
+	int *v6; // ecx
 
 	v1 = -1;
 	if (vertices < clipnewvx )
@@ -1385,7 +1382,7 @@ int clipfinish(DWORD *a1)
 	if ( v1 )
 		return 0;
 	setuprvx(vertices, clipnewvx - vertices);
-	v6 = a1;
+	v6 = vx;
 	result = 0;
 	do
 	{
@@ -1398,23 +1395,23 @@ int clipfinish(DWORD *a1)
 	return result;
 }
 
-int clippoly(int a1, int a2, int *a3, DWORD *a4)
+int clippoly(int clor, int vxn, int *v, int *out)
 {
 	int *v4; // edi
 	int v5; // ecx
 	int *v6; // edx
 	int v7; // esi
-	DWORD *v9; // ST00_4
+	int *v9; // ST00_4
 
 	v4 = clipbuf1;
-	clipor = a1;
+	clipor = clor;
 	clipnewvx = vertices;
-	v5 = a2;
+	v5 = vxn;
 	clipin = clipbuf1;
 	clipout = clipbuf2;
-	if ( a2 > 0 )
+	if (vxn > 0 )
 	{
-		v6 = a3;
+		v6 = v;
 		do
 		{
 			v7 = *v6;
@@ -1425,7 +1422,7 @@ int clippoly(int a1, int a2, int *a3, DWORD *a4)
 		}
 		while ( v5 );
 	}
-	v4[0] = *a3;
+	v4[0] = v[0];
 	v4[1] = -1;
 	if ( clipor & X_CLIPZ1)
 		doclip(X_CLIPZ1);
@@ -1439,47 +1436,47 @@ int clippoly(int a1, int a2, int *a3, DWORD *a4)
 		doclip(X_CLIPY1);
 	if ( clipor & X_CLIPY2)
 		doclip(X_CLIPY2);
-	if ( *clipin == -1 )
+	if ( clipin[0] == -1)
 		return 0;
-	v9 = (DWORD *)(clipin + 4);
-	*a4 = clipin + 4;
+	v9 = &clipin[1];
+	*out = &clipin[1];
 	return clipfinish(v9);
 }
 
-int docliplineend(int a1, int a2)
+int docliplineend(int v1, int v2)
 {
 	int result; // eax
 
-	result = a1;
+	result = v1;
 	if ( xfpos[result].clip & X_CLIPZ1)
-		result = doclipvertex(X_CLIPZ1, a2, result);
+		result = doclipvertex(X_CLIPZ1, v2, result);
 	if (xfpos[result].clip & X_CLIPZ2)
-		result = doclipvertex(X_CLIPZ2, a2, result);
+		result = doclipvertex(X_CLIPZ2, v2, result);
 	if (xfpos[result].clip & X_CLIPX1)
-		result = doclipvertex(X_CLIPX1, a2, result);
+		result = doclipvertex(X_CLIPX1, v2, result);
 	if (xfpos[result].clip & X_CLIPX2)
-		result = doclipvertex(X_CLIPX2, a2, result);
+		result = doclipvertex(X_CLIPX2, v2, result);
 	if (xfpos[result].clip & X_CLIPY1)
-		result = doclipvertex(X_CLIPY1, a2, result);
+		result = doclipvertex(X_CLIPY1, v2, result);
 	if (xfpos[result].clip & X_CLIPY2)
-		result = doclipvertex(X_CLIPY2, a2, result);
+		result = doclipvertex(X_CLIPY2, v2, result);
 	return result;
 }
 
-int clipline(int a1, int a2, DWORD *a3)
+int clipline(int v1, int v2, int *out)
 {
 	int v3; // eax
 	int v4; // esi
 	int v5; // eax
 
 	clipnewvx = vertices;
-	v3 = docliplineend(a1, a2);
+	v3 = docliplineend(v1, v2);
 	v4 = v3;
-	v5 = docliplineend(a2, v3);
+	v5 = docliplineend(v2, v3);
 	clipbuf1[0] = v4;
 	clipbuf1[1] = v5;
 	clipbuf1[2] = -1;
-	*a3 = clipbuf1;
+	*out = clipbuf1;
 	return clipfinish(clipbuf1);
 }
 
