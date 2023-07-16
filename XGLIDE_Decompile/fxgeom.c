@@ -294,17 +294,13 @@ void recalc_projection()
 
 void x_begin(int type)
 {
-	int result; // eax
-
 	if ( g_state[XST].changed || g_state[XST].projchanged )
 		x_flush();
 	mode = type;
-	result = 0;
 	vertices_base = vertices;
 	corners_base = corners;
 	state = 0;
 	flip = 0;
-	return result;
 }
 
 void x_end()

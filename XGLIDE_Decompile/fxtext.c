@@ -79,7 +79,7 @@ DWORD * memory_clear(DWORD *memory)
 	return result;
 }
 
-DWORD * memory_alloc(int memory, int size, DWORD *base)
+DWORD * memory_alloc(int memory, int size, int* base)
 {
 	int v3; // ebx
 	signed int v4; // edi
@@ -264,19 +264,16 @@ int picktmu()
 	return result;
 }
 
-int fxloadtexturepart(DWORD *txt, int texturepart)
+int fxloadtexturepart(xt_texture *txt, int texturepart)
 {
 	int v2; // ebx
 	FxU32 v3; // ebp
-	int result; // eax
-	DWORD *v5; // ecx
-	int v6; // edx
 	int v7; // [esp+10h] [ebp-Ch]
 	int v8; // [esp+14h] [ebp-8h]
 	DWORD *v9; // [esp+18h] [ebp-4h]
 
-	txt[11] = g_state[XST].frame;
-	v2 = txt[texturepart + 26];
+	txt->lastframeused = g_state[XST].frame;
+	v2 = txt->tmu[texturepart];
 	switch (texturepart)
 	{
 		case 0:
@@ -296,50 +293,47 @@ int fxloadtexturepart(DWORD *txt, int texturepart)
 			v3 = 0;// v8;
 			break;
 	}
-	if ( !txt[texturepart + 18] )
+	if ( !txt->size[texturepart] )
 	{
-		v7 = grTexTextureMemRequired(v3, txt + 13);
+		v7 = grTexTextureMemRequired(v3, &txt->ti);
 		v9 = memory_alloc(mem[v2], v7, &v8);
 		if ( !v7 )
-			x_fatal("texture: zero size for handle %i (part=%i,mask=%i)\n", txt[1], texturepart, v3);
+			x_fatal("texture: zero size for handle %i (part=%i,mask=%i)\n", txt->handle, texturepart, v3);
 		if ( !v9 )
 			return -1;
-		v5 = v9;
-		v6 = v8;
-		txt[texturepart + 18] = v7;
-		txt[texturepart + 30] = v5;
-		txt[texturepart + 22] = v6;
-		txt[12] = 1;
+		txt->size[texturepart] = v7;
+		txt->xblock[texturepart] = v9;
+		txt->base[texturepart] = v8;
+		txt->reload = 1;
 	}
-	if (txt[12] )
+	if (txt->reload)
 	{
-		grTexDownloadMipMap(v2, txt[texturepart + 22], v3, txt + 13);
-		txt[12] = 0;
-		g_stats.text_uploaded += txt[texturepart + 18];
+		grTexDownloadMipMap(v2, txt->base[texturepart], v3, &txt->ti);
+		txt->reload = 0;
+		g_stats.text_uploaded += txt->size[texturepart];
 	}
-	grTexSource(v2, txt[texturepart + 22], v3, txt + 13);
-	result = 0;
-	txt[texturepart + 34] = txt[texturepart + 18];
-	return result;
+	grTexSource(v2, txt->base[texturepart], v3, &txt->ti);
+	txt->usedsize[texturepart] = txt->size[texturepart];
+	return 0;
 }
 
-int fxloadtexture_single(DWORD *txt)
+int fxloadtexture_single(xt_texture* txt)
 {
-	signed int v1; // edi
-	signed int v2; // ebx
+	int v1; // edi
+	int v2; // ebx
 
 	v1 = 0;
-	if ( g_state[XST].tmus > 1 && txt[18] <= 0 )
+	if ( g_state[XST].tmus > 1 && txt->size[0] <= 0 )
 	{
-		if (txt[19] <= 0 )
+		if (txt->size[1] <= 0 )
 			v1 = picktmu();
 		else
 			v1 = 1;
 	}
 	v2 = 0;
-	txt[v1 + 26] = v1;
-	g_state[XST].texturexmul = txt[9];
-	g_state[XST].textureymul = txt[10];
+	txt->tmu[v1] = v1;
+	g_state[XST].texturexmul = txt->xmul;
+	g_state[XST].textureymul = txt->ymul;
 	do
 	{
 		if ( fxloadtexturepart(txt, v1) >= 0 )
@@ -356,20 +350,20 @@ int fxloadtexture_single(DWORD *txt)
 	return v1;
 }
 
-int fxloadtexture_trilin(DWORD *txt)
+int fxloadtexture_trilin(xt_texture* txt)
 {
 	int v1; // eax
-	signed int v2; // esi
+	int v2; // esi
 
-	if ( !txt[20] && !txt[21] )
+	if ( !txt->size[2] && !txt->size[3])
 	{
 		v1 = picktmu();
-		txt[28] = v1;
-		txt[29] = v1 ^ 1;
+		txt->tmu[2] = v1;
+		txt->tmu[3] = v1 ^ 1;
 	}
 	v2 = 0;
-	g_state[XST].texturexmul = txt[9];
-	g_state[XST].textureymul = txt[10];
+	g_state[XST].texturexmul = txt->xmul;
+	g_state[XST].textureymul = txt->ymul;
 	do
 	{
 		if ( fxloadtexturepart(txt, 2) >= 0 && fxloadtexturepart(txt, 3) >= 0 )
@@ -383,16 +377,16 @@ int fxloadtexture_trilin(DWORD *txt)
 		++v2;
 	}
 	while ( v2 < 3 );
-	return txt[28];
+	return txt->tmu[2];
 }
 
-int fxloadtexture_multi(DWORD *txt1, DWORD *txt2)
+int fxloadtexture_multi(xt_texture* txt1, xt_texture* txt2)
 {
-	signed int v2; // ebx
+	int v2; // ebx
 
 	v2 = 0;
-	g_state[XST].texturexmul = txt1[9];
-	g_state[XST].textureymul = txt1[10];
+	g_state[XST].texturexmul = txt1->xmul;
+	g_state[XST].textureymul = txt1->ymul;
 	do
 	{
 		if ( fxloadtexturepart(txt1, 0) >= 0 && fxloadtexturepart(txt2, 1) >= 0 )

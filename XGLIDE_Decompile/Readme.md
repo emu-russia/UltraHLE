@@ -107,7 +107,7 @@ Progress:
 |flush_drawfx| |Check grDrawPlanarPolygon|
 |x_flush|Ready| |
 |**fxtext.c**|||
-|newblock| | |
+|newblock| |TODO: Change to use t_block and xt_memory to make it pretty|
 |addbefore| | |
 |addafter| | |
 |removeblk| | |
@@ -120,10 +120,10 @@ Progress:
 |makespace| | |
 |clearspace| | |
 |picktmu|Ready| |
-|fxloadtexturepart| | |
-|fxloadtexture_single| | |
-|fxloadtexture_trilin| | |
-|fxloadtexture_multi| | |
+|fxloadtexturepart|Ready| |
+|fxloadtexture_single|Ready| |
+|fxloadtexture_trilin|Ready| |
+|fxloadtexture_multi|Ready| |
 |text_init| | |
 |text_deinit| | |
 |accesstexture|Ready| |

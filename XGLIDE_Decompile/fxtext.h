@@ -49,9 +49,9 @@ typedef struct _xt_texture		// 152 bytes (38 dwords)
 	int reload;				// 12
 	GrTexInfo ti;			// 13, 14, 15, 16, 17[data]
 	int	size[X_TEXPARTS];		// 18  19  20  21 
-	int	base[X_TEXPARTS];		// 22  23  24  25
+	FxU32 base[X_TEXPARTS];		// 22  23  24  25
 	int	tmu[X_TEXPARTS];		// 26  27  28  29
-	int	xblock[X_TEXPARTS];		// 30  31  32  33
+	DWORD* xblock[X_TEXPARTS];	// 30  31  32  33      TODO: Make like t_block
 	int	usedsize[X_TEXPARTS];	// 34  35  36  37
 } xt_texture;
 
@@ -63,7 +63,7 @@ DWORD* addbefore(DWORD* b, DWORD* t);
 int addafter(int b, DWORD* t);
 DWORD* removeblk(DWORD** b);
 DWORD* memory_clear(DWORD* memory);
-DWORD* memory_alloc(int memory, int size, DWORD* base);
+DWORD* memory_alloc(int memory, int size, int* base);
 int memory_free(int memory, DWORD** handle);
 xt_memory* memory_create(int min, int max);
 void memory_delete(xt_memory* memory);
@@ -71,10 +71,10 @@ void freetexmem(DWORD* txt);
 void makespace();
 void clearspace();
 int picktmu();
-int fxloadtexturepart(DWORD* txt, int texturepart);
-int fxloadtexture_single(DWORD* txt);
-int fxloadtexture_trilin(DWORD* txt);
-int fxloadtexture_multi(DWORD* txt1, DWORD* txt2);
+int fxloadtexturepart(xt_texture* txt, int texturepart);
+int fxloadtexture_single(xt_texture* txt);
+int fxloadtexture_trilin(xt_texture* txt);
+int fxloadtexture_multi(xt_texture* txt1, xt_texture* txt2);
 void text_init();
 void text_deinit();
 int accesstexture(xt_texture* txt, int level, int* xsize, int* ysize);
