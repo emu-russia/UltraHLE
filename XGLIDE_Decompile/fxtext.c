@@ -79,7 +79,7 @@ DWORD * memory_clear(DWORD *memory)
 	return result;
 }
 
-DWORD * memory_alloc(int memory, int size, int* base)
+DWORD * memory_alloc(int memory, int size, DWORD* base)
 {
 	int v3; // ebx
 	signed int v4; // edi
@@ -714,7 +714,7 @@ int text_allocdata(int txt)
 	return result;
 }
 
-unsigned int text_loadlevel(DWORD *txt, int level, unsigned int data)
+int text_loadlevel(xt_texture* txt, int level, unsigned int data)
 {
 	unsigned int result; // eax
 	int v4; // esi
@@ -735,11 +735,11 @@ unsigned int text_loadlevel(DWORD *txt, int level, unsigned int data)
 	int v19; // [esp+Ch] [ebp-8h]
 	int v20; // [esp+10h] [ebp-4h]
 
-	result = txt[16];
+	result = txt->ti.format;
 	switch ( result )
 	{
 		case GR_TEXFMT_INTENSITY_8:
-			v4 = accesstexture(txt, level, &v20, &v19) + txt[17];
+			v4 = accesstexture(txt, level, &v20, &v19) + (uint8_t*)txt->ti.data;
 			result = v20 * v19;
 			v5 = data;
 			v6 = data + 4 * v20 * v19;
@@ -758,7 +758,7 @@ unsigned int text_loadlevel(DWORD *txt, int level, unsigned int data)
 		case GR_TEXFMT_RGB_565:
 			v7 = accesstexture(txt, level, &v20, &v19);
 			v8 = data;
-			result = txt[17] + 2 * v7;
+			result = (uint8_t*)txt->ti.data + 2 * v7;
 			v9 = data + 4 * v20 * v19;
 			if ( v9 > data)
 			{
@@ -777,7 +777,7 @@ unsigned int text_loadlevel(DWORD *txt, int level, unsigned int data)
 		case GR_TEXFMT_ARGB_1555:
 			v11 = accesstexture(txt, level, &v20, &v19);
 			v12 = data;
-			v13 = txt[17] + 2 * v11;
+			v13 = (uint8_t*)txt->ti.data + 2 * v11;
 			result = data + 4 * v20 * v19;
 			if ( result > data)
 			{
@@ -797,7 +797,7 @@ unsigned int text_loadlevel(DWORD *txt, int level, unsigned int data)
 		case GR_TEXFMT_ARGB_4444:
 			v15 = accesstexture(txt, level, &v20, &v19);
 			v16 = data;
-			v17 = txt[17] + 2 * v15;
+			v17 = (uint8_t*)txt->ti.data + 2 * v15;
 			result = data + 4 * v20 * v19;
 			if ( result > data)
 			{
@@ -817,7 +817,7 @@ unsigned int text_loadlevel(DWORD *txt, int level, unsigned int data)
 		default:
 			break;
 	}
-	txt[12] = 1;
+	txt->reload = 1;
 	return result;
 }
 
