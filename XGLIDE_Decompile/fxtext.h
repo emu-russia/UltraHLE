@@ -45,8 +45,8 @@ typedef struct _xt_texture		// 152 bytes (38 dwords)
 	int bytes;				// 6
 	int levels;				// 7  (1 - no mipmap)
 	int levelsloaded;		// 8   mask
-	float xmul;				// 9
-	float ymul;				// 10
+	int xmul;				// 9
+	int ymul;				// 10
 	int lastframeused;		// 11
 	int reload;				// 12
 	GrTexInfo ti;			// 13, 14, 15, 16, 17[data]
@@ -67,7 +67,7 @@ DWORD* addbefore(DWORD* b, DWORD* t);
 int addafter(int b, DWORD* t);
 DWORD* removeblk(DWORD** b);
 DWORD* memory_clear(DWORD* memory);
-DWORD* memory_alloc(int memory, int size, DWORD* base);
+DWORD* memory_alloc(int memory, int size, int* base);
 int memory_free(int memory, DWORD** handle);
 xt_memory* memory_create(int min, int max);
 void memory_delete(xt_memory* memory);

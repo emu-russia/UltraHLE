@@ -79,7 +79,7 @@ DWORD * memory_clear(DWORD *memory)
 	return result;
 }
 
-DWORD * memory_alloc(int memory, int size, DWORD* base)
+DWORD * memory_alloc(int memory, int size, int* base)
 {
 	int v3; // ebx
 	signed int v4; // edi
@@ -317,24 +317,23 @@ int fxloadtexturepart(xt_texture *txt, int texturepart)
 	return 0;
 }
 
-int fxloadtexture_single(xt_texture* txt1)
+int fxloadtexture_single(xt_texture* txt)
 {
-	DWORD* txt = txt1;
-	signed int v1; // edi
-	signed int v2; // ebx
+	int v1; // edi
+	int v2; // ebx
 
 	v1 = 0;
-	if (g_state[XST].tmus > 1 && txt[18] <= 0)
+	if (g_state[XST].tmus > 1 && txt->size[0] <= 0)
 	{
-		if (txt[19] <= 0)
+		if (txt->size[1] <= 0)
 			v1 = picktmu();
 		else
 			v1 = 1;
 	}
 	v2 = 0;
-	txt[v1 + 26] = v1;
-	g_state[XST].texturexmul = txt[9];
-	g_state[XST].textureymul = txt[10];
+	txt->tmu[v1] = v1;
+	g_state[XST].texturexmul = txt->xmul;
+	g_state[XST].textureymul = txt->ymul;
 	do
 	{
 		if (fxloadtexturepart(txt, v1) >= 0)
