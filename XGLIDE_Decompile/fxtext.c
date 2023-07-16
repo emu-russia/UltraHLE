@@ -317,36 +317,36 @@ int fxloadtexturepart(xt_texture *txt, int texturepart)
 	return 0;
 }
 
-int fxloadtexture_single(xt_texture* txt)
+int fxloadtexture_single(xt_texture* txt1)
 {
-	int v1; // edi
-	int v2; // ebx
+	DWORD* txt = txt1;
+	signed int v1; // edi
+	signed int v2; // ebx
 
 	v1 = 0;
-	if ( g_state[XST].tmus > 1 && txt->size[0] <= 0 )
+	if (g_state[XST].tmus > 1 && txt[18] <= 0)
 	{
-		if (txt->size[1] <= 0 )
+		if (txt[19] <= 0)
 			v1 = picktmu();
 		else
 			v1 = 1;
 	}
 	v2 = 0;
-	txt->tmu[v1] = v1;
-	g_state[XST].texturexmul = txt->xmul;
-	g_state[XST].textureymul = txt->ymul;
+	txt[v1 + 26] = v1;
+	g_state[XST].texturexmul = txt[9];
+	g_state[XST].textureymul = txt[10];
 	do
 	{
-		if ( fxloadtexturepart(txt, v1) >= 0 )
+		if (fxloadtexturepart(txt, v1) >= 0)
 			break;
-		if ( !v2 )
+		if (!v2)
 			makespace();
-		if ( v2 == 1 )
+		if (v2 == 1)
 			clearspace();
-		if ( v2 == 2 )
+		if (v2 == 2)
 			x_fatal("loadtexture: unable to load texture (single/part %i)!\n", v1);
 		++v2;
-	}
-	while ( v2 < 3 );
+	} while (v2 < 3);
 	return v1;
 }
 
