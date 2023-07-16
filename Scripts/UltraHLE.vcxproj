@@ -119,11 +119,15 @@
     <ClInclude Include="..\src\X.H" />
   </ItemGroup>
   <ItemGroup>
-    <Library Include="..\src\GLIDE2X.LIB" />
-    <Library Include="..\src\XGLIDE.LIB" />
+    <ResourceCompile Include="..\src\UltraHLE.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="..\src\UltraHLE.rc" />
+    <ProjectReference Include="..\XGLIDE_Decompile\Scripts\XGLIDE.vcxproj">
+      <Project>{12e668b0-bbc9-40d2-9cda-a6ef53915819}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="..\src\GLIDE2X.LIB" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -178,22 +182,22 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>$(SolutionDir)..\Build</OutDir>
+    <OutDir>$(SolutionDir)..\Build\</OutDir>
     <TargetName>$(ProjectName)$(Configuration)</TargetName>
     <GenerateManifest>false</GenerateManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>$(SolutionDir)..\Build</OutDir>
+    <OutDir>$(SolutionDir)..\Build\</OutDir>
     <TargetName>$(ProjectName)$(Configuration)</TargetName>
     <GenerateManifest>false</GenerateManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(SolutionDir)..\Build</OutDir>
+    <OutDir>$(SolutionDir)..\Build\</OutDir>
     <TargetName>$(ProjectName)$(Configuration)</TargetName>
     <GenerateManifest>false</GenerateManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(SolutionDir)..\Build</OutDir>
+    <OutDir>$(SolutionDir)..\Build\</OutDir>
     <TargetName>$(ProjectName)$(Configuration)</TargetName>
     <GenerateManifest>false</GenerateManifest>
   </PropertyGroup>

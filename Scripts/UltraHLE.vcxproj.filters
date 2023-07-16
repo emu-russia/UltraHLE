@@ -273,12 +273,11 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Library Include="..\src\GLIDE2X.LIB" />
-    <Library Include="..\src\XGLIDE.LIB" />
-  </ItemGroup>
-  <ItemGroup>
     <ResourceCompile Include="..\src\UltraHLE.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="..\src\GLIDE2X.LIB" />
   </ItemGroup>
 </Project>
