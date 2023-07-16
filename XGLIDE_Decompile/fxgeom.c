@@ -333,40 +333,8 @@ void x_end()
 void vertexdata(xt_data* data)
 {
 	float *v2; // ecx
-	long double v4; // fst7
-	int result; // eax
-	int v8; // eax
-	int v9; // ecx
-	int v10; // ecx
-	int v11; // eax
-	int v12; // ecx
-	int v13; // edx
-	int v14; // eax
-	int v15; // ecx
-	int v16; // ecx
-	int v17; // eax
-	int v18; // edx
-	int v19; // eax
-	int v20; // ecx
-	int v21; // ecx
-	int v22; // eax
-	int v23; // ecx
-	int v24; // ecx
-	int v25; // ecx
-	int v26; // ecx
-	int v27; // eax
-	int v28; // ecx
-	int v29; // ecx
-	int v30; // eax
-	int v31; // ecx
-	int v32; // ecx
-	int v33; // eax
-	int v34; // ecx
-	float v35; // [esp+0h] [ebp-8h]
-	float v36; // [esp+4h] [ebp-4h]
+	float v4; // fst7
 
-	v35 = g_state[XST].texturexmul;
-	v36 = g_state[XST].textureymul;
 	if ( mode == 0 )
 		x_fatal("vertex without begin");
 	if ( g_state[XST].send & 1 )
@@ -386,20 +354,20 @@ void vertexdata(xt_data* data)
 		if ( g_state[XST].setnew & 0x10 )
 		{
 			texp[vertices].s = *((DWORD *)v2 + 7);
-			tex[vertices].s = v2[5] * v2[7] * v35;
+			tex[vertices].s = v2[5] * v2[7] * g_state[XST].texturexmul;
 			v4 = v2[6] * v2[7];
 		}
 		else
 		{
-			tex[vertices].s = v2[5] * v35;
+			tex[vertices].s = v2[5] * g_state[XST].texturexmul;
 			v4 = v2[6];
 		}
-		tex[vertices].t = v4 * v36;
+		tex[vertices].t = v4 * g_state[XST].textureymul;
 	}
 	if ( g_state[XST].send & 4 )
 	{
-		tex2[vertices].s = v2[8] * v35;
-		tex2[vertices].t = v2[9] * v36;
+		tex2[vertices].s = v2[8] * g_state[XST].texturexmul;
+		tex2[vertices].t = v2[9] * g_state[XST].textureymul;
 	}
 	switch (mode)
 	{
@@ -411,14 +379,11 @@ void vertexdata(xt_data* data)
 		case X_TRIANGLES:
 			if (state >= 2 )
 			{
-				v8 = corners++;
-				corner[v8] = 3;
-				v9 = corners++;
-				corner[v9] = vertices - 2;
-				state = 0;
+				corner[corners++] = 3;
+				corner[corners++] = vertices - 2;
 				corner[corners++] = vertices - 1;
-				v10 = corners++;
-				corner[v10] = vertices;
+				corner[corners++] = vertices;
+				state = 0;
 			}
 			else
 			{
@@ -429,23 +394,17 @@ void vertexdata(xt_data* data)
 		case X_QUADSTRIP:
 			if (state >= 2 )
 			{
-				v11 = corners++;
-				corner[v11] = 3;
+				corner[corners++] = 3;
 				if (flip)
 				{
-					v12 = corners++;
-					v13 = vertices;
-					corner[v12] = vertices - 1;
-					v14 = corners++;
-					corner[v14] = vertices - 2;
-					corner[corners] = v13;
+					corner[corners++] = vertices - 1;
+					corner[corners++] = vertices - 2;
+					corner[corners] = vertices;
 				}
 				else
 				{
-					v15 = corners++;
-					corner[v15] = vertices - 2;
-					v16 = corners++;
-					corner[v16] = vertices - 1;
+					corner[corners++] = vertices - 2;
+					corner[corners++] = vertices - 1;
 					corner[corners] = vertices;
 				}
 				flip ^= 1u;
@@ -459,16 +418,10 @@ void vertexdata(xt_data* data)
 		case X_TRIFAN:
 			if (state >= 2 )
 			{
-				v17 = corners;
-				v18 = vertices_base;
-				++corners;
-				corner[v17] = 3;
-				v19 = corners++;
-				corner[v19] = v18;
-				v20 = corners++;
-				corner[v20] = vertices - 1;
-				v21 = corners++;
-				corner[v21] = vertices;
+				corner[corners++] = 3;
+				corner[corners++] = vertices_base;
+				corner[corners++] = vertices - 1;
+				corner[corners++] = vertices;
 			}
 			else
 			{
@@ -478,17 +431,12 @@ void vertexdata(xt_data* data)
 		case X_QUADS:
 			if (state >= 3 )
 			{
-				v22 = corners++;
-				corner[v22] = 4;
-				v23 = corners++;
-				corner[v23] = vertices - 3;
-				v24 = corners++;
-				corner[v24] = vertices - 2;
-				v25 = corners++;
+				corner[corners++] = 4;
+				corner[corners++] = vertices - 3;
+				corner[corners++] = vertices - 2;
+				corner[corners++] = vertices - 1;
+				corner[corners++] = vertices;
 				state = 0;
-				corner[v25] = vertices - 1;
-				v26 = corners++;
-				corner[v26] = vertices;
 			}
 			else
 			{
@@ -498,12 +446,9 @@ void vertexdata(xt_data* data)
 		case X_POLYLINE:
 			if (state >= 1 )
 			{
-				v27 = corners++;
-				corner[v27] = 2;
-				v28 = corners++;
-				corner[v28] = vertices - 1;
-				v29 = corners++;
-				corner[v29] = vertices;
+				corner[corners++] = 2;
+				corner[corners++] = vertices - 1;
+				corner[corners++] = vertices;
 			}
 			else
 			{
@@ -513,13 +458,10 @@ void vertexdata(xt_data* data)
 		case X_LINES:
 			if (state >= 1 )
 			{
-				v30 = corners++;
-				corner[v30] = 2;
-				v31 = corners++;
+				corner[corners++] = 2;
+				corner[corners++] = vertices - 1;
+				corner[corners++] = vertices;
 				state = 0;
-				corner[v31] = vertices - 1;
-				v32 = corners++;
-				corner[v32] = vertices;
 			}
 			else
 			{
@@ -529,15 +471,11 @@ void vertexdata(xt_data* data)
 		case X_POLYGON:
 			if ( !state)
 			{
-				v33 = corners;
 				++state;
-				++corners;
-				corner[v33] = 1;
+				corner[corners++] = 1;
 			}
-			v34 = corners++;
-			corner[v34] = vertices;
-			result = corners_base + 64;
-			if ( corners_base + 64 < corners )
+			corner[corners++] = vertices;
+			if (corners > corners_base + 64 )
 				x_fatal("xgeom: too large X_POLYGON!\n");
 			break;
 		default:
@@ -1066,7 +1004,7 @@ LABEL_23:
 LABEL_55:
 			v5 += 2;
 			v4 += 2;
-			v2 += 5;
+			v2++;
 			v3 += 15;
 			v24 += 2;
 			if ( !--v13 )
@@ -1102,7 +1040,7 @@ LABEL_55:
 			}
 			v5 += 2;
 			v4 += 2;
-			v2 += 5;
+			v2 ++;
 			v3 += 15;
 			--v11;
 		}
