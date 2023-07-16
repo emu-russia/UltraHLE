@@ -97,7 +97,7 @@ Progress:
 |x_vxarray|Ready| |
 |clear|Ready| |
 |doclipvertex|Ready| |
-|doclip|Check!|:warning: There is a decompilation error somewhere in here|
+|doclip|Ready| |
 |clipfinish|Ready| |
 |clippoly|Ready| |
 |docliplineend|Ready| |

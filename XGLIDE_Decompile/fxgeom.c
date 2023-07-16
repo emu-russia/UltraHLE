@@ -1246,18 +1246,18 @@ LABEL_5:
 	return v26;
 }
 
-int doclip(int bit)
+void doclip(int bit)
 {
 	int *v1; // esi
 	int v2; // ecx
 	int v3; // ebx
 	int *v4; // ebp
-	int result; // eax
+	int *result; // eax
 
 	v1 = clipout;
 	v2 = clipin[0];
 	v3 = clipin[1];
-	v4 = clipin[2];
+	v4 = &clipin[2];
 	if ( *clipin != -1 && v3 != -1 )
 	{
 		while (bit & xfpos[v3].clip )
@@ -1276,8 +1276,8 @@ LABEL_9:
 		}
 		if (bit & xfpos[v2].clip )
 		{
-			++v1;
-			*(v1 - 1) = doclipvertex(bit, v3, v2);
+			*v1 = doclipvertex(bit, v3, v2);
+			v1++;
 		}
 		*v1 = v3;
 		goto LABEL_9;
@@ -1289,7 +1289,6 @@ LABEL_11:
 	result = clipout;
 	clipout = clipin;
 	clipin = result;
-	return result;
 }
 
 int clipfinish(int *vx)

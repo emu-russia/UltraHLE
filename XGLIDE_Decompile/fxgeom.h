@@ -15,7 +15,7 @@ int setuprvx(int first, int count);
 void x_vxrel(xt_pos* p, xt_data* d);
 void clear();
 int doclipvertex(int bit, int vi, int vo);
-int doclip(int bit);
+void doclip(int bit);
 int clipfinish(int* vx);
 int clippoly(int clor, int vxn, int* v, int* out);
 int docliplineend(int v1, int v2);
