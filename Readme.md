@@ -26,14 +26,13 @@ Tidied up for building under Visual Studio 2022.
 - Minor fixes in UltraHLE.rc and RESOURCE.H
 - Executable base address should be 0 (Linker->Advanced); If you are unsure about the recompiler, you can replace the `go` call with `sgo` in MAIN.C (`breakcommand("sgo");`)
 - A decompiled version of the library is used instead of XGLIDE.LIB
+- Correctly disabled DEBUGUI.C for Release builds
 
 ## Build
 
 You don't need to do anything special. You can build in Debug/Release x86 configuration.
 
 x64 build is not supported because UltraHLE uses inline assembler in .C files, which cannot be used in x64.
-
-:warning: The emulator in Release is very unstable, and crashes at the very beginning, right after startup. Somewhere the problem is in incompletely disabled debugging UI.
 
 ## Glide
 
