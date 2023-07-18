@@ -25,7 +25,7 @@ typedef struct _xt_memory	// 48 bytes
 	int max;		// 1
 	t_block free;	// 2..5
 	t_block used;   // 6..9
-	void* table;	// 10
+	t_block* table;	// 10
 	int tableind;	// 11  - table index
 } xt_memory;
 
@@ -62,7 +62,7 @@ typedef struct _xt_texture		// 152 bytes (38 dwords)
 extern int g_lasttexture;
 extern xt_texture g_texture[MAXTEXTURES];
 
-int newblock(int m);
+t_block* newblock(xt_memory* m);
 DWORD* addbefore(DWORD* b, DWORD* t);
 int addafter(int b, DWORD* t);
 DWORD* removeblk(DWORD** b);

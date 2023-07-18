@@ -7,15 +7,11 @@ xt_texture g_texture[MAXTEXTURES];		// The 0th entry is not used
 
 static xt_memory* mem[GLIDE_NUM_TMU];
 
-int newblock(int m)
+t_block* newblock(xt_memory* m)
 {
-	signed int v1; // edx
-
-	v1 = *(DWORD *)(m + 44);
-	if ( v1 >= X_MAX_BLOCKS)
+	if (m->tableind >= X_MAX_BLOCKS)
 		return 0;
-	*(DWORD *)(m + 44) = v1 + 1;
-	return 16 * v1 + *(DWORD *)(m + 40);
+	return &m->table[m->tableind++];
 }
 
 DWORD * addbefore(DWORD *b, DWORD *t)
@@ -152,7 +148,7 @@ xt_memory* memory_create(int min, int max)
 	mem->max = max;
 	mem->free.size = -1;
 	mem->used.size = -1;
-	mem->table = x_alloc(X_MAX_BLOCKS * sizeof(t_block));	// 0x8000
+	mem->table = (t_block *)x_alloc(X_MAX_BLOCKS * sizeof(t_block));	// 0x8000
 	mem->tableind = 0;
 	memory_clear(mem);
 	return mem;

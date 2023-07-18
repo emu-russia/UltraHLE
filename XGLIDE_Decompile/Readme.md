@@ -107,15 +107,15 @@ Progress:
 |flush_drawfx| |Check grDrawPlanarPolygon|
 |x_flush|Ready| |
 |**fxtext.c**|||
-|newblock| |TODO: Change to use t_block and xt_memory to make it pretty|
-|addbefore| | |
-|addafter| | |
-|removeblk| | |
-|memory_clear| | |
-|memory_alloc| | |
-|memory_free| | |
-|memory_create| | |
-|memory_delete| | |
+|newblock|Ready| |
+|addbefore| |TODO: Change to use t_block and xt_memory to make it pretty|
+|addafter| |TODO: Change to use t_block and xt_memory to make it pretty|
+|removeblk| |TODO: Change to use t_block and xt_memory to make it pretty|
+|memory_clear| |TODO: Change to use xt_memory|
+|memory_alloc| |TODO: Change to use xt_memory|
+|memory_free| |TODO: Change to use xt_memory|
+|memory_create| |TODO: Change to use xt_memory|
+|memory_delete| |TODO: Change to use xt_memory|
 |freetexmem| | |
 |makespace| | |
 |clearspace| | |
