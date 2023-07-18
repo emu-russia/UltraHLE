@@ -222,8 +222,10 @@ void view_regs(void)
                 con_printf("%s:",vname);
                 if(x==0)
                 {
-                    if(vnowhi==0) con_printf("%08X:",vnowhi);
-                    else          con_printf("........:");
+                    if (!view.showfpu) {
+                        if (vnowhi == 0) con_printf("%08X:", vnowhi);
+                        else          con_printf("........:");
+                    }
                 }
                 if(vnow!=vlast) con_attr(c_chg);
                 if(printq)
