@@ -616,7 +616,7 @@ void view_cons(void)
 
 void view_redraw(void)
 {
-    if(!view.changed)
+    if(!view.changed || RELEASE)
     {
         return;
     }
