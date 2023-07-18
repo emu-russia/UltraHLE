@@ -113,7 +113,12 @@ int main_start(void)
 
     dlist_ignoregraphics(0);
 
+    // Temporary solution. go runs too fast on fast processors and Zelda hangs when the moon appears.
+#if !RELEASE
     breakcommand("go");
+#else
+    breakcommand("sgo");
+#endif
 
     // wait for execution to start (up to 0.5 sec)
     for(i=0;i<500;i+=10)
