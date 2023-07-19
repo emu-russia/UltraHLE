@@ -128,99 +128,6 @@ void ac_sizegroup(Group *g)
     logc("compiler: group %08X size %i (op=%i)\n",g->addr,g->len,op);
 }
 
-OBEGIN(o_urpo)
-fld  dword ptr [ebx+0x00ED4AE8-0x00ED4914]
-fmul dword ptr [ebx+0x00ED4B08-0x00ED4914]
-fstp dword ptr [ebx+0x00ED4AD8-0x00ED4914]
-fld  dword ptr [ebx+0x00ED4AF0-0x00ED4914]
-fsub dword ptr [ebx+0x00ED4AD8-0x00ED4914]
-fstp dword ptr [ebx+0x00ED4AE0-0x00ED4914]
-OEND
-
-float urpo1a;
-float urpo2a;
-float urpo1b;
-float urpo2b;
-float urpo_f4;
-float urpo_f6;
-float urpo_f12;
-
-void urpoprint(void)
-{
-    /*
-    print("urpo ok( f4*f12:%5.2f f6-f4:%5.2f ) \n"
-          "    bad( f4*f12:%5.2f f6-f4:%5.2f ) f4:%5.2f f6:%5.2f f12:%5.2f\n",
-        urpo1a,urpo2a,
-        urpo1b,urpo2b,
-        urpo_f4,
-        urpo_f6,
-        urpo_f12);
-    */
-}
-
-
-OBEGIN(o_urpo2)
-/*
-fld  dword ptr [ebx+0x00ED4AE8-0x00ED4914]
-fstp dword ptr [urpo_f4]
-fld  dword ptr [ebx+0x00ED4B08-0x00ED4914]
-fstp dword ptr [urpo_f12]
-fld  dword ptr [ebx+0x00ED4AF0-0x00ED4914]
-fstp dword ptr [urpo_f6]
-
-fld  dword ptr [ebx+0x00ED4AE8-0x00ED4914]
-fmul dword ptr [ebx+0x00ED4B08-0x00ED4914]
-fstp dword ptr [urpo1a]
-fld  dword ptr [ebx+0x00ED4AF0-0x00ED4914]
-fsub dword ptr [urpo1a]
-fstp dword ptr [urpo2a]
-
-fld  dword ptr [ebx+0x00ED4AE8-0x00ED4914]
-fmul dword ptr [ebx+0x00ED4B08-0x00ED4914]
-fld  dword ptr [ebx+0x00ED4AF0-0x00ED4914]
-fsub st,st(1)
-fstp dword ptr [urpo2b]
-fstp dword ptr [urpo1b]
-*/
-
-#if 0
-fld  dword ptr [ebx+0x00ED4AE8-0x00ED4914]
-fmul dword ptr [ebx+0x00ED4B08-0x00ED4914]
-fstp dword ptr [ebx+0x00ED4AD8-0x00ED4914]
-fld  dword ptr [ebx+0x00ED4AF0-0x00ED4914]
-fsub dword ptr [ebx+0x00ED4AD8-0x00ED4914]
-fstp dword ptr [ebx+0x00ED4AE0-0x00ED4914]
-#else
-fld  dword ptr [ebx+0x00ED4AE8-0x00ED4914]
-fmul dword ptr [ebx+0x00ED4B08-0x00ED4914]
-fld  dword ptr [ebx+0x00ED4AF0-0x00ED4914]
-fsub st,st(1)
-fstp dword ptr [ebx+0x00ED4AE0-0x00ED4914]
-fstp dword ptr [ebx+0x00ED4AD8-0x00ED4914]
-#endif
-
-/*
-fld  dword ptr [ebx+0x00ED4AE8-0x00ED4914]
-fmul dword ptr [ebx+0x00ED4B08-0x00ED4914]
-fst  dword ptr [ebx+0x00ED4AD8-0x00ED4914]
-fld  dword ptr [ebx+0x00ED4AF0-0x00ED4914]
-fsub st,st(1)
-fstp dword ptr [ebx+0x00ED4AE0-0x00ED4914]
-fstp st(0)
-*/
-/*
-fld  dword ptr [ebx+0x00ED4AE8-0x00ED4914]
-fmul dword ptr [ebx+0x00ED4B08-0x00ED4914]
-fstp dword ptr [ebx+0x00ED4AD8-0x00ED4914]
-fld  dword ptr [ebx+0x00ED4AD8-0x00ED4914]
-fld  dword ptr [ebx+0x00ED4AF0-0x00ED4914]
-fsub st,st(1)
-fstp dword ptr [ebx+0x00ED4AE0-0x00ED4914]
-fstp st(0)
-*/
-
-OEND
-
 void ac_compilegroup(Group *g) // main
 {
     int   i,l;
@@ -258,31 +165,25 @@ void ac_compilegroup(Group *g) // main
     r.mark=0;
 
     ac_compilestartnew();
-
-if(0 && r.pc0==0x8008c594)
-{
-    insert(o_urpo2);
-}
-else
-{
-    alignedcodepos=mem.codeused;
-    for(i=0;i<g->len;)
     {
-        l=ac_compileop(g->addr+i*4);
-        if(!l)
+        alignedcodepos=mem.codeused;
+        for(i=0;i<g->len;)
         {
-            r.errors|=ERROR_INTER;
-            break;
-        }
-        i+=l;
-        if(mem.codeused>=mem.codemax-1000)
-        {
-            // out of mem, clear code cache
-            a_clearcodecache();
-            break;
+            l=ac_compileop(g->addr+i*4);
+            if(!l)
+            {
+                r.errors|=ERROR_INTER;
+                break;
+            }
+            i+=l;
+            if(mem.codeused>=mem.codemax-1000)
+            {
+                // out of mem, clear code cache
+                a_clearcodecache();
+                break;
+            }
         }
     }
-}
     ac_compileendnew();
 
     if(!r.errors && r.mark)

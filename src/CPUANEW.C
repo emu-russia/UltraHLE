@@ -2244,24 +2244,6 @@ static void ac_compilealign(void)
     insertdword(0x22222222);
 }
 
-dword urpoenv[32];
-dword *urpox=&st.breakout;
-
-OBEGIN(o_urpo2_checkfpustack)
-fnstenv ds:urpoenv
-fwait
-mov     eax,ds:[urpoenv+8]
-and     eax,0xffff
-cmp     eax,0xffff
-je      ok
-mov     eax,-1
-mov     ds:[ebx+0],eax
-mov     edx,[urpox]
-mov     eax,5
-mov     ds:[edx],eax
-ok:
-OEND
-
 void ac_compilestartnew(void)
 {
     Group *g=r.g;
@@ -2279,8 +2261,6 @@ void ac_compilestartnew(void)
 
     vmcache_clear(-1);
 //    insertbyte(0xCC);
-
-//    insert(o_urpo2_checkfpustack);
 }
 
 void ac_compileendnew(void)
