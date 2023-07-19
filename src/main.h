@@ -30,3 +30,8 @@ int   main_executing(void); // returns 1 if execution in progress
 void  main_hide3dfx(void);
 void  main_show3dfx(void);
 
+void* main_gethwnd(void);
+
+void outputhook(char* txt, char* full);
+
+void fixpath(char* path, int striplastname);

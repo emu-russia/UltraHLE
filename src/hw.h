@@ -2,6 +2,8 @@
 
 #pragma once
 
+void    hw_init(void);
+
 void    hw_check(void);
 // these in cpu.c temporarily
 void    hw_retrace(void);
@@ -13,3 +15,5 @@ void    hw_memio(void);
 int     hw_ismemiorange(dword addr);
 
 void    hw_gfxthread(void);
+
+void    hw_selectpad(int pad);
