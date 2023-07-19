@@ -505,7 +505,7 @@ char *mem_readoptype(dword addr)
         switch(t)
         {
         case GROUP_NEW:
-            sprintf(buf,"n   ",l);
+            sprintf(buf,"n   ");
             break;
         case GROUP_FAST:
             sprintf(buf,"a%-2i ",l);
