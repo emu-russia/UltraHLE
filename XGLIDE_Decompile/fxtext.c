@@ -840,7 +840,7 @@ void text_closedata(xt_texture* txt)
 	if ( txt->handle == g_state[XST].active.text1)
 		g_state[XST].active.text1 = 0;
 	if ( txt->handle == g_state[XST].active.text2)
-		g_state[XST].active.text1 = 0;		// TODO: Check, there seems to be a typo here (should be text2)
+		g_state[XST].active.text2 = 0;
 }
 
 int text_frameend()

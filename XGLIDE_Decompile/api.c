@@ -549,14 +549,14 @@ int x_dither(int type)
 	if (type == X_ENABLE)
 	{
 		g_state[XST].currentmode.dither = 1;
-LABEL_5:
 		g_state[XST].changed |= 4u;
 		return 0;
 	}
 	if (type == X_DISABLE)
 	{
 		g_state[XST].currentmode.dither = 0;
-		goto LABEL_5;
+		g_state[XST].changed |= 4u;
+		return 0;
 	}
 	return 1;
 }
@@ -608,11 +608,10 @@ int x_envcolor(float r, float g, float b, float a)
 	g_state[XST].currentmode.env[1] = g;
 	g_state[XST].currentmode.env[2] = b;
 	g_state[XST].currentmode.env[3] = a;
-	// TODO: Buggy (decompile bug?)
 	g_state[XST].currentmode.envc =
 		(unsigned __int8)(signed __int64)(r * 255.0) | 
 		((unsigned __int8)(signed __int64)(b * 255.0) << 16) | 
-		((((unsigned int)(signed __int64)(a * 255.0) << 16) | 
+		((((unsigned int)(signed __int64)(a * 255.0) << 24) |	// fixed. Was 16
 		(unsigned __int8)(signed __int64)(g * 255.0)) << 8);
 	g_state[XST].changed |= 4u;
 	return 0;
@@ -672,8 +671,7 @@ void x_reset(void)
 {
 	x_geometry(X_CULLBACK);
 	x_mask(X_ENABLE, X_ENABLE, X_ENABLE);
-	// TODO: Probably meant X_ENABLE?
-	x_dither(1);
+	x_dither(X_ENABLE);			// fixed. Was 1
 	x_blend(X_ONE, X_ZERO);
 	x_alphatest(1.0f);
 	x_combine(X_COLOR);
