@@ -10,23 +10,10 @@ Tidied up for building under Visual Studio 2022.
 
 ## Directory structure
 
-- src: original slightly modified sources
+- src: original modified sources
 - Build: this is where the executable will be built
 - Scripts: project for VS2022, which pulls sources and everything else from the original src folder by links.
 - XGLIDE_Decompile: decompiling the XGLIDE library.
-
-## How the sources are modified
-
-- Added `_CRT_SECURE_NO_WARNINGS` macro for unsafe calls
-- The `RELEASE=1` macro must be defined for Release builds, otherwise the console code will crash immediately after starting the emulator
-- `stricmp` replaced by `_stricmp`
-- `memicmp` replaced by `_memicmp`
-- `strlwr` replaced by `_strlwr`.
-- Unicode: Not Set (UltraHLE does not use Unicode)
-- Minor fixes in UltraHLE.rc and RESOURCE.H
-- Executable base address should be 0 (Linker->Advanced); If you are unsure about the recompiler, you can replace the `go` call with `sgo` in MAIN.C (`breakcommand("sgo");`)
-- A decompiled version of the library is used instead of XGLIDE.LIB
-- Correctly disabled DEBUGUI.C for Release builds
 
 ## Build
 
