@@ -53,8 +53,12 @@
 #define  DMULT       28  // Doubleword Multiply
 #define  DMULTU      29  // Doubleword Multiply Unsigned
 #define  DSLL        56  // Doubleword Shift Left Logical
+#define  DSLR		 58  // Doubleword Shift Right Logical
+#define  DSLA		 59  // Doubleword Shift Left Arithmetic
 #define  DSLLV       20  // Doubleword Shift Left Logical Variable
 #define  DSLL32      60  // Doubleword Shift Left Logical + 32
+#define  DSLR32		 62  // Doubleword Shift Right Logical + 32
+#define  DSLA32		 63  // Doubleword Shift Left Arithmetic + 32
 #define  DSRA        59  // Doubleword Shift Right Arithmetic
 #define  DSRAV       23  // Doubleword Shift Right Arithmetic Variable
 #define  DSRA32      63  // Doubleword Shift Right Arithmetic + 32

@@ -1,4 +1,5 @@
 #include "ultra.h"
+#include "opdefs_c.h"
 
 #define DUMP64 0 // dump 64 bit arithmetic
 
@@ -848,10 +849,10 @@ static void op_main(dword opcode)
     switch(op)
     {
     //------------------------------ignored coprosessor stuff
-    case 16: // cop0
+    case COP0: // cop0
         op_scc( opcode );
         break;
-    case 18: // cop2
+    case COP2: // cop2
         error("unimplemented COP2 opcode");
         break;
     //------------------------------special ops!
@@ -867,89 +868,89 @@ static void op_main(dword opcode)
         error("reserved group-opcode encountered in cpuc");
         break;
     //------------------------------loads
-    case 32: // LB
+    case LB: // LB
         op_readmem(opcode,-1);
         break;
-    case 36: // LBU
+    case LBU: // LBU
         op_readmem(opcode,1);
         break;
-    case 33: // LH
+    case LH: // LH
         op_readmem(opcode,-2);
         break;
-    case 37: // LHU
+    case LHU: // LHU
         op_readmem(opcode,2);
         break;
-    case 35: // LW
-    case 39: // LWU
+    case LW: // LW
+    case LWU: // LWU
         op_readmem(opcode,4);
         break;
-    case 34: // LWL
+    case LWL: // LWL
         op_rwmemrl(opcode,0,0);
         break;
-    case 38: // LWR
+    case LWR: // LWR
         op_rwmemrl(opcode,0,1);
         break;
 //    case 26: // LDL
 //    case 27: // LDR
-    case 55: // LD
+    case LD: // LD
 //        logi("doubleword load at (%08X)\n",st.pc);
         st.expanded64bit=1;
         op_readmem(opcode,8);
         break;
     //------------------------------stores
-    case 40: // SB
+    case SB: // SB
         op_writemem(opcode,1);
         break;
-    case 41: // SH
+    case SH: // SH
         op_writemem(opcode,2);
         break;
-    case 43: // SW
+    case SW: // SW
         op_writemem(opcode,4);
         break;
-    case 42: // SWL
+    case SWL: // SWL
         op_rwmemrl(opcode,1,0);
         break;
-    case 46: // SWR
+    case SWR: // SWR
         op_rwmemrl(opcode,1,1);
         break;
 //    case 44: // SDL
 //    case 45: // SDR
-    case 63: // SD
+    case SD: // SD
 //        logi("doubleword store at (%08X)\n",st.pc);
         op_writemem(opcode,8);
         break;
     //------------------------------arithmetic
-    case 8: // ADDI
-    case 9: // ADDIU
+    case ADDI: // ADDI
+    case ADDIU: // ADDIU
         GETREGSIMM;
         *rd=*rs + *rt;
         break;
-    case 24: // DADDI
-    case 25: // DADDIU
+    case DADDI: // DADDI
+    case DADDIU: // DADDIU
         GETREGSIMM64;
         addi64(rd,rs,rt);
         break;
-    case 10: // SLTI
+    case SLTI: // SLTI
         GETREGSIMM;
         *rd=((int)*rs < (int)*rt);
         break;
-    case 11: // SLTIU
+    case SLTIU: // SLTIU
         GETREGSIMM;
         *rd=((unsigned)*rs < (unsigned)*rt);
         break;
-    case 12: // ANDI
+    case ANDI: // ANDI
         GETREGSIMMUNS;
         *rd=*rs & *rt;
         break;
-    case 13: // ORI
+    case ORI: // ORI
         GETREGSIMMUNS;
         *rd=*rs | *rt;
         break;
-    case 14: // XORI
+    case XORI: // XORI
         GETREGSIMMUNS;
         *rd=*rs ^ *rt;
         break;
-    case 15: // LUI
+    case LUI: // LUI
         GETREGSIMM;
 //        print("at %08X lui %04X\n",st.pc,(*rt)&0xffff);
         if((*rt&0x1F00)==0x0400)
@@ -958,263 +959,263 @@ static void op_main(dword opcode)
         }
         *rd=*rt << 16;
         break;
-    case 0x40+0: // SLL
+    case 0x40+SLL: // SLL
         GETREGS;
         *rd=*rt << OP_SHAMT(opcode);
         break;
-    case 0x40+2: // SRL
+    case 0x40+SRL: // SRL
         GETREGS;
         *rd=(unsigned)*rt >> OP_SHAMT(opcode);
         break;
-    case 0x40+3: // SRA
+    case 0x40+SRA: // SRA
         GETREGS;
         *rd=(int)*rt >> OP_SHAMT(opcode);
         break;
-    case 0x40+4: // SLLV
+    case 0x40+SLLV: // SLLV
         GETREGS;
         *rd=*rt << *rs;
         break;
-    case 0x40+6: // SRLV
+    case 0x40+SRLV: // SRLV
         GETREGS;
         *rd=(unsigned)*rt >> *rs;
         break;
-    case 0x40+7: // SRAV
+    case 0x40+SRAV: // SRAV
         GETREGS;
         *rd=(int)*rt >> *rs;
         break;
-    case 0x40+20: // DSLLV
+    case 0x40+DSLLV: // DSLLV
         op_shift64(opcode,0,-1);
         break;
-    case 0x40+22: // DSRLV
+    case 0x40+DSRLV: // DSRLV
         op_shift64(opcode,1,-1);
         break;
-    case 0x40+23: // DSRAV
+    case 0x40+DSRAV: // DSRAV
         op_shift64(opcode,2,-1);
         break;
-    case 0x40+12: // SYSCALL
+    case 0x40+SYSCALL: // SYSCALL
         exception("opcode syscall");
         break;
-    case 0x40+13: // BREAK
+    case 0x40+BREAK: // BREAK
         exception("opcode break");
         break;
-    case 0x40+16: // MFHI
+    case 0x40+MFHI: // MFHI
         GETREGS;
         rd[0]=st.mhi.d2[0];
         rd[1]=st.mhi.d2[1];
         break;
-    case 0x40+17: // MTHI
+    case 0x40+MTHI: // MTHI
         GETREGS;
         st.mhi.d2[0]=rs[0];
         st.mhi.d2[1]=rs[1];
         break;
-    case 0x40+18: // MFLO
+    case 0x40+MFLO: // MFLO
         GETREGS;
         rd[0]=st.mlo.d2[0];
         rd[1]=st.mlo.d2[1];
         break;
-    case 0x40+19: // MTLO
+    case 0x40+MTLO: // MTLO
         GETREGS;
         st.mlo.d2[0]=rs[0];
         st.mlo.d2[1]=rs[1];
         break;
-    case 0x40+24: // MULT
+    case 0x40+MULT: // MULT
         GETREGS;
         op_mult(*rs,*rt);
         break;
-    case 0x40+25: // MULTU
+    case 0x40+MULTU: // MULTU
         GETREGS;
         op_multu(*rs,*rt);
         break;
-    case 0x40+26: // DIV
+    case 0x40+DIV: // DIV
         GETREGS;
         op_div(*rs,*rt);
         break;
-    case 0x40+27: // DIVU
+    case 0x40+DIVU: // DIVU
         GETREGS;
         op_divu(*rs,*rt);
         break;
-    case 0x40+28: // DMULT
+    case 0x40+DMULT: // DMULT
         op_dmultu(OP_RS(opcode),OP_RT(opcode));
         break;
-    case 0x40+29: // DMULTU
+    case 0x40+DMULTU: // DMULTU
         op_dmultu(OP_RS(opcode),OP_RT(opcode));
         break;
-    case 0x40+30: // DDIV
+    case 0x40+DDIV: // DDIV
         op_ddiv(OP_RS(opcode),OP_RT(opcode));
         break;
-    case 0x40+31: // DDIVU
+    case 0x40+DDIVU: // DDIVU
         op_ddivu(OP_RS(opcode),OP_RT(opcode));
         break;
-    case 0x40+32: // ADD
-    case 0x40+33: // ADDU
+    case 0x40+ADD: // ADD
+    case 0x40+ADDU: // ADDU
         GETREGS;
         *rd=*rs + *rt;
         break;
-    case 0x40+34: // SUB
-    case 0x40+35: // SUBU
+    case 0x40+SUB: // SUB
+    case 0x40+SUBU: // SUBU
         GETREGS;
         *rd=*rs - *rt;
         break;
-    case 0x40+36: // AND
+    case 0x40+AND: // AND
         GETREGS;
         *rd=*rs & *rt;
         rd[1]=rs[1] & rt[1]; // do 64bit too (goldeneye needs)
         break;
-    case 0x40+37: // OR
+    case 0x40+OR: // OR
         GETREGS;
         *rd=*rs | *rt;
         rd[1]=rs[1] | rt[1]; // do 64bit too (goldeneye needs)
         break;
-    case 0x40+38: // XOR
+    case 0x40+XOR: // XOR
         GETREGS;
         *rd=*rs ^ *rt;
         rd[1]=rs[1] ^ rt[1]; // do 64bit too (goldeneye needs)
         break;
-    case 0x40+39: // NOR
+    case 0x40+NOR: // NOR
         GETREGS;
         *rd=~(*rs | *rt);
         rd[1]=~(rs[1] | rt[1]); // do 64bit too (goldeneye needs)
         break;
-    case 0x40+42: // SLT
+    case 0x40+SLT: // SLT
         GETREGS;
         *rd=((int)*rs < (int)*rt);
         break;
-    case 0x40+43: // SLTU
+    case 0x40+SLTU: // SLTU
         GETREGS;
         *rd=((unsigned)*rs < (unsigned)*rt);
         break;
-    case 0x40+44: // DADD
-    case 0x40+45: // DADDU
+    case 0x40+DADD: // DADD
+    case 0x40+DADDU: // DADDU
         GETREGS;
         addi64(rd,rs,rt);
         break;
-    case 0x40+56: // DSLL
+    case 0x40+DSLL: // DSLL
         op_shift64(opcode,0,OP_SHAMT(opcode)+0);
         break;
-    case 0x40+58: // DSLR
+    case 0x40+DSLR: // DSLR
         op_shift64(opcode,1,OP_SHAMT(opcode)+0);
         break;
-    case 0x40+59: // DSLA
+    case 0x40+DSLA: // DSLA
         op_shift64(opcode,2,OP_SHAMT(opcode)+0);
         break;
-    case 0x40+60: // DSLL32
+    case 0x40+DSLL32: // DSLL32
         op_shift64(opcode,0,OP_SHAMT(opcode)+32);
         break;
-    case 0x40+62: // DSLR32
+    case 0x40+DSLR32: // DSLR32
         op_shift64(opcode,1,OP_SHAMT(opcode)+32);
         break;
-    case 0x40+63: // DSLA32
+    case 0x40+DSLA32: // DSLA32
         op_shift64(opcode,2,OP_SHAMT(opcode)+32);
         break;
     //------------------------------jump and branch
-    case 2: // J
+    case J: // J
         op_jump(opcode,0,-1);
         break;
-    case 3: // JAL
+    case JAL: // JAL
         op_jump(opcode,1,-1);
         break;
-    case 4: // BEQ
+    case BEQ: // BEQ
         GETREGSBR;
         flag=*rs==*rt;
         op_branch(opcode,flag,0,0);
         break;
-    case 5: // BNEQ
+    case BNE: // BNEQ
         GETREGSBR;
         flag=*rs!=*rt;
         op_branch(opcode,flag,0,0);
         break;
-    case 6: // BLEZ
+    case BLEZ: // BLEZ
         GETREGSBR;
         flag=(int)*rs<=0;
         op_branch(opcode,flag,0,0);
         break;
-    case 7: // BGTZ
+    case BGTZ: // BGTZ
         GETREGSBR;
         flag=(int)*rs>0;
         op_branch(opcode,flag,0,0);
         break;
-    case 20: // BEQL
+    case BEQL: // BEQL
         GETREGSBR;
         flag=(*rs==*rt);
         op_branch(opcode,flag,1,0);
         break;
-    case 21: // BNEL BNEQL
+    case BNEL: // BNEL BNEQL
         GETREGSBR;
         flag=(*rs!=*rt);
         op_branch(opcode,flag,1,0);
         break;
-    case 22: // BLEZL
+    case BLEZL: // BLEZL
         GETREGSBR;
         flag=(int)*rs<=0;
         op_branch(opcode,flag,1,0);
         break;
-    case 23: // BGTZL
+    case BGTZL: // BGTZL
         GETREGSBR;
         flag=(int)*rs>0;
         op_branch(opcode,flag,1,0);
         break;
-    case 0x40+8: // JR
+    case 0x40+JR: // JR
         op_jump(opcode,0,OP_RS(opcode));
         break;
-    case 0x40+9: // JALR
+    case 0x40+JALR: // JALR
         op_jump(opcode,1,OP_RS(opcode));
         break;
-    case 0x80+0: // BLTZ
+    case 0x80+BLTZ: // BLTZ
         GETREGSBR;
         flag=(int)*rs<0;
         op_branch(opcode,flag,0,0);
         break;
-    case 0x80+1: // BGEZ
+    case 0x80+BGEZ: // BGEZ
         GETREGSBR;
         flag=(int)*rs>=0;
         op_branch(opcode,flag,0,0);
         break;
-    case 0x80+2: // BLTZL
+    case 0x80+BLTZL: // BLTZL
         GETREGSBR;
         flag=(int)*rs<0;
         op_branch(opcode,flag,1,0);
         break;
-    case 0x80+3: // BGEZL
+    case 0x80+BGEZL: // BGEZL
         GETREGSBR;
         flag=(int)*rs>=0;
         op_branch(opcode,flag,1,0);
         break;
-    case 0x80+16: // BLTZAL
+    case 0x80+BLTZAL: // BLTZAL
         GETREGSBR;
         flag=(int)*rs<0;
         op_branch(opcode,flag,0,1);
         break;
-    case 0x80+17: // BGEZAL
+    case 0x80+BGEZAL: // BGEZAL
         GETREGSBR;
         flag=(int)*rs>=0;
         op_branch(opcode,flag,0,1);
         break;
-    case 0x80+18: // BLTZALL
+    case 0x80+BLTZALL: // BLTZALL
         GETREGSBR;
         flag=(int)*rs<0;
         op_branch(opcode,flag,1,1);
         break;
-    case 0x80+19: // BGEZALL
+    case 0x80+BGEZALL: // BGEZALL
         GETREGSBR;
         flag=(int)*rs>=0;
         op_branch(opcode,flag,1,1);
         break;
-    case 47: // CACHE
+    case CACHE: // CACHE
         break;
     //------------------------------fpu
-    case 17:
+    case COP1:
         op_fpu(opcode);
         break;
-    case 53: // LDC1
+    case LDC1: // LDC1
         op_readmem(opcode,0x18);
         break;
-    case 61: // SDC1
+    case SDC1: // SDC1
         op_writemem(opcode,0x18);
         break;
-    case 49: // LWC1
+    case LWC1: // LWC1
         op_readmem(opcode,0x14);
         break;
-    case 57: // SWC1
+    case SWC1: // SWC1
         op_writemem(opcode,0x14);
         break;
     //--------------
@@ -1253,4 +1254,3 @@ void c_exec(void)
         cpu_notify_pc(st.pc);
     }
 }
-

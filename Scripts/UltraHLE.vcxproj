@@ -102,12 +102,6 @@
     <ClCompile Include="..\src\cpuanew.c" />
     <ClCompile Include="..\src\cpuautil.c" />
     <ClCompile Include="..\src\cpuc.c" />
-    <ClCompile Include="..\src\cpug.c">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\src\debugui.c" />
     <ClCompile Include="..\src\disasm.c" />
     <ClCompile Include="..\src\disasm86.c" />

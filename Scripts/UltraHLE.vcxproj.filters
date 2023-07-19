@@ -231,9 +231,6 @@
     <ClCompile Include="..\src\cpuc.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\cpug.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\debugui.c">
       <Filter>Source Files</Filter>
     </ClCompile>
