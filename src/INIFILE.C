@@ -392,5 +392,3 @@ void inifile_readtemp(char *cartnamep)
     memcpy(&cart,&bak,sizeof(cart));
     tempread=0;
 }
-
-

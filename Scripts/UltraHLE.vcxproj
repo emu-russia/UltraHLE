@@ -61,6 +61,8 @@
   <ItemGroup>
     <ClInclude Include="..\src\CONSOLE.H" />
     <ClInclude Include="..\src\CPUA.H" />
+    <ClInclude Include="..\src\DLIST.H" />
+    <ClInclude Include="..\src\INIFILE.H" />
     <ClInclude Include="..\src\LISTVIEW.H" />
     <ClInclude Include="..\src\LOADSAVE.H" />
     <ClInclude Include="..\src\MAIN.H" />
@@ -71,13 +73,16 @@
     <ClInclude Include="..\src\OSPATCH.H" />
     <ClInclude Include="..\src\RDP.H" />
     <ClInclude Include="..\src\resources\RESOURCE.H" />
+    <ClInclude Include="..\src\SLIST.H" />
     <ClInclude Include="..\src\SOUND.H" />
     <ClInclude Include="..\src\STDSDK.H" />
+    <ClInclude Include="..\src\SYNC.H" />
     <ClInclude Include="..\src\TIMER.H" />
     <ClInclude Include="..\src\ULTRA.H" />
     <ClInclude Include="..\src\ULTRAHLE.H" />
     <ClInclude Include="..\src\VERSION.H" />
     <ClInclude Include="..\src\X.H" />
+    <ClInclude Include="..\src\ZLIST.H" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\XGLIDE_Decompile\Scripts\XGLIDE.vcxproj">

@@ -1235,11 +1235,7 @@ void command_fkey(int key);
 **
 */
 
-void sync_init(void);
-void sync_thread(void);
-void sync_gfxframedone(void);
-void sync_retrace(void);
-void sync_checkretrace(void);
+#include "sync.h"
 
 /****************************************************************************
 ** Graphics, Sound and OS emulation
@@ -1251,19 +1247,11 @@ void op_patch(int patch); // patch.c
 // rdp emulation.
 #include "rdp.h"
 
-// GRAPHICS - display lists
-void dlist_execute(OSTask_t *task); // execute a display list
-void dlist_addtestdot(int y); // add a dot to the framerate graph in debug mode
-void dlist_cammove(float x,float y,float z);
-void dlist_ignoregraphics(int ignore);
+#include "dlist.h"
 
-// SOUND - sound lists
-void slist_execute(OSTask_t *task); // execute a sound list
-int  slist_nextbuffer(dword m_addr,int bytes); // for playing audio (not implemented)
-int  slist_getlength(void); // get current audio position (not implemented)
+#include "slist.h"
 
-// ZELDA specific lists
-void zlist_uncompress(OSTask_t *task);
+#include "zlist.h"
 
 #include "sound.h" // directsound
 
@@ -1271,10 +1259,7 @@ void *main_gethwnd(void);
 
 void outputhook(char *txt,char *full);
 
-void inifile_command(char *cmd);
-void inifile_read(char *cartnamep);
-void inifile_readtemp(char *cartnamep);
-void inifile_patches(int dmanum);
+#include "inifile.h"
 
 void boot(char *cartname,int nomemmap);
 
