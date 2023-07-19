@@ -1,5 +1,4 @@
 #include "ultra.h"
-#include "x.h"
 
 // whole frame collected, drawn in bursts
 #define MAXVX       16384

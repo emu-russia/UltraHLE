@@ -1,14 +1,5 @@
 #include "pch.h"
 
-void zerobase()
-{
-}
-
-void mysleep(DWORD dwMilliseconds)
-{
-	Sleep(dwMilliseconds);
-}
-
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 {
 	return TRUE;

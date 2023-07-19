@@ -15,7 +15,7 @@ static dword   asm_temp4;
 void vmcache_add(int reg,int off)
 {
     r.vmcachei=(r.vmcachei+1)&(VMCACHESIZE-1);
-    insertmemwopcode(X_MOV,REG_NONE,(dword)(asm_vmcache+r.vmcachei),REG_ECX);
+    insertmemwopcode(X86_MOV,REG_NONE,(dword)(asm_vmcache+r.vmcachei),REG_ECX);
     r.vmcache[r.vmcachei].reg=reg;
     r.vmcache[r.vmcachei].off=off;
 }
@@ -280,10 +280,10 @@ static void ac_flushregs(int allbut1,int allbut2)
 static void ac_jumptogroup(int x86reg)
 {
     // move group to eax
-    insertregopcode(X_MOV,REG_EAX,x86reg);
+    insertregopcode(X86_MOV,REG_EAX,x86reg);
     // load group length
-    insertimmopcode(X_IMMMOV,REG_ECX,-r.g->len);
-    insertjump(fastexec_loop); // insertbyte(X_RET);
+    insertimmopcode(X86_IMMMOV,REG_ECX,-r.g->len);
+    insertjump(fastexec_loop); // insertbyte(X86_RET);
     r.inserted=99;
 }
 
@@ -300,43 +300,43 @@ static void ac_jumptoreg(int x86reg,int isret)
 {
 #if OLDSTYLE
     // move PC to edx
-    insertregopcode(X_MOV,REG_EDX,x86reg);
+    insertregopcode(X86_MOV,REG_EDX,x86reg);
     if(isret && r.opt_domemio)
     {
-        insertmemropcode(X_MOV,REG_ESI,REG_EBX,STADDR(st.memiodetected));
+        insertmemropcode(X86_MOV,REG_ESI,REG_EBX,STADDR(st.memiodetected));
     }
     // load group length
-    insertimmopcode(X_IMMMOV,REG_ECX,-r.g->len);
+    insertimmopcode(X86_IMMMOV,REG_ECX,-r.g->len);
     // clear eax
-    insertregopcode(X_XOR,REG_EAX,REG_EAX);
+    insertregopcode(X86_XOR,REG_EAX,REG_EAX);
     if(isret)
     {
         // clear 64bit variable in st (all reg jumps, mainly JR RA clear it)
-        insertmemwopcode(X_MOV,REG_EBX,STADDR(st.expanded64bit),REG_EAX);
+        insertmemwopcode(X86_MOV,REG_EBX,STADDR(st.expanded64bit),REG_EAX);
         if(r.opt_domemio)
         {
             // check memio (returns if not)
             insert(o_memiocheck);
             // replace jump
             mem.codeused-=5;
-            insertjump(fastexec_loop); // insertbyte(X_RET);
+            insertjump(fastexec_loop); // insertbyte(X86_RET);
             // insert CALL or_memiocheck, RET
             insertbyte(0x60); // pushad
             insertcall(hw_memio);
             insertbyte(0x61); // popad
         }
-        insertjump(fastexec_loop); // insertbyte(X_RET);
+        insertjump(fastexec_loop); // insertbyte(X86_RET);
     }
     else
     {
         // insert RET
-        insertjump(fastexec_loop); // insertbyte(X_RET);
+        insertjump(fastexec_loop); // insertbyte(X86_RET);
     }
 #else
     // move PC to edx
-    insertregopcode(X_MOV,REG_EDX,x86reg);
+    insertregopcode(X86_MOV,REG_EDX,x86reg);
     // load group length
-    insertimmopcode(X_IMMMOV,REG_ECX,-r.g->len);
+    insertimmopcode(X86_IMMMOV,REG_ECX,-r.g->len);
     // clear eax
     if(isret)
     {
@@ -345,8 +345,8 @@ static void ac_jumptoreg(int x86reg,int isret)
     else
     {
         // insert RET
-        insertregopcode(X_XOR,REG_EAX,REG_EAX);
-        insertjump(fastexec_loop); // insertbyte(X_RET);
+        insertregopcode(X86_XOR,REG_EAX,REG_EAX);
+        insertjump(fastexec_loop); // insertbyte(X86_RET);
     }
 #endif
     r.inserted=99;
@@ -356,7 +356,7 @@ static void ac_jumpto(dword addr)
 {
     dword ng;
     ng=(dword)ac_creategroup(addr);
-    insertimmopcode(X_IMMMOV,REG_EAX,ng);
+    insertimmopcode(X86_IMMMOV,REG_EAX,ng);
     ac_jumptogroup(REG_EAX);
 }
 
@@ -388,8 +388,8 @@ static void ac_jump(dword opcode,int options)
     // link
     if(options&J_LINK)
     {
-        insertimmopcode(X_IMMMOV,REG_EAX,r.pc+4); // delay slot already added 4
-        insertmemwopcode(X_MOV,REG_EBX,STADDR(RA.d),REG_EAX);
+        insertimmopcode(X86_IMMMOV,REG_EAX,r.pc+4); // delay slot already added 4
+        insertmemwopcode(X86_MOV,REG_EBX,STADDR(RA.d),REG_EAX);
     }
 
     // jump
@@ -398,7 +398,7 @@ static void ac_jump(dword opcode,int options)
         if(xrs==REG_NONE)
         {
             xrs=REG_EDX;
-            insertmemropcode(X_MOV,xrs,REG_EBX,STADDR(st.g[rs]));
+            insertmemropcode(X86_MOV,xrs,REG_EBX,STADDR(st.g[rs]));
         }
         ac_jumptoreg(xrs,rs==0x1f);
     }
@@ -471,12 +471,12 @@ void ac_branch(dword opcode, int cmpop, int flags)
             // alloc EDX register for compare result
             xrd=reg_alloc(XNAME_TEMP+1,REG_EDX);
             // - clear edx
-            insertregopcode(X_XOR,xrd,xrd);
+            insertregopcode(X86_XOR,xrd,xrd);
         }
 
         // test fpu flag
-        insertmemropcode(X_MOV,REG_EAX,REG_EBX,STADDR(st.fputrue));
-        insertregopcode(X_TEST,REG_EAX,REG_EAX);
+        insertmemropcode(X86_MOV,REG_EAX,REG_EBX,STADDR(st.fputrue));
+        insertregopcode(X86_TEST,REG_EAX,REG_EAX);
     }
     else if(cmpop!=CMP_ALWAYS)
     {
@@ -485,7 +485,7 @@ void ac_branch(dword opcode, int cmpop, int flags)
             // alloc EDX register for compare result
             xrd=reg_alloc(XNAME_TEMP+1,REG_EDX);
             // - clear edx
-            insertregopcode(X_XOR,xrd,xrd);
+            insertregopcode(X86_XOR,xrd,xrd);
         }
 
         rs=OP_RS(opcode);
@@ -533,51 +533,51 @@ void ac_branch(dword opcode, int cmpop, int flags)
         if(rt==0 && xrs!=REG_NONE)
         {
             // direct test of register
-            insertregopcode(X_TEST,xrs,xrs);
+            insertregopcode(X86_TEST,xrs,xrs);
         }
         else
         {
             if(xrs!=REG_NONE && rt==-1)
             {
-                insertimmopcode(X_IMMCMP,xrs,r.slt_imm);
+                insertimmopcode(X86_IMMCMP,xrs,r.slt_imm);
             }
             else if(xrs!=REG_NONE && xrt!=REG_NONE)
             {
-                insertregopcode(X_CMP,xrs,xrt);
+                insertregopcode(X86_CMP,xrs,xrt);
             }
             else
             {
                 if(rs==0)
                 {
-                    insertregopcode(X_XOR,xcm,xcm);
+                    insertregopcode(X86_XOR,xcm,xcm);
                 }
                 else if(xrs==REG_NONE)
                 {
                     // rs not in reg, load from mem
-                    insertmemropcode(X_MOV,xcm,REG_EBX,STADDR(st.g[rs]));
+                    insertmemropcode(X86_MOV,xcm,REG_EBX,STADDR(st.g[rs]));
                 }
                 else
                 {
                     // rs is in reg, just a reg move
-                    insertregopcode(X_MOV,xcm,xrs);
+                    insertregopcode(X86_MOV,xcm,xrs);
                 }
                 if(rt==-1)
                 {
-                    insertimmopcode(X_IMMCMP,xcm,r.slt_imm);
+                    insertimmopcode(X86_IMMCMP,xcm,r.slt_imm);
                 }
                 else if(rt==0)
                 {
-                    insertregopcode(X_TEST,xcm,xcm);
+                    insertregopcode(X86_TEST,xcm,xcm);
                 }
                 else if(xrt==REG_NONE)
                 {
                     // rs not in reg, load from mem
-                    insertmemropcode(X_CMP,xcm,REG_EBX,STADDR(st.g[rt]));
+                    insertmemropcode(X86_CMP,xcm,REG_EBX,STADDR(st.g[rt]));
                 }
                 else
                 {
                     // rs is in reg, just a reg move
-                    insertregopcode(X_CMP,xcm,xrt);
+                    insertregopcode(X86_CMP,xcm,xrt);
                 }
             }
         }
@@ -614,7 +614,7 @@ void ac_branch(dword opcode, int cmpop, int flags)
         ac_flushregs(0,0);
 
         // do the jump
-        insertimmopcode(X_IMMMOV,REG_EAX,jumptrue);
+        insertimmopcode(X86_IMMMOV,REG_EAX,jumptrue);
         ac_jumptogroup(REG_EAX);
 
         //---- branch false
@@ -634,7 +634,7 @@ void ac_branch(dword opcode, int cmpop, int flags)
         ac_flushregs(0,0);
 
         // do the jump
-        insertimmopcode(X_IMMMOV,REG_EAX,jumpfalse);
+        insertimmopcode(X86_IMMMOV,REG_EAX,jumpfalse);
         ac_jumptogroup(REG_EAX);
     }
     else
@@ -662,10 +662,10 @@ void ac_branch(dword opcode, int cmpop, int flags)
 
         if(r.slt_branch)
         {
-            insertmemwopcode(X_MOV,REG_EBX,STADDR(st.g[1]),REG_EDX);
+            insertmemwopcode(X86_MOV,REG_EBX,STADDR(st.g[1]),REG_EDX);
             if(slt_flip)
             {
-                insertimmopcode(X_IMMXOR,REG_EDX,1);
+                insertimmopcode(X86_IMMXOR,REG_EDX,1);
             }
         }
 
@@ -681,7 +681,7 @@ void ac_branch(dword opcode, int cmpop, int flags)
         // load EAX with destination address
         if(cmpop==CMP_ALWAYS)
         {
-            insertimmopcode(X_IMMMOV,REG_EAX,jumptrue);
+            insertimmopcode(X86_IMMMOV,REG_EAX,jumptrue);
         }
         else
         {
@@ -819,7 +819,7 @@ static void ac_regmove(int fpureg,int intreg,int tofpu)
         if(intreg==0)
         {
             xrs=REG_EAX;
-            insertregopcode(X_XOR,xrs,xrs);
+            insertregopcode(X86_XOR,xrs,xrs);
         }
         else
         {
@@ -827,21 +827,21 @@ static void ac_regmove(int fpureg,int intreg,int tofpu)
             if(xrs==REG_NONE)
             {
                 xrs=REG_EAX;
-                insertmemropcode(X_MOV,xrs,REG_EBX,STADDR(st.g[intreg]));
+                insertmemropcode(X86_MOV,xrs,REG_EBX,STADDR(st.g[intreg]));
             }
         }
-        if(fpureg==REGMOVE_MLO)      insertmemwopcode(X_MOV,REG_EBX,STADDR(st.mlo),xrs);
-        else if(fpureg==REGMOVE_MHI) insertmemwopcode(X_MOV,REG_EBX,STADDR(st.mhi),xrs);
-        else                         insertmemwopcode(X_MOV,REG_EBX,STADDR(st.f[fpureg]),xrs);
+        if(fpureg==REGMOVE_MLO)      insertmemwopcode(X86_MOV,REG_EBX,STADDR(st.mlo),xrs);
+        else if(fpureg==REGMOVE_MHI) insertmemwopcode(X86_MOV,REG_EBX,STADDR(st.mhi),xrs);
+        else                         insertmemwopcode(X86_MOV,REG_EBX,STADDR(st.f[fpureg]),xrs);
     }
     else
     {
         // fpureg->intreg
         xrd=reg_allocnew(intreg);
-        if(fpureg==REGMOVE_MLO)       insertmemropcode(X_MOV,xrd,REG_EBX,STADDR(st.mlo));
-        else if(fpureg==REGMOVE_MHI)  insertmemropcode(X_MOV,xrd,REG_EBX,STADDR(st.mhi));
-        else if(fpureg==REGMOVE_ZERO) insertregopcode(X_XOR,xrd,xrd);
-        else                          insertmemropcode(X_MOV,xrd,REG_EBX,STADDR(st.f[fpureg]));
+        if(fpureg==REGMOVE_MLO)       insertmemropcode(X86_MOV,xrd,REG_EBX,STADDR(st.mlo));
+        else if(fpureg==REGMOVE_MHI)  insertmemropcode(X86_MOV,xrd,REG_EBX,STADDR(st.mhi));
+        else if(fpureg==REGMOVE_ZERO) insertregopcode(X86_XOR,xrd,xrd);
+        else                          insertmemropcode(X86_MOV,xrd,REG_EBX,STADDR(st.f[fpureg]));
         regwrite(xrd);
         // ecx address cache changed
         if(r.lastmareg==intreg)
@@ -860,25 +860,25 @@ void ac_fpulwsw(dword opcode,int op)
     /*
     case 53: // LDC1
         ac_regsma(opcode,M_RD,0,0);
-        insertmodrmopcode(X_FLD8,0,REG_ECX,0);
+        insertmodrmopcode(X86_FLD8,0,REG_ECX,0);
         freg_pushtop(OP_RT(opcode),8);
         break;
     case 61: // SDC1
         freg_push(OP_RT(opcode),8);
         ac_regsma(opcode,M_RD,0,0);
-        insertmodrmopcode(X_FSTP8,0,REG_ECX,0);
+        insertmodrmopcode(X86_FSTP8,0,REG_ECX,0);
         freg_poptop();
         break;
     case 49: // LWC1
         ac_regsma(opcode,M_RD,0,0);
-        insertmodrmopcode(X_FLD4,0,REG_ECX,0);
+        insertmodrmopcode(X86_FLD4,0,REG_ECX,0);
         freg_pushtop(OP_RT(opcode),4);
         print("pushtop %i\n",OP_RT(opcode));
         break;
     case 57: // SWC1
         freg_push(OP_RT(opcode),4);
         ac_regsma(opcode,M_RD,0,0);
-        insertmodrmopcode(X_FSTP4,0,REG_ECX,0);
+        insertmodrmopcode(X86_FSTP4,0,REG_ECX,0);
         freg_poptop();
         break;
     */
@@ -1091,8 +1091,8 @@ print("strange FPU cmp at %08X\n",r.pc);
                 insertbyte(0xD8);
                 insertbyte(0xD0+rt);
             }
-            else if(fmt==16) insertmodrmopcode(X_FCOM4,0,REG_EBX,STADDR(st.f[OP_RT(opcode)]));
-            else if(fmt==17) insertmodrmopcode(X_FCOM8,0,REG_EBX,STADDR(st.f[OP_RT(opcode)]));
+            else if(fmt==16) insertmodrmopcode(X86_FCOM4,0,REG_EBX,STADDR(st.f[OP_RT(opcode)]));
+            else if(fmt==17) insertmodrmopcode(X86_FCOM8,0,REG_EBX,STADDR(st.f[OP_RT(opcode)]));
         }
         else
         {
@@ -1116,8 +1116,8 @@ print("strange FPU cmp at %08X\n",r.pc);
                 insertbyte(0xD8);
                 insertbyte(0xD8+rt);
             }
-            else if(fmt==16) insertmodrmopcode(X_FCOMP4,0,REG_EBX,STADDR(st.f[OP_RT(opcode)]));
-            else if(fmt==17) insertmodrmopcode(X_FCOMP8,0,REG_EBX,STADDR(st.f[OP_RT(opcode)]));
+            else if(fmt==16) insertmodrmopcode(X86_FCOMP4,0,REG_EBX,STADDR(st.f[OP_RT(opcode)]));
+            else if(fmt==17) insertmodrmopcode(X86_FCOMP8,0,REG_EBX,STADDR(st.f[OP_RT(opcode)]));
 
             freg_poptop();
         }
@@ -1154,8 +1154,8 @@ print("strange FPU cmp at %08X\n",r.pc);
                 insertbyte(0xD8);
                 insertbyte(0xC0+rt);
             }
-            else if(fmt==16) insertmodrmopcode(X_FADD4,0,REG_EBX,STADDR(st.f[OP_RT(opcode)]));
-            else             insertmodrmopcode(X_FADD8,0,REG_EBX,STADDR(st.f[OP_RT(opcode)]));
+            else if(fmt==16) insertmodrmopcode(X86_FADD4,0,REG_EBX,STADDR(st.f[OP_RT(opcode)]));
+            else             insertmodrmopcode(X86_FADD8,0,REG_EBX,STADDR(st.f[OP_RT(opcode)]));
             break;
         case 1: // FSUB
             if(rt!=REG_NONE)
@@ -1163,8 +1163,8 @@ print("strange FPU cmp at %08X\n",r.pc);
                 insertbyte(0xD8);
                 insertbyte(0xE0+rt);
             }
-            else if(fmt==16) insertmodrmopcode(X_FSUB4,0,REG_EBX,STADDR(st.f[OP_RT(opcode)]));
-            else             insertmodrmopcode(X_FSUB8,0,REG_EBX,STADDR(st.f[OP_RT(opcode)]));
+            else if(fmt==16) insertmodrmopcode(X86_FSUB4,0,REG_EBX,STADDR(st.f[OP_RT(opcode)]));
+            else             insertmodrmopcode(X86_FSUB8,0,REG_EBX,STADDR(st.f[OP_RT(opcode)]));
             break;
         case 2: // FMUL
             if(rt!=REG_NONE)
@@ -1172,8 +1172,8 @@ print("strange FPU cmp at %08X\n",r.pc);
                 insertbyte(0xD8);
                 insertbyte(0xC8+rt);
             }
-            else if(fmt==16) insertmodrmopcode(X_FMUL4,0,REG_EBX,STADDR(st.f[OP_RT(opcode)]));
-            else             insertmodrmopcode(X_FMUL8,0,REG_EBX,STADDR(st.f[OP_RT(opcode)]));
+            else if(fmt==16) insertmodrmopcode(X86_FMUL4,0,REG_EBX,STADDR(st.f[OP_RT(opcode)]));
+            else             insertmodrmopcode(X86_FMUL8,0,REG_EBX,STADDR(st.f[OP_RT(opcode)]));
             break;
         case 3: // FDIV
             if(rt!=REG_NONE)
@@ -1181,8 +1181,8 @@ print("strange FPU cmp at %08X\n",r.pc);
                 insertbyte(0xD8);
                 insertbyte(0xF0+rt);
             }
-            else if(fmt==16) insertmodrmopcode(X_FDIV4,0,REG_EBX,STADDR(st.f[OP_RT(opcode)]));
-            else             insertmodrmopcode(X_FDIV8,0,REG_EBX,STADDR(st.f[OP_RT(opcode)]));
+            else if(fmt==16) insertmodrmopcode(X86_FDIV4,0,REG_EBX,STADDR(st.f[OP_RT(opcode)]));
+            else             insertmodrmopcode(X86_FDIV8,0,REG_EBX,STADDR(st.f[OP_RT(opcode)]));
             break;
         case 4: // SQRT
             insertbyte(0xD9);
@@ -1374,22 +1374,22 @@ static void ac_regsma(dword opcode,int type,int size,int fpu)
         if(xrs==REG_NONE)
         {
             // rs not in reg, load from mem
-            insertmemropcode(X_MOV,REG_ECX,REG_EBX,STADDR(st.g[rs]));
+            insertmemropcode(X86_MOV,REG_ECX,REG_EBX,STADDR(st.g[rs]));
         }
         else
         {
             // rs is in reg, just a reg move
-            insertregopcode(X_MOV,REG_ECX,xrs);
+            insertregopcode(X86_MOV,REG_ECX,xrs);
         }
         // mask to ramsize
-        insertimmopcode(X_IMMAND,REG_ECX,mem.ramsize-1);
+        insertimmopcode(X86_IMMAND,REG_ECX,mem.ramsize-1);
         // add immediate and lookup base
-        insertimmopcode(X_IMMADD,REG_ECX,imm+(dword)mem.ram);
+        insertimmopcode(X86_IMMADD,REG_ECX,imm+(dword)mem.ram);
     }
     else if(r.opt_vmcache && (i=vmcache_find(rs,imm))>=0)
     {
         cstat.inmasimple++;
-        insertmemropcode(X_MOV,REG_ECX,REG_NONE,(dword)(asm_vmcache+i));
+        insertmemropcode(X86_MOV,REG_ECX,REG_NONE,(dword)(asm_vmcache+i));
         addecx=imm-r.vmcache[i].off;
 //        print("vmcache %i at %08X reg r%02i+%-8i (last r%02i+%-8i) addecx=%i\n",
 //            i,r.pc,rs,imm,r.vmcache[i].reg,r.vmcache[i].off,addecx);
@@ -1402,18 +1402,18 @@ static void ac_regsma(dword opcode,int type,int size,int fpu)
         if(xrs==REG_NONE)
         {
             // rs not in reg, load from mem
-            insertmemropcode(X_MOV,REG_EAX,REG_EBX,STADDR(st.g[rs]));
+            insertmemropcode(X86_MOV,REG_EAX,REG_EBX,STADDR(st.g[rs]));
         }
         else
         {
             // rs is in reg, just a reg move
-            insertregopcode(X_MOV,REG_EAX,xrs);
+            insertregopcode(X86_MOV,REG_EAX,xrs);
             // TBD: convert to LEA
         }
         // add immediate (if present)
         if(imm)
         {
-            insertimmopcode(X_IMMADD,REG_EAX,imm);
+            insertimmopcode(X86_IMMADD,REG_EAX,imm);
         }
 
         // perform virtual memory lookup
@@ -1445,7 +1445,7 @@ static void ac_regsma(dword opcode,int type,int size,int fpu)
     {
         if(addecx)
         {
-            insertimmopcode(X_IMMADD,REG_ECX,addecx);
+            insertimmopcode(X86_IMMADD,REG_ECX,addecx);
             r.lastmaoff+=addecx;
         }
         // just calc address to ECX
@@ -1455,7 +1455,7 @@ static void ac_regsma(dword opcode,int type,int size,int fpu)
     {
         if(addecx)
         {
-            insertimmopcode(X_IMMADD,REG_ECX,addecx);
+            insertimmopcode(X86_IMMADD,REG_ECX,addecx);
         }
         ip[IP_RT]=STADDR(st.g[rd]);
         switch(size)
@@ -1474,30 +1474,30 @@ static void ac_regsma(dword opcode,int type,int size,int fpu)
         {
             if(fpu)
             {
-                insertmemropcode(X_MOV,REG_EAX,REG_EBX,STADDR(st.f[rd]));
+                insertmemropcode(X86_MOV,REG_EAX,REG_EBX,STADDR(st.f[rd]));
             }
             else
             {
                 if(rd==0)
                 {
-                    insertregopcode(X_XOR,REG_EAX,REG_EAX);
+                    insertregopcode(X86_XOR,REG_EAX,REG_EAX);
                 }
                 else if(xrd==REG_EAX)
                 {
                     // rd is temp, load
-                    insertmemropcode(X_MOV,REG_EAX,REG_EBX,STADDR(st.g[rd]));
+                    insertmemropcode(X86_MOV,REG_EAX,REG_EBX,STADDR(st.g[rd]));
                 }
             }
             // store
-            insertmemwopcode(X_MOV,REG_ECX,addecx,xrd);
+            insertmemwopcode(X86_MOV,REG_ECX,addecx,xrd);
         }
         else
         {
             // load
-            insertmemropcode(X_MOV,xrd,REG_ECX,addecx);
+            insertmemropcode(X86_MOV,xrd,REG_ECX,addecx);
             if(fpu)
             {
-                insertmemwopcode(X_MOV,REG_EBX,STADDR(st.f[rd]),xrd);
+                insertmemwopcode(X86_MOV,REG_EBX,STADDR(st.f[rd]),xrd);
             }
         }
     }
@@ -1506,23 +1506,23 @@ static void ac_regsma(dword opcode,int type,int size,int fpu)
         // other sizes always go through eax
         if(addecx)
         {
-            insertimmopcode(X_IMMADD,REG_ECX,addecx);
+            insertimmopcode(X86_IMMADD,REG_ECX,addecx);
         }
         if(type==M_WR)
         {
             if(rd==0)
             {
-                insertregopcode(X_XOR,REG_EAX,REG_EAX);
+                insertregopcode(X86_XOR,REG_EAX,REG_EAX);
             }
             else if(xrd==REG_EAX)
             {
                 // rd not in reg, load from mem
-                insertmemropcode(X_MOV,REG_EAX,REG_EBX,STADDR(st.g[rd]));
+                insertmemropcode(X86_MOV,REG_EAX,REG_EBX,STADDR(st.g[rd]));
             }
             else
             {
                 // rd is in reg, just a reg move
-                insertregopcode(X_MOV,REG_EAX,xrd);
+                insertregopcode(X86_MOV,REG_EAX,xrd);
             }
         }
         if(size==2)
@@ -1540,7 +1540,7 @@ static void ac_regsma(dword opcode,int type,int size,int fpu)
         if(type!=M_WR)
         {
             // move result to rd reg
-            insertregopcode(X_MOV,xrd,REG_EAX);
+            insertregopcode(X86_MOV,xrd,REG_EAX);
         }
     }
 
@@ -1588,12 +1588,12 @@ static void ac_regssh(dword opcode,int x86op,int fromreg)
         if(xrs==REG_NONE)
         {
             // no reg, do with a memory access
-            insertmemropcode(X_MOV,REG_ECX,REG_EBX,STADDR(st.g[rs]));
+            insertmemropcode(X86_MOV,REG_ECX,REG_EBX,STADDR(st.g[rs]));
         }
         else
         {
             // we have a reg, do a regop
-            insertregopcode(X_MOV,REG_ECX,xrs);
+            insertregopcode(X86_MOV,REG_ECX,xrs);
         }
     }
 
@@ -1603,12 +1603,12 @@ static void ac_regssh(dword opcode,int x86op,int fromreg)
     if(xrt==REG_NONE)
     {
         // rt not in reg, load from mem
-        insertmemropcode(X_MOV,xrd,REG_EBX,STADDR(st.g[rt]));
+        insertmemropcode(X86_MOV,xrd,REG_EBX,STADDR(st.g[rt]));
     }
     else
     {
         // rt is in reg, just a reg move
-        insertregopcode(X_MOV,xrd,xrt);
+        insertregopcode(X86_MOV,xrd,xrt);
     }
 
     // shift
@@ -1667,7 +1667,7 @@ static int ac_regsslt(dword opcode,int fromreg,int unsignedcmp)
     }
 
     // clear eax
-    insertregopcode(X_XOR,REG_EAX,REG_EAX);
+    insertregopcode(X86_XOR,REG_EAX,REG_EAX);
 
     xrs=reg_find(rs);
     if(xrs!=REG_NONE)
@@ -1678,13 +1678,13 @@ static int ac_regsslt(dword opcode,int fromreg,int unsignedcmp)
     {
         // load to ECX
         xrs=REG_ECX;
-        insertmemropcode(X_MOV,xrs,REG_EBX,STADDR(st.g[rs]));
+        insertmemropcode(X86_MOV,xrs,REG_EBX,STADDR(st.g[rs]));
     }
 
     if(rt==-1)
     {
         // compare to immediate
-        insertimmopcode(X_IMMCMP,xrs,imm);
+        insertimmopcode(X86_IMMCMP,xrs,imm);
     }
     else
     {
@@ -1692,11 +1692,11 @@ static int ac_regsslt(dword opcode,int fromreg,int unsignedcmp)
         if(xrt!=REG_NONE)
         {
             reg_rd(xrt); // protect by increasing lastused
-            insertregopcode(X_CMP,xrs,xrt);
+            insertregopcode(X86_CMP,xrs,xrt);
         }
         else
         {
-            insertmemropcode(X_CMP,xrs,REG_EBX,STADDR(st.g[rt]));
+            insertmemropcode(X86_CMP,xrs,REG_EBX,STADDR(st.g[rt]));
         }
     }
 
@@ -1713,7 +1713,7 @@ static int ac_regsslt(dword opcode,int fromreg,int unsignedcmp)
     insertbyte(0xC0);
 
     // mov data to xrd
-    insertregopcode(X_MOV,xrd,REG_EAX);
+    insertregopcode(X86_MOV,xrd,REG_EAX);
 
     regwrite(xrd);
 
@@ -1727,9 +1727,9 @@ static void ac_regs3(dword opcode,int x86op)
     int xrs,xrt,xrd;
     int nor=0;
 
-    if(x86op==X_NOR)
+    if(x86op==X86_NOR)
     {
-        x86op=X_XOR;
+        x86op=X86_XOR;
         nor=1;
     }
 
@@ -1752,20 +1752,20 @@ static void ac_regs3(dword opcode,int x86op)
 
     xrd=reg_allocnew(rd);
 
-    if(rs==0 && rt==0 && (x86op==X_ADD || x86op==X_OR))
+    if(rs==0 && rt==0 && (x86op==X86_ADD || x86op==X86_OR))
     {
         // this is a CLEAR REG op
-        insertregopcode(X_XOR,xrd,xrd);
+        insertregopcode(X86_XOR,xrd,xrd);
     }
     else
     {
         if(xrt==xrd && xrt!=REG_NONE && xrt!=REG_EAX)
         {
             // both in regs && x=y-x (x would be corrupted by x=y, can't have that)
-            if(x86op==X_SUB)
+            if(x86op==X86_SUB)
             {
                 // convert x=y-x to x=-x + y
-                x86op=X_ADD;
+                x86op=X86_ADD;
                 // insert NEG
                 insertbyte(0xF7);
                 insertbyte(3*64+3*8+xrd);
@@ -1777,20 +1777,20 @@ static void ac_regs3(dword opcode,int x86op)
 
         if(rs==0)
         {
-            insertregopcode(X_XOR,xrd,xrd);
+            insertregopcode(X86_XOR,xrd,xrd);
         }
         else if(xrs==REG_NONE)
         {
             // rs not in reg, load from mem
-            insertmemropcode(X_MOV,xrd,REG_EBX,STADDR(st.g[rs]));
+            insertmemropcode(X86_MOV,xrd,REG_EBX,STADDR(st.g[rs]));
         }
         else
         {
             // rs is in reg, just a reg move
-            insertregopcode(X_MOV,xrd,xrs);
+            insertregopcode(X86_MOV,xrd,xrs);
         }
 
-        if(rt==0 && (x86op==X_ADD || x86op==X_OR))
+        if(rt==0 && (x86op==X86_ADD || x86op==X86_OR))
         {
             // done already (zero as a second parameter does nothing)
         }
@@ -1829,10 +1829,10 @@ static void ac_regs2(dword opcode,int x86op,int signextend)
 
     if(signextend) imm=SIGNEXT16(imm);
 
-    if(x86op==X_LUIMOV)
+    if(x86op==X86_LUIMOV)
     {
         luimov=1;
-        x86op=X_IMMMOV;
+        x86op=X86_IMMMOV;
         imm<<=16;
     }
 
@@ -1851,23 +1851,23 @@ static void ac_regs2(dword opcode,int x86op,int signextend)
 
     xrd=reg_allocnew(rd);
 
-    if(rs==0 && (x86op==X_IMMADD || x86op==X_IMMOR))
+    if(rs==0 && (x86op==X86_IMMADD || x86op==X86_IMMOR))
     {
         // just convert to load
-        x86op=X_IMMMOV;
+        x86op=X86_IMMMOV;
     }
 
-    if(x86op!=X_IMMMOV)
+    if(x86op!=X86_IMMMOV)
     {
         if(xrs==REG_NONE)
         {
             // rs not in reg, load from mem
-            insertmemropcode(X_MOV,xrd,REG_EBX,STADDR(st.g[rs]));
+            insertmemropcode(X86_MOV,xrd,REG_EBX,STADDR(st.g[rs]));
         }
         else
         {
             // rs is in reg, just a reg move
-            insertregopcode(X_MOV,xrd,xrs);
+            insertregopcode(X86_MOV,xrd,xrs);
         }
     }
 
@@ -1877,7 +1877,7 @@ static void ac_regs2(dword opcode,int x86op,int signextend)
     {
         if(hw_ismemiorange(imm))
         {
-            insertmemwopcode(X_MOV,REG_EBX,STADDR(st.memiodetected),xrd);
+            insertmemwopcode(X86_MOV,REG_EBX,STADDR(st.memiodetected),xrd);
         }
     }
     // mark changed, will be flushed later
@@ -1990,38 +1990,38 @@ int ac_compileopnew(dword pc,dword opcode,int op)
     //--------------
     case 8: // ADDI
     case 9: // ADDIU
-        ac_regs2(opcode,X_IMMADD,1);
+        ac_regs2(opcode,X86_IMMADD,1);
         break;
     case 12: // ANDI
-        ac_regs2(opcode,X_IMMAND,0);
+        ac_regs2(opcode,X86_IMMAND,0);
         break;
     case 13: // ORI
-        ac_regs2(opcode,X_IMMOR,0);
+        ac_regs2(opcode,X86_IMMOR,0);
         break;
     case 14: // XORI
-        ac_regs2(opcode,X_IMMXOR,0);
+        ac_regs2(opcode,X86_IMMXOR,0);
         break;
     case 15: // LUI
-        ac_regs2(opcode,X_LUIMOV,0);
+        ac_regs2(opcode,X86_LUIMOV,0);
         break;
     //--------------
     case 0x40+0: // SLL
-        ac_regssh(opcode,X_SHLIMM,0);
+        ac_regssh(opcode,X86_SHLIMM,0);
         break;
     case 0x40+2: // SRL
-        ac_regssh(opcode,X_SHRIMM,0);
+        ac_regssh(opcode,X86_SHRIMM,0);
         break;
     case 0x40+3: // SRA
-        ac_regssh(opcode,X_SARIMM,0);
+        ac_regssh(opcode,X86_SARIMM,0);
         break;
     case 0x40+4: // SLLV
-        ac_regssh(opcode,X_SHLCL,1);
+        ac_regssh(opcode,X86_SHLCL,1);
         break;
     case 0x40+6: // SRLV
-        ac_regssh(opcode,X_SHRCL,1);
+        ac_regssh(opcode,X86_SHRCL,1);
         break;
     case 0x40+7: // SRAV
-        ac_regssh(opcode,X_SARCL,1);
+        ac_regssh(opcode,X86_SARCL,1);
         break;
     //--------------
     case 10: // SLTI
@@ -2039,23 +2039,23 @@ int ac_compileopnew(dword pc,dword opcode,int op)
     //--------------
     case 0x40+32: // ADD
     case 0x40+33: // ADDU
-        ac_regs3(opcode,X_ADD);
+        ac_regs3(opcode,X86_ADD);
         break;
     case 0x40+34: // SUB
     case 0x40+35: // SUBU
-        ac_regs3(opcode,X_SUB);
+        ac_regs3(opcode,X86_SUB);
         break;
     case 0x40+36: // AND
-        ac_regs3(opcode,X_AND);
+        ac_regs3(opcode,X86_AND);
         break;
     case 0x40+37: // OR
-        ac_regs3(opcode,X_OR);
+        ac_regs3(opcode,X86_OR);
         break;
     case 0x40+38: // XOR
-        ac_regs3(opcode,X_XOR);
+        ac_regs3(opcode,X86_XOR);
         break;
     case 0x40+39: // NOR
-        ac_regs3(opcode,X_NOR);
+        ac_regs3(opcode,X86_NOR);
         break;
     //--------------
     case 0x40+16: // MFHI
@@ -2229,7 +2229,7 @@ static void a_analyzeops(void)
 static void ac_compilealign(void)
 {
     // align to 16 byte boundary -15
-    while((mem.codeused+15)&0x0f) insertbyte(X_INT3); // int 3
+    while((mem.codeused+15)&0x0f) insertbyte(X86_INT3); // int 3
     // These are never executed but when looking at the code
     // in an X86 debugger you see what group comes from where
     //
@@ -2296,6 +2296,6 @@ void ac_compileendnew(void)
         ac_jumpto(g->addr+g->len*4);
     }
 
-    insertbyte(X_INT3); // should never get here
+    insertbyte(X86_INT3); // should never get here
 }
 

@@ -2,8 +2,6 @@ void con_init(void);
 void con_initdummy(void);
 void con_deinit(void);
 
-void con_sleep(int ms);
-
 int  con_resized(void);
 int  con_rows(void);
 int  con_cols(void);

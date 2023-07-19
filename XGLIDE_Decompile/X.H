@@ -191,6 +191,7 @@ EXPORT void    x_fastfpu(int fast);
 EXPORT void    x_timereset(void);
 EXPORT int     x_timems(void);
 EXPORT int     x_timeus(void);
+EXPORT void    x_sleep(int ms);
 
 /****************************************************************************
 ** xmode.c

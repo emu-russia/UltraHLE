@@ -1013,10 +1013,10 @@ void debugui(void)
             }
             else
             {
-                con_sleep(10);
+                x_sleep(10);
             }
         }
-        con_sleep(0);
+        x_sleep(0);
     }
 }
 

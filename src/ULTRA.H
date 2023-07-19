@@ -1284,4 +1284,7 @@ void fixpath(char *path,int striplastname);
 
 /****************************************************************************
 */
+
+#include "x.h"
+
 #endif  _ULTRA_H_

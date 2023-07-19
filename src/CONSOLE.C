@@ -369,8 +369,3 @@ int con_readkey_noblock(void)
     if(!con.hconsole) return(0);
     return(readevent(1));
 }
-
-void con_sleep(int ms)
-{
-    Sleep(ms);
-}

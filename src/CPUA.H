@@ -340,64 +340,64 @@ typedef void (*t_asmop)(void);
 #define BR_CMPZERO 2
 #define BR_CMPFPU  4
 
-#define X_INT3       0x00CC
-#define X_NOP        0x0090
-#define X_RET        0x00C3
+#define X86_INT3       0x00CC
+#define X86_NOP        0x0090
+#define X86_RET        0x00C3
 
-#define X_MOV        0x0089
-#define X_ADD        0x0001
-#define X_SUB        0x0029
-#define X_AND        0x0021
-#define X_OR         0x0009
-#define X_XOR        0x0031
-#define X_CMP        0x0039
-#define X_TEST       0x0085
+#define X86_MOV        0x0089
+#define X86_ADD        0x0001
+#define X86_SUB        0x0029
+#define X86_AND        0x0021
+#define X86_OR         0x0009
+#define X86_XOR        0x0031
+#define X86_CMP        0x0039
+#define X86_TEST       0x0085
 
-#define X_SHLCL      0x14D3
-#define X_SHRCL      0x15D3
-#define X_SARCL      0x17D3
+#define X86_SHLCL      0x14D3
+#define X86_SHRCL      0x15D3
+#define X86_SARCL      0x17D3
 
-#define X_SHL01      0x14D1
-#define X_SHR01      0x15D1
-#define X_SAR01      0x17D1
+#define X86_SHL01      0x14D1
+#define X86_SHR01      0x15D1
+#define X86_SAR01      0x17D1
 
-#define X_SHLIMM     0x8014C1
-#define X_SHRIMM     0x8015C1
-#define X_SARIMM     0x8017C1
+#define X86_SHLIMM     0x8014C1
+#define X86_SHRIMM     0x8015C1
+#define X86_SARIMM     0x8017C1
 
-#define X_FLD4       0x10d9
-#define X_FLD8       0x10dd
-#define X_FST4       0x12d9
-#define X_FST8       0x12dd
-#define X_FSTP4      0x13d9
-#define X_FSTP8      0x13dd
+#define X86_FLD4       0x10d9
+#define X86_FLD8       0x10dd
+#define X86_FST4       0x12d9
+#define X86_FST8       0x12dd
+#define X86_FSTP4      0x13d9
+#define X86_FSTP8      0x13dd
 
-#define X_FADD4      0x10d8
-#define X_FADD8      0x10dc
-#define X_FSUB4      0x14d8
-#define X_FSUB8      0x14dc
-#define X_FSUBR4     0x15d8
-#define X_FSUBR8     0x15dc
-#define X_FMUL4      0x11d8
-#define X_FMUL8      0x11dc
-#define X_FDIV4      0x16d8
-#define X_FDIV8      0x16dc
-#define X_FCOMP4     0x13d8
-#define X_FCOMP8     0x13dc
-#define X_FCOM4      0x12d8
-#define X_FCOM8      0x12dc
+#define X86_FADD4      0x10d8
+#define X86_FADD8      0x10dc
+#define X86_FSUB4      0x14d8
+#define X86_FSUB8      0x14dc
+#define X86_FSUBR4     0x15d8
+#define X86_FSUBR8     0x15dc
+#define X86_FMUL4      0x11d8
+#define X86_FMUL8      0x11dc
+#define X86_FDIV4      0x16d8
+#define X86_FDIV8      0x16dc
+#define X86_FCOMP4     0x13d8
+#define X86_FCOMP8     0x13dc
+#define X86_FCOM4      0x12d8
+#define X86_FCOM8      0x12dc
 
-#define X_IMMMOV     0x30b8 // T=3, reg adds opcode
-#define X_IMMADD     0x1081
-#define X_IMMADD8    0x1083
-#define X_IMMSUB     0x1581
-#define X_IMMAND     0x1481
-#define X_IMMOR      0x1181
-#define X_IMMXOR     0x1681
-#define X_IMMCMP     0x1781
+#define X86_IMMMOV     0x30b8 // T=3, reg adds opcode
+#define X86_IMMADD     0x1081
+#define X86_IMMADD8    0x1083
+#define X86_IMMSUB     0x1581
+#define X86_IMMAND     0x1481
+#define X86_IMMOR      0x1181
+#define X86_IMMXOR     0x1681
+#define X86_IMMCMP     0x1781
 
-#define X_NOR        0xA001
-#define X_LUIMOV     0xA002 // not a real opcode
+#define X86_NOR        0xA001
+#define X86_LUIMOV     0xA002 // not a real opcode
 
 void insertnothing(void); // inserts nothing (but sets r.inserted=1)
 void insertbyte(int x);   // inserts a single byte

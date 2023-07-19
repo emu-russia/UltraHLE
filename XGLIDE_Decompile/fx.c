@@ -146,7 +146,7 @@ void init_bufferswap()
 	v0 = 0;
 	while ( grBufferNumPending() > 3 )
 	{
-		mysleep(10);
+		x_sleep(10);
 		v1 = v0++;
 		if ( v1 > 100 )
 		{

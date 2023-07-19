@@ -37,7 +37,7 @@ void insertmodrmopcode(int opcode,int reg,int base,int offset)
 
     if(r.opt_eaxloads)
     {
-        if(opcode==X_MOV+2 && mem.codeused==r.eaxload_codeusedend)
+        if(opcode==X86_MOV+2 && mem.codeused==r.eaxload_codeusedend)
         {
             if(base==r.eaxload_base && offset==r.eaxload_offset)
             {
@@ -51,7 +51,7 @@ void insertmodrmopcode(int opcode,int reg,int base,int offset)
                 {
                     // just a reg move
     //                print("regmove at %08X\n",r.pc);
-                    insertregopcode(X_MOV,reg,r.eaxload_reg);
+                    insertregopcode(X86_MOV,reg,r.eaxload_reg);
                     return;
                 }
             }
@@ -120,7 +120,7 @@ void insertmodrmopcode(int opcode,int reg,int base,int offset)
 
     mem.codeused+=d-d0;
 
-    if(opcode==X_MOV)
+    if(opcode==X86_MOV)
     {
         r.eaxload_codeusedend=mem.codeused;
     }
@@ -143,7 +143,7 @@ void insertmemwopcode(int opcode,int base,int offset,int src)
 void insertregopcode(int opcode,int dst,int src)
 {
     if(!(opcode&0xf000)) opcode&=~2;
-    if(opcode==X_MOV)
+    if(opcode==X86_MOV)
     {
         if(dst==src) return; // null move
     }
@@ -155,16 +155,16 @@ void insertimmopcode(int opcode,int xrs,int imm)
     int a=0;
     if(!(opcode&0xf000))
     {
-        exception("cpua: insertimmopcode with X_NONIMM opcode\n");
+        exception("cpua: insertimmopcode with X86_NONIMM opcode\n");
     }
     if((opcode&0xf000)==0x3000)
     {
         insertbyte(opcode+xrs);
         insertdword(imm);
     }
-    else if(opcode==X_IMMADD && imm>=-128 && imm<128)
+    else if(opcode==X86_IMMADD && imm>=-128 && imm<128)
     {
-        opcode=X_IMMADD8;
+        opcode=X86_IMMADD8;
         insertmodrmopcode(opcode,0,REG_REG,xrs);
         insertbyte(imm);
     }
@@ -474,7 +474,7 @@ void reg_load(int x86)
     if(type==XNAME_MIPS)
     {
         // load data to the reg
-        insertmemropcode(X_MOV,x86,REG_EBX,STADDR(st.g[reg[x86].name&XNAME_INDEX]));
+        insertmemropcode(X86_MOV,x86,REG_EBX,STADDR(st.g[reg[x86].name&XNAME_INDEX]));
     }
     else exception("cpuanew: reg_save unrecognized register type");
 }
@@ -489,7 +489,7 @@ void reg_save(int x86)
     if(type==XNAME_MIPS)
     {
         // save data to the reg
-        insertmemwopcode(X_MOV,REG_EBX,STADDR(st.g[reg[x86].name&XNAME_INDEX]),x86);
+        insertmemwopcode(X86_MOV,REG_EBX,STADDR(st.g[reg[x86].name&XNAME_INDEX]),x86);
     }
     else if(type==XNAME_TEMP)
     {
@@ -650,11 +650,11 @@ void freg_load(int name,int size)
     // load it
     if(fpreg[0].size==4)
     {
-        insertmodrmopcode(X_FLD4,0,REG_EBX,STADDR(st.f[name]));
+        insertmodrmopcode(X86_FLD4,0,REG_EBX,STADDR(st.f[name]));
     }
     else if(fpreg[0].size==8)
     {
-        insertmodrmopcode(X_FLD8,0,REG_EBX,STADDR(st.f[name]));
+        insertmodrmopcode(X86_FLD8,0,REG_EBX,STADDR(st.f[name]));
     }
     else exception("cpuautil: illegal freg_load\n");
 }
@@ -675,11 +675,11 @@ void freg_save(int i)
     }
     else if(fpreg[0].size==4)
     {
-        insertmodrmopcode(X_FSTP4,0,REG_EBX,STADDR(st.f[name]));
+        insertmodrmopcode(X86_FSTP4,0,REG_EBX,STADDR(st.f[name]));
     }
     else if(fpreg[0].size==8)
     {
-        insertmodrmopcode(X_FSTP8,0,REG_EBX,STADDR(st.f[name]));
+        insertmodrmopcode(X86_FSTP8,0,REG_EBX,STADDR(st.f[name]));
     }
     else exception("cpuautil: illegal freg_save\n");
 

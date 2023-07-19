@@ -123,7 +123,7 @@ void hw_gfxthread(void)
 {
     if(!st.gfxthread)
     {
-        con_sleep(100);
+        x_sleep(100);
         return;
     }
 
@@ -135,7 +135,7 @@ void hw_gfxthread(void)
         spgfxexecuting=2;
     }
 
-    con_sleep(1); // always sleep a little bit
+    x_sleep(1); // always sleep a little bit
 }
 
 void hw_sp_endgfx(void)
