@@ -1,3 +1,8 @@
+
+// This structure must be packed in order to make the formats compatible with the Ultra SDK
+
+#pragma pack(push, 1)
+
 typedef struct {
 	dword	type;
 	dword	flags;
@@ -23,6 +28,8 @@ typedef struct {
 	dword   m_yield_data_ptr;
 	dword	yield_data_size;
 } OSTask_t;
+
+#pragma pack(pop)
 
 #define OS_EVENT_SW1              0     /* CPU SW1 interrupt */
 #define OS_EVENT_SW2              1     /* CPU SW2 interrupt */
