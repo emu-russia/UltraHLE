@@ -19,23 +19,32 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\src\cart.h" />
     <ClInclude Include="..\src\console.h" />
     <ClInclude Include="..\src\cpua.h" />
+    <ClInclude Include="..\src\debugui.h" />
+    <ClInclude Include="..\src\disasm.h" />
     <ClInclude Include="..\src\dlist.h" />
+    <ClInclude Include="..\src\hw.h" />
     <ClInclude Include="..\src\inifile.h" />
     <ClInclude Include="..\src\listview.h" />
     <ClInclude Include="..\src\loadsave.h" />
+    <ClInclude Include="..\src\log.h" />
     <ClInclude Include="..\src\main.h" />
+    <ClInclude Include="..\src\mem.h" />
     <ClInclude Include="..\src\opdefs_c.h" />
     <ClInclude Include="..\src\os.h" />
     <ClInclude Include="..\src\oscall.h" />
     <ClInclude Include="..\src\osignore.h" />
     <ClInclude Include="..\src\ospatch.h" />
+    <ClInclude Include="..\src\pad.h" />
+    <ClInclude Include="..\src\patch.h" />
     <ClInclude Include="..\src\rdp.h" />
     <ClInclude Include="..\src\resources\RESOURCE.H" />
     <ClInclude Include="..\src\slist.h" />
     <ClInclude Include="..\src\sound.h" />
     <ClInclude Include="..\src\stdsdk.h" />
+    <ClInclude Include="..\src\sym.h" />
     <ClInclude Include="..\src\sync.h" />
     <ClInclude Include="..\src\timer.h" />
     <ClInclude Include="..\src\ultra.h" />

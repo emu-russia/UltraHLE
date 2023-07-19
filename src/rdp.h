@@ -1,3 +1,4 @@
+// rdp emulation.
 
 #define MAXRDPVX 64
 
