@@ -23,7 +23,6 @@
     <ClCompile Include="..\fx.c" />
     <ClCompile Include="..\fxgeom.c" />
     <ClCompile Include="..\fxtext.c" />
-    <ClCompile Include="..\main.c" />
     <ClCompile Include="..\pch.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -49,7 +48,6 @@
     <ClInclude Include="..\fx.h" />
     <ClInclude Include="..\fxgeom.h" />
     <ClInclude Include="..\fxtext.h" />
-    <ClInclude Include="..\main.h" />
     <ClInclude Include="..\pch.h" />
     <ClInclude Include="..\state.h" />
     <ClInclude Include="..\util.h" />

@@ -10,7 +10,6 @@
 #include "x.h"
 
 #include "state.h"
-#include "main.h"
 #include "fx.h"
 #include "fxgeom.h"
 #include "fxtext.h"
