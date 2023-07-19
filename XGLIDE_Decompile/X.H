@@ -225,23 +225,6 @@ EXPORT void    x_geometry(int flags);
 #define X_PROJTEXT   0x00000010 // projective texture 1
 #define X_DUMPDATA   0x00000020 // debugdump (for full projection only)
 
-#ifdef VISU3
-// Visu 3 rendering settings (higher level):
-EXPORT void    x_mode0(int mode);
-EXPORT void    x_mode1(int mode,int txt1);
-EXPORT void    x_mode2(int mode,int txt1,int txt2);
-#define X_NONE        0
-#define X_2D          1  // 2d bitmaps
-#define X_3D          2  // normal, 3d objects
-#define X_LAND1       3  // normal, 3d objects
-#define X_LAND2       4  // normal, 3d objects
-#define X_LANDTREE    5  // normal, 3d objects
-#define X_OVERLAY     6  // 2D overlay text
-#define X_SKY         7  //
-#define X_PARTICLE    8  // 2d particle bitmaps (transparent, sorted)
-#define X_LANDMT      9
-#endif
-
 // These control rendering settings:
 // - all return 0 if mode supported, 1 otherwise
 // - in practice all modes we use WILL be supported, somehow :)
