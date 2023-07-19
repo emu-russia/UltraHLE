@@ -230,6 +230,7 @@ More notes intermixed with the definitions, read on.
 ** Headers
 */
 
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

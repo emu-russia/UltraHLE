@@ -48,18 +48,76 @@ static void op_64bitexpand(void)
     st.expanded64bit=1;
 }
 
+static void mult64to128(uint64_t op1, uint64_t op2, uint64_t* hi, uint64_t* lo)
+{
+    uint64_t u1 = (op1 & 0xffffffff);
+    uint64_t v1 = (op2 & 0xffffffff);
+    uint64_t t = (u1 * v1);
+    uint64_t w3 = (t & 0xffffffff);
+    uint64_t k = (t >> 32);
+
+    op1 >>= 32;
+    t = (op1 * v1) + k;
+    k = (t & 0xffffffff);
+    uint64_t w1 = (t >> 32);
+
+    op2 >>= 32;
+    t = (u1 * op2) + k;
+    k = (t >> 32);
+
+    *hi = (op1 * op2) + w1 + k;
+    *lo = (t << 32) + w3;
+}
+
+static void mult64to128_signed(int64_t op1, int64_t op2, uint64_t* hi, uint64_t* lo)
+{
+    int64_t u1 = (op1 & 0xffffffff);
+    int64_t v1 = (op2 & 0xffffffff);
+    int64_t t = (u1 * v1);
+    int64_t w3 = (t & 0xffffffff);
+    int64_t k = (t >> 32);
+
+    op1 >>= 32;
+    t = (op1 * v1) + k;
+    k = (t & 0xffffffff);
+    int64_t w1 = (t >> 32);
+
+    op2 >>= 32;
+    t = (u1 * op2) + k;
+    k = (t >> 32);
+
+    *hi = (op1 * op2) + w1 + k;
+    *lo = (t << 32) + w3;
+}
+
+static void op_dmult(int reg1, int reg2)
+{
+    qreg a, b;
+    op_64bitexpand();
+    a = st.g[reg1];
+    b = st.g[reg2];
+    mult64to128_signed((int64_t)a.q, (int64_t)b.q, &st.mhi.q, &st.mlo.q);
+    if (DUMP64)
+    {
+        print("(%08X) ", st.pc);
+        print("dmult  %08X%08X*%08X%08X = %08X%08X %08X%08X\n",
+            a.d2[1], a.d2[0], b.d2[1], b.d2[0],
+            st.mhi.d2[1], st.mhi.d2[0],
+            st.mlo.d2[1], st.mlo.d2[0]);
+    }
+}
+
 static void op_dmultu(int reg1,int reg2)
 {
     qreg a,b;
     op_64bitexpand();
     a=st.g[reg1];
     b=st.g[reg2];
-    st.mlo.q=(unsigned __int64)a.q*(unsigned __int64)b.q;
-    st.mhi.q=0;
+    mult64to128((uint64_t)a.q, (uint64_t)b.q, &st.mhi.q, &st.mlo.q);
     if(DUMP64)
     {
         print("(%08X) ",st.pc);
-        print("dmult  %08X%08X*%08X%08X = %08X%08X %08X%08X\n",
+        print("dmultu  %08X%08X*%08X%08X = %08X%08X %08X%08X\n",
             a.d2[1],a.d2[0],b.d2[1],b.d2[0],
             st.mhi.d2[1],st.mhi.d2[0],
             st.mlo.d2[1],st.mlo.d2[0]);
@@ -1035,7 +1093,7 @@ static void op_main(dword opcode)
         op_divu(*rs,*rt);
         break;
     case 0x40+DMULT: // DMULT
-        op_dmultu(OP_RS(opcode),OP_RT(opcode));
+        op_dmult(OP_RS(opcode),OP_RT(opcode));
         break;
     case 0x40+DMULTU: // DMULTU
         op_dmultu(OP_RS(opcode),OP_RT(opcode));
