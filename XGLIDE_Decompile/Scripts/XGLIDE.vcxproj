@@ -54,7 +54,7 @@
     <ClInclude Include="..\state.h" />
     <ClInclude Include="..\util.h" />
     <ClInclude Include="..\version.h" />
-    <ClInclude Include="..\X.H" />
+    <ClInclude Include="..\x.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

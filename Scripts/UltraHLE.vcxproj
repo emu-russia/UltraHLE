@@ -19,70 +19,30 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\BOOT.C" />
-    <ClCompile Include="..\src\CART.C" />
-    <ClCompile Include="..\src\CMD.C" />
-    <ClCompile Include="..\src\CONSOLE.C" />
-    <ClCompile Include="..\src\CPU.C" />
-    <ClCompile Include="..\src\CPUA.C" />
-    <ClCompile Include="..\src\CPUANEW.C" />
-    <ClCompile Include="..\src\CPUAUTIL.C" />
-    <ClCompile Include="..\src\CPUC.C" />
-    <ClCompile Include="..\src\CPUG.C">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\src\DEBUGUI.C" />
-    <ClCompile Include="..\src\DISASM.C" />
-    <ClCompile Include="..\src\DISASM86.C" />
-    <ClCompile Include="..\src\DLIST.C" />
-    <ClCompile Include="..\src\HW.C" />
-    <ClCompile Include="..\src\INIFILE.C" />
-    <ClCompile Include="..\src\LISTVIEW.C" />
-    <ClCompile Include="..\src\LOADSAVE.C" />
-    <ClCompile Include="..\src\LOG.C" />
-    <ClCompile Include="..\src\MAIN.C" />
-    <ClCompile Include="..\src\MEM.C" />
-    <ClCompile Include="..\src\OS.C" />
-    <ClCompile Include="..\src\PAD.C" />
-    <ClCompile Include="..\src\PATCH.C" />
-    <ClCompile Include="..\src\RDP.C" />
-    <ClCompile Include="..\src\SLIST.C" />
-    <ClCompile Include="..\src\SOUND.C" />
-    <ClCompile Include="..\src\SYM.C" />
-    <ClCompile Include="..\src\SYMFIND.C" />
-    <ClCompile Include="..\src\SYNC.C" />
-    <ClCompile Include="..\src\TIMER.C" />
-    <ClCompile Include="..\src\Ultrahle.c" />
-    <ClCompile Include="..\src\ZLIST.C" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\src\CONSOLE.H" />
-    <ClInclude Include="..\src\CPUA.H" />
-    <ClInclude Include="..\src\DLIST.H" />
-    <ClInclude Include="..\src\INIFILE.H" />
-    <ClInclude Include="..\src\LISTVIEW.H" />
-    <ClInclude Include="..\src\LOADSAVE.H" />
-    <ClInclude Include="..\src\MAIN.H" />
-    <ClInclude Include="..\src\OPDEFS_C.H" />
-    <ClInclude Include="..\src\OS.H" />
-    <ClInclude Include="..\src\OSCALL.H" />
-    <ClInclude Include="..\src\Osignore.h" />
-    <ClInclude Include="..\src\OSPATCH.H" />
-    <ClInclude Include="..\src\RDP.H" />
+    <ClInclude Include="..\src\console.h" />
+    <ClInclude Include="..\src\cpua.h" />
+    <ClInclude Include="..\src\dlist.h" />
+    <ClInclude Include="..\src\inifile.h" />
+    <ClInclude Include="..\src\listview.h" />
+    <ClInclude Include="..\src\loadsave.h" />
+    <ClInclude Include="..\src\main.h" />
+    <ClInclude Include="..\src\opdefs_c.h" />
+    <ClInclude Include="..\src\os.h" />
+    <ClInclude Include="..\src\oscall.h" />
+    <ClInclude Include="..\src\osignore.h" />
+    <ClInclude Include="..\src\ospatch.h" />
+    <ClInclude Include="..\src\rdp.h" />
     <ClInclude Include="..\src\resources\RESOURCE.H" />
-    <ClInclude Include="..\src\SLIST.H" />
-    <ClInclude Include="..\src\SOUND.H" />
-    <ClInclude Include="..\src\STDSDK.H" />
-    <ClInclude Include="..\src\SYNC.H" />
-    <ClInclude Include="..\src\TIMER.H" />
-    <ClInclude Include="..\src\ULTRA.H" />
-    <ClInclude Include="..\src\ULTRAHLE.H" />
-    <ClInclude Include="..\src\VERSION.H" />
-    <ClInclude Include="..\src\X.H" />
-    <ClInclude Include="..\src\ZLIST.H" />
+    <ClInclude Include="..\src\slist.h" />
+    <ClInclude Include="..\src\sound.h" />
+    <ClInclude Include="..\src\stdsdk.h" />
+    <ClInclude Include="..\src\sync.h" />
+    <ClInclude Include="..\src\timer.h" />
+    <ClInclude Include="..\src\ultra.h" />
+    <ClInclude Include="..\src\ultrahle.h" />
+    <ClInclude Include="..\src\version.h" />
+    <ClInclude Include="..\src\x.h" />
+    <ClInclude Include="..\src\zlist.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\XGLIDE_Decompile\Scripts\XGLIDE.vcxproj">
@@ -122,6 +82,46 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\src\resources\UltraHLE.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\boot.c" />
+    <ClCompile Include="..\src\cart.c" />
+    <ClCompile Include="..\src\cmd.c" />
+    <ClCompile Include="..\src\console.c" />
+    <ClCompile Include="..\src\cpu.c" />
+    <ClCompile Include="..\src\cpua.c" />
+    <ClCompile Include="..\src\cpuanew.c" />
+    <ClCompile Include="..\src\cpuautil.c" />
+    <ClCompile Include="..\src\cpuc.c" />
+    <ClCompile Include="..\src\cpug.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\debugui.c" />
+    <ClCompile Include="..\src\disasm.c" />
+    <ClCompile Include="..\src\disasm86.c" />
+    <ClCompile Include="..\src\dlist.c" />
+    <ClCompile Include="..\src\hw.c" />
+    <ClCompile Include="..\src\inifile.c" />
+    <ClCompile Include="..\src\listview.c" />
+    <ClCompile Include="..\src\loadsave.c" />
+    <ClCompile Include="..\src\log.c" />
+    <ClCompile Include="..\src\main.c" />
+    <ClCompile Include="..\src\mem.c" />
+    <ClCompile Include="..\src\os.c" />
+    <ClCompile Include="..\src\pad.c" />
+    <ClCompile Include="..\src\patch.c" />
+    <ClCompile Include="..\src\rdp.c" />
+    <ClCompile Include="..\src\slist.c" />
+    <ClCompile Include="..\src\sound.c" />
+    <ClCompile Include="..\src\sym.c" />
+    <ClCompile Include="..\src\symfind.c" />
+    <ClCompile Include="..\src\sync.c" />
+    <ClCompile Include="..\src\timer.c" />
+    <ClCompile Include="..\src\ultrahle.c" />
+    <ClCompile Include="..\src\zlist.c" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
