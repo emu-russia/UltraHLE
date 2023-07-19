@@ -7,10 +7,9 @@
 
 #include "3dfx_headers/glide.h"
 
-#include "X.H"
+#include "x.h"
 
 #include "state.h"
-#include "main.h"
 #include "fx.h"
 #include "fxgeom.h"
 #include "fxtext.h"

@@ -46,7 +46,7 @@ Progress:
 |x_forcegeometry|Ready| |
 |x_geometry|Ready| |
 |x_mask|Ready| |
-|x_dither|Ready|Uses goto?|
+|x_dither|Ready| |
 |x_blend|Ready| |
 |x_alphatest|Ready|Check range check|
 |x_combine|Ready| |
@@ -132,7 +132,7 @@ Progress:
 |text_freedata|Ready| |
 |text_cleartexmem|Ready| |
 |text_opendata|Ready| |
-|text_closedata|Ready|TODO: Check, there seems to be a typo here (should be text2)|
+|text_closedata|Ready|Fixed typo here (should be text2)|
 |text_frameend| | |
 |**main.c**|||
 |zerobase|Ready|empty|

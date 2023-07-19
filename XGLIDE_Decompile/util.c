@@ -159,3 +159,8 @@ int x_timems(void)
 	QueryPerformanceCounter(&PerformanceCount);
 	return 1000 * (PerformanceCount.QuadPart - perf_counter.QuadPart) / perf_freq.QuadPart;
 }
+
+void x_sleep(int ms)
+{
+	Sleep(ms);
+}

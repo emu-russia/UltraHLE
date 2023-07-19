@@ -15,269 +15,293 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\src\A.BMP">
+    <ClInclude Include="..\src\resources\RESOURCE.H">
       <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\src\AUDIO.ICO">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\src\AUSTRAL.ICO">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\src\B.BMP">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\src\C_DOWN.BMP">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\src\C_LEFT.BMP">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\src\C_RIGHT.BMP">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\src\C_UP.BMP">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\src\D_DOWN.BMP">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\src\D_LEFT.BMP">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\src\D_RIGHT.BMP">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\src\D_UP.BMP">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\src\DEBUG.ICO">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\src\EUROPE.ICO">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\src\GERMANY.ICO">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\src\JAPAN.ICO">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\src\LEFT.BMP">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\src\N_LOGO.BMP">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\src\N64CART.ICO">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\src\N64CNTRL.ICO">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\src\N64LOGO.ICO">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\src\RIGHT.BMP">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\src\START.BMP">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\src\USA.ICO">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\src\VIDEO.ICO">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\src\Z.BMP">
-      <Filter>Resource Files</Filter>
-    </Image>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\src\BOOT.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\CART.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\CMD.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\CMD2.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\CONSOLE.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\CPU.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\CPUA.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\CPUANEW.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\CPUAOLD.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\CPUAUTIL.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\CPUC.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\CPUG.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\DEBUGUI.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\DISASM.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\DISASM86.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\DLIST.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\HW.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\INIFILE.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\LISTVIEW.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\LOADSAVE.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\LOG.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\MAIN.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\MEM.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\OS.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\PAD.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\PADOLD.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\PATCH.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\RDP.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\SLIST.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\SOUND.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\SYM.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\SYMFIND.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\SYNC.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\TIMER.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\Ultrahle.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\ZLIST.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\src\CONSOLE.H">
+    </ClInclude>
+    <ClInclude Include="..\src\console.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\CPUA.H">
+    <ClInclude Include="..\src\cpua.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\CPUAG.H">
+    <ClInclude Include="..\src\dlist.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\LISTVIEW.H">
+    <ClInclude Include="..\src\inifile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\LOADSAVE.H">
+    <ClInclude Include="..\src\listview.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\MAIN.H">
+    <ClInclude Include="..\src\loadsave.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\NOC.H">
+    <ClInclude Include="..\src\main.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\OLDVER.H">
+    <ClInclude Include="..\src\opdefs_c.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\OPDEFS_C.H">
+    <ClInclude Include="..\src\os.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\OS.H">
+    <ClInclude Include="..\src\oscall.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\OSCALL.H">
+    <ClInclude Include="..\src\osignore.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Osignore.h">
+    <ClInclude Include="..\src\ospatch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\OSPATCH.H">
+    <ClInclude Include="..\src\rdp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\RDP.H">
+    <ClInclude Include="..\src\slist.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\RESOURCE.H">
+    <ClInclude Include="..\src\sound.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\SOUND.H">
+    <ClInclude Include="..\src\stdsdk.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\STDSDK.H">
+    <ClInclude Include="..\src\sync.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\TIMER.H">
+    <ClInclude Include="..\src\timer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\ULTRA.H">
+    <ClInclude Include="..\src\ultra.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\ULTRAHLE.H">
+    <ClInclude Include="..\src\ultrahle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\VERSION.H">
+    <ClInclude Include="..\src\version.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\X.H">
+    <ClInclude Include="..\src\x.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\zlist.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\hw.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\cart.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\disasm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\log.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\sym.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\pad.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\debugui.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\patch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="..\src\UltraHLE.rc">
+    <Library Include="..\src\GLIDE2X.LIB" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\src\resources\A.BMP">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\src\resources\AUDIO.ICO">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\src\resources\AUSTRAL.ICO">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\src\resources\B.BMP">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\src\resources\C_DOWN.BMP">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\src\resources\C_LEFT.BMP">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\src\resources\C_RIGHT.BMP">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\src\resources\C_UP.BMP">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\src\resources\D_DOWN.BMP">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\src\resources\D_LEFT.BMP">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\src\resources\D_RIGHT.BMP">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\src\resources\D_UP.BMP">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\src\resources\DEBUG.ICO">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\src\resources\EUROPE.ICO">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\src\resources\GERMANY.ICO">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\src\resources\JAPAN.ICO">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\src\resources\LEFT.BMP">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\src\resources\N_LOGO.BMP">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\src\resources\N64CART.ICO">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\src\resources\N64CNTRL.ICO">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\src\resources\N64LOGO.ICO">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\src\resources\RIGHT.BMP">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\src\resources\START.BMP">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\src\resources\USA.ICO">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\src\resources\VIDEO.ICO">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\src\resources\Z.BMP">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\src\resources\UltraHLE.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Library Include="..\src\GLIDE2X.LIB" />
+    <ClCompile Include="..\src\boot.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\cart.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\cmd.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\console.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\cpu.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\cpua.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\cpuanew.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\cpuautil.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\cpuc.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\cpug.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\debugui.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\disasm.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\disasm86.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\dlist.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\hw.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\inifile.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\listview.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\loadsave.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\log.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\main.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\mem.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\os.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\pad.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\patch.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\rdp.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\slist.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\sound.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\sym.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\symfind.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\sync.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\timer.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ultrahle.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\zlist.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
