@@ -173,7 +173,6 @@ void printhelp(void)
           "rom <file>    - load a new rom file\n"
           "reset         - reset/restart rom\n"
           "sgo           - slow go! (using c emulator)\n"
-          "ogo           - old go! (using older compiler)\n"
           "go, z         - go! (using compiler)\n"
           "exit, x       - exit\n"
           );
@@ -350,7 +349,7 @@ int command_main(char *p,char *tp)
 
         print("note: Loaded state from '%s'\n",p);
     }
-    else if(IS(p,"go") || IS(p,"sgo") || IS(p,"ogo"))
+    else if(IS(p,"go") || IS(p,"sgo"))
     {
         int a=view.showhelp;
 
@@ -364,10 +363,6 @@ int command_main(char *p,char *tp)
         if(IS(p,"go"))
         {
             cpu_exec(CYCLES_INFINITE,1);
-        }
-        else if(IS(p,"ogo"))
-        {
-            cpu_exec(CYCLES_INFINITE,2);
         }
         else
         {
@@ -416,15 +411,6 @@ int command_step(char *p,char *tp)
         if(cnt<1) cnt=1;
         cpu_clearbp();
         cpu_exec(cnt,1);
-    }
-    else IFIS(p,"of")
-    {
-        qword cnt;
-        p=param(&tp);
-        cnt=atoq(p);
-        if(cnt<1) cnt=1;
-        cpu_clearbp();
-        cpu_exec(cnt,2);
     }
     else IFIS(p,"n")
     {

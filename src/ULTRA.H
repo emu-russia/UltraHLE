@@ -486,7 +486,6 @@ typedef struct
 
     int    soundslowsgfx;  // 1=slow gfx down if losing sound sync
 
-    int    oldcompiler;
     int    optimize;
 
     int    gfxthread;

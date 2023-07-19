@@ -106,7 +106,6 @@ typedef struct
     int    fpuused;
 
     // optimization settings
-    int    opt_old;         // use the old compiler (no regs allocation)
 
     int    opt_rejumpgroup; // jump back to group start
 

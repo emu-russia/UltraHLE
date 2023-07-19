@@ -36,9 +36,6 @@
     <ClCompile Include="..\src\CPUANEW.C">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\CPUAOLD.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\CPUAUTIL.C">
       <Filter>Source Files</Filter>
     </ClCompile>

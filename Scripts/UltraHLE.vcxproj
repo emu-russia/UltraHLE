@@ -26,7 +26,6 @@
     <ClCompile Include="..\src\CPU.C" />
     <ClCompile Include="..\src\CPUA.C" />
     <ClCompile Include="..\src\CPUANEW.C" />
-    <ClCompile Include="..\src\CPUAOLD.C" />
     <ClCompile Include="..\src\CPUAUTIL.C" />
     <ClCompile Include="..\src\CPUC.C" />
     <ClCompile Include="..\src\CPUG.C">

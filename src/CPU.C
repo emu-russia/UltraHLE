@@ -558,8 +558,6 @@ void cpu_exec(qword ops0,int fast)
     st.exectime=st.cputime;
 
     // clear breakpoints temporarily if fast
-    if(fast==2) st.oldcompiler=1;
-    else st.oldcompiler=0;
     if(fast)
     {
         breakpointnum=st.breakpoints; // stores

@@ -19,7 +19,6 @@ dword  ip[256];
 // select optimization settings
 void a_optimizesetup(void)
 {
-    r.opt_old=0;
     r.opt_directjmp=0;
     r.opt_rejumpgroup=0;
     r.opt_adjacentvm=0;
@@ -50,13 +49,11 @@ void a_optimizesetup(void)
         r.opt_nospvm=1;
     }
 
-    if(st.oldcompiler) r.opt_old=1;
-
     r.opt_domemio=1;
 }
 
 // called to compile one opcode and insert the compiled data into
-// x86 instruction stream. Calls CPUAOLD.C or CPUANEW.C
+// x86 instruction stream.
 int ac_compileop(dword pc)
 {
     dword opcode=mem_readop(pc);
@@ -69,8 +66,7 @@ int ac_compileop(dword pc)
 
     cstat.used[op]++;
 
-    if(r.opt_old) return ac_compileopold(pc,opcode,op);
-    else          return ac_compileopnew(pc,opcode,op);
+    return ac_compileopnew(pc,opcode,op);
 }
 
 void ac_sizegroup(Group *g)
@@ -262,8 +258,8 @@ void ac_compilegroup(Group *g) // main
 
     r.mark=0;
 
-    if(r.opt_old) ac_compilestartold();
-    else          ac_compilestartnew();
+    ac_compilestartnew();
+
 if(0 && r.pc0==0x8008c594)
 {
     insert(o_urpo2);
@@ -288,8 +284,7 @@ else
         }
     }
 }
-    if(r.opt_old) ac_compileendold();
-    else          ac_compileendnew();
+    ac_compileendnew();
 
     if(!r.errors && r.mark)
     {
@@ -771,8 +766,7 @@ print("fast-go %08X (%i)\n",st.pc,g->ratio&1);
                 // NOTE: fastgroup may actually execute multiple
                 // groups, as long as bailout remains positive
                 // and Group.code is present for all groups.
-                if(st.oldcompiler) a_fastgroup_old(g);
-                else a_fastgroup(g);
+                a_fastgroup(g);
             }
             else
             {
