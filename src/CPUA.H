@@ -22,7 +22,6 @@
 //   * CPUA.C     - high level compiler and execution
 //   * CPUAUTIL.C - x86 code insert (ip[], insertop, regs... )
 //   * CPUANEW.C  - opcode compiler
-//   * CPUAOLD.C  - old opcode compiler
 // + compares to
 //     SETXY EAX
 //     mov   eax,[groupbase-8+EAX*4)
@@ -108,11 +107,6 @@ typedef struct
     // optimization settings
 
     int    opt_rejumpgroup; // jump back to group start
-
-    // for old only
-    int    opt_directjmp;   // direct jump to next group
-
-    // for new only
     int    opt_adjacentvm;  // do not do another vm for nearby [reg+1] [reg+2] if reg is the same
     int    opt_vmcache;     // cache vm lookups to memory
     int    opt_nospvm;      // no vm lookup for sp
@@ -449,15 +443,11 @@ void   ac_compilegroup(Group *g);
 
 // call this
 int    ac_compileop(dword pc);
-// it calls one of these based on r.opt_old parameter
-int    ac_compileopold(dword pc,dword opcode,int op);
 int    ac_compileopnew(dword pc,dword opcode,int op);
 
-// start/end routines for new/old compilers
+// start/end routines for compiler
 void   ac_compilestartnew(void);
-void   ac_compilestartold(void);
 void   ac_compileendnew(void);
-void   ac_compileendold(void);
 
 // routine for creating a new group Tthe group is allocated an entry
 // in mem.group table, but it is not compiled before it is executed.

@@ -19,7 +19,6 @@ dword  ip[256];
 // select optimization settings
 void a_optimizesetup(void)
 {
-    r.opt_directjmp=0;
     r.opt_rejumpgroup=0;
     r.opt_adjacentvm=0;
     r.opt_nospvm=0;
