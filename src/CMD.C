@@ -2,9 +2,6 @@
 
 int godisabled;
 
-extern void printhelp2(void);
-extern int command_2(char *,char *);
-
 static byte *snap; 
 
 #define IFIS(x,str) if(!_stricmp(x,str))
@@ -157,7 +154,6 @@ void printhelp(void)
           "snd <0/1>     - toggle sound info (slist.log)\n"
           "all <0/1>     - toggle all of the above on/off\n"
           "stop <0/1/2>  - stopping: 0=exceptions only, 1=and errors (def.), 2=and warnings\n");
-    printhelp2();
     print(
     "\x1\x3------------------ special keys when NOT executing -----------------------------------\n"
           "F1 - show stats      F5 - go      F9 - step next   \n"
@@ -1276,7 +1272,6 @@ void command(char *cmd)
 
         // execute
         a=0;
-        if(!a) a=command_2(p,tp);
         if(!a) a=command_main(p,tp);
         if(!a) a=command_step(p,tp);
         if(!a) a=command_exam(p,tp);

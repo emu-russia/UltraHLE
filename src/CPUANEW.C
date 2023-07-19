@@ -12,18 +12,6 @@ static dword   asm_temp2;
 static dword   asm_temp3;
 static dword   asm_temp4;
 
-#include "noc.h"
-
-int isnoc(dword addr)
-{
-    int i;
-    for(i=1;noc[i];i++)
-    {
-        if(addr==noc[i]) return(1);
-    }
-    return(0);
-}
-
 void vmcache_add(int reg,int off)
 {
     r.vmcachei=(r.vmcachei+1)&(VMCACHESIZE-1);
@@ -450,21 +438,7 @@ void ac_branch(dword opcode, int cmpop, int flags)
             flags&=~BR_LIKELY;
         }
     }
-
-    #if 0
-    if(flags&BR_CMPFPU)
-    {
-        /*
-        if(isnoc(r.pc+4+imm*4))
-        {
-            r.errors++;
-            print("at %08X cmpop %04X flags %04X true %08X\n",r.pc,cmpop,flags,r.pc+4+imm*4);
-        }
-        */
-        if(r.pc==0x8008c5a4) r.errors++;
-    }
-    #endif
-
+    
     truepc   =r.pc+4+imm*4;
     falsepc  =r.pc+8;
     jumptrue =(dword)ac_creategroup(truepc);

@@ -15,86 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\src\A.BMP">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\src\AUDIO.ICO">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\src\AUSTRAL.ICO">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\src\B.BMP">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\src\C_DOWN.BMP">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\src\C_LEFT.BMP">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\src\C_RIGHT.BMP">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\src\C_UP.BMP">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\src\D_DOWN.BMP">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\src\D_LEFT.BMP">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\src\D_RIGHT.BMP">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\src\D_UP.BMP">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\src\DEBUG.ICO">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\src\EUROPE.ICO">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\src\GERMANY.ICO">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\src\JAPAN.ICO">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\src\LEFT.BMP">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\src\N_LOGO.BMP">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\src\N64CART.ICO">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\src\N64CNTRL.ICO">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\src\N64LOGO.ICO">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\src\RIGHT.BMP">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\src\START.BMP">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\src\USA.ICO">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\src\VIDEO.ICO">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\src\Z.BMP">
-      <Filter>Resource Files</Filter>
-    </Image>
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="..\src\BOOT.C">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -102,9 +22,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\src\CMD.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\CMD2.C">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\src\CONSOLE.C">
@@ -170,9 +87,6 @@
     <ClCompile Include="..\src\PAD.C">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\PADOLD.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\PATCH.C">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -211,9 +125,6 @@
     <ClInclude Include="..\src\CPUA.H">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\CPUAG.H">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\LISTVIEW.H">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -221,12 +132,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\MAIN.H">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\NOC.H">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\OLDVER.H">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\OPDEFS_C.H">
@@ -245,9 +150,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\RDP.H">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\RESOURCE.H">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\SOUND.H">
@@ -271,13 +173,96 @@
     <ClInclude Include="..\src\X.H">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="..\src\UltraHLE.rc">
+    <ClInclude Include="..\src\resources\RESOURCE.H">
       <Filter>Resource Files</Filter>
-    </ResourceCompile>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Library Include="..\src\GLIDE2X.LIB" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\src\resources\A.BMP">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\src\resources\AUDIO.ICO">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\src\resources\AUSTRAL.ICO">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\src\resources\B.BMP">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\src\resources\C_DOWN.BMP">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\src\resources\C_LEFT.BMP">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\src\resources\C_RIGHT.BMP">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\src\resources\C_UP.BMP">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\src\resources\D_DOWN.BMP">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\src\resources\D_LEFT.BMP">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\src\resources\D_RIGHT.BMP">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\src\resources\D_UP.BMP">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\src\resources\DEBUG.ICO">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\src\resources\EUROPE.ICO">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\src\resources\GERMANY.ICO">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\src\resources\JAPAN.ICO">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\src\resources\LEFT.BMP">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\src\resources\N_LOGO.BMP">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\src\resources\N64CART.ICO">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\src\resources\N64CNTRL.ICO">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\src\resources\N64LOGO.ICO">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\src\resources\RIGHT.BMP">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\src\resources\START.BMP">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\src\resources\USA.ICO">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\src\resources\VIDEO.ICO">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\src\resources\Z.BMP">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\src\resources\UltraHLE.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

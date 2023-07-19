@@ -19,38 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\src\A.BMP" />
-    <Image Include="..\src\AUDIO.ICO" />
-    <Image Include="..\src\AUSTRAL.ICO" />
-    <Image Include="..\src\B.BMP" />
-    <Image Include="..\src\C_DOWN.BMP" />
-    <Image Include="..\src\C_LEFT.BMP" />
-    <Image Include="..\src\C_RIGHT.BMP" />
-    <Image Include="..\src\C_UP.BMP" />
-    <Image Include="..\src\DEBUG.ICO" />
-    <Image Include="..\src\D_DOWN.BMP" />
-    <Image Include="..\src\D_LEFT.BMP" />
-    <Image Include="..\src\D_RIGHT.BMP" />
-    <Image Include="..\src\D_UP.BMP" />
-    <Image Include="..\src\EUROPE.ICO" />
-    <Image Include="..\src\GERMANY.ICO" />
-    <Image Include="..\src\JAPAN.ICO" />
-    <Image Include="..\src\LEFT.BMP" />
-    <Image Include="..\src\N64CART.ICO" />
-    <Image Include="..\src\N64CNTRL.ICO" />
-    <Image Include="..\src\N64LOGO.ICO" />
-    <Image Include="..\src\N_LOGO.BMP" />
-    <Image Include="..\src\RIGHT.BMP" />
-    <Image Include="..\src\START.BMP" />
-    <Image Include="..\src\USA.ICO" />
-    <Image Include="..\src\VIDEO.ICO" />
-    <Image Include="..\src\Z.BMP" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="..\src\BOOT.C" />
     <ClCompile Include="..\src\CART.C" />
     <ClCompile Include="..\src\CMD.C" />
-    <ClCompile Include="..\src\CMD2.C" />
     <ClCompile Include="..\src\CONSOLE.C" />
     <ClCompile Include="..\src\CPU.C" />
     <ClCompile Include="..\src\CPUA.C" />
@@ -77,12 +48,6 @@
     <ClCompile Include="..\src\MEM.C" />
     <ClCompile Include="..\src\OS.C" />
     <ClCompile Include="..\src\PAD.C" />
-    <ClCompile Include="..\src\PADOLD.C">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\src\PATCH.C" />
     <ClCompile Include="..\src\RDP.C" />
     <ClCompile Include="..\src\SLIST.C" />
@@ -97,19 +62,16 @@
   <ItemGroup>
     <ClInclude Include="..\src\CONSOLE.H" />
     <ClInclude Include="..\src\CPUA.H" />
-    <ClInclude Include="..\src\CPUAG.H" />
     <ClInclude Include="..\src\LISTVIEW.H" />
     <ClInclude Include="..\src\LOADSAVE.H" />
     <ClInclude Include="..\src\MAIN.H" />
-    <ClInclude Include="..\src\NOC.H" />
-    <ClInclude Include="..\src\OLDVER.H" />
     <ClInclude Include="..\src\OPDEFS_C.H" />
     <ClInclude Include="..\src\OS.H" />
     <ClInclude Include="..\src\OSCALL.H" />
     <ClInclude Include="..\src\Osignore.h" />
     <ClInclude Include="..\src\OSPATCH.H" />
     <ClInclude Include="..\src\RDP.H" />
-    <ClInclude Include="..\src\RESOURCE.H" />
+    <ClInclude Include="..\src\resources\RESOURCE.H" />
     <ClInclude Include="..\src\SOUND.H" />
     <ClInclude Include="..\src\STDSDK.H" />
     <ClInclude Include="..\src\TIMER.H" />
@@ -119,15 +81,43 @@
     <ClInclude Include="..\src\X.H" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="..\src\UltraHLE.rc" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\XGLIDE_Decompile\Scripts\XGLIDE.vcxproj">
       <Project>{12e668b0-bbc9-40d2-9cda-a6ef53915819}</Project>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Library Include="..\src\GLIDE2X.LIB" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\src\resources\A.BMP" />
+    <Image Include="..\src\resources\AUDIO.ICO" />
+    <Image Include="..\src\resources\AUSTRAL.ICO" />
+    <Image Include="..\src\resources\B.BMP" />
+    <Image Include="..\src\resources\C_DOWN.BMP" />
+    <Image Include="..\src\resources\C_LEFT.BMP" />
+    <Image Include="..\src\resources\C_RIGHT.BMP" />
+    <Image Include="..\src\resources\C_UP.BMP" />
+    <Image Include="..\src\resources\DEBUG.ICO" />
+    <Image Include="..\src\resources\D_DOWN.BMP" />
+    <Image Include="..\src\resources\D_LEFT.BMP" />
+    <Image Include="..\src\resources\D_RIGHT.BMP" />
+    <Image Include="..\src\resources\D_UP.BMP" />
+    <Image Include="..\src\resources\EUROPE.ICO" />
+    <Image Include="..\src\resources\GERMANY.ICO" />
+    <Image Include="..\src\resources\JAPAN.ICO" />
+    <Image Include="..\src\resources\LEFT.BMP" />
+    <Image Include="..\src\resources\N64CART.ICO" />
+    <Image Include="..\src\resources\N64CNTRL.ICO" />
+    <Image Include="..\src\resources\N64LOGO.ICO" />
+    <Image Include="..\src\resources\N_LOGO.BMP" />
+    <Image Include="..\src\resources\RIGHT.BMP" />
+    <Image Include="..\src\resources\START.BMP" />
+    <Image Include="..\src\resources\USA.ICO" />
+    <Image Include="..\src\resources\VIDEO.ICO" />
+    <Image Include="..\src\resources\Z.BMP" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\src\resources\UltraHLE.rc" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

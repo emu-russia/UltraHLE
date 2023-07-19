@@ -9,7 +9,7 @@
 
 #include <windows.h>                   // Master Include File for Windows Apps
 #include <commctrl.h>                  // Interface for the Common Controls  
-#include "resource.h"                  // Application Resource Definitions
+#include "resources/resource.h"        // Application Resource Definitions
 #include "ultra.h"                     // UltraHLE Core Emu File
 
    // Typedefs
