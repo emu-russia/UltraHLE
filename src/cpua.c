@@ -104,24 +104,6 @@ void ac_sizegroup(Group *g)
         i++;
         x=mem_readop(g->addr+i*4);
     }
-/*
-    if(g->addr==0x8008c57c)
-    {
-        i=4;
-        print("special groupsize!\n");
-    }
-    if(g->addr==0x8008c58c)
-    {
-        i=2;
-        print("special groupsize!\n");
-    }
-    if(g->addr==0x8008c594)
-    {
-        i=2;
-//        r.errors++;
-        print("special groupsize!\n");
-    }
-*/
 
     g->len=i;
     g->ratio=1;
@@ -503,99 +485,6 @@ void a_fastgroup(Group *g)
         jmp    edx // will return to fastexec_loop
     rethere:
 
-        // restore regs
-        fldcw  [originalfpucw]
-        pop    ebp
-    }
-}
-
-void a_fastgroup_old(Group *g)
-{
-    dword stptr=(dword)&st;
-    stptr+=STOFFSET;
-    // will execute multiple groups as long as bailout is positibe
-    // and groups remain compiled
-    _asm
-    {
-        // save regs
-        push   ebp
-        // set fpu rounding mode
-        fldcw  [fpucw]
-        // load current group we will execute, and first codeptr
-        mov    eax,[g]
-        // load constant regs for fastexec
-        mov    ebx,[stptr] // can't use 'OFFSET st' since the inline asm thinks st is a fpu reg :(
-        mov    esi,OFFSET mem.lookupr
-        mov    edi,OFFSET mem.lookupw
-        mov    edx,[eax+0] // Group.code (first group always compiled)
-
-        //--main loop for executing groups. Normally every MIPS jump/call
-        //--returns here for dispatching. However, optimized code might
-        //--do the jump/call internally without returning (but it still
-        //--checks the bailout, so if that goes negative execution returns).
-    again:
-        // EDX=group.code
-        call   edx
-        // returns with either (len=number of instructions executed)
-        //    EAX=next group  ECX=-len
-        // or EAX=0           ECX=-len  EDX=st.pc
-        test   eax,eax
-        jz     nogroup
-
-        //--a jump to a new known group
-    //havegroup:
-        // EAX=group, ECX=-len
-        // decrement bailout, load codeptr for next group
-        add    ecx,[ebx+STBAIL]
-        mov    edx,[eax] // Group.code
-        mov    [ebx+STBAIL],ecx
-        // bailout?
-#if DUMPGO==1 | EXECPROF
-jmp finish2
-#endif
-        jl     finish2   // bailout, exit
-        test   edx,edx
-        jnz    again     // we have code, go
-        jmp    finish2   // no code, exit
-
-        //--a jump to register / ret (no destination group specified)
-    nogroup:
-        // EAX=0, ECX=-len, EDX=st.pc
-        // decrement bailout, load codeptr for next group
-        add    ecx,[ebx+STBAIL]
-        mov    [ebx+STPC],edx // store pc
-        mov    [ebx+STBAIL],ecx
-        // bailout?
-#if DUMPGO==1 | EXECPROF
-jmp finish
-#endif
-        jl     finish
-        // read memory at st.pc
-        mov    eax,edx
-        shr    edx,12
-        add    eax,[OFFSET mem.lookupr+edx*4]
-        mov    eax,[eax]   // mem_read32(st.pc)
-        // calc EDX=OP_OP(mem), EAX=sizeof(Group)*OP_IMM(mem)
-        mov    edx,eax
-        and    eax,0xffff  // &0xffff
-        shr    edx,26
-        shl    eax,4       // *sizeof(Group)
-        cmp    edx,OP_GROUP
-        jne    finish3     // no group at destination
-        // convert EAX to group ptr, and go to execute group
-        add    eax,[mem.group]
-        mov    edx,[eax+0] // Group.code
-        test   edx,edx
-        jnz    again       // we have code
-        jmp    finish3     // no code, exit
-
-    finish2:
-        mov    edx,[eax+4] // Group.addr
-    finish:
-        // EDX=ending pc
-        // set pc
-        mov    [ebx+STPC],edx // st.pc=addr
-    finish3:
         // restore regs
         fldcw  [originalfpucw]
         pop    ebp
