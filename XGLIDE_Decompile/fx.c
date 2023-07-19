@@ -536,7 +536,9 @@ $L1409:
 				case X_TEXTUREENVCR:
 					grColorCombine(7, 5, 0, 2, 0);
 					guAlphaSource(GR_ALPHASOURCE_ITERATED_ALPHA);
-					x_log("envc=%08X\n", g_state[XST].active.envc);
+					if (g_state[XST].geometry & X_DUMPDATA) {
+						x_log("envc=%08X\n", g_state[XST].active.envc);
+					}
 LABEL_47:
 					grConstantColorValue(g_state[XST].active.envc);
 LABEL_48:
