@@ -102,6 +102,11 @@ void mem_init(int ramsize)
         mem.group=NULL;
     }
     mem.group=malloc(sizeof(Group)*mem.groupmax);
+    if (!mem.group) {
+        print("fatal error could not allocate mem.group\n");
+        flushdisplay();
+        exit(3);
+    }
     memset(mem.group,0,sizeof(Group)*mem.groupmax);
 
     if(mem.groupcnt)
@@ -110,14 +115,12 @@ void mem_init(int ramsize)
         mem.groupcnt=NULL;
     }
     mem.groupcnt=malloc(sizeof(int)*mem.groupmax);
-    memset(mem.groupcnt,0,sizeof(int)*mem.groupmax);
-
-    if(!mem.code)
-    {
-        print("fatal error could not allocate mem.code\n");
+    if (!mem.groupcnt) {
+        print("fatal error could not allocate mem.groupcnt\n");
         flushdisplay();
         exit(3);
     }
+    memset(mem.groupcnt,0,sizeof(int)*mem.groupmax);
 
     // set a single NULLFILL to first page
     mem_write32(0x1f0,NULLFILL);
