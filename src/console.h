@@ -1,3 +1,8 @@
+// Win32 Console code is not exported externally, but is entirely dependent on the console implementation of debugui.
+// This is done so that debugui can be ported to other engines, like imgui.
+
+#pragma once
+
 void con_init(void);
 void con_initdummy(void);
 void con_deinit(void);

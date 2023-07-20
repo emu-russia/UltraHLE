@@ -242,7 +242,7 @@ void cpu_keys(int dopad)
             st.pause=0;
             stopnow=1;
         }
-        else if(key && dopad) pad_misckey(key);
+        else if(key && dopad) debugui_misckey(key);
     }
 
     if(stopnow==1)

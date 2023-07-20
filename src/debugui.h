@@ -73,3 +73,4 @@ void flushdisplay(void); // redraw debug console
 void debugui(void); // main debugui-loop
 
 void breakcommand(char* cmd); // breaks nicely at next retrace, and then executes
+void debugui_misckey(int key);      // tell a key has been pressed (keycodes as in console.h)

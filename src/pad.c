@@ -68,138 +68,6 @@ void readjoystick(int *xpos,int *ypos,int *buttons)
     *buttons=joy.wButtons;
 }
 
-void pad_oldkeyb(int key,int down)
-{
-    int a;
-    static int flag;
-    if(!flag)
-    {
-        print("note: Old keyboard code being used\n");
-        flag=1;
-    }
-
-    if(!rdp_gfxactive() || st.keyboarddisable) return;
-
-    switch(key)
-    {
-        case KEY_HOME:  xnarrow=down; xcenter=-6*down;  ycenter=+12*down; joyactive=0; break;
-        case KEY_PGUP:  xnarrow=down; xcenter=+6*down;  ycenter=+12*down; joyactive=0; break;
-        case KEY_PGDN:  xnarrow=down; xcenter=+6*down;  ycenter=-12*down; joyactive=0; break;
-        case KEY_END:   xnarrow=down; xcenter=-6*down;  ycenter=-12*down; joyactive=0; break;
-        case KEY_LEFT:  xnarrow=0;    xcenter=-16*down;                   joyactive=0; break;
-        case KEY_RIGHT: xnarrow=0;    xcenter=+16*down;                   joyactive=0; break;
-        case KEY_UP:    xnarrow=0;                      ycenter=+16*down; joyactive=0; break;
-        case KEY_DOWN:  xnarrow=0;                      ycenter=-16*down; joyactive=0; break;
-
-        case 'F':       a=L_JPAD;     mypad.button|=a; if(!down) mypad.button^=a; break;
-        case 'H':       a=R_JPAD;     mypad.button|=a; if(!down) mypad.button^=a; break;
-        case 'T':       a=U_JPAD;     mypad.button|=a; if(!down) mypad.button^=a; break;
-        case 'G':       a=D_JPAD;     mypad.button|=a; if(!down) mypad.button^=a; break;
-        case 'J':       a=L_CBUT; mypad.button|=a; if(!down) mypad.button^=a; break;
-        case 'L':       a=R_CBUT; mypad.button|=a; if(!down) mypad.button^=a; break;
-        case 'I':       a=U_CBUT; mypad.button|=a; if(!down) mypad.button^=a; break;
-        case 'K':       a=D_CBUT; mypad.button|=a; if(!down) mypad.button^=a; break;
-        case 'S':       a=START;      mypad.button|=a; if(!down) mypad.button^=a; break;
-        case 'A':       a=A_BUTTON;   mypad.button|=a; if(!down) mypad.button^=a; break;
-        case 'X':
-        case 'B':       a=B_BUTTON;   mypad.button|=a; if(!down) mypad.button^=a; break;
-        case 'Z':       a=Z_TRIG;     mypad.button|=a; if(!down) mypad.button^=a; break;
-        case 'C':       a=L_TRIG;     mypad.button|=a; if(!down) mypad.button^=a; break;
-        case 'V':       a=R_TRIG;     mypad.button|=a; if(!down) mypad.button^=a; break;
-    }
-}
-
-void pad_misckey(int key)
-{ // called from cpu.c user interface check
-    int down;
-
-    if(key&KEY_RELEASE) down=0; else down=1;
-    key&=0xfff;
-    if(key>32 && key<256) key=toupper(key);
-
-    if((!rdp_gfxactive() || st.keyboarddisable) && key!=KEY_F12) return;
-
-    if(init.oldkeyb) pad_oldkeyb(key,down);
-
-    if(init.showconsole) switch(key)
-    {
-        case 'W': if(down)
-                  {
-                      showwire^=1;
-                  } break;
-        case 'Q': if(down)
-                  {
-                      showinfo^=1;
-                  } break;
-        case 'E': if(down)
-                  {
-                      showtest++;
-                      if(showtest>3) showtest=0;
-                  } break;
-        case 'R': if(down)
-                  {
-                      showtest2++;
-                      if(showtest2>7) showtest2=0;
-                  } break;
-        case KEY_F10:
-        case KEY_F11:
-        case KEY_F12:
-                  if(down)
-                  {
-                      rdp_togglefullscreen();
-                  } break;
-        case KEY_F6:
-                  if(st.pause) st.pause=0;
-                  if(down)
-                  {
-                      breakcommand("save;go");
-                  }
-                  break;
-        case KEY_F8:
-                  if(down)
-                  {
-                      st.pause^=1;
-                      if(st.pause)
-                      {
-                          if(st2.audioon)
-                          {
-                              st2.audioon=0;
-                              sound_stop();
-                          }
-                      }
-                  }
-                  break;
-        case KEY_F9:
-                  if(st.pause) st.pause=0;
-                  if(down)
-                  {
-                      breakcommand("load;go");
-                  }
-                  if(st.pause) st.pause=0;
-                  break;
-        case KEY_F3:
-        case KEY_F4:
-                  if(down)
-                  {
-                      if(key==KEY_F3)
-                      {
-                          joyactive^=1;
-                          if(joyactive) mouseactive=0;
-                      }
-                      else
-                      {
-                          mouseactive^=1;
-                          if(mouseactive) joyactive=0;
-                      }
-                      mousedisablecnt=0;
-                      print("Joystick (F5) %s, Mouse (F6) %s\n",
-                        joyactive?"enabled ":"disabled",
-                        mouseactive?"enabled ":"disabled");
-                      flushdisplay();
-                  } break;
-    }
-}
-
 void pad_enablejoy(int enable)
 {
     joyactive=0;
@@ -425,8 +293,8 @@ void pad_drawframe(void)
     }
     else // keyboard
     {
-        if(!init.oldkeyb) pad_buttons();
-        pad_keyboard(!init.oldkeyb);
+        pad_buttons();
+        pad_keyboard(1);
     }
 
     if(mypad.stickx> 80) mypad.stickx= 80;

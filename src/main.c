@@ -308,7 +308,6 @@ void help(void)
                "     of just flipping screen (for Banshee)\n"
                "-n   no file mapping for preflipped roms (load whole rom)\n"
                "-c   show console\n"
-               "-k   use old keyboard code (ONLY WORKS WITH CONSOLE!)\n"
                ,"UltraHLE",MB_OK);
     }
 }
@@ -371,9 +370,6 @@ void main_startup(void)
                 {
                 case 'c':
                     init.showconsole=1;
-                    break;
-                case 'k':
-                    init.oldkeyb=1;
                     break;
                 case 'n':
                     init.nomemmap=1;

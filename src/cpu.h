@@ -383,8 +383,6 @@ typedef struct
     char   savepath[MAXFILE]; // default path for saves
     char   rompath[MAXFILE];  // default path for rom search
 
-    int    oldkeyb;
-
     int    viewportwid;
     int    viewporthig;
 } Init;

@@ -1188,46 +1188,6 @@ static int command_misc(char *p,char *tp)
     return(1);
 }
 
-void command_fkey(int a)
-{
-    switch(a)
-    {
-    case KEY_F1:
-        view_changed(VIEW_RESIZE);
-//        view.shrink^=1;
-        view.showhelp^=1;
-        break;
-    case KEY_F2:
-        view.active=WIN_DATA;
-        break;
-    case KEY_F3:
-        view.active=WIN_CODE;
-        break;
-    case KEY_F4:
-        view.active=WIN_CONS;
-        break;
-    case KEY_F5:
-        command("go");
-        break;
-    case KEY_F6:
-        command("regs");
-        break;
-    case KEY_F7:
-        command("f 1");
-        break;
-    case KEY_F8:
-        command("s 1");
-        break;
-    case KEY_F9:
-        command("n");
-        break;
-    case KEY_F12:
-        print("3dfx screen flipped.\n");
-        rdp_togglefullscreen();
-        break;
-    }
-}
-
 void command(char *cmd)
 {
     char *tp,*p,*cs,*cd;

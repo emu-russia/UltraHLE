@@ -251,7 +251,6 @@ typedef unsigned char       byte;
 
 #include "os.h"
 #include "timer.h"
-#include "console.h"
 #include "cpu.h"
 #include "mem.h"
 #include "hw.h"

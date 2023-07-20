@@ -1,4 +1,5 @@
 #include "stdsdk.h"
+#include "console.h"
 extern HWND hwndStatus;
 extern char szBuffer[];
 
@@ -957,6 +958,47 @@ void conkey(int a)
     view_changed(VIEW_CONS);
 }
 
+// execute commands bound to a function key (keycodes as in console.h)
+void command_fkey(int a)
+{
+    switch(a)
+    {
+    case KEY_F1:
+        view_changed(VIEW_RESIZE);
+//        view.shrink^=1;
+        view.showhelp^=1;
+        break;
+    case KEY_F2:
+        view.active=WIN_DATA;
+        break;
+    case KEY_F3:
+        view.active=WIN_CODE;
+        break;
+    case KEY_F4:
+        view.active=WIN_CONS;
+        break;
+    case KEY_F5:
+        command("go");
+        break;
+    case KEY_F6:
+        command("regs");
+        break;
+    case KEY_F7:
+        command("f 1");
+        break;
+    case KEY_F8:
+        command("s 1");
+        break;
+    case KEY_F9:
+        command("n");
+        break;
+    case KEY_F12:
+        print("3dfx screen flipped.\n");
+        rdp_togglefullscreen();
+        break;
+    }
+}
+
 void debugui_key(int a)
 {
     int flag=1;
@@ -983,6 +1025,95 @@ void breakcommand(char *cmd)
     if(*breakcmd) return; // ignore command, still processing last
     strcpy(breakcmd,cmd);
     cpu_nicebreak();
+}
+
+void debugui_misckey(int key)
+{ // called from cpu.c user interface check
+    int down;
+
+    if(key&KEY_RELEASE) down=0; else down=1;
+    key&=0xfff;
+    if(key>32 && key<256) key=toupper(key);
+
+    if((!rdp_gfxactive() || st.keyboarddisable) && key!=KEY_F12) return;
+
+    if(init.showconsole) switch(key)
+    {
+        case 'W': if(down)
+                  {
+                      showwire^=1;
+                  } break;
+        case 'Q': if(down)
+                  {
+                      showinfo^=1;
+                  } break;
+        case 'E': if(down)
+                  {
+                      showtest++;
+                      if(showtest>3) showtest=0;
+                  } break;
+        case 'R': if(down)
+                  {
+                      showtest2++;
+                      if(showtest2>7) showtest2=0;
+                  } break;
+        case KEY_F10:
+        case KEY_F11:
+        case KEY_F12:
+                  if(down)
+                  {
+                      rdp_togglefullscreen();
+                  } break;
+        case KEY_F6:
+                  if(st.pause) st.pause=0;
+                  if(down)
+                  {
+                      breakcommand("save;go");
+                  }
+                  break;
+        case KEY_F8:
+                  if(down)
+                  {
+                      st.pause^=1;
+                      if(st.pause)
+                      {
+                          if(st2.audioon)
+                          {
+                              st2.audioon=0;
+                              sound_stop();
+                          }
+                      }
+                  }
+                  break;
+        case KEY_F9:
+                  if(st.pause) st.pause=0;
+                  if(down)
+                  {
+                      breakcommand("load;go");
+                  }
+                  if(st.pause) st.pause=0;
+                  break;
+        case KEY_F3:
+        case KEY_F4:
+                  if(down)
+                  {
+                      if(key==KEY_F3)
+                      {
+                          joyactive^=1;
+                          if(joyactive) mouseactive=0;
+                      }
+                      else
+                      {
+                          mouseactive^=1;
+                          if(mouseactive) joyactive=0;
+                      }
+                      mousedisablecnt=0;
+                      print("Joystick (F5) %s, Mouse (F6) %s\n",
+                        joyactive?"enabled ":"disabled",
+                        mouseactive?"enabled ":"disabled");
+                      flushdisplay();
+                  } break;
+    }
 }
 
 /****************************************************************************
