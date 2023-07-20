@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClInclude Include="..\src\boot.h" />
     <ClInclude Include="..\src\cart.h" />
+    <ClInclude Include="..\src\cmd.h" />
     <ClInclude Include="..\src\console.h" />
     <ClInclude Include="..\src\cpu.h" />
     <ClInclude Include="..\src\cpua.h" />

@@ -72,10 +72,4 @@ void exitnow(void); // exit emu asap
 void flushdisplay(void); // redraw debug console
 void debugui(void); // main debugui-loop
 
-// execute a command, ';' acts as a command separator for multiple commands
-// quotes etc are not supported, so ';' inside a quote is still a separator!
-void command(char* cmd);
 void breakcommand(char* cmd); // breaks nicely at next retrace, and then executes
-
-// execute commands bound to a function key (keycodes as in console.h)
-void command_fkey(int key);

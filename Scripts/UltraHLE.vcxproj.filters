@@ -120,6 +120,9 @@
     <ClInclude Include="..\src\cpu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\cmd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Library Include="..\src\GLIDE2X.LIB" />

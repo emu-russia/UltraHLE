@@ -260,6 +260,7 @@ typedef unsigned char       byte;
 #include "log.h"
 #include "sym.h"
 #include "pad.h"
+#include "cmd.h"
 #include "debugui.h"
 #include "sync.h"
 #include "patch.h"

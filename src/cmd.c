@@ -7,7 +7,7 @@ static byte *snap;
 #define IFIS(x,str) if(!_stricmp(x,str))
 #define IS(x,str) !_stricmp(x,str)
 
-char *param(char **tp)
+static char *param(char **tp)
 {
     static char buf[256];
     char *d=buf,*s=*tp;
@@ -29,7 +29,7 @@ char *param(char **tp)
     return(buf);
 }
 
-qword atoq(char *p)
+static qword atoq(char *p)
 {
     qword res=0;
     dword x;
@@ -56,7 +56,7 @@ qword atoq(char *p)
     return(res);
 }
 
-void setaddress(char *text,int *addr)
+static void setaddress(char *text,int *addr)
 {
     int l,a,o;
     unsigned int mask;
@@ -71,7 +71,7 @@ void setaddress(char *text,int *addr)
 
 //------------------------------------------------------------
 
-void printhelp(void)
+static void printhelp(void)
 {
     extern void printcopyright(void);
     printcopyright();
@@ -179,7 +179,7 @@ void printhelp(void)
 #endif
 }
 
-void memorypic(void)
+static void memorypic(void)
 {
     int a,i,x,y,cnt,codecnt,d;
     print("Memory RDRAM contents (4MB): C=code? d=data? e=almostempty .=empty\n");
@@ -215,7 +215,7 @@ void memorypic(void)
     }
 }
 
-void printdumping(void)
+static void printdumping(void)
 {
     char *t[2]={"off","ON "};
     print("Dumping: ");
@@ -231,7 +231,7 @@ void printdumping(void)
     print("\n");
 }
 
-void savestate(char *name)
+static void savestate(char *name)
 {
     FILE *f1;
     a_clearcodecache(); // will remove GROUP opcodes from mem
@@ -251,7 +251,7 @@ void savestate(char *name)
     else print("Error saving state.\n");
 }
 
-void loadstate(char *name)
+static void loadstate(char *name)
 {
     FILE *f1;
     f1=fopen(name,"rb");
@@ -288,7 +288,7 @@ void loadstate(char *name)
     else print("Error loading state from %s.\n",name);
 }
 
-int command_main(char *p,char *tp)
+static int command_main(char *p,char *tp)
 {
     if(0) { }
     else IFIS(p,"help")
@@ -375,7 +375,7 @@ int command_main(char *p,char *tp)
     return(1);
 }
 
-int command_step(char *p,char *tp)
+static int command_step(char *p,char *tp)
 {
     if(0) { }
     else IFIS(p,"skip")
@@ -493,7 +493,7 @@ int command_step(char *p,char *tp)
     return(1);
 }
 
-int command_dump(char *p,char *tp)
+static int command_dump(char *p,char *tp)
 {
     int infoset=0;
     if(0) { }
@@ -627,7 +627,7 @@ int command_dump(char *p,char *tp)
     return(1);
 }
 
-int command_exam(char *p,char *tp)
+static int command_exam(char *p,char *tp)
 {
     if(0) { }
     else IFIS(p,".")
@@ -799,7 +799,7 @@ int command_exam(char *p,char *tp)
     return(1);
 }
 
-int command_sym(char *p,char *tp)
+static int command_sym(char *p,char *tp)
 {
     if(0) { }
     else IFIS(p,"saveoscalls")
@@ -836,7 +836,7 @@ int command_sym(char *p,char *tp)
     return(1);
 }
 
-int command_misc(char *p,char *tp)
+static int command_misc(char *p,char *tp)
 {
     if(0) { }
     else IFIS(p,"pad")
@@ -1269,4 +1269,3 @@ void command(char *cmd)
 
     print(NULL);
 }
-
