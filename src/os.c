@@ -15,11 +15,15 @@
 
 #define THREADSLICE     (CYCLES_BURST*2-1) // timeslice for a thread (uncless block comes along)
 
+// This structures must be packed in order to make the formats compatible with the Ultra SDK
+
+#pragma pack(push, 1)
+
 typedef struct
 {
     dword  memaddr;
     dword  id;
-    int    realpriority;
+    int32_t realpriority;
     dword  flags;
     dword  active; // 1 for any created threads
     dword  ready;  // 1=ok to execute (0=waiting)
@@ -27,42 +31,44 @@ typedef struct
     // blocking queues
     dword  sendblock;
     dword  recvblock;
-    int    priority;
+    int32_t priority;
     dword  RESERVED[15];
 } OSThread;
 
 typedef struct
 {
     dword  memaddr;
-    int    size; // total size of queue
-    int    pos;  // position in queue
-    int    num;  // messages in queue
-    int    totalmsgs;
-    int    fullerrors;
+    int32_t size; // total size of queue
+    int32_t pos;  // position in queue
+    int32_t num;  // messages in queue
+    int32_t totalmsgs;
+    int32_t fullerrors;
     dword  RESERVED[15];
     dword  data[MAXQUEUESIZE];
 } OSQueue;
 
 typedef struct
 {
-    int    queueid; // 0=no queue
+    int32_t queueid; // 0=no queue
     dword  mesg;
-    int    count;
+    int32_t count;
     dword  RESERVED[16];
 } OSEvent;
 
 typedef struct
 {
     dword  memaddr;
-    int    active;
-    int    timerid; // 0=unused
+    int32_t active;
+    int32_t timerid; // 0=unused
     dword  m_queue;
     dword  m_mesg;
-    int    queueid;
-    int    count; // us
-    int    interval; // us
+    int32_t queueid;
+    int32_t count; // us
+    int32_t interval; // us
     dword  RESERVED[16];
 } OSTimer;
+
+#pragma pack(pop)
 
 OSThread thread[MAXTHREAD];
 int    currentthread=0;

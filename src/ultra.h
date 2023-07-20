@@ -243,6 +243,8 @@ More notes intermixed with the definitions, read on.
 ** Basic types
 */
 
+// TODO: Change all types to stdint, for better readability/portability of the code
+
 typedef          __int64    qint;
 typedef unsigned __int64    qword;
 typedef unsigned int        dword;
