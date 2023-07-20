@@ -243,7 +243,15 @@ void cart_open(char *fname,int memmap)
     // get title (reverseswap)
     for(i=0;i<20;i++) cart.title[i]=cart.data[0x20+(i^3)];
 
-    if(cart.mapped) print("ROM image '%s' mapped (%iMB): "YELLOW"%s\n",fname,cart.size/1024/1024,cart.title);
-    else print("ROM image '%s' loaded (%iMB): "YELLOW"%s\n",fname,cart.size/1024/1024,cart.title);
+    if(cart.mapped) print("ROM image '%s' mapped (%iMB): "YELLOW"'%s'\n",fname,cart.size/1024/1024,cart.title);
+    else print("ROM image '%s' loaded (%iMB): "YELLOW"'%s'\n",fname,cart.size/1024/1024,cart.title);
+
+    // Display SDK version
+
+    uint32_t version = *(uint32_t*)(cart.data + 0xc) & 0xffff;
+    float libultra_ver = (float)(version >> 8) / 10.0f;
+    char libultra_rev = (char)version;
+
+    print("libultra version %.1f%c\n", libultra_ver, libultra_rev);
 }
 
