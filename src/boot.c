@@ -49,22 +49,25 @@ void boot_boot(void)
         cart.codebase&=~0x300000; // fzero
     }
 
+    uint32_t pc = 0;
+
     if(0)
     { // Load IPL3 into DMEM and see what happens :)  (IPL1 and IPL2 are skipped because they require a PIF-ROM)
         mem_writerangeraw(DMEM_ADDRESS+0x40,0xfc0,cart.data+0x40);
-        cpu_goto(DMEM_ADDRESS+0x40);
+        pc = DMEM_ADDRESS + 0x40;
     }
     else
     { // C-Boot
         mem_writerangeraw(cart.codebase,cart.codesize,cart.data+0x1000);
-        cpu_goto(cart.codebase);
+        pc = cart.codebase;
     }
 
+    cpu_goto(pc);
     sym_load(cart.symname);
 
     st.framesync=cart.framesync;
 
-    view.codebase=cart.codebase;
+    view.codebase=pc;
     view_changed(VIEW_CODE);
 }
 
