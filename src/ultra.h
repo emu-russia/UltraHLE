@@ -265,6 +265,7 @@ typedef unsigned char       byte;
 #include "debugui.h"
 #include "sync.h"
 #include "patch.h"
+#include "rsp.h"
 #include "rdp.h"
 #include "dlist.h"
 #include "slist.h"

@@ -44,6 +44,7 @@
     <ClInclude Include="..\src\patch.h" />
     <ClInclude Include="..\src\rdp.h" />
     <ClInclude Include="..\src\resources\RESOURCE.H" />
+    <ClInclude Include="..\src\rsp.h" />
     <ClInclude Include="..\src\slist.h" />
     <ClInclude Include="..\src\sound.h" />
     <ClInclude Include="..\src\stdsdk.h" />
@@ -120,6 +121,7 @@
     <ClCompile Include="..\src\pad.c" />
     <ClCompile Include="..\src\patch.c" />
     <ClCompile Include="..\src\rdp.c" />
+    <ClCompile Include="..\src\rsp.c" />
     <ClCompile Include="..\src\slist.c" />
     <ClCompile Include="..\src\sound.c" />
     <ClCompile Include="..\src\sym.c" />

@@ -12,6 +12,9 @@ void boot_boot(void)
     // cpu/compiler init
     cpu_init();
 
+    // rsp
+    rsp_init();
+
     // os emulator structures
     os_init();
 
@@ -47,16 +50,17 @@ void boot_boot(void)
     }
 
     if(0)
-    { // RealBoot
-        mem_writerangeraw(0xa4000000,4096,cart.data);
-        cpu_goto(0xa4000000);
+    { // Load IPL3 into DMEM and see what happens :)  (IPL1 and IPL2 are skipped because they require a PIF-ROM)
+        mem_writerangeraw(DMEM_ADDRESS+0x40,0xfc0,cart.data+0x40);
+        cpu_goto(DMEM_ADDRESS+0x40);
     }
     else
     { // C-Boot
         mem_writerangeraw(cart.codebase,cart.codesize,cart.data+0x1000);
-        sym_load(cart.symname);
         cpu_goto(cart.codebase);
     }
+
+    sym_load(cart.symname);
 
     st.framesync=cart.framesync;
 

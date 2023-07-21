@@ -123,6 +123,9 @@
     <ClInclude Include="..\src\cmd.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\rsp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Library Include="..\src\GLIDE2X.LIB" />
@@ -307,6 +310,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\src\zlist.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\rsp.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

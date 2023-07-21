@@ -146,8 +146,6 @@ void    mem_mapexternal(dword dst, int rw, void* data);
 #define MAP_RW      2  // map page for both
 #define MAP_WTHENR  3  // map page for CPU write, and other page at data+4096 to CPU read
 
-void    mem_alloc(dword dst);
-
 int mem_groupat(dword addr);
 
 // routines to access memory. 32-bit accesses are macros and quite fast,
