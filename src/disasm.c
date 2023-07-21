@@ -407,7 +407,7 @@ static char *op_fpu[65]={ // <-FUNC
 "c.ule%ff %fs ? %ft",
 // 7
 "c.sf%ff %fs ? %ft",
-"c.ngel%ff %fs ? %ft",
+"c.ngle%ff %fs ? %ft",
 "c.seq%ff %fs ? %ft",
 "c.ngl%ff %fs ? %ft",
 "c.lt%ff %fs ? %ft",

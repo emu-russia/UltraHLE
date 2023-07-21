@@ -55,6 +55,7 @@ void boot_boot(void)
     { // Load IPL3 into DMEM and see what happens :)  (IPL1 and IPL2 are skipped because they require a PIF-ROM)
         mem_writerangeraw(DMEM_ADDRESS+0x40,0xfc0,cart.data+0x40);
         pc = DMEM_ADDRESS + 0x40;
+        RA.d = 0xA0001000;
     }
     else
     { // C-Boot
