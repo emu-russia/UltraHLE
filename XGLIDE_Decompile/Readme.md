@@ -127,7 +127,7 @@ Progress:
 |text_init| | |
 |text_deinit| | |
 |accesstexture|Ready| |
-|text_allocdata| | |
+|text_allocdata|Ready|TODO: Why are float constants used here?|
 |text_loadlevel| | |
 |text_freedata|Ready| |
 |text_cleartexmem|Ready| |

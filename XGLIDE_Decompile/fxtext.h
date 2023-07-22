@@ -82,7 +82,7 @@ int fxloadtexture_multi(xt_texture* txt1, xt_texture* txt2);
 void text_init();
 void text_deinit();
 int accesstexture(xt_texture* txt, int level, int* xsize, int* ysize);
-int text_allocdata(int txt);
+void text_allocdata(xt_texture* txt);
 int text_loadlevel(xt_texture* txt, int level, unsigned int data);
 void text_freedata(xt_texture* txt);
 void text_cleartexmem();

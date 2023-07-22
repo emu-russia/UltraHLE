@@ -473,33 +473,27 @@ int accesstexture(xt_texture *txt, int level, int *xsize, int *ysize)
 	return v6[1];
 }
 
-int text_allocdata(int txt)
+void text_allocdata(xt_texture* txt)
 {
-	signed int v1; // ebx
+	int v1; // ebx
 	int v2; // ebp
-	unsigned int v3; // esi
-	int v4; // eax
-	signed int v5; // ebx
-	DWORD *v6; // esi
+	int v3; // esi
+	int v5; // ebx
 	int v7; // eax
 	int v8; // eax
 	int v9; // eax
 	int v10; // eax
-	int v11; // eax
-	DWORD *v12; // ecx
-	signed int v13; // eax
-	int result; // eax
 
-	v1 = *(DWORD *)(txt + 8);
-	if ( v1 < *(DWORD *)(txt + 12) )
+	v1 = txt->width;
+	if ( v1 < txt->height )
 	{
-		v2 = *(DWORD *)(txt + 8);
+		v2 = txt->width;
 		v3 = 0;
-		v1 = *(DWORD *)(txt + 12);
+		v1 = txt->height;
 	}
 	else
 	{
-		v2 = *(DWORD *)(txt + 12);
+		v2 = txt->height;
 		v3 = 1;
 	}
 	if ( v1 > 8 )
@@ -507,24 +501,24 @@ int text_allocdata(int txt)
 		switch ( v1 )
 		{
 			case 16:
-				*(DWORD *)(txt + 56) = 4;
-				*(DWORD *)(txt + 28) = 5;
+				txt->ti.largeLod = GR_LOD_16;
+				txt->levels = 5;
 				break;
 			case 32:
-				*(DWORD *)(txt + 56) = 3;
-				*(DWORD *)(txt + 28) = 6;
+				txt->ti.largeLod = GR_LOD_32;
+				txt->levels = 6;
 				break;
 			case 64:
-				*(DWORD *)(txt + 56) = 2;
-				*(DWORD *)(txt + 28) = 7;
+				txt->ti.largeLod = GR_LOD_64;
+				txt->levels = 7;
 				break;
 			case 128:
-				*(DWORD *)(txt + 56) = 1;
-				*(DWORD *)(txt + 28) = 8;
+				txt->ti.largeLod = GR_LOD_128;
+				txt->levels = 8;
 				break;
 			case 256:
-				*(DWORD *)(txt + 56) = 0;
-				*(DWORD *)(txt + 28) = 9;
+				txt->ti.largeLod = GR_LOD_256;
+				txt->levels = 9;
 				break;
 			default:
 				x_fatal("Illegal texture size %ix%i", v1, v2);
@@ -535,102 +529,100 @@ int text_allocdata(int txt)
 	{
 		switch ( v1 )
 		{
-			case 8:
-				*(DWORD *)(txt + 56) = 5;
-				*(DWORD *)(txt + 28) = 4;
-				break;
 			case 1:
-				*(DWORD *)(txt + 56) = 8;
-				*(DWORD *)(txt + 28) = 1;
+				txt->ti.largeLod = GR_LOD_1;
+				txt->levels = 1;
 				break;
 			case 2:
-				*(DWORD *)(txt + 56) = 7;
-				*(DWORD *)(txt + 28) = 2;
+				txt->ti.largeLod = GR_LOD_2;
+				txt->levels = 2;
 				break;
 			case 4:
-				*(DWORD *)(txt + 56) = 6;
-				*(DWORD *)(txt + 28) = 3;
+				txt->ti.largeLod = GR_LOD_4;
+				txt->levels = 3;
+				break;
+			case 8:
+				txt->ti.largeLod = GR_LOD_8;
+				txt->levels = 4;
 				break;
 			default:
 				x_fatal("Illegal texture size %ix%i", v1, v2);
 				break;
 		}
 	}
-	if ( !(*(BYTE *)(txt + 17) & 2) )
-		*(DWORD *)(txt + 28) = 1;
+	if ( !(txt->format & X_MIPMAP) )
+		txt->levels = 1;
 	switch ( v1 / v2 )
 	{
 		case 1:
-			*(DWORD *)(txt + 60) = 3;
+			txt->ti.aspectRatio = GR_ASPECT_1x1;
 			break;
 		case 2:
-			v4 = v3 < 1 ? 4 : 2;
-			*(DWORD*)(txt + 60) = v4;
+			txt->ti.aspectRatio = v3 < 1 ? GR_ASPECT_1x2 : GR_ASPECT_2x1;
 			break;
 		case 4:
-			v4 = v3 < 1 ? 5 : 1;
-			*(DWORD*)(txt + 60) = v4;
+			txt->ti.aspectRatio = v3 < 1 ? GR_ASPECT_1x4 : GR_ASPECT_4x1;
 			break;
 		case 8:
-			v4 = v3 < 1 ? 6 : 0;
-			*(DWORD*)(txt + 60) = v4;
+			txt->ti.aspectRatio = v3 < 1 ? GR_ASPECT_1x8 : GR_ASPECT_8x1;
 			break;
 		default:
 			x_fatal("Illegal texture aspect %i/%i", v1, v2);
 			break;
 	}
-	switch ( *(DWORD *)(txt + 60) )
+	// TODO: Why are float constants used here?
+	switch ( txt->ti.aspectRatio )
 	{
-		case 0:
-			*(DWORD *)(txt + 36) = 256.0f;
-			*(DWORD *)(txt + 40) = 32.0f;
+		case GR_ASPECT_8x1:
+			txt->xmul = 256.0f;
+			txt->ymul = 32.0f;
 			break;
-		case 1:
-			*(DWORD *)(txt + 36) = 256.0f;
-			*(DWORD *)(txt + 40) = 64.0f;
+		case GR_ASPECT_4x1:
+			txt->xmul = 256.0f;
+			txt->ymul = 64.0f;
 			break;
-		case 2:
-			*(DWORD *)(txt + 36) = 256.0f;
-			*(DWORD *)(txt + 40) = 128.0f;
+		case GR_ASPECT_2x1:
+			txt->xmul = 256.0f;
+			txt->ymul = 128.0f;
 			break;
-		case 3:
-			*(DWORD *)(txt + 36) = 256.0f;
-			*(DWORD *)(txt + 40) = 256.0f;
+		case GR_ASPECT_1x1:
+			txt->xmul = 256.0f;
+			txt->ymul = 256.0f;
 			break;
-		case 4:
-			*(DWORD *)(txt + 36) = 128.0f;
-			*(DWORD*)(txt + 40) = 256.0f;
+		case GR_ASPECT_1x2:
+			txt->xmul = 128.0f;
+			txt->ymul = 256.0f;
 			break;
-		case 5:
-			*(DWORD *)(txt + 36) = 64.0f;
-			*(DWORD*)(txt + 40) = 256.0f;
+		case GR_ASPECT_1x4:
+			txt->xmul = 64.0f;
+			txt->ymul = 256.0f;
 			break;
-		case 6:
-			*(DWORD *)(txt + 36) = 32.0f;
-			*(DWORD *)(txt + 40) = 256.0f;
+		case GR_ASPECT_1x8:
+			txt->xmul = 32.0f;
+			txt->ymul = 256.0f;
 			break;
 		default:
 			break;
 	}
-	v5 = v1 >> (*(unsigned int *)(txt + 28) - 1);
+	v5 = v1 >> (txt->levels - 1);
 	if ( v5 > 8 )
 	{
 		switch ( v5 )
 		{
 			case 16:
-				*(DWORD *)(txt + 52) = 4;
+				txt->ti.smallLod = GR_LOD_16;
 				break;
 			case 32:
-				*(DWORD *)(txt + 52) = 3;
+				txt->ti.smallLod = GR_LOD_32;
 				break;
 			case 64:
-				*(DWORD *)(txt + 52) = 2;
+				txt->ti.smallLod = GR_LOD_64;
 				break;
 			case 128:
-				*(DWORD *)(txt + 52) = 1;
+				txt->ti.smallLod = GR_LOD_128;
 				break;
 			case 256:
-				*(DWORD *)(txt + 52) = 0;
+				txt->ti.smallLod = GR_LOD_256;
 				break;
 			default:
 				x_fatal("Illegal texture small size");
@@ -641,72 +633,61 @@ int text_allocdata(int txt)
 	{
 		switch ( v5 )
 		{
-			case 8:
-				*(DWORD *)(txt + 52) = 5;
-				break;
 			case 1:
-				*(DWORD *)(txt + 52) = 8;
+				txt->ti.smallLod = GR_LOD_1;
 				break;
 			case 2:
-				*(DWORD *)(txt + 52) = 7;
+				txt->ti.smallLod = GR_LOD_2;
 				break;
 			case 4:
-				*(DWORD *)(txt + 52) = 6;
+				txt->ti.smallLod = GR_LOD_4;
+				break;
+			case 8:
+				txt->ti.smallLod = GR_LOD_8;
 				break;
 			default:
 				x_fatal("Illegal texture small size");
 				break;
 		}
 	}
-	switch ( *(DWORD *)(txt + 16) & X_FORMATMASK)
+	switch ( txt->format & X_FORMATMASK)
 	{
 		case X_RGBA5551:
-			v6 = (DWORD *)(txt + 24);
-			v8 = accesstexture((DWORD *)txt, *(DWORD *)(txt + 28), 0, 0);
-			*(DWORD *)(txt + 20) = 0;
-			*(DWORD *)(txt + 64) = 11;
-			*(DWORD *)(txt + 24) = 2 * v8;
+			v8 = accesstexture(txt, txt->levels, 0, 0);
+			txt->memformat = 0;
+			txt->ti.format = GR_TEXFMT_ARGB_1555;
+			txt->bytes = 2 * v8;
 			break;
 		case X_RGB565:
-			v6 = (DWORD *)(txt + 24);
-			v9 = accesstexture((DWORD *)txt, *(DWORD *)(txt + 28), 0, 0);
-			*(DWORD *)(txt + 20) = 3;
-			*(DWORD *)(txt + 64) = 10;
-			*(DWORD *)(txt + 24) = 2 * v9;
+			v9 = accesstexture(txt, txt->levels, 0, 0);
+			txt->memformat = 3;
+			txt->ti.format = GR_TEXFMT_RGB_565;
+			txt->bytes = 2 * v9;
 			break;
 		case X_I8:
-			v6 = (DWORD *)(txt + 24);
-			v10 = accesstexture((DWORD *)txt, *(DWORD *)(txt + 28), 0, 0);
-			*(DWORD *)(txt + 20) = 4;
-			*(DWORD *)(txt + 64) = 3;
-			*(DWORD *)(txt + 24) = 2 * v10;
+			v10 = accesstexture(txt, txt->levels, 0, 0);
+			txt->memformat = 4;
+			txt->ti.format = GR_TEXFMT_INTENSITY_8;
+			txt->bytes = 2 * v10;
 			break;
 		default:
-			v6 = (DWORD *)(txt + 24);
-			v7 = accesstexture((DWORD *)txt, *(DWORD *)(txt + 28), 0, 0);
-			*(DWORD *)(txt + 20) = 1;
-			*(DWORD *)(txt + 64) = 12;
-			*(DWORD *)(txt + 24) = 2 * v7;
+			v7 = accesstexture(txt, txt->levels, 0, 0);
+			txt->memformat = 1;
+			txt->ti.format = GR_TEXFMT_ARGB_4444;
+			txt->bytes = 2 * v7;
 			break;
 	}
-	v11 = x_alloc(*v6);
-	v12 = (DWORD *)(txt + 72);
-	*(DWORD *)(txt + 68) = v11;
-	v13 = 4;
-	do
-	{
-		*v12 = 0;
-		++v12;
-		--v13;
-		v12[11] = 0;
+	txt->ti.data = x_alloc(txt->bytes);
+
+	for (int i = 0; i < X_TEXPARTS; i++) {
+		txt->size[i] = 0;
+		txt->xblock[i] = 0;
 	}
-	while ( v13 );
-	result = 0;
-	*(DWORD *)(txt + 104) = 0;
-	*(DWORD *)(txt + 108) = 1;
-	*(DWORD *)(txt + 112) = 0;
-	*(DWORD *)(txt + 116) = 1;
-	return result;
+
+	txt->tmu[0] = 0;
+	txt->tmu[1] = 1;
+	txt->tmu[2] = 0;
+	txt->tmu[3] = 1;
 }
 
 int text_loadlevel(xt_texture* txt, int level, unsigned int data)
