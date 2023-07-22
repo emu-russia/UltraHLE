@@ -17,20 +17,22 @@
 #include "osignore.h"
 #include "ospatch.h"
 
-dword oscall[256][16]={
+typedef struct _OSCall
+{
+    uint32_t data[8];   // 0-7=first 8 dwords (0=do not care, only check upper 16 bits)
+    uint32_t crc1;      // 8=crc-routine
+    uint32_t crc2;      // 9=crc-calls
+    uint32_t flag;      // 10=(temp flag)
+    uint32_t symb;      // 11=(symbol)
+    uint32_t found_at;  // 12=found at
+    uint32_t fclass;    // 13=found class: 0=not, 1=crc1ok, 2=crc1&2ok
+    uint32_t patch_num; // 14=patch number
+    char* symname;      // 15=symbol name ptr
+} OSCall;
+
+OSCall oscall[256]={
 #include "oscall.h"
 {0}};
-
-// fields:
-// 0-7=first 8 dwords (0=do not care, only check upper 16 bits)
-//   8=crc-routine
-//   9=crc-calls
-//  10=(temp flag)
-//  11=(symbol)
-//  12=found at
-//  13=found class: 0=not, 1=crc1ok, 2=crc1&2ok
-//  14=patch number
-//  15=symbol name ptr
 
 typedef struct
 {
@@ -83,10 +85,10 @@ void sym_clear(void)
     sym_add(0,"(null)",0);
 
     // clear ospatches
-    for(i=0;oscall[i][15];i++)
+    for(i=0;oscall[i].symname;i++)
     {
-        oscall[i][12]=0;
-        oscall[i][13]=0;
+        oscall[i].found_at =0;
+        oscall[i].fclass =0;
     }
 }
 
@@ -563,23 +565,23 @@ void sym_demooscalls(void) // for demo.rom
                 }
                 if(OP_OP(x)==3 || OP_OP(x)==2) x=0;
                 fprintf(f1,"0x%08X,",x);
-                oscall[n][j]=x;
+                oscall[n].data[j]=x;
             }
             for(;j<8;j++)
             {
-                oscall[n][j]=0;
+                oscall[n].data[j]=0;
             }
 
             routinecrc2(sym[i].addr,base2-base1,&x,&y);
 
-            oscall[n][8]=x;
-            oscall[n][9]=y;
-            oscall[n][10]=0;
-            oscall[n][11]=0;
-            oscall[n][12]=0;
-            oscall[n][13]=1;
-            oscall[n][14]=sym[i].patch;
-            oscall[n][15]=(dword)sym[i].text;
+            oscall[n].crc1=x;
+            oscall[n].crc2=y;
+            oscall[n].flag =0;
+            oscall[n].symb =0;
+            oscall[n].found_at =0;
+            oscall[n].fclass =1;
+            oscall[n].patch_num =sym[i].patch;
+            oscall[n].symname =sym[i].text;
 
             if(x==-1)
             {
@@ -595,25 +597,28 @@ void sym_demooscalls(void) // for demo.rom
 
     print("Generating OSCALL.H (%i entries).\n",n);
     f1=fopen("oscall.h","wt");
-//    fprintf(f1,"dword oscall[%i][16]={\n",MAXOSCALL);
     for(i=0;i<n;i++)
     {
-        if(strstr((char *)oscall[i][15],"__ll") || strstr((char *)oscall[i][15],"__ull")) k=4;
+        if(strstr(oscall[i].symname,"__ll") || strstr(oscall[i].symname,"__ull")) k=4;
         else k=1;
         for(l=0;l<k;l++)
         {
             fprintf(f1,"{");
-            for(j=0;j<10;j++)
+            for(j=0;j<8;j++)
             {
-                fprintf(f1,"0x%08X,",oscall[i][j]);
+                fprintf(f1,"0x%08X,",oscall[i].data[j]);
             }
-            for(;j<14;j++)
-            {
-                fprintf(f1,"%i,",oscall[i][j]);
-            }
-            fprintf(f1,"%3i,(dword)\"",oscall[i][14]);
+            fprintf(f1, "0x%08X,", oscall[i].crc1);
+            fprintf(f1, "0x%08X,", oscall[i].crc2);
+
+            fprintf(f1, "%i,", oscall[i].flag);
+            fprintf(f1, "%i,", oscall[i].symb);
+            fprintf(f1, "%i,", oscall[i].found_at);
+            fprintf(f1, "%i,", oscall[i].fclass);
+
+            fprintf(f1,"%3i,\"",oscall[i].patch_num);
             if(l) fprintf(f1,"A");
-            fprintf(f1,"%s\"},\n",oscall[i][15]);
+            fprintf(f1,"%s\"},\n",oscall[i].symname);
         }
     }
 //    fprintf(f1,"{0}};\n");
@@ -701,7 +706,7 @@ void sym_dumposcalls(void)
 {
     int cnt,j,l,total;
 
-    for(j=0;oscall[j][15];j++)
+    for(j=0;oscall[j].symname;j++)
     {
     }
     total=j;
@@ -709,17 +714,17 @@ void sym_dumposcalls(void)
     cnt=0;
     for(j=0;j<total;j++)
     {
-        if(oscall[j][12])
+        if(oscall[j].found_at)
         {
             print("- %-32s found at %08X (patch %2i) class %i\n",
-                sym[oscall[j][11]].text,
-                oscall[j][12],oscall[j][14],oscall[j][13]);
+                sym[oscall[j].symb].text,
+                oscall[j].found_at,oscall[j].patch_num,oscall[j].fclass);
             cnt++;
             if(cart.isdocalls)
             { // check against mario sym file
                 for(l=0;l<symnum;l++)
                 {
-                    if(sym[l].addr==oscall[j][12] && sym[l].patch!=oscall[j][14])
+                    if(sym[l].addr==oscall[j].found_at && sym[l].patch!=oscall[j].patch_num)
                     {
                         print("INVALID PATCH should be %i\n",sym[l].patch);
                     }
@@ -729,18 +734,18 @@ void sym_dumposcalls(void)
     }
     for(j=0;j<total;j++)
     {
-        if(!oscall[j][12])
+        if(!oscall[j].found_at)
         {
-            if(!memcmp((char *)oscall[j][15],"A__",3)) continue;
-            if(oscall[j][11])
+            if(!memcmp(oscall[j].symname,"A__",3)) continue;
+            if(oscall[j].symb)
             {
                 print("- %-32s not found (maybe at %08X)\n",
-                    oscall[j][15],oscall[j][11]);
+                    oscall[j].symname,oscall[j].symb);
             }
             else
             {
                 print("- %-32s not found\n",
-                    oscall[j][15]);
+                    oscall[j].symname);
             }
         }
     }
@@ -759,18 +764,18 @@ void sym_findoscalls(dword base,dword bytes,int cont)
     flushdisplay();
     if(bytes<=0) return;
 
-    for(j=0;oscall[j][15];j++)
+    for(j=0;oscall[j].symname;j++)
     {
-        oscall[j][10]=0;
+        oscall[j].flag =0;
         if(!cont)
         {
-            oscall[j][11]=0;
-            oscall[j][12]=0;
-            oscall[j][13]=0;
+            oscall[j].symb =0;
+            oscall[j].found_at =0;
+            oscall[j].fclass =0;
         }
         else
         {
-            if(oscall[j][13]) oscall[j][13]+=100;
+            if(oscall[j].fclass) oscall[j].fclass +=100;
         }
     }
     total=j;
@@ -787,23 +792,23 @@ void sym_findoscalls(dword base,dword bytes,int cont)
         cnt=0;
         for(j=0;j<total;j++)
         {
-            if( ((x0^oscall[j][0])>>16) && oscall[j][0] ) continue;
+            if( ((x0^oscall[j].data[0])>>16) && oscall[j].data[0] ) continue;
 
-            if(oscall[j][12]) continue; // routine already found
+            if(oscall[j].found_at) continue; // routine already found
 
             for(k=1;k<8;k++)
             {
                 x=mem_read32(i+k*4);
-                y=oscall[j][k];
+                y=oscall[j].data[k];
                 if( ((x^y)>>16) && y) break;
             }
             if(k!=8) continue;
 
 #ifdef SHOWCRC
-            print("# maybe %08X is %s\n",i,oscall[j][15]);
+            print("# maybe %08X is %s\n",i,oscall[j].symname);
 #endif
-            if(!oscall[j][11]) oscall[j][11]=i; // maybestore
-            oscall[j][10]=1;
+            if(!oscall[j].symb) oscall[j].symb =i; // maybestore
+            oscall[j].flag =1;
             cnt++;
         }
         if(cnt>0)
@@ -815,16 +820,16 @@ void sym_findoscalls(dword base,dword bytes,int cont)
             cnt=0;
             for(j=0;j<total;j++)
             {
-                if(oscall[j][10])
+                if(oscall[j].flag)
                 {
-                    x=oscall[j][8];
+                    x=oscall[j].crc1;
                     routinecrc2(i,0,&x,&y);
 
                     cl=0;
-                    if(oscall[j][9]==y) cl=16;
+                    if(oscall[j].crc2==y) cl=16;
                     else
                     {
-                        y^=oscall[j][9];
+                        y^=oscall[j].crc2;
                         for(k=0;k<32;k+=2)
                         {
                             if(!(y&(3<<k))) cl++;
@@ -835,16 +840,16 @@ void sym_findoscalls(dword base,dword bytes,int cont)
                     {
                         class=cl;
 #ifdef SHOWCRC
-                        print("# crc %08X class %i, OK for %s\n",y,class,oscall[j][15]);
+                        print("# crc %08X class %i, OK for %s\n",y,class,oscall[j].symname);
 #endif
                         if(class==16) cnt++;
                         found=j;
-                        oscall[j][10]=2;
+                        oscall[j].flag =2;
                     }
                     else
                     {
 #ifdef SHOWCRC
-                        print("# crc %08X class %i, FAILED for %s\n",y,cl,oscall[j][15]);
+                        print("# crc %08X class %i, FAILED for %s\n",y,cl,oscall[j].symname);
 #endif
                     }
                 }
@@ -857,15 +862,15 @@ void sym_findoscalls(dword base,dword bytes,int cont)
                     print("- multiple at %08X: ",i);
                     for(j=0;j<total;j++)
                     {
-                        if(oscall[j][10]==2)
+                        if(oscall[j].flag ==2)
                         {
-                            print("%s ",oscall[j][15]);
+                            print("%s ",oscall[j].symname);
                         }
                     }
                     print("\n");
                     for(j=0;j<total;j++)
                     {
-                        if(oscall[j][10]==2 && !oscall[j][13])
+                        if(oscall[j].flag ==2 && !oscall[j].fclass)
                         {
                             break;
                         }
@@ -874,17 +879,17 @@ void sym_findoscalls(dword base,dword bytes,int cont)
                 else j=found;
                 if(j<total)
                 {
-                    oscall[j][13]=class;
-                    oscall[j][12]=i;
-                    oscall[j][11]=sym_add(i,(char *)oscall[j][15],oscall[j][14]);
+                    oscall[j].fclass =class;
+                    oscall[j].found_at =i;
+                    oscall[j].symb =sym_add(i,oscall[j].symname,oscall[j].patch_num);
                 }
                 else
                 {
-                    print("- extra %-32s at %08X ignored\n",oscall[j][15],oscall[j][14]);
+                    print("- extra %-32s at %08X ignored\n",oscall[j].symname,oscall[j].patch_num);
                 }
             }
             // clear
-            for(j=0;j<total;j++) oscall[j][10]=0;
+            for(j=0;j<total;j++) oscall[j].flag =0;
         }
     }
 
@@ -894,21 +899,21 @@ void sym_findoscalls(dword base,dword bytes,int cont)
     cnt=0;
     for(i=0;i<total;i++)
     {
-        if(oscall[i][14]>=10) total2++;
-        if(oscall[i][12])
+        if(oscall[i].patch_num >=10) total2++;
+        if(oscall[i].found_at)
         {
             // patch found
-            if(oscall[i][14]>=10) cnt2++;
+            if(oscall[i].patch_num >=10) cnt2++;
             cnt++;
             continue;
         }
-        if(!oscall[i][11]) continue;
+        if(!oscall[i].symb) continue;
 
         for(j=0;j<total;j++)
         {
-            if(oscall[i][11]==oscall[j][12])
+            if(oscall[i].symb ==oscall[j].found_at)
             {
-                oscall[i][11]=0;
+                oscall[i].symb =0;
             }
         }
     }
@@ -920,4 +925,3 @@ void sym_findoscalls(dword base,dword bytes,int cont)
     flushdisplay();
 //    sym_dump();
 }
-
