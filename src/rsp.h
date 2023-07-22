@@ -12,8 +12,8 @@
 typedef struct _SPState
 {
 
-	uint8_t* imem;
-	uint8_t* dmem;
+	uint8_t imem[IMEM_SIZE];
+	uint8_t dmem[DMEM_SIZE];
 
 } SPState;
 
