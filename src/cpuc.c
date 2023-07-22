@@ -1,5 +1,5 @@
 #include "ultra.h"
-#include "opdefs_c.h"
+#include "opdefs.h"
 
 #define DUMP64 0 // dump 64 bit arithmetic
 

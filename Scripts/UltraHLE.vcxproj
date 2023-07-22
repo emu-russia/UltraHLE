@@ -35,7 +35,7 @@
     <ClInclude Include="..\src\log.h" />
     <ClInclude Include="..\src\main.h" />
     <ClInclude Include="..\src\mem.h" />
-    <ClInclude Include="..\src\opdefs_c.h" />
+    <ClInclude Include="..\src\opdefs.h" />
     <ClInclude Include="..\src\os.h" />
     <ClInclude Include="..\src\oscall.h" />
     <ClInclude Include="..\src\osignore.h" />

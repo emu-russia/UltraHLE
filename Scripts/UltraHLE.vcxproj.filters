@@ -39,7 +39,7 @@
     <ClInclude Include="..\src\main.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\opdefs_c.h">
+    <ClInclude Include="..\src\opdefs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\os.h">
