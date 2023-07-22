@@ -112,7 +112,6 @@ void osSpTaskStartGo(dword pos);
 
 // game specific hacks (called internally)
 void os_taskhacks(int idling);
-void os_recvhacks(int queue);
 
 int os_eventqueuefree(dword ev);
 

@@ -477,8 +477,6 @@ dword osRecvMesg(dword m_queue,dword mm_mesg,int block)
 
     st.checkswitch=1;
 
-    os_recvhacks(id);
-
     cpu_notify_msg(id,m_queue,0);
 
 /*
@@ -1353,61 +1351,6 @@ int os_nonidlethread(void)
 }
 
 /**************************************************************************/
-
-void os_recvhacks(int queue)
-{
-    #if 0
-    int i;
-    if(cart.ismario)
-    {
-        if(RA.d==0x80246a68+8)
-        {
-            st.hackcount++;
-            if(st.hackcount==10)
-            {
-                print(WHITE"hacks/mario: init complete (just a note)\n");
-                flushdisplay();
-            }
-        }
-//        mem_write32(0x80226b74,0x220);
-//        mem_write32(0x80226b78,0x200);
-    }
-    if(cart.iszelda)
-    {
-        if(RA.d==0x80000e50+8)
-        {
-            st.hackcount++;
-            if(st.hackcount==2)
-            {
-                print("dmatransfers=%i\n",st.dmatransfers);
-                print(WHITE"hacks/zelda: init complete, rescanning os routines\n");
-                sym_findoscalls(0x800c8000,0x800d8000-0x800c8000,1);
-                sym_addpatches();
-            }
-            if(st.hackcount==3)
-            {
-                print(WHITE"hacks/zelda: language=1 (English) [also Japanese available!]\n");
-                mem_write8(0x8011b9d9,1);
-                /*
-                print(WHITE"hacks/zelda: audio speed adjustment\n");
-                mem_write16(0x80127e7e,0x220);
-                mem_write16(0x80127e80,0x250);
-                mem_write16(0x80127e82,0x210);
-                */
-            }
-            for(i=0;i<MAXTHREAD;i++)
-            {
-                if(thread[i].priority>1000)
-                {
-                    thread[i].priority=1;
-                    print(WHITE"hacks/zelda: stopping os thread %i\n",i);
-                }
-            }
-        }
-//        mem_write16(0x80127e80,0x230*2); // max audiomix
-    }
-    #endif
-}
 
 void os_taskhacks(int idling)
 { // hacks, called when we would switch to idle thread
