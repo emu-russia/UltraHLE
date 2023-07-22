@@ -30,7 +30,7 @@ typedef struct _OSCall
     char* symname;      // 15=symbol name ptr
 } OSCall;
 
-OSCall oscall[256]={
+OSCall oscall[MAXOSCALL]={
 #include "oscall.h"
 {0}};
 
