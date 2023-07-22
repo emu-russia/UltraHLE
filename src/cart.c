@@ -47,6 +47,10 @@ int cart_load(char *fname)
 
     cart.mapped=0;
     cart.data=malloc(cart.size);
+    if (!cart.data) {
+        exception("Failed to allocate memory for cart (%d bytes)\n", cart.size);
+        return -1;
+    }
     fread(cart.data,1,cart.size,f1);
 
     fclose(f1);
@@ -110,6 +114,10 @@ void cart_dummy(void)
     cart_free();
     cart.size=2048*1024;
     cart.data=malloc(cart.size);
+    if (!cart.data) {
+        exception("Failed to allocate memory for Dummy cart (%d bytes)\n", cart.size);
+        return;
+    }
     memset(cart.data,'?',1024*1024);
     memset(cart.data,0,64);
     memset(cart.data+4096,0x70,4096);
