@@ -125,7 +125,6 @@
     <ClCompile Include="..\src\slist.c" />
     <ClCompile Include="..\src\sound.c" />
     <ClCompile Include="..\src\sym.c" />
-    <ClCompile Include="..\src\symfind.c" />
     <ClCompile Include="..\src\sync.c" />
     <ClCompile Include="..\src\timer.c" />
     <ClCompile Include="..\src\ultrahle.c" />

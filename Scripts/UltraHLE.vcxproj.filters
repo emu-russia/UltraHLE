@@ -297,9 +297,6 @@
     <ClCompile Include="..\src\sym.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\symfind.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\sync.c">
       <Filter>Source Files</Filter>
     </ClCompile>
