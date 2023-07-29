@@ -10,6 +10,8 @@ static HANDLE emuthreadhandle;
 
 extern char romfilename[];
 
+int godisabled;
+
 // used by SOUND.C for directsound init
 void *main_gethwnd(void)
 {
@@ -212,7 +214,6 @@ char *main_command(char *cmd,...)
     // to the command.
 
     {
-        extern int godisabled;
         godisabled=1;
         command(cmdin);
         godisabled=0;

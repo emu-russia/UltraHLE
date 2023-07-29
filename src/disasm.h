@@ -2,6 +2,10 @@
 
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // text tables for register names
 extern char* regnames[];    // in disasm.c
 extern char* mmuregnames[]; // in disasm.c
@@ -21,3 +25,7 @@ void  disasm_dumpcode(char* filename, dword addr, int size, dword dataaddr, int 
 
 // as above, but use rsp disassembler
 void  disasm_dumpucode(char* filename, dword addr, int size, dword dataaddr, int datasize, int offset);
+
+#ifdef __cplusplus
+};
+#endif

@@ -7,32 +7,39 @@
 #include "version.h"                   // Version Information
 #include "main.h"
 
-   // Prototypes
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-   int WINAPI WinMain( HINSTANCE, HINSTANCE, LPSTR, int );
-   LRESULT CALLBACK WindowFunc( HWND, UINT, WPARAM, LPARAM );
-   BOOL CALLBACK AboutDialog( HWND, UINT, WPARAM, LPARAM );
-   int ControllerProperties( void );
-   BOOL APIENTRY Controller1Prop( HWND, UINT, UINT, LONG );
+// Prototypes
 
-   extern void CreateListView( void );
-   extern BOOL UpdateROMList( void );
-	extern BOOL LoadImageState( BOOL );
-   extern BOOL SaveState( void );
+int WINAPI WinMain( HINSTANCE, HINSTANCE, LPSTR, int );
+LRESULT CALLBACK WindowFunc( HWND, UINT, WPARAM, LPARAM );
+BOOL CALLBACK AboutDialog( HWND, UINT, WPARAM, LPARAM );
+int ControllerProperties( void );
+BOOL APIENTRY Controller1Prop( HWND, UINT, UINT, LONG );
 
-   // Globals
+extern void CreateListView( void );
+extern BOOL UpdateROMList( void );
+extern BOOL LoadImageState( BOOL );
+extern BOOL SaveState( void );
 
-   char szBuffer[ MAX_PATH ];             // Temporary String Buffer
-   HANDLE hInst;                          // Global Application Instance
-   HWND hwndMain;                         // Handle to the Main App Window
-   HWND hwndStatus;                       // Handle to Status Bar
+// Globals
 
-   HANDLE mainthread;                     
-   LPDWORD mainthreadid;
+char szBuffer[ MAX_PATH ];             // Temporary String Buffer
+HANDLE hInst;                          // Global Application Instance
+HWND hwndMain;                         // Handle to the Main App Window
+HWND hwndStatus;                       // Handle to Status Bar
 
-	extern HWND hwndList;                  // Handle to Rom List View
-	extern HWND hwndDebug;                 // Handle to Debug List View
-   extern ROMLIST *romList;               // Pointer to Rom List Information
+HANDLE mainthread;                     
+LPDWORD mainthreadid;
 
-   extern Init init;
+extern HWND hwndList;                  // Handle to Rom List View
+extern HWND hwndDebug;                 // Handle to Debug List View
+extern ROMLIST *romList;               // Pointer to Rom List Information
 
+extern Init init;
+
+#ifdef __cplusplus
+};
+#endif

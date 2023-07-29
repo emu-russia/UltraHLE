@@ -15,5 +15,3 @@
 #define  MAJORREV    1
 #define  MINORREV    0
 #define  PATCHLVL    0
-
-

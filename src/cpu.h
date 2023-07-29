@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // quadword register
 typedef union
 {
@@ -497,3 +501,7 @@ void cpu_notify_pc(dword addr);                 // execution at address
 void cpu_notify_msg(int queue, dword qaddr, int issend); // execution at address
 
 void cpu_updatestats(int skip);
+
+#ifdef __cplusplus
+};
+#endif

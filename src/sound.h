@@ -1,3 +1,8 @@
+#pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 int  sound_init(int rate);
 void sound_start(int rate);
@@ -11,3 +16,7 @@ int  sound_add(short *data,int bytes);
 void sound_resync(int target);
 
 void sound_addwavfile(char *file,short *data,int cnt,int stereo);
+
+#ifdef __cplusplus
+};
+#endif

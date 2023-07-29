@@ -2,6 +2,10 @@
 
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct
 {
     byte* data;
@@ -65,3 +69,7 @@ int  cart_save(char* fname);  // save cart image (not used)
 int  cart_check(char* fname); // check byte order (returns flipcode)
 void cart_flip(int flip);     // flip cart (based on flipcode)
 void cart_flipheader(char* header);
+
+#ifdef __cplusplus
+};
+#endif

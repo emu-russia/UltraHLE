@@ -222,7 +222,7 @@
     <ClCompile Include="..\src\cart.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\cmd.c">
+    <ClCompile Include="..\src\cmd.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\src\console.c">

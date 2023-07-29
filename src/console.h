@@ -3,6 +3,10 @@
 
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void con_init(void);
 void con_initdummy(void);
 void con_deinit(void);
@@ -54,3 +58,7 @@ int con_readkey_noblock(void);
 #define KEY_END     0x127
 
 #define KEY_RELEASE 0x1000
+
+#ifdef __cplusplus
+};
+#endif

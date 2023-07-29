@@ -264,4 +264,3 @@ char *disablepatches[]={
 //"__osEepromTimerMsg",
 //"__osEepPifRam",
 NULL};
-

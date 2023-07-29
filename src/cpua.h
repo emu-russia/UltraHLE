@@ -1,3 +1,8 @@
+#pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /***********************************************************************
 ** Header file for MIPS->X86 compiler (CPUA*.C)
@@ -524,3 +529,6 @@ extern XReg fpreg[16];
 extern void fastexec_loop(void);
 extern void fastexec_loopjrra(void);
 
+#ifdef __cplusplus
+};
+#endif

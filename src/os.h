@@ -1,9 +1,14 @@
 // os-routines and types
 
-// This structure must be packed in order to make the formats compatible with the Ultra SDK
+#pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #pragma pack(push, 1)
 
+// This structure must be packed in order to make the formats compatible with the Ultra SDK
 typedef struct {
 	dword	type;
 	dword	flags;
@@ -131,3 +136,6 @@ void os_init(void);
 void osMapMem(dword virt,dword phys,int size);
 double os_gettimeus(void);
 
+#ifdef __cplusplus
+};
+#endif

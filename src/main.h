@@ -1,5 +1,11 @@
 // Public interface to the emulator
 
+#pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // ST: Communication with main emulator (main.c)
 void  main_startup(void);
 void  main_thread(void);
@@ -35,3 +41,11 @@ void* main_gethwnd(void);
 void outputhook(char* txt, char* full);
 
 void fixpath(char* path, int striplastname);
+
+void printcopyright(void);
+
+extern int godisabled;
+
+#ifdef __cplusplus
+};
+#endif

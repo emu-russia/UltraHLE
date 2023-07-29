@@ -2,6 +2,10 @@
 
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void    hw_init(void);
 
 void    hw_check(void);
@@ -17,3 +21,7 @@ int     hw_ismemiorange(dword addr);
 void    hw_gfxthread(void);
 
 void    hw_selectpad(int pad);
+
+#ifdef __cplusplus
+};
+#endif

@@ -2,8 +2,8 @@
 ** UltraHLE (temp.name) - Ultra64 High Level Emulator
 ** Copyright (C) 1998 Epsilon & RealityMan
 */
-#ifndef _ULTRA_H_
-#define _ULTRA_H_
+
+#pragma once
 
 /*
 
@@ -275,5 +275,3 @@ typedef unsigned char       byte;
 #include "boot.h"
 #include "main.h"
 #include "x.h"
-
-#endif  _ULTRA_H_

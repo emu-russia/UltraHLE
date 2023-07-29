@@ -2,6 +2,10 @@
 
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // Colors for console (standard vga color numbers)
 #define RED    "\x1\x4"
 #define GRAY   "\x1\x8"
@@ -20,8 +24,8 @@
 typedef struct
 {
     int changed;       // bitmask for what to update (use view_changed())
-    int codebase;      // address of code window
-    int database;      // address of data window
+    uint32_t codebase; // address of code window
+    uint32_t database; // address of data window
     int datatype;      // type of data window (not supported)
     int showfpu;       // what registers to show (SHOWFPU_*)
     int showhelp;      // show pad help at top of screen
@@ -67,6 +71,7 @@ void view_redraw(void);             // update what has been requested
 void view_setlast(void);            // set "last" state for register highlight
 void view_writeconsole(char* text); // write text to console
 void view_status(char* text);       // change statusline text
+void view_clear_cmdline();           // Called from cmd.c command to clear the command entry string
 
 void exitnow(void); // exit emu asap
 void flushdisplay(void); // redraw debug console
@@ -74,3 +79,7 @@ void debugui(void); // main debugui-loop
 
 void breakcommand(char* cmd); // breaks nicely at next retrace, and then executes
 void debugui_misckey(int key);      // tell a key has been pressed (keycodes as in console.h)
+
+#ifdef __cplusplus
+};
+#endif

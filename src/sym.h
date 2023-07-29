@@ -2,6 +2,10 @@
 
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*
 NOTES:
 - One address can only have one symbol (adding to same address replaces last)
@@ -51,3 +55,7 @@ void  sym_demooscalls(void); // create list of oscalls from DEMO.ROM (which must
 
 void  symfind_saveroutine(dword addr, char* name);
 char* symfind_matchroutine(dword addr);
+
+#ifdef __cplusplus
+};
+#endif

@@ -754,6 +754,12 @@ void view_setlast(void)
     memcpy(&stlast,&st,sizeof(st));
 }
 
+void view_clear_cmdline()
+{
+    view_writeconsole("\x01\x17\r");
+    con_cursorxy(0, 0, 0);
+    view.consolecursor = -1;
+}
 
 /****************************************************************************
 ** Keyboard handling

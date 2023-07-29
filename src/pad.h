@@ -2,6 +2,10 @@
 
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void  pad_frame(void);           // call this every frame (pad centering and stuff)
 dword pad_getdata(int pad);
 void  pad_writedata(dword addr); // write pad state to a memory location
@@ -14,3 +18,7 @@ void  pad_enablejoy(int enable);
 extern int joyactive;
 extern int mouseactive;
 extern int mousedisablecnt;
+
+#ifdef __cplusplus
+};
+#endif

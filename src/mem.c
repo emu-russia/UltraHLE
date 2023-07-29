@@ -183,9 +183,9 @@ void mem_mapphysical(dword dst,int rw,dword src)
 }
 
 // physical is based on write mapping
-dword mem_getphysical(dword virtual)
+dword mem_getphysical(dword virtual_addr)
 {
-    byte *raw=(byte *)memdatar(virtual);
+    byte *raw=(byte *)memdatar(virtual_addr);
     if(raw>=mem.ram && raw<mem.ram+mem.ramsize)
     {
         return(raw-mem.ram);

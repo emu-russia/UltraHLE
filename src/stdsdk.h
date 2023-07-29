@@ -12,16 +12,16 @@
 #include "resources/resource.h"        // Application Resource Definitions
 #include "ultra.h"                     // UltraHLE Core Emu File
 
-   // Typedefs
+// Typedefs
 
-   typedef struct _RomList
-   {
-      char  name[MAX_PATH];                // ROM Name
-      char  alttitle[MAX_PATH];             // Alternate ROM Name
-      char  country;                       // Country Code
-      char  filename[MAX_PATH];            // ROM File Name
-      char  comment[MAX_PATH];             // Comments on ROM Functionality
-      DWORD dwFileSize;                    // ROM File Size
-   } ROMLIST;
+typedef struct _RomList
+{
+    char  name[MAX_PATH];                // ROM Name
+    char  alttitle[MAX_PATH];             // Alternate ROM Name
+    char  country;                       // Country Code
+    char  filename[MAX_PATH];            // ROM File Name
+    char  comment[MAX_PATH];             // Comments on ROM Functionality
+    DWORD dwFileSize;                    // ROM File Size
+} ROMLIST;
 
 #endif // _STDSDK_H_

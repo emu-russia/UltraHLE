@@ -51,7 +51,7 @@ void printtxt(char *txt)
     outputhook(p,txt); // for new ui
 }
 
-void print(char *txt,...) // generic
+void print(const char *txt,...) // generic
 {
     static char buf[256];
     va_list argp;

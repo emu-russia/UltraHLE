@@ -2,6 +2,10 @@
 
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // There should be minimal stuff on the generic info channel, so that by
 // enabling it only and running a game you can see if any problems
 // (warnings etc) come up. Info is always enabled if any other channel
@@ -11,7 +15,7 @@
 // separet st.dump-enables.
 
 // The following print to console (logged to ultra.log)
-void print(char* txt, ...);  // show always
+void print(const char* txt, ...);  // show always
 void logi(char* txt, ...);   // generic stuff (toggle 'info')
 void logc(char* txt, ...);   // compiler stuff
 void logh(char* txt, ...);   // hardware stuff (toggle 'hw')
@@ -37,3 +41,7 @@ void warning(char* txt, ...);
 
 // NOTE: print and log* don't include linefeeds (so use \n) but
 // exception,error,warning do add a \n at end of string!
+
+#ifdef __cplusplus
+};
+#endif

@@ -133,4 +133,3 @@ char *ospatch[MAXOSCALL]={
 "__os* #1",
 "os* #2",
 NULL};
-

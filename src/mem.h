@@ -1,6 +1,10 @@
-// Memory state (saved/loaded)
+// Memory management. Represents a hybrid implementation of the RCP arbiter and the TLB of the CPU.
 
 #pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define IO_MAX 32
 
@@ -23,6 +27,7 @@ typedef struct
 #define GROUP_FAST  2   // analysed, use fast cpua (in this case .code set)
 #define GROUP_PATCH 3   // analysed, use slow cpuc (patch)
 
+// Memory state (saved/loaded)
 typedef struct
 {
     // VMM page lookup table (4GB lookup = 4MB table)
@@ -131,7 +136,7 @@ extern Mem mem; // mem.c
 
 // sim.c
 void    mem_init(int ramsize);          // allocates memory and initializes memory system
-dword   mem_getphysical(dword virtual); // virtual->physical address (-1=no physical for that address!)
+dword   mem_getphysical(dword virtual_addr); // virtual->physical address (-1=no physical for that address!)
 
 // map page[dst] to external 4K array (external data NOT saved!)
 // map page[dst] to physical address src
@@ -171,3 +176,7 @@ void    mem_writerangeraw(dword addr, int bytes, char* data);
 
 void    mem_save(FILE* f1);
 void    mem_load(FILE* f1);
+
+#ifdef __cplusplus
+};
+#endif

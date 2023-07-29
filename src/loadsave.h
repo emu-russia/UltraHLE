@@ -6,23 +6,28 @@
 
 #include "stdsdk.h"                    // Standard Win32 API Includes, etc.
 
-   // Prototypes
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-	BOOL LoadImageState( BOOL );
-   BOOL SaveState( void );
-   extern int mainwindow( int );
+// Prototypes
 
-   // Globals
+BOOL LoadImageState( BOOL );
+BOOL SaveState( void );
+extern int mainwindow( int );
 
-   OPENFILENAME OpenFileName;          // Structure for Open Common Dialog
-   char romfilename[ MAX_PATH ];
+// Globals
 
-   extern char szBuffer[ MAX_PATH ];   // Temporary String Buffer
-	extern HWND hwndMain;               // Handle to the Main App Window
-	extern HANDLE hInst;                // Global Application Instance
+OPENFILENAME OpenFileName;          // Structure for Open Common Dialog
+char romfilename[ MAX_PATH ];
+
+extern char szBuffer[ MAX_PATH ];   // Temporary String Buffer
+extern HWND hwndMain;               // Handle to the Main App Window
+extern HANDLE hInst;                // Global Application Instance
    
-   extern HANDLE mainthread;
-   extern LPDWORD mainthreadid;
+extern HANDLE mainthread;
+extern LPDWORD mainthreadid;
 
-
-
+#ifdef __cplusplus
+};
+#endif

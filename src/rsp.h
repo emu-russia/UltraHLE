@@ -2,6 +2,10 @@
 
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define DMEM_ADDRESS 0xa4000000
 #define IMEM_ADDRESS 0xa4001000
 
@@ -20,3 +24,7 @@ typedef struct _SPState
 extern SPState sp;
 
 int rsp_init();
+
+#ifdef __cplusplus
+};
+#endif

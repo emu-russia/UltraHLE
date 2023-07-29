@@ -1,7 +1,5 @@
 #include "ultra.h"
 
-int godisabled;
-
 static byte *snap; 
 
 #define IFIS(x,str) if(!_stricmp(x,str))
@@ -56,7 +54,7 @@ static qword atoq(char *p)
     return(res);
 }
 
-static void setaddress(char *text,int *addr)
+static void setaddress(char *text,uint32_t *addr)
 {
     int l,a,o;
     unsigned int mask;
@@ -73,7 +71,6 @@ static void setaddress(char *text,int *addr)
 
 static void printhelp(void)
 {
-    extern void printcopyright(void);
     printcopyright();
 #if !RELEASE
     print(
@@ -217,7 +214,7 @@ static void memorypic(void)
 
 static void printdumping(void)
 {
-    char *t[2]={"off","ON "};
+    const char *t[2]={"off","ON "};
     print("Dumping: ");
     print("info:%i "  ,st.dumpinfo);
     print("os:%i "    ,st.dumpos);
@@ -312,7 +309,7 @@ static int command_main(char *p,char *tp)
             remove("ultrabak.sav");
             rename("ultra.sav","ultrabak.sav");
             remove("ultra.sav");
-            p="ultra.sav";
+            p= (char*)"ultra.sav";
         }
         strcpy(buf,p); if(!strstr(p,".")) strcat(buf,".sav");
         p=buf;
@@ -330,7 +327,7 @@ static int command_main(char *p,char *tp)
     {
         char buf[64];
         p=param(&tp);
-        if(!p || *p<=32) p="ultra.sav";
+        if(!p || *p<=32) p= (char*)"ultra.sav";
         strcpy(buf,p); if(!strstr(p,".")) strcat(buf,".sav");
         p=buf;
         loadstate(p);
@@ -389,7 +386,7 @@ static int command_step(char *p,char *tp)
     }
     else IFIS(p,"goto")
     {
-        int to=st.pc;
+        uint32_t to=st.pc;
         setaddress(param(&tp),&to);
         st.pc=to;
         view.codebase=st.pc;
@@ -422,7 +419,7 @@ static int command_step(char *p,char *tp)
     }
     else IFIS(p,"t")
     {
-        int to=st.pc;
+        uint32_t to=st.pc;
         setaddress(param(&tp),&to);
         print("Executing until address %08X\n",to);
         cpu_onebp(BREAK_PC,to,0);
@@ -430,7 +427,7 @@ static int command_step(char *p,char *tp)
     }
     else IFIS(p,"mw")
     {
-        int to=0;
+        uint32_t to=0;
         setaddress(param(&tp),&to);
         view.database=to;
         print("Executing until address %08X written\n",to);
@@ -439,7 +436,7 @@ static int command_step(char *p,char *tp)
     }
     else IFIS(p,"mr")
     {
-        int to=0;
+        uint32_t to=0;
         setaddress(param(&tp),&to);
         view.database=to;
         print("Executing until address %08X written\n",to);
@@ -448,7 +445,7 @@ static int command_step(char *p,char *tp)
     }
     else IFIS(p,"ma")
     {
-        int to=0;
+        uint32_t to=0;
         setaddress(param(&tp),&to);
         view.database=to;
         print("Executing until address %08X accessed\n",to);
@@ -457,7 +454,7 @@ static int command_step(char *p,char *tp)
     }
     else IFIS(p,"mc")
     {
-        int to=0;
+        uint32_t to=0;
         setaddress(param(&tp),&to);
         view.database=to;
         print("Executing until address %08X changed\n",to);
@@ -567,8 +564,8 @@ static int command_dump(char *p,char *tp)
         if(*p!='0' && *p!='1')
         {
             if(st.dumpinfo || st.dumpsnd || st.dumpgfx || st.dumphw ||
-               st.dumpos   || st.dumpops || st.dumpasm || st.dumptrace) p="0";
-            else p="1";
+               st.dumpos   || st.dumpops || st.dumpasm || st.dumptrace) p= (char*)"0";
+            else p=(char *)"1";
         }
 
         if(*p=='0')
@@ -714,7 +711,7 @@ static int command_exam(char *p,char *tp)
     {
         if(!snap)
         {
-            snap=malloc(RDRAMSIZE);
+            snap=(byte *)malloc(RDRAMSIZE);
         }
         memcpy(snap,mem.ram,RDRAMSIZE);
         print("Snapshot taken\n");
@@ -1030,7 +1027,7 @@ static int command_misc(char *p,char *tp)
                 for(i=0;i<1000;i++)
                 {
                     if(*code==0xcc) break; // int 3 marks end
-                    print("%08X: "NORMAL"%s\n",
+                    print("%08X: " NORMAL "%s\n",
                         (dword)code,
                         disasmx86(code,(int)code,&ia));
                     code+=ia;
@@ -1188,15 +1185,14 @@ static int command_misc(char *p,char *tp)
     return(1);
 }
 
+extern "C"
 void command(char *cmd)
 {
     char *tp,*p,*cs,*cd;
     int   a;
-    char  buf[256];
+    char  buf[256]{};
 
-    view_writeconsole("\x01\x17\r");
-    con_cursorxy(0,0,0);
-    view.consolecursor=-1;
+    view_clear_cmdline();
 
     cs=cmd;
     while(*cs)

@@ -1,3 +1,8 @@
+#pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef struct
 {
@@ -10,3 +15,6 @@ int  timer_ms(Timer *t);
 int  timer_usreset(Timer *t);
 int  timer_msreset(Timer *t);
 
+#ifdef __cplusplus
+};
+#endif

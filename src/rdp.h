@@ -1,5 +1,9 @@
 // rdp emulation.
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define MAXRDPVX 64
 
 typedef struct
@@ -85,3 +89,6 @@ void rdp_texture(int on,int tile,int level);
 
 int  rdp_gfxactive(void);
 
+#ifdef __cplusplus
+};
+#endif

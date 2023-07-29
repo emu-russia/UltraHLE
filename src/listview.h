@@ -7,18 +7,26 @@
 #include "stdsdk.h"                    // Standard Win32 API Includes, etc.
 #include "version.h"                   // Version Information
 
-	// Prototypes
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-   void CreateListView( void );
-   BOOL UpdateROMList( void );
-   void AddDebugLine( char *, int );
+// Prototypes
 
-	// Globals
+void CreateListView( void );
+BOOL UpdateROMList( void );
+void AddDebugLine( char *, int );
 
-   HWND hwndList;                         // Handle to Rom List View
-   HWND hwndDebug;                        // Handle to Debug List View
-   ROMLIST romList;                       // Pointer to Rom List Information
+// Globals
+
+HWND hwndList;                         // Handle to Rom List View
+HWND hwndDebug;                        // Handle to Debug List View
+ROMLIST romList;                       // Pointer to Rom List Information
    
-   extern char szBuffer[];                // Temporary String Buffer
-   extern HANDLE hInst;                   // Global Application Instance
-   extern HWND hwndMain;                  // Handle to the Main App Window
+extern char szBuffer[];                // Temporary String Buffer
+extern HANDLE hInst;                   // Global Application Instance
+extern HWND hwndMain;                  // Handle to the Main App Window
+
+#ifdef __cplusplus
+};
+#endif
