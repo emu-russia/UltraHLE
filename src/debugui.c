@@ -756,6 +756,8 @@ void view_setlast(void)
 
 void view_clear_cmdline()
 {
+    if (!viewopen) return;
+
     view_writeconsole("\x01\x17\r");
     con_cursorxy(0, 0, 0);
     view.consolecursor = -1;
