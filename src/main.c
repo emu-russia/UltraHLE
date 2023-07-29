@@ -462,6 +462,8 @@ void main_thread(void)
 
     emuthreadhandle=GetCurrentThread();
 
+    cmd_init();
+
     // open console
     view_open();
     view_changed(VIEW_RESIZE);
@@ -509,4 +511,3 @@ print(CYAN"rompath: %s\n",init.rompath);
     // close console
     view_close();
 }
-
