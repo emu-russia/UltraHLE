@@ -1397,57 +1397,57 @@ void get_autocomplete_list(std::vector<std::string>& cmdlist)
 
 static void tokenize(const char* text, std::vector<std::string>& args)
 {
-	#define endl    ( text[p] == 0 )
-	#define space   ( text[p] == 0x20 )
-	#define quot    ( text[p] == '\'' )
-	#define dquot   ( text[p] == '\"' )
+    #define endl    ( text[p] == 0 )
+    #define space   ( text[p] == 0x20 )
+    #define quot    ( text[p] == '\'' )
+    #define dquot   ( text[p] == '\"' )
 
-	int p, start, end;
-	p = start = end = 0;
+    int p, start, end;
+    p = start = end = 0;
 
-	args.clear();
+    args.clear();
 
-	// while not end line
-	while (!endl)
-	{
-		// skip space first, if any
-		while (space) p++;
-		if (!endl && (quot || dquot))
-		{   // quotation, need special case
-			p++;
-			start = p;
-			while (1)
-			{
-				if (endl)
-				{
-					throw "Open quotation";
-					return;
-				}
+    // while not end line
+    while (!endl)
+    {
+        // skip space first, if any
+        while (space) p++;
+        if (!endl && (quot || dquot))
+        {   // quotation, need special case
+            p++;
+            start = p;
+            while (1)
+            {
+                if (endl)
+                {
+                    throw "Open quotation";
+                    return;
+                }
 
-				if (quot || dquot)
-				{
-					end = p;
-					p++;
-					break;
-				}
-				else p++;
-			}
+                if (quot || dquot)
+                {
+                    end = p;
+                    p++;
+                    break;
+                }
+                else p++;
+            }
 
-			args.push_back(std::string(text + start, end - start));
-		}
-		else if (!endl)
-		{
-			start = p;
-			while (1)
-			{
-				if (endl || space || quot || dquot)
-				{
-					end = p;
-					break;
-				}
+            args.push_back(std::string(text + start, end - start));
+        }
+        else if (!endl)
+        {
+            start = p;
+            while (1)
+            {
+                if (endl || space || quot || dquot)
+                {
+                    end = p;
+                    break;
+                }
 
-				p++;
-			}
+                p++;
+            }
 
             if (args.size() == 0) {
                 // The name of the command is always in lower case
@@ -1459,12 +1459,12 @@ static void tokenize(const char* text, std::vector<std::string>& args)
             else {
                 args.push_back(std::string(text + start, end - start));
             }
-		}
-	}
-	#undef space
-	#undef quot
-	#undef dquot
-	#undef endl
+        }
+    }
+    #undef space
+    #undef quot
+    #undef dquot
+    #undef endl
 }
 
 extern "C"
