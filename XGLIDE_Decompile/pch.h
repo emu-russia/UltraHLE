@@ -6,8 +6,11 @@
 #include <Windows.h>
 
 #include "3dfx_headers/glide.h"
+//#include <gl/GL.h>
+#include "glew-2.2.0/include/GL/glew.h"
 
 #include "x.h"
+#include "xgl.h"
 
 #include "state.h"
 #include "fx.h"

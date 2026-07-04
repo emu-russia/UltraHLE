@@ -23,3 +23,5 @@ int clipline(int v1, int v2, int* out);
 int splitpoly(int a1, int a2, DWORD* a3);
 void flush_reordertables();
 int flush_drawfx();
+
+extern int allxformed;
