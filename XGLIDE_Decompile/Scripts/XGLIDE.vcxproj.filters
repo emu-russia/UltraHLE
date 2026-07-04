@@ -39,6 +39,18 @@
     <ClCompile Include="..\pch.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\xgl.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\xglgeom.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\xglmode.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\xgltext.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Readme.md" />
@@ -94,6 +106,9 @@
     </ClInclude>
     <ClInclude Include="..\3dfx_headers\SST1VID.H">
       <Filter>3dfx Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xgl.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

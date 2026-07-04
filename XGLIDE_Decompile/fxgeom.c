@@ -10,7 +10,7 @@ static float identmatrix[4 * 4] = {
 };
 
 static int flip;
-static int allxformed;
+int allxformed;
 static int state;
 static int mode;		// x_begin type
 

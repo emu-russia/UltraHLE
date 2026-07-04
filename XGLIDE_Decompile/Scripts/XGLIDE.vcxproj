@@ -31,6 +31,10 @@
     </ClCompile>
     <ClCompile Include="..\util.c" />
     <ClCompile Include="..\version.c" />
+    <ClCompile Include="..\xgl.c" />
+    <ClCompile Include="..\xglgeom.c" />
+    <ClCompile Include="..\xglmode.c" />
+    <ClCompile Include="..\xgltext.c" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Readme.md" />
@@ -53,6 +57,7 @@
     <ClInclude Include="..\util.h" />
     <ClInclude Include="..\version.h" />
     <ClInclude Include="..\x.h" />
+    <ClInclude Include="..\xgl.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
