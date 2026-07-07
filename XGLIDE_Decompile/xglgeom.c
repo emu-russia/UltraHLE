@@ -40,7 +40,7 @@ void xgl_geom_init(void)
 }
 
 // Set up vertex arrays for OpenGL
-static void setup_vertex_arrays()
+static void setup_vertex_arrays(void)
 {
     if (g_state[XST].send & 1) {
         glEnableClientState(GL_COLOR_ARRAY);
@@ -57,14 +57,14 @@ static void setup_vertex_arrays()
     }
 
     if (g_state[XST].send & 4) {
-        if (glActiveTextureARB) {
+        if (GLEW_ARB_multitexture) {
             glActiveTextureARB(GL_TEXTURE1_ARB);
             glEnableClientState(GL_TEXTURE_COORD_ARRAY);
             glTexCoordPointer(2, GL_FLOAT, 0, texcoord1_array);
             glActiveTextureARB(GL_TEXTURE0_ARB);
         }
     } else {
-        if (glActiveTextureARB) {
+        if (GLEW_ARB_multitexture) {
             glActiveTextureARB(GL_TEXTURE1_ARB);
             glDisableClientState(GL_TEXTURE_COORD_ARRAY);
             glActiveTextureARB(GL_TEXTURE0_ARB);
@@ -237,7 +237,7 @@ void xgl_flush(void)
     glDisableClientState(GL_COLOR_ARRAY);
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
-    if (glActiveTextureARB) {
+    if (GLEW_ARB_multitexture) {
         glActiveTextureARB(GL_TEXTURE1_ARB);
         glDisableClientState(GL_TEXTURE_COORD_ARRAY);
         glActiveTextureARB(GL_TEXTURE0_ARB);

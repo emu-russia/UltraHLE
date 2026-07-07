@@ -195,7 +195,7 @@ void xgl_mode_change(void)
 // Apply texture mode
 void xgl_mode_texturemode(int tmu, int format, int trilin)
 {
-    GLenum target = (tmu > 0 && glActiveTextureARB) ? GL_TEXTURE1_ARB : GL_TEXTURE0_ARB;
+    GLenum target = (tmu > 0 && GLEW_ARB_multitexture) ? GL_TEXTURE1_ARB : GL_TEXTURE0_ARB;
     glBindTexture(target, g_opengl_texture_ids[g_state[XST].currentmode.text1 + tmu]);
     
     // Mipmap filtering
@@ -223,7 +223,7 @@ void xgl_mode_loadtexture(int txtind)
 {
     if (txtind <= 0 || txtind >= MAXTEXTURES) return;
     
-    if (glActiveTextureARB) {
+    if (GLEW_ARB_multitexture) {
         glActiveTextureARB(GL_TEXTURE0_ARB);
     }
     
@@ -237,7 +237,7 @@ void xgl_mode_loadmultitexture(int txtind1, int txtind2)
     if (txtind1 <= 0 || txtind1 >= MAXTEXTURES) return;
     if (txtind2 <= 0 || txtind2 >= MAXTEXTURES) return;
     
-    if (glActiveTextureARB) {
+    if (GLEW_ARB_multitexture) {
         glActiveTextureARB(GL_TEXTURE0_ARB);
         glBindTexture(GL_TEXTURE_2D, g_opengl_texture_ids[txtind1]);
         xgl_mode_texturemode(0, g_texture[txtind1].format, 0);

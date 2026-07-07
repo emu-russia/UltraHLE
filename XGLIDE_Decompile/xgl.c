@@ -1,9 +1,7 @@
 #include "pch.h"
 
-// OpenGL extension function pointers
-PFNGLACTIVETEXTUREARBPROC glActiveTextureARB = NULL;
-PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB = NULL;
-PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB = NULL;
+// OpenGL extension function pointers are provided by GLEW
+// glew.h includes glext.h which defines these function pointer types and variables
 
 // OpenGL context state
 static HGLRC hRC = NULL;
@@ -146,12 +144,15 @@ int xgl_init(void* hdc, void* hwnd, int width, int height)
         return -1;
     }
     
-    // Load OpenGL extensions
-    glActiveTextureARB = (PFNGLACTIVETEXTUREARBPROC)wglGetProcAddress("glActiveTextureARB");
-    glClientActiveTextureARB = (PFNGLCLIENTACTIVETEXTUREARBPROC)wglGetProcAddress("glClientActiveTextureARB");
-    glMultiTexCoord2fARB = (PFNGLMULTITEXCOORD2FARBPROC)wglGetProcAddress("glMultiTexCoord2fARB");
+    // Initialize GLEW for extension loading
+    GLenum err = glewInit();
+    if (err != GLEW_OK) {
+        xgl_log("Failed to initialize GLEW: %s\n", glewGetErrorString(err));
+        return -1;
+    }
     
-    if (!glActiveTextureARB || !glClientActiveTextureARB || !glMultiTexCoord2fARB) {
+    // Check for multitexture extension
+    if (!GLEW_ARB_multitexture) {
         xgl_log("Multitexture extensions not available\n");
         // Continue without multitexture support
     }
@@ -180,7 +181,7 @@ int xgl_init(void* hdc, void* hwnd, int width, int height)
     glEnable(GL_DITHER);
     
     // Initialize texture units
-    if (glActiveTextureARB) {
+    if (GLEW_ARB_multitexture) {
         glActiveTextureARB(GL_TEXTURE0_ARB);
         glEnable(GL_TEXTURE_2D);
         
