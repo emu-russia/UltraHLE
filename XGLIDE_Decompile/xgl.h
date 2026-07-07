@@ -2,21 +2,14 @@
 #define _XGL_H_
 
 #include <GL/gl.h>
-//#include <GL/glext.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// OpenGL-specific extensions and function pointers
-typedef void (APIENTRY *PFNGLACTIVETEXTUREARBPROC)(GLenum);
-typedef void (APIENTRY *PFNGLCLIENTACTIVETEXTUREARBPROC)(GLenum);
-typedef void (APIENTRY *PFNGLMULTITEXCOORD2FARBPROC)(GLenum, GLfloat, GLfloat);
-
 // Global OpenGL state
-extern PFNGLACTIVETEXTUREARBPROC glActiveTextureARB;
-extern PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB;
-extern PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB;
+// GLEW provides function pointers for extensions automatically
+// Use GLEW_ARB_multitexture, GLEW_ARB_texture_compression, etc. for checks
 
 // Initialize OpenGL subsystem
 int xgl_init(void* hdc, void* hwnd, int width, int height);
