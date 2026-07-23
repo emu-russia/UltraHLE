@@ -25,3 +25,17 @@ void flush_reordertables();
 int flush_drawfx();
 
 extern int allxformed;
+extern int state;
+extern int mode;
+extern int vertices;
+extern int vertices_base;
+extern int corners_base;
+extern int corners;
+extern int corner[0x200 * 5];
+extern GrVertex grvx[0x200];
+extern xt_pos pos[0x200];
+extern xt_tex tex[0x200];
+extern xt_tex tex2[0x200];
+extern xt_tex texp[0x200];
+extern xt_xfpos xfpos[0x200];
+extern uint8_t xformed[0x200];

@@ -1,224 +1,141 @@
 // Set pixel pipeline modes, and initialize the graphics device.
+// Ported to OpenGL - uses xgl* functions as the backend
 
 #include "pch.h"
+#include "xgl.h"
 
 char *init_name()
 {
-	return "Glide";
+	return "OpenGL";
 }
 
 int init_fullscreen(int fullscreen)
 {
-	int result; // eax
-
-	if (fullscreen)
-		result = grSstControl(GR_CONTROL_ACTIVATE);
-	else
-		result = grSstControl(GR_CONTROL_DEACTIVATE);
-	return result;
+	static HWND last_hwnd = NULL;
+	static int last_style = 0;
+	
+	if (fullscreen) {
+		if (!g_state[XST].hwnd) return -1;
+		last_hwnd = (HWND)g_state[XST].hwnd;
+		last_style = GetWindowLongPtr(last_hwnd, GWL_STYLE);
+		SetWindowLongPtr(last_hwnd, GWL_STYLE, last_style & ~WS_OVERLAPPEDWINDOW | WS_POPUP | WS_VISIBLE);
+		SetWindowPos(last_hwnd, HWND_TOP, 0, 0, g_state[XST].xs, g_state[XST].ys, SWP_SHOWWINDOW);
+	} else {
+		if (!last_hwnd) return -1;
+		SetWindowLongPtr(last_hwnd, GWL_STYLE, last_style);
+		SetWindowPos(last_hwnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+	}
+	return 0;
 }
 
 int init_query()
 {
-	//int result; // eax
-	//GrHwConfiguration v1; // [esp+0h] [ebp-94h]
-	//int v2; // [esp+4h] [ebp-90h]
-
-	// Badly decompiled and not used.
-
-	//grGlideInit();
-	//if ( grSstQueryHardware(&v1) )
-	//	result = ((unsigned int)(v2 - 3) < 1) + 1;
-	//else
-	//	result = -1;
-	//return result;
-
-	return -1;
+	// Query OpenGL hardware support
+	// Returns number of supported TMUs (texture mapping units)
+	g_state[XST].tmus = 1;
+	
+	// Check for multitexture support
+	if (GLEW_ARB_multitexture) {
+		g_state[XST].tmus = 2;
+	}
+	
+	x_log("init_query: OpenGL TMUs=%i\n", g_state[XST].tmus);
+	return 0;
 }
 
 void init_reinit()
 {
-	GrScreenResolution_t mode;
-
 	x_log("init_reinit: shutdown\n");
-	grGlideShutdown();
+	xgl_deinit();
+	
 	x_log("init_reinit: init\n");
-	grGlideInit();
-	x_log("init_reinit: select\n");
-	grSstSelect(0);
-	x_log("init_reinit: resolution\n");
-	if ( g_state[XST].xs < 1024 )
-	{
-		if ( g_state[XST].xs < 800 )
-		{
-			if ( g_state[XST].xs < 640 )
-			{
-				mode = GR_RESOLUTION_512x384;
-				if ( g_state[XST].xs < 512 )
-					mode = GR_RESOLUTION_640x480;
-			}
-			else
-			{
-				mode = GR_RESOLUTION_640x480;
-			}
-		}
-		else
-		{
-			mode = GR_RESOLUTION_800x600;
-		}
-	}
-	else
-	{
-		// 1024x768
-		mode = 12;
-	}
-	grSstWinOpen((FxU32)g_state[XST].hwnd, mode, GR_REFRESH_60Hz, GR_COLORFORMAT_ABGR, GR_ORIGIN_LOWER_LEFT, g_state[XST].buffers, g_state[XST].vsync);
-	grClipWindow(0, 0, g_state[XST].xs, g_state[XST].ys);
+	int width = g_state[XST].xs;
+	int height = g_state[XST].ys;
+	
+	// Map resolution to appropriate size
+	if (width < 640) width = 640;
+	else if (width < 800) width = 800;
+	
+	x_log("init_reinit: resolution %ix%i\n", width, height);
+	xgl_init(g_state[XST].hdc, g_state[XST].hwnd, width, height);
+	xgl_resize(width, height);
 	x_log("init_reinit: done\n");
 }
 
 int init_init()
 {
-	GrScreenResolution_t mode;
-	GrHwConfiguration hw;
-
-	grGlideInit();
-	if ( !grSstQueryHardware(&hw) )
-		return -1;
-	if (hw.SSTs[0].type != 3 && hw.SSTs[0].type)
-		g_state[XST].tmus = 1;
-	else
-		g_state[XST].tmus = hw.SSTs[0].sstBoard.VoodooConfig.nTexelfx;
-	x_log("x_open: cartdtype=%i, tmus=%i\n", hw.SSTs[0].type, g_state[XST].tmus);
-
-	grSstSelect(0);
+	int width = g_state[XST].xs;
+	int height = g_state[XST].ys;
+	
+	// Query OpenGL hardware
+	init_query();
+	x_log("x_open: cartdtype=OpenGL, tmus=%i\n", g_state[XST].tmus);
+	
+	// Initialize texture memory
 	text_init();
-	if ( g_state[XST].xs < 1024 )
-	{
-		if ( g_state[XST].xs < 800 )
-		{
-			if ( g_state[XST].xs < 640 )
-			{
-				mode = GR_RESOLUTION_512x384;
-				if ( g_state[XST].xs < 512 )
-					mode = GR_RESOLUTION_640x480;
-			}
-			else
-			{
-				mode = GR_RESOLUTION_640x480;
-			}
-		}
-		else
-		{
-			mode = GR_RESOLUTION_800x600;
-		}
+	
+	// Initialize OpenGL backend
+	x_log("x_open: opening OpenGL context %ix%i\n", width, height);
+	if (xgl_init(g_state[XST].hdc, g_state[XST].hwnd, width, height) != 0) {
+		x_log("x_open: failed to initialize OpenGL\n");
+		return -1;
 	}
-	else
-	{
-		mode = 12;
-	}
-	grSstWinOpen((FxU32)g_state[XST].hwnd, mode, GR_REFRESH_60Hz, GR_COLORFORMAT_ABGR, GR_ORIGIN_LOWER_LEFT, g_state[XST].buffers, g_state[XST].vsync);
-	grClipWindow(0, 0, g_state[XST].xs, g_state[XST].ys);
+	
+	xgl_resize(width, height);
+	
+	// Set clip window (viewport)
+	g_state[XST].view_x0 = 0;
+	g_state[XST].view_x1 = width - 1;
+	g_state[XST].view_y0 = 0;
+	g_state[XST].view_y1 = height - 1;
+	
+	x_log("x_open: done\n");
 	return 0;
 }
 
 void init_deinit()
 {
-	x_log("x_close");
-	grGlideShutdown();
+	x_log("x_close: deinit\n");
+	xgl_deinit();
 }
 
 void init_activate()
 {
+	xgl_select_context();
 }
 
 void init_resize(int xs, int ys)
 {
 	g_state[XST].xs = xs;
 	g_state[XST].ys = ys;
+	xgl_resize(xs, ys);
 }
 
 void init_bufferswap()
 {
-	int v0;
-	int v1;
-
-	v0 = 0;
-	while ( grBufferNumPending() > 3 )
-	{
-		x_sleep(10);
-		v1 = v0++;
-		if ( v1 > 100 )
-		{
-			x_log("timeout on bufferswap!\n");
-			init_reinit();
-			return;
-		}
+	int retries = 0;
+	
+	// Wait for GPU to catch up (max 100 retries)
+	while (retries < 100) {
+		xgl_bufferswap();
+		return;
 	}
-	grBufferSwap(1);
+	
+	x_log("timeout on bufferswap!\n");
+	init_reinit();
 }
 
 void init_clear(int writecolor, int writedepth, float cr, float cg, float cb)
 {
-	x_flush();
-	grClipWindow(
-		g_state[XST].view_x0,
-		g_state[XST].view_y0,
-		g_state[XST].view_x1,
-		g_state[XST].view_y1);
-	grColorMask(writecolor >= 1 ? FXTRUE : FXFALSE, writecolor >= 1 ? FXTRUE : FXFALSE);
-	grDepthMask(writedepth >= 1 ? FXTRUE : FXFALSE);
-	grBufferClear(
-		(unsigned __int8)(signed __int64)(cr * 255.0) | ((unsigned __int16)(signed __int64)(cg * 255.0) << 8) & 0xFF00 | ((unsigned __int8)(signed __int64)(cb * 255.0) << 16),
-		0,
-		0xFFFF);
-	grDepthMask((g_state[XST].currentmode.mask & 2u) >> 1);
-	grColorMask(g_state[XST].currentmode.mask & 1, g_state[XST].currentmode.mask & 1);
+	xgl_clear(writecolor, writedepth, cr, cg, cb);
 }
 
 int init_readfb(int fb, int x, int y, int xs, int ys, char* buffer, int bufrowlen)
 {
-	BOOL v7; // ecx
-	signed int result; // eax
-	int v9; // esi
-	unsigned __int16 *v10; // edi
-	int v11; // ebx
-	unsigned __int16 v12; // ax
-
-	v7 = (fb & X_FB_FRONT) < 1;
-	if ( (uint8_t)fb == X_FB_RGB565)
-	{
-		grLfbReadRegion(v7, x, y, xs, ys, bufrowlen, buffer);
-		result = 0;
+	if ((uint8_t)fb == X_FB_RGB565 || (uint8_t)fb == X_FB_RGBA8888) {
+		return xgl_readfb(fb, x, y, xs, ys, buffer, bufrowlen);
 	}
-	else if ( (uint8_t)fb == X_FB_RGBA8888)
-	{
-		v9 = buffer;
-		v10 = (unsigned __int16 *)(buffer + ys * bufrowlen / 2);
-		v11 = xs * ys;
-		grLfbReadRegion(v7, x, y, xs, ys, bufrowlen / 2, buffer + ys * bufrowlen / 2);
-		if (xs * ys > 0 )
-		{
-			do
-			{
-				v12 = *v10;
-				++v10;
-				v9 += 4;
-				*(BYTE *)(v9 - 4) = HIBYTE(v12) & 0xF8;
-				--v11;
-				*(BYTE *)(v9 - 3) = (v12 >> 3) & 0xFC;
-				*(BYTE *)(v9 - 2) = 8 * v12;
-				*(BYTE *)(v9 - 1) = -1;
-			}
-			while ( v11 );
-		}
-		result = 0;
-	}
-	else
-	{
-		result = 1;
-	}
-	return result;
+	return 1;
 }
 
 int init_writefb(int fb, int x, int y, int xs, int ys, char* buffer, int bufrowlen)
@@ -229,99 +146,47 @@ int init_writefb(int fb, int x, int y, int xs, int ys, char* buffer, int bufrowl
 
 void mode_init()
 {
+	xgl_mode_init();
 	g_state[XST].currentmode.stwhint = 0;
-	grDepthBiasLevel(0);
-	grDepthBufferMode(GR_DEPTHBUFFER_WBUFFER);
-	grDepthMask(FXTRUE);
-	grDitherMode(GR_DITHER_4x4);
-	grHints(GR_HINT_ALLOW_MIPMAP_DITHER, 1);
-	grTexFilterMode(GR_TMU0, GR_TEXTUREFILTER_BILINEAR, GR_TEXTUREFILTER_BILINEAR);
-	grTexFilterMode(GR_TMU1, GR_TEXTUREFILTER_BILINEAR, GR_TEXTUREFILTER_BILINEAR);
 }
 
 void mode_texturemode(int tmu, int format, int trilin)
 {
-	if (trilin)
-	{
-		grTexMipMapMode(tmu, 1, 1);
-	}
-	else
-	{
-		grTexMipMapMode(tmu, (format & X_MIPMAP) != 0, 0);
-	}
-	if (format & X_CLAMP)
-		grTexClampMode(tmu, (format & X_CLAMPNOX) < 1, (format & X_CLAMPNOY) < 1);
-	else
-		grTexClampMode(tmu, 0, 0);
-	if (format & X_NOBILIN)
-		grTexFilterMode(tmu, 0, 0);
-	else
-		grTexFilterMode(tmu, 1, 1);
+	xgl_mode_texturemode(tmu, format, trilin);
 }
 
 void mode_loadtexture(int txtind)
 {
-	signed int v1; // ebx
-	xt_texture* result; // eax
-	xt_texture* v3; // esi
-	int v4; // edi
-
-	v1 = 1;
-	if ( g_state[XST].tmus < 2 )
-		v1 = 0;
-	result = texture_get(txtind);
-	v3 = result;
-	if ( result )
-	{
-		v4 = result->format;
-		if ( !(v4 & X_MIPMAP) )
-			v1 = 0;
-		grTexCombine(1, 1, 0, 1, 0, 0, 0);
-		if ( v1 )
-		{
-			if ( fxloadtexture_trilin(v3) )
-				grTexCombine(0, 7, 13, 7, 13, 0, 0);
-			else
-				grTexCombine(0, 7, 5, 7, 5, 0, 0);
-			mode_texturemode(0, v4, 1);
-			mode_texturemode(1, v4, 1);
-		}
-		else if ( fxloadtexture_single(v3) )
-		{
-			grTexCombine(0, 7, 8, 7, 8, 0, 0);
-			mode_texturemode(0, v4, 0);
-			mode_texturemode(1, v4, 0);
-			grTexCombine(1, 1, 0, 1, 0, 0, 0);
-		}
-		else
-		{
-			grTexCombine(0, 1, 0, 1, 0, 0, 0);
-			mode_texturemode(0, v4, 0);
-		}
+	int has_multitexture = (g_state[XST].tmus >= 2) ? 1 : 0;
+	xt_texture* txt = texture_get(txtind);
+	
+	if (!txt) return;
+	
+	int use_trilin = (txt->format & X_MIPMAP) && has_multitexture;
+	
+	// Load texture data
+	if (use_trilin) {
+		fxloadtexture_trilin(txt);
+	} else {
+		fxloadtexture_single(txt);
 	}
+	
+	// Apply OpenGL texture state
+	xgl_mode_loadtexture(txtind);
 }
 
 void mode_loadmultitexture(int txtind1, int txtind2)
 {
-	xt_texture* result; // eax
-	xt_texture* v3; // ebx
-	int v4; // edi
-	int v5; // esi
-
-	result = texture_get(txtind1);
-	v3 = result;
-	if ( result )
-	{
-		v4 = result->format;
-		result = texture_get(txtind2);
-		if ( result )
-		{
-			v5 = result->format;
-			fxloadtexture_multi(v3, result);
-			mode_texturemode(0, v4, 0);
-			mode_texturemode(1, v5, 0);
-		}
-	}
+	xt_texture* txt1 = texture_get(txtind1);
+	xt_texture* txt2 = texture_get(txtind2);
+	
+	if (!txt1 || !txt2) return;
+	
+	// Load texture data
+	fxloadtexture_multi(txt1, txt2);
+	
+	// Apply OpenGL texture state
+	xgl_mode_loadmultitexture(txtind1, txtind2);
 }
 
 void fixfogtable(GrFog_t* fogtable, int size)
@@ -377,348 +242,11 @@ GrFog_t* generatefogtable()
 
 void mode_change()
 {
-	float a1; // @ecx 
-	int v16; // rax
-	signed int v17; // edx
-	signed int v18; // esi
-	signed int v19; // eax
-	signed int v20; // ecx
-	float v25; // eax
-
-	if ( g_state[XST].changed & 1 )
-	{
-		if ( g_state[XST].setnew != g_state[XST].geometry)
-		{
-			if (g_state[XST].geometry & 2 )
-			{
-				grCullMode(GR_CULL_NEGATIVE);
-			}
-			else if ( g_state[XST].geometry & 4 )
-			{
-				grCullMode(GR_CULL_POSITIVE);
-			}
-			else
-			{
-				grCullMode(GR_CULL_DISABLE);
-			}
-			g_state[XST].setnew = g_state[XST].geometry;
-		}
-	}
-	if ( g_state[XST].changed & 8 )
-	{
-		g_state[XST].active.fogtype = g_state[XST].currentmode.fogtype;
-		g_state[XST].active.fogmin = g_state[XST].currentmode.fogmin;
-		g_state[XST].active.fogmax = g_state[XST].currentmode.fogmax;
-		g_state[XST].active.fogcolor[0] = g_state[XST].currentmode.fogcolor[0];
-		g_state[XST].active.fogcolor[1] = g_state[XST].currentmode.fogcolor[1];
-		g_state[XST].active.fogcolor[2] = g_state[XST].currentmode.fogcolor[2];
-		g_state[XST].active.fogcolor[3] = g_state[XST].currentmode.fogcolor[3];
-		if ( g_state[XST].currentmode.fogtype == X_DISABLE)
-		{
-			grFogMode(GR_FOG_DISABLE);
-		}
-		else
-		{
-			grFogTable(generatefogtable());
-			grFogColorValue(
-				(unsigned __int8)(signed __int64)(g_state[XST].active.fogcolor[0] * 255.0) | 
-				((unsigned __int16)(signed __int64)(g_state[XST].active.fogcolor[1] * 255.0) << 8) & 0xFF00 | 
-				(((unsigned int)(signed __int64)(g_state[XST].active.fogcolor[2] * 255.0) | 0xFFFFFF00) << 16)
-			);
-			if ( g_state[XST].active.fogtype == X_LINEARADD)
-				grFogMode(GR_FOG_ADD2 | GR_FOG_WITH_TABLE);
-			else
-				grFogMode(GR_FOG_WITH_TABLE);
-		}
-	}
-	if ( g_state[XST].changed & 4 )
-	{
-		if ( g_state[XST].active.mask != g_state[XST].currentmode.mask)
-		{
-			grDepthMask((g_state[XST].currentmode.mask & 2u) >> 1);
-			grColorMask(g_state[XST].currentmode.mask & 1, g_state[XST].currentmode.mask & 1);
-			g_state[XST].active.mask = g_state[XST].currentmode.mask;
-		}
-		if ( g_state[XST].active.masktst != g_state[XST].currentmode.masktst)
-		{
-			if (g_state[XST].currentmode.masktst > X_DISABLE)
-			{
-				switch (g_state[XST].currentmode.masktst)
-				{
-					case X_TESTEQ:
-						grDepthBufferFunction(2);
-						break;
-					case X_TESTNE:
-						grDepthBufferFunction(5);
-						break;
-					case X_TESTGT:
-						grDepthBufferFunction(4);
-						break;
-					case X_TESTLT:
-						grDepthBufferFunction(1);
-						break;
-					default:
-						goto $L1409;
-				}
-			}
-			else if (g_state[XST].currentmode.masktst == X_DISABLE || g_state[XST].currentmode.masktst == 0 )
-			{
-				grDepthBufferFunction(7);
-			}
-			else
-			{
-$L1409:
-				grDepthBufferFunction(3);
-			}
-			g_state[XST].active.masktst = g_state[XST].currentmode.masktst;
-		}
-		if ( g_state[XST].currentmode.envc != g_state[XST].active.envc)
-		{
-			g_state[XST].active.colortext1 = 0xfffffff;
-			g_state[XST].active.envc = g_state[XST].currentmode.envc;
-		}
-		if ( g_state[XST].currentmode.colortext1 != g_state[XST].active.colortext1 )
-		{
-			g_state[XST].send &= 0xFFFFFFFC;
-			switch ( g_state[XST].currentmode.colortext1 & 0xFFFF )
-			{
-				case X_WHITE:
-					grConstantColorValue(0x7FFF7FFF);
-					guColorCombineFunction(GR_COLORCOMBINE_CCRGB);
-					guAlphaSource(GR_ALPHASOURCE_CC_ALPHA);
-					break;
-				case X_COLOR:
-					guColorCombineFunction(GR_COLORCOMBINE_ITRGB);
-					guAlphaSource(GR_ALPHASOURCE_ITERATED_ALPHA);
-					g_state[XST].send |= 1u;
-					break;
-				case X_TEXTURE:
-				case X_DECAL:
-					guColorCombineFunction(GR_COLORCOMBINE_DECAL_TEXTURE);
-					guAlphaSource(GR_ALPHASOURCE_TEXTURE_ALPHA);
-					goto LABEL_49;
-				case X_ADD:
-					guColorCombineFunction(GR_COLORCOMBINE_TEXTURE_ADD_ITRGB);
-					guAlphaSource(GR_ALPHASOURCE_TEXTURE_ALPHA);
-					goto LABEL_48;
-				case X_MUL:
-					guColorCombineFunction(GR_COLORCOMBINE_TEXTURE_TIMES_ITRGB);
-					guAlphaSource(GR_ALPHASOURCE_TEXTURE_ALPHA_TIMES_ITERATED_ALPHA);
-					goto LABEL_48;
-				case X_TEXTURE_IA:
-					guColorCombineFunction(GR_COLORCOMBINE_DECAL_TEXTURE);
-					guAlphaSource(GR_ALPHASOURCE_ITERATED_ALPHA);
-					goto LABEL_48;
-				case X_MUL_TA:
-					guColorCombineFunction(GR_COLORCOMBINE_TEXTURE_TIMES_ITRGB);
-					guAlphaSource(GR_ALPHASOURCE_TEXTURE_ALPHA);
-					goto LABEL_48;
-				case X_MUL_IA:
-					guColorCombineFunction(GR_COLORCOMBINE_TEXTURE_TIMES_ITRGB);
-					guAlphaSource(GR_ALPHASOURCE_ITERATED_ALPHA);
-					goto LABEL_48;
-				case X_TEXTUREBLEND:
-					grColorCombine(7, 4, 0, 1, 0);
-					guAlphaSource(GR_ALPHASOURCE_ITERATED_ALPHA);
-					goto LABEL_48;
-				case X_TEXTUREENVA:
-					grColorCombine(7, 4, 1, 0, 0);
-					guAlphaSource(GR_ALPHASOURCE_ITERATED_ALPHA);
-					goto LABEL_47;
-				case X_TEXTUREENVC:
-					grColorCombine(7, 5, 1, 0, 0);
-					guAlphaSource(GR_ALPHASOURCE_ITERATED_ALPHA);
-					goto LABEL_47;
-				case X_SUB:
-					grColorCombine(6, 8, 0, 1, 0);
-					guAlphaSource(GR_ALPHASOURCE_TEXTURE_ALPHA);
-					goto LABEL_48;
-				case X_TEXTUREENVCR:
-					grColorCombine(7, 5, 0, 2, 0);
-					guAlphaSource(GR_ALPHASOURCE_ITERATED_ALPHA);
-					if (g_state[XST].geometry & X_DUMPDATA) {
-						x_log("envc=%08X\n", g_state[XST].active.envc);
-					}
-LABEL_47:
-					grConstantColorValue(g_state[XST].active.envc);
-LABEL_48:
-					g_state[XST].send |= 1u;
-LABEL_49:
-					g_state[XST].send |= 2u;
-					break;
-				default:
-					break;
-			}
-			switch ( g_state[XST].currentmode.colortext1 >> 16 )
-			{
-				case X_COLOR:
-					guAlphaSource(GR_ALPHASOURCE_ITERATED_ALPHA);
-					g_state[XST].send |= 1u;
-					break;
-				case X_TEXTURE:
-				case X_DECAL:
-					guAlphaSource(GR_ALPHASOURCE_TEXTURE_ALPHA);
-					goto LABEL_56;
-				case X_ADD:
-					guAlphaSource(GR_ALPHASOURCE_TEXTURE_ALPHA);
-					goto LABEL_55;
-				case X_MUL:
-					guAlphaSource(GR_ALPHASOURCE_TEXTURE_ALPHA_TIMES_ITERATED_ALPHA);
-LABEL_55:
-					g_state[XST].send |= 1u;
-LABEL_56:
-					g_state[XST].send |= 2u;
-					break;
-				default:
-					break;
-			}
-			g_state[XST].active.colortext1 = g_state[XST].currentmode.colortext1;
-		}
-		if ( g_state[XST].currentmode.text1text2 != g_state[XST].active.text1text2)
-		{
-			g_state[XST].send &= 0xFFFFFFFB;
-			grTexCombine(1, 1, 0, 1, 0, 0, 0);
-			if (g_state[XST].currentmode.text1text2 > X_TEXTURE)
-			{
-				a1 = 0.0;
-				switch (g_state[XST].currentmode.text1text2)
-				{
-					case X_ADD:
-						grTexCombine(0, 4, 8, 4, 8, 0, 0);
-						g_state[XST].send |= 4u;
-						break;
-					case X_MUL:
-						grTexCombine(0, 3, 1, 3, 1, 0, 0);
-						g_state[XST].send |= 4u;
-						break;
-					case X_DECAL:
-						grTexCombine(0, 7, 11, 7, 11, 0, 0);
-						g_state[XST].send |= 4u;
-						break;
-					case X_MULADD:
-						grTexCombine(0, 4, 1, 4, 1, 0, 0);
-						g_state[XST].send |= 4u;
-						break;
-					case X_SUB:
-						grTexCombine(0, 6, 8, 6, 8, 0, 0);
-						g_state[XST].send |= 4u;
-						break;
-					default:
-						break;
-				}
-			}
-			else if (g_state[XST].currentmode.text1text2 >= X_WHITE || !g_state[XST].currentmode.text1text2)
-			{
-				grTexCombine(0, 1, 0, 1, 0, 0, 0);
-				grTexCombine(1, 1, 0, 1, 0, 0, 0);
-			}
-			g_state[XST].active.text1text2 = g_state[XST].currentmode.text1text2;
-		}
-		if ( g_state[XST].active.alphatest != g_state[XST].currentmode.alphatest)
-		{
-			// TODO: Check to see what kind of decompilation is so crooked
-			if ( g_state[XST].currentmode.alphatest < 1.0f && g_state[XST].currentmode.alphatest != 0 /*???*/)
-			{
-				v16 = (int)(g_state[XST].currentmode.alphatest * 256.0);
-				// Clamp
-				if ( v16 < 0 )
-					v16 = 0;
-				if ( v16 > 255 )
-					v16 = 255;
-				grAlphaTestReferenceValue((GrAlpha_t)v16);
-				grAlphaTestFunction(GR_CMP_GREATER);
-			}
-			else
-			{
-				grAlphaTestFunction(GR_CMP_ALWAYS);
-			}
-			g_state[XST].active.alphatest = g_state[XST].currentmode.alphatest;
-		}
-		if ( g_state[XST].active.src != g_state[XST].currentmode.src || g_state[XST].currentmode.dst != g_state[XST].active.dst)
-		{
-			switch ( g_state[XST].currentmode.src)
-			{
-				case X_ZERO:
-					v17 = 0;
-					v18 = 0;
-					break;
-				case X_OTHER:
-					v17 = 2;
-					v18 = 3;
-					break;
-				case X_ALPHA:
-					v17 = 1;
-					v18 = 1;
-					break;
-				case X_OTHERALPHA:
-					v17 = 3;
-					v18 = 3;
-					break;
-				case X_INVOTHER:
-					v17 = 6;
-					v18 = 7;
-					break;
-				case X_INVALPHA:
-					v18 = 5;
-					v17 = v18;
-					break;
-				case X_INVOTHERALPHA:
-					v18 = 7;
-					v17 = v18;
-					break;
-				default:
-					v17 = 4;
-					v18 = 4;
-					break;
-			}
-			switch ( g_state[XST].currentmode.dst)
-			{
-				case X_ONE:
-					v20 = 4;
-					v19 = v20;
-					break;
-				case X_OTHER:
-					v19 = 2;
-					v20 = 1;
-					break;
-				case X_ALPHA:
-					v20 = 3;
-					v19 = v20;
-					break;
-				case X_OTHERALPHA:
-					v20 = 1;
-					v19 = v20;
-					break;
-				case X_INVOTHER:
-					v19 = 6;
-					v20 = 5;
-					break;
-				case X_INVALPHA:
-					v20 = 7;
-					v19 = v20;
-					break;
-				case X_INVOTHERALPHA:
-					v20 = 5;
-					v19 = v20;
-					break;
-				default:
-					v19 = 0;
-					v20 = 0;
-					break;
-			}
-			grAlphaBlendFunction(v17, v19, v18, v20);
-			g_state[XST].active.src = g_state[XST].currentmode.src;
-			g_state[XST].active.dst = g_state[XST].currentmode.dst;
-		}
-		if ( g_state[XST].active.dither != g_state[XST].currentmode.dither)
-		{
-			if (g_state[XST].currentmode.dither == 0 )
-				grDitherMode(GR_DITHER_DISABLE);
-			else
-				grDitherMode(GR_DITHER_4x4);
-			g_state[XST].active.dither = g_state[XST].currentmode.dither;
-		}
-	}
+	// Apply OpenGL state changes via xgl_mode_change
+	// This handles: blend, depth test, culling, alpha test, fog, color mask, depth mask, dither
+	xgl_mode_change();
+	
+	// Update texture state tracking (same logic as original, but texture loading is done by xgl_mode_loadtexture)
 	if ( g_state[XST].send & 4 )
 	{
 		g_state[XST].currentmode.textures = 2;
@@ -731,6 +259,8 @@ LABEL_56:
 	}
 	if ( g_state[XST].setnew & 1 )
 		g_state[XST].currentmode.textures = 0;
+	
+	// Track texture changes
 	if ( g_state[XST].active.textures != g_state[XST].currentmode.textures)
 	{
 		g_state[XST].active.text1 = 0;
@@ -738,6 +268,7 @@ LABEL_56:
 		g_state[XST].changed |= 2u;
 		g_state[XST].active.textures = g_state[XST].currentmode.textures;
 	}
+	
 	if ( g_state[XST].changed & 2 )
 	{
 		if ( g_state[XST].geometry & 0x10 )
@@ -762,21 +293,20 @@ LABEL_56:
 				g_state[XST].currentmode.stwhint |= 0x10u;
 			if ( g_state[XST].currentmode.text1 != g_state[XST].active.text1 || g_state[XST].currentmode.text2 != g_state[XST].active.text2)
 			{
-				v25 = g_state[XST].currentmode.text2;
 				mode_loadmultitexture(g_state[XST].currentmode.text1, g_state[XST].currentmode.text2);
 				g_stats.chg_text += 2;
 				g_state[XST].active.text1 = g_state[XST].currentmode.text1;
+				g_state[XST].active.text2 = g_state[XST].currentmode.text2;
 			}
 		}
 		g_state[XST].active.sametex = g_state[XST].currentmode.sametex;
 	}
-	if ( g_state[XST].active.stwhint != g_state[XST].currentmode.stwhint)
-	{
-		grHints(GR_HINT_STWHINT, g_state[XST].currentmode.stwhint);
-		g_state[XST].active.stwhint = g_state[XST].currentmode.stwhint;
-	}
+	
+	// Update active state
+	g_state[XST].active.stwhint = g_state[XST].currentmode.stwhint;
 	g_state[XST].changed = 0;
 	++g_stats.chg_mode;
+	
 	if ( g_state[XST].geometry & X_DUMPDATA)
 	{
 		x_log("#modechange:\n");

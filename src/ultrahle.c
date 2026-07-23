@@ -811,13 +811,13 @@
 
                case PSN_KILLACTIVE:
 
-                  SetWindowLong( hDlg, DWL_MSGRESULT, FALSE );
+                  SetWindowLong( hDlg, DWLP_MSGRESULT, FALSE );
                   return( 1 );
                   break;
 
                case PSN_RESET:
 
-                  SetWindowLong( hDlg, DWL_MSGRESULT, FALSE );
+                  SetWindowLong( hDlg, DWLP_MSGRESULT, FALSE );
                   break;
 
                default:

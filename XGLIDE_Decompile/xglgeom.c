@@ -3,6 +3,10 @@
 
 // OpenGL geometry rendering implementation
 
+#include "pch.h"
+#include "fxgeom.h"
+#include "api.h"
+
 #define MAX_VERTICES 256
 
 // OpenGL vertex arrays
@@ -17,12 +21,12 @@ static int g_vertex_count = 0;
 // Current primitive type
 static int g_primitive_type = 0;
 
-// Vertex data buffer (from fxgeom.c)
+// External vertex data (from fxgeom.c)
 extern xt_xfpos xfpos[0x200];
 extern xt_pos pos[0x200];
 extern xt_tex tex[0x200];
 extern xt_tex tex2[0x200];
-extern GrVertex grvx[0x200];
+extern xt_tex texp[0x200];
 extern uint8_t xformed[0x200];
 extern int vertices;
 extern int vertices_base;
