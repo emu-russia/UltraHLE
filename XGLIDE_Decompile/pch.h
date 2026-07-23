@@ -1,13 +1,15 @@
 #pragma once
 
+#define GLEW_STATIC
+
 #include <stdint.h>
 #include <stdio.h>
 #include <float.h>			// See x_fastfpu
 #include <Windows.h>
 
-#include "3dfx_headers/glide.h"
-//#include <gl/GL.h>
 #include "glew-2.2.0/include/GL/glew.h"
+
+#include "3dfx_headers/glide.h"
 
 #include "x.h"
 #include "xgl.h"

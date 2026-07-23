@@ -1,10 +1,14 @@
 // Texture memory management and texture upload - OpenGL version
 
 #include "pch.h"
+#include "fxtext.h"
 
 // OpenGL texture ID storage
 GLuint g_opengl_texture_ids[MAXTEXTURES] = {0};
 static int g_texture_initialized[MAXTEXTURES] = {0};
+
+// External texture data (from fxtext.c)
+extern xt_texture g_texture[MAXTEXTURES];
 
 // Convert Glide texture format to OpenGL format
 static GLenum get_gl_format(int glide_format)
@@ -200,19 +204,39 @@ void xgl_cleartexmem(void)
 // Get texture info
 int xgl_gettextureinfo(int handle, int* format, int* memformat, int* width, int* height)
 {
-    // This would need to track texture info separately
-    // For now, return basic info
-    if (format) *format = 0;
-    if (memformat) *memformat = 0;
-    if (width) *width = 0;
-    if (height) *height = 0;
+    if (handle <= 0 || handle >= MAXTEXTURES) {
+        return 1;
+    }
+    
+    xt_texture* tex = &g_texture[handle];
+    if (tex->state == 0) {
+        return 1;
+    }
+    
+    if (format) *format = tex->format;
+    if (memformat) *memformat = tex->memformat;
+    if (width) *width = tex->width;
+    if (height) *height = tex->height;
     return 0;
 }
 
 // Open texture data for modification
 unsigned char* xgl_opentexturedata(int handle)
 {
-    // Would need to track original data for dynamic textures
+    if (handle <= 0 || handle >= MAXTEXTURES) {
+        return NULL;
+    }
+    
+    xt_texture* tex = &g_texture[handle];
+    if (!tex || tex->state == 0) {
+        return NULL;
+    }
+    if (!(tex->format & X_DYNAMIC)) {
+        return NULL;
+    }
+    if (tex->ti.data) {
+        return (unsigned char*)tex->ti.data;
+    }
     return NULL;
 }
 

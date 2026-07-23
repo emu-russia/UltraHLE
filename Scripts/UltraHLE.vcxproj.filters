@@ -128,9 +128,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Library Include="..\src\GLIDE2X.LIB" />
-  </ItemGroup>
-  <ItemGroup>
     <Image Include="..\src\resources\A.BMP">
       <Filter>Resource Files</Filter>
     </Image>
