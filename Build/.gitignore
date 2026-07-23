@@ -3,3 +3,5 @@
 *.sav
 *.pdb
 *.ilk
+*.exp
+*.lib

@@ -105,7 +105,7 @@ int xgl_init(void* hdc, void* hwnd, int width, int height)
     PIXELFORMATDESCRIPTOR pfd;
     int pixel_format;
     
-    hDC = (HDC)hdc;
+    hDC = (HDC)hdc ? hdc : GetDC(hwnd);
     hWnd = (HWND)hwnd;
     g_width = width;
     g_height = height;
@@ -206,7 +206,10 @@ void xgl_deinit(void)
         wglDeleteContext(hRC);
         hRC = NULL;
     }
-    hDC = NULL;
+    if (hDC) {
+        ReleaseDC(hWnd, hDC);
+        hDC = NULL;
+    }
     hWnd = NULL;
 }
 
