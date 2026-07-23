@@ -111,6 +111,7 @@ static void convert_vertex(int idx)
 // Begin drawing with specified primitive type
 void xgl_begin(int type)
 {
+    mode = type;
     g_primitive_type = type;
     g_vertex_count = 0;
 
@@ -134,6 +135,7 @@ void xgl_end(void)
     }
 
     g_primitive_type = 0;
+    mode = 0;
 
     if (vertices > 127) {
         xgl_flush();
