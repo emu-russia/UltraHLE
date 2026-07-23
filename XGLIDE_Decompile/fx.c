@@ -204,6 +204,22 @@ void fixfogtable(GrFog_t* fogtable, int size)
 	}
 }
 
+void my_guFogGenerateExp(GrFog_t fogtable[GR_FOG_TABLE_SIZE], float density)
+{
+    for (int i = 0; i < GR_FOG_TABLE_SIZE; i++) {
+        float f = expf(density * i / 64.0f);
+        fogtable[i] = (FxU8)(f > 1.0f ? 255.0f : 255.0f * f);
+    }
+}
+
+void my_guFogGenerateLinear(GrFog_t fogtable[GR_FOG_TABLE_SIZE], float nearW, float farW)
+{
+    for (int i = 0; i < GR_FOG_TABLE_SIZE; i++) {
+        float f = (farW - nearW) * i / 64.0f + nearW;
+        fogtable[i] = (FxU8)(f > 1.0f ? 255.0f : 255.0f * f);
+    }
+}
+
 GrFog_t* generatefogtable()
 {
 	float v4; // ST08_4
@@ -229,12 +245,12 @@ GrFog_t* generatefogtable()
 	{
 		v5 = g_state[XST].active.fogmax / g_state[XST].znear;
 		v6 = g_state[XST].active.fogmin / g_state[XST].znear;
-		guFogGenerateLinear(fogtable, v6, v5);
+		my_guFogGenerateLinear(fogtable, v6, v5);
 	}
 	else if (g_state[XST].active.fogtype == X_EXPONENTIAL)
 	{
 		v4 = 2.3f / (g_state[XST].active.fogmax / g_state[XST].znear);
-		guFogGenerateExp(fogtable, v4);
+		my_guFogGenerateExp(fogtable, v4);
 	}
 	fixfogtable(fogtable, GR_FOG_TABLE_SIZE);
 	return fogtable;
