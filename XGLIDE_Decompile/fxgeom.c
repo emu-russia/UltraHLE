@@ -1724,12 +1724,8 @@ int flush_drawfx()
 					break;
 				default:
 					g_stats.out_tri += i - 2;
-					// OpenGL: draw polygon (fan)
-					xgl_begin(X_TRIFAN);
-					for (int k = 0; k < i; k++) {
-						xgl_vx(&grvx[v0[k]], &grvx[v0[k]]);
-					}
-					xgl_end();
+					// TODO: The call parameters were badly decompiled
+					grDrawPlanarPolygon(v2, v1, i, v0, grvx);
 					break;
 			}
 		}

@@ -805,7 +805,7 @@
                      pad_enablejoy(0);
                   }
 
-                  SetWindowLong( hDlg, DWLP_MSGRESULT, TRUE );
+                  SetWindowLong( hDlg, DWL_MSGRESULT, TRUE );
 
                   break;
 
