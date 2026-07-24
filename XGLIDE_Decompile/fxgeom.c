@@ -1699,7 +1699,7 @@ int flush_drawfx()
 				default:
 					g_stats.out_tri += i - 2;
 					// TODO: The call parameters were badly decompiled
-					grDrawPlanarPolygon(v2, v1, i, v0, grvx);
+					//grDrawPlanarPolygon(v2, v1, i, v0, grvx);
 					break;
 			}
 		}
