@@ -1,9 +1,6 @@
-// This module deals with vertex transformation (3D->2D), since Glide does not know how to do Z. It also deals with Clipping and partitioning of edge polygons.
-// Ported to OpenGL - uses xgl* functions for rendering
+// This module deals with vertex transformation (3D->2D), since Glide does not know how to do Z. It also deals with Clipping and partitioning of edge polygons. This is supposed to be handled by the graphics API, but alas....
 
 #include "pch.h"
-#include "xgl.h"
-#include "api.h"
 
 static float identmatrix[4 * 4] = {
 	1.0f, 0.0f, 0.0f, 0.0f,
@@ -13,21 +10,21 @@ static float identmatrix[4 * 4] = {
 };
 
 static int flip;
-int allxformed;
-int state;
-int mode;		// x_begin type
+static int allxformed;
+static int state;
+static int mode;		// x_begin type
 
 static int16_t debugcount = 0;
 static int posarrayallocsize = 0;
 static int posarraysize = 0;
 static xt_xfpos* posarray;			// Item size: 20 bytes
 
-int vertices;
-int vertices_base;
+static int vertices;
+static int vertices_base;
 static int vertices_lastnonrel;
 
-int corners_base;
-int corners;
+static int corners_base;
+static int corners;
 
 static int clipnewvx;
 static int clipor;
@@ -36,14 +33,14 @@ static int clipbuf2[0x200];		// TODO: not sure of the size
 static int* clipin;
 static int* clipout;
 
-GrVertex grvx[0x200];		// Item size: 60 bytes
-int corner[0x200 * 5];
-xt_pos pos[0x200];
-xt_tex tex[0x200];
-xt_tex tex2[0x200];
-xt_tex texp[0x200];
-xt_xfpos xfpos[0x200];		// Item size: 20 bytes
-uint8_t xformed[0x200];			// Contains an indication that the vertex has been transformed (?)
+static GrVertex grvx[0x200];		// Item size: 60 bytes
+static int corner[0x200 * 5];
+static xt_pos pos[0x200];
+static xt_tex tex[0x200];
+static xt_tex tex2[0x200];
+static xt_tex texp[0x200];
+static xt_xfpos xfpos[0x200];		// Item size: 20 bytes
+static uint8_t xformed[0x200];			// Contains an indication that the vertex has been transformed (?)
 
 static int splitbuf[0x200];		// TODO: not sure of the size
 
@@ -260,12 +257,10 @@ void recalc_projection()
 	g_state[XST].projxmul = v1;
 	v2 = (g_state[XST].view_y1 - g_state[XST].view_y0 + 1.0f) * 0.5f;
 	g_state[XST].projymul = v2;
- 	g_state[XST].projxadd = v1 + g_state[XST].view_x0 + 0.2f;
- 	g_state[XST].projyadd = v2 + g_state[XST].view_y0 + 0.2f;
- 	// OpenGL: set viewport (replaces grClipWindow)
- 	glViewport(g_state[XST].view_x0, g_state[XST].view_y0, 
- 	           g_state[XST].view_x1 - g_state[XST].view_x0 + 1, 
- 	           g_state[XST].view_y1 - g_state[XST].view_y0 + 1);
+	g_state[XST].projxadd = v1 + g_state[XST].view_x0 + 0.2f;
+	g_state[XST].projyadd = v2 + g_state[XST].view_y0 + 0.2f;
+	// TODO: Check. Hard place for decompiler.
+	grClipWindow(g_state[XST].view_x0, g_state[XST].view_y0, g_state[XST].view_x1, g_state[XST].view_y1);
 
 	if (g_state[XST].xformmode == XFORM_MODE_FRUSTUM)
 	{
@@ -1623,11 +1618,7 @@ int flush_drawfx()
 					{
 						v9 = v16;
 						++g_stats.out_tri;
-						// OpenGL: draw line using vertex arrays
-						xgl_begin(X_LINES);
-						xgl_vx(&pos[*v16], &grvx[*v16]);
-						xgl_vx(&pos[v9[1]], &grvx[v9[1]]);
-						xgl_end();
+						grDrawLine(&grvx[*v16], &grvx[v9[1]]);
 					}
 				}
 				else
@@ -1643,11 +1634,7 @@ int flush_drawfx()
 							v2 = v10 - 1;
 							for ( j = 0; v10 > j; ++j )
 							{
-								// OpenGL: draw line strip
-								xgl_begin(X_POLYLINE);
-								xgl_vx(&grvx[v16[v2]], &grvx[v16[v2]]);
-								xgl_vx(&grvx[v16[j]], &grvx[v16[j]]);
-								xgl_end();
+								grDrawLine(&grvx[v16[v2]], &grvx[v16[j]]);
 								v2 = j;
 							}
 						}
@@ -1663,12 +1650,9 @@ int flush_drawfx()
 								{
 									v14 = *v12;
 									v12 += 3;
-									// OpenGL: draw triangle using vertex arrays
-									xgl_begin(X_TRIANGLES);
-									xgl_vx(&grvx[*(v12 - 5)], &grvx[*(v12 - 5)]);
-									xgl_vx(&grvx[*(v12 - 4)], &grvx[*(v12 - 4)]);
-									xgl_vx(&grvx[v14], &grvx[v14]);
-									xgl_end();
+									grDrawTriangle( &grvx[*(v12 - 5)],
+													&grvx[*(v12 - 4)],
+													&grvx[v14] );
 									--v13;
 								}
 								while ( v13 );
@@ -1686,12 +1670,12 @@ int flush_drawfx()
 			g_stats.out_tri += i - 2;
 			if ( i > 0 )
 			{
-				// OpenGL: draw line strip for polygon edges
-				xgl_begin(X_POLYLINE);
-				for (int k = 0; k < i; k++) {
-					xgl_vx(&grvx[v0[k]], &grvx[v0[k]]);
+				do
+				{
+					grDrawLine(&grvx[v0[v2]], &grvx[v0[v8]]);
+					v2 = v8++;
 				}
-				xgl_end();
+				while ( i > v8 );
 			}
 		}
 		else
@@ -1700,27 +1684,17 @@ int flush_drawfx()
 			{
 				case 1:
 					++g_stats.out_tri;
-					// OpenGL: draw point
-					xgl_begin(X_POINTS);
-					xgl_vx(&grvx[v0[0]], &grvx[v0[0]]);
-					xgl_end();
+					grDrawPoint(&grvx[v0[0]]);
 					break;
 				case 2:
 					++g_stats.out_tri;
-					// OpenGL: draw line
-					xgl_begin(X_LINES);
-					xgl_vx(&grvx[v0[0]], &grvx[v0[0]]);
-					xgl_vx(&grvx[v0[1]], &grvx[v0[1]]);
-					xgl_end();
+					grDrawLine(&grvx[v0[0]], &grvx[v0[1]]);
 					break;
 				case 3:
 					++g_stats.out_tri;
-					// OpenGL: draw triangle
-					xgl_begin(X_TRIANGLES);
-					xgl_vx(&grvx[v0[0]], &grvx[v0[0]]);
-					xgl_vx(&grvx[v0[1]], &grvx[v0[1]]);
-					xgl_vx(&grvx[v0[2]], &grvx[v0[2]]);
-					xgl_end();
+					grDrawTriangle( &grvx[v0[0]],
+									&grvx[v0[1]],
+									&grvx[v0[2]] );
 					break;
 				default:
 					g_stats.out_tri += i - 2;

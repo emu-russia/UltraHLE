@@ -286,7 +286,7 @@ void x_projection(float fov, float znear, float zfar)
 	x_flush();
 	if ( fov >= 1.0f )
 	{
-		v6 = tan(fov * (PI/180.0f) * 0.5f) * znear;
+		v6 = tan(fov * (PI/180.0f) * 0.5f) * zfar;
 		x_frustum(-v6, v6, -(0.75f * v6), 0.75f * v6, znear, zfar);
 	}
 	else

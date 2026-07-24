@@ -1,8 +1,6 @@
 // Texture memory management and texture upload
-// Ported to OpenGL - uses xgl_loadtexturelevel for texture upload
 
 #include "pch.h"
-#include "xgl.h"
 
 int g_lasttexture;
 xt_texture g_texture[MAXTEXTURES];		// The 0th entry is not used
@@ -287,16 +285,13 @@ int fxloadtexturepart(xt_texture *txt, int texturepart)
 			v3 = GR_MIPMAPLEVELMASK_ODD;
 			break;
 		default:
-			v3 = 0;
+			// TODO: uninitialized local variable 'v8' used
+			v3 = 0;// v8;
 			break;
 	}
 	if ( !txt->size[texturepart] )
 	{
-		// OpenGL: calculate texture memory requirement
-		// In OpenGL, texture data is stored in host memory
-		v7 = txt->ti.largeLod >= GR_LOD_8 ? (1 << txt->ti.largeLod) * (1 << txt->ti.smallLod) * 2 : 0;
-		if (v7 == 0) v7 = 4096;  // Minimum allocation
-		
+		v7 = grTexTextureMemRequired(v3, &txt->ti);
 		v9 = memory_alloc(mem[v2], v7, &v8);
 		if ( !v7 )
 			x_fatal("texture: zero size for handle %i (part=%i,mask=%i)\n", txt->handle, texturepart, v3);
@@ -309,15 +304,11 @@ int fxloadtexturepart(xt_texture *txt, int texturepart)
 	}
 	if (txt->reload)
 	{
-		// OpenGL: upload texture using xgl_loadtexturelevel
-		// Process all mipmap levels
-		for (int level = 0; level < txt->levels; level++) {
-			xgl_loadtexturelevel(txt->handle, level, (char*)txt->ti.data + accesstexture(txt, level, 0, 0) * 4);
-		}
+		grTexDownloadMipMap(v2, txt->base[texturepart], v3, &txt->ti);
 		txt->reload = 0;
 		g_stats.text_uploaded += txt->size[texturepart];
 	}
-	// Note: grTexSource is replaced by xgl_mode_loadtexture/loadmultitexture in mode_change
+	grTexSource(v2, txt->base[texturepart], v3, &txt->ti);
 	txt->usedsize[texturepart] = txt->size[texturepart];
 	return 0;
 }
@@ -409,22 +400,28 @@ int fxloadtexture_multi(xt_texture* txt1, xt_texture* txt2)
 
 void text_init()
 {
-	// OpenGL: texture memory is managed by OpenGL, not hardware
-	// Use a simple memory model for texture data storage
-	x_log("Texture memory (OpenGL): using host memory\n");
-	
-	// Create virtual texture memory pools for each TMU
-	// In OpenGL, textures are stored in system memory before upload
-	mem[0] = memory_create(0, 64 * 1024 * 1024);  // 64MB virtual pool
+	signed int v0; // ST04_4
+	int v1; // eax
+	xt_memory *result; // eax
+	signed int v3; // ST04_4
+	int v4; // eax
+
+	x_log("Texture memory TMU0: ");
+	v1 = grTexMinAddress(GR_TMU0);
+	v0 = grTexMaxAddress(GR_TMU0);
+	mem[0] = memory_create(v1 + 256, v0);
+	x_log("Texture memory TMU1: ");
 	if ( g_state[XST].tmus >= 2 )
 	{
-		mem[1] = memory_create(0, 64 * 1024 * 1024);  // 64MB virtual pool
+		v4 = grTexMinAddress(GR_TMU1);
+		v3 = grTexMaxAddress(GR_TMU1);
+		result = memory_create(v4 + 256, v3);
 	}
 	else
 	{
-		mem[1] = memory_create(0, 0);
+		result = memory_create(0, 0);
 	}
-	x_log("Texture memory initialized: TMU0=%p, TMU1=%p\n", (void*)mem[0], (void*)mem[1]);
+	mem[1] = result;
 }
 
 void text_deinit()
