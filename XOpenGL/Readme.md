@@ -56,8 +56,10 @@ Glide calls:
 * **Textures.** The original converted RGBA8888 data to packed 16-bit TMU
   formats to save Voodoo memory. OpenGL manages texture memory, so the port
   keeps RGBA8888 on the host and uploads it directly. `x_opentexturedata()`
-  returns the same host buffer as before. Texture rows are flipped on upload
-  (OpenGL expects row 0 at the bottom, the emulator provides row 0 at the top).
+  returns the same host buffer as before. The emulator provides the texture
+  with row 0 = top of the image and maps the vertex coordinate t=0 to the top
+  of the screen (the N64 convention); OpenGL samples v=0 from the first data
+  row, so the rows are uploaded as-is - no vertical flip is needed.
 
 * **Texture coordinates.** The vertex pipeline computes texture coordinates in
   the library's "256-unit" space (`texel * xmul`). The port normalizes them to

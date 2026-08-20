@@ -200,15 +200,17 @@ int text_frameend()
 // OpenGL upload
 // ---------------------------------------------------------------------------
 
-// Upload one mip level, flipping the image vertically (GL expects row 0 at the
-// bottom, the N64/emulator data has row 0 at the top).
+// Upload one mip level.
+//
+// The emulator provides the texture with row 0 = top of the image and maps
+// the vertex texture coordinate t=0 to the top of the screen (the N64
+// convention). OpenGL samples texture coordinate v=0 from the first row of
+// the data, so the rows are uploaded as-is - no vertical flip is needed.
 static void upload_level(xt_texture* txt, int level)
 {
 	int w, h, off;
 	const unsigned char* src;
-	unsigned char* flip;
 	int rowbytes;
-	int y;
 
 	off = accesstexture(txt, level, &w, &h);
 	if (!w || !h)
@@ -216,14 +218,8 @@ static void upload_level(xt_texture* txt, int level)
 
 	src = (const unsigned char*)txt->data + off * 4;
 	rowbytes = w * 4;
-	flip = (unsigned char*)x_allocfast(rowbytes * h);
 
-	// GL row 0 = bottom; N64/emulator data has row 0 = top
-	for (y = 0; y < h; y++)
-		memcpy(flip + y * rowbytes, src + (h - 1 - y) * rowbytes, rowbytes);
-
-	glTexImage2D(GL_TEXTURE_2D, level, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, flip);
-	x_free(flip);
+	glTexImage2D(GL_TEXTURE_2D, level, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, src);
 }
 
 /// <summary>

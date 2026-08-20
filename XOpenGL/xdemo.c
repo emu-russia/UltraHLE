@@ -149,7 +149,8 @@ static void draw_cube(void)
 		{
 			int idx = faces[f][j];
 			float tu = (j == 0 || j == 3) ? 0.0f : 1.0f;
-			float tv = (j == 0 || j == 1) ? 0.0f : 1.0f;
+			/* t = 0 at the top of the face (emulator convention) */
+			float tv = (j == 0 || j == 1) ? 1.0f : 0.0f;
 			x_vxcolor(facecol[f][0], facecol[f][1], facecol[f][2]);
 			x_vxtex(tu, tv);
 			x_vxpos(xv[idx][0], xv[idx][1], xv[idx][2]);
@@ -241,10 +242,11 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmd, int show)
 		x_combine(X_TEXTURE);
 		x_texture(tex_grad);
 		x_begin(X_QUADS);
-		x_vxtex(0, 0); x_vxpos(0.15f, 0.55f, 1.0f);
-		x_vxtex(1, 0); x_vxpos(0.55f, 0.55f, 1.0f);
-		x_vxtex(1, 1); x_vxpos(0.55f, 0.85f, 1.0f);
-		x_vxtex(0, 1); x_vxpos(0.15f, 0.85f, 1.0f);
+		/* t = 0 at the top of the screen (emulator convention) */
+		x_vxtex(0, 1); x_vxpos(0.15f, 0.55f, 1.0f);
+		x_vxtex(1, 1); x_vxpos(0.55f, 0.55f, 1.0f);
+		x_vxtex(1, 0); x_vxpos(0.55f, 0.85f, 1.0f);
+		x_vxtex(0, 0); x_vxpos(0.15f, 0.85f, 1.0f);
 		x_end();
 		x_flush();
 
