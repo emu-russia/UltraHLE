@@ -134,7 +134,7 @@ int init_init()
 
 	// Default GL state
 	glDisable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
+	glDepthFunc(GL_LEQUAL);
 	glClearDepth(1.0);
 	glDepthMask(GL_TRUE);
 	glDisable(GL_BLEND);
@@ -684,13 +684,17 @@ void mode_change()
 		{
 			// Depth is the oow value (see fxgeom.c); with the ortho setup in
 			// gl_setup_view the window depth = (1-oow)/2, so nearer fragments
-			// have smaller depth: the standard GL_LESS convention with the
-			// buffer cleared to 1.0.
+			// have smaller depth.
+			//
+			// GL_LEQUAL: the N64 RDP renders lots of coplanar geometry
+			// (adjacent floor/wall tiles etc.); a strict GL_LESS test would
+			// reject the equal-depth fragments and leave holes. GL_LEQUAL
+			// matches the RDP z-buffer behavior (nearer or equal passes).
 			switch (g_state[XST].currentmode.masktst)
 			{
 				case X_ENABLE:
 					glEnable(GL_DEPTH_TEST);
-					glDepthFunc(GL_LESS);
+					glDepthFunc(GL_LEQUAL);
 					break;
 				case X_DISABLE:
 					glDisable(GL_DEPTH_TEST);
@@ -721,7 +725,7 @@ void mode_change()
 					break;
 				default:
 					glEnable(GL_DEPTH_TEST);
-					glDepthFunc(GL_LESS);
+					glDepthFunc(GL_LEQUAL);
 					break;
 			}
 			g_state[XST].active.masktst = g_state[XST].currentmode.masktst;

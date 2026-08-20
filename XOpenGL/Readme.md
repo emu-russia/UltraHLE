@@ -49,9 +49,12 @@ Glide calls:
 * **Depth.** Glide used a W-buffer where the depth value was `oow = 1/w`
   (larger = closer). OpenGL has no W-buffer, so the port passes `oow` as the
   vertex Z. The ortho setup maps it to `window depth = (1-oow)/2`, so nearer
-  fragments have smaller depth — the standard `GL_LESS` convention with the
-  buffer cleared to 1.0. `X_ENABLE` enables the depth test (the current
-  decompiled Glide backend maps it to a questionable `GR_CMP_EQUAL`).
+  fragments have smaller depth — `GL_LEQUAL` with the buffer cleared to 1.0.
+  The N64 RDP renders lots of coplanar geometry (adjacent floor/wall tiles),
+  so an equal-depth test is required: a strict `GL_LESS` would reject the
+  equal-depth fragments and leave holes. `X_ENABLE` enables the depth test
+  (the current decompiled Glide backend maps it to a questionable
+  `GR_CMP_EQUAL`).
 
 * **Textures.** The original converted RGBA8888 data to packed 16-bit TMU
   formats to save Voodoo memory. OpenGL manages texture memory, so the port

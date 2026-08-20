@@ -1,4 +1,4 @@
-﻿// This module deals with vertex transformation (3D->2D), since the graphics
+// This module deals with vertex transformation (3D->2D), since the graphics
 // API does not know how to do Z. It also deals with Clipping and partitioning
 // of edge polygons. This is supposed to be handled by the graphics API, but
 // alas....
@@ -1357,7 +1357,7 @@ int clipfinish(int *vx)
 		++result;
 	}
 	while (result < 256);
-	return 0;
+	return result;
 }
 
 int clippoly(int clor, int vxn, int *v, int **out)
@@ -1425,7 +1425,7 @@ int docliplineend(int v1, int v2)
 		result = doclipvertex(X_CLIPY1, v2, result);
 	if (xfpos[result].clip & X_CLIPY2)
 		result = doclipvertex(X_CLIPY2, v2, result);
-	return 0;
+	return result;
 }
 
 int clipline(int v1, int v2, int **out)
