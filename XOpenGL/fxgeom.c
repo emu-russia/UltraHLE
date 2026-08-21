@@ -288,8 +288,12 @@ void recalc_projection()
 	g_state[XST].projxadd = v1 + g_state[XST].view_x0 + 0.2f;
 	g_state[XST].projyadd = v2 + g_state[XST].view_y0 + 0.2f;
 
-	// Limit all rendering to the current viewport (like grClipWindow did)
+	// Limit all rendering to the current viewport (like grClipWindow did).
+	// The game-space rectangle is mapped through the letterboxed viewport
+	// into window pixels (y up), same as init_clear.
 	{
+		int lx, ly, vw, vh;
+		float sx, sy;
 		int cx0 = (int)g_state[XST].view_x0;
 		int cy0 = (int)g_state[XST].view_y0;
 		int cx1 = (int)g_state[XST].view_x1;
@@ -298,7 +302,14 @@ void recalc_projection()
 		if (cy0 < 0) cy0 = 0;
 		if (cx1 >= g_state[XST].xs) cx1 = g_state[XST].xs - 1;
 		if (cy1 >= g_state[XST].ys) cy1 = g_state[XST].ys - 1;
-		glScissor(cx0, cy0, cx1 - cx0 + 1, cy1 - cy0 + 1);
+		gl_viewport_geom(&lx, &ly, &vw, &vh);
+		sx = (float)vw / (float)g_state[XST].xs;
+		sy = (float)vh / (float)g_state[XST].ys;
+		// game y is top-down, GL scissor y is bottom-up
+		glScissor(lx + (int)(cx0 * sx),
+			ly + (int)((g_state[XST].ys - 1 - cy1) * sy),
+			(int)((cx1 - cx0 + 1) * sx) + 1,
+			(int)((cy1 - cy0 + 1) * sy) + 1);
 		glEnable(GL_SCISSOR_TEST);
 	}
 

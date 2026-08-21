@@ -15,6 +15,9 @@ void init_clear(int writecolor, int writedepth, float cr, float cg, float cb);
 int init_readfb(int fb, int x, int y, int xs, int ys, char* buffer, int bufrowlen);
 int init_writefb(int fb, int x, int y, int xs, int ys, char* buffer, int bufrowlen);
 
+// Letterboxed viewport geometry (the game image xs x ys inside the window)
+void gl_viewport_geom(int* lx, int* ly, int* vw, int* vh);
+
 // Pixel pipeline modes (fx.c, OpenGL backend)
 void mode_init();
 void mode_texturemode(int tmu, int format, int trilin);

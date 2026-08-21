@@ -44,7 +44,7 @@ static void gl_showhide_children(int show)
 
 // Compute the letterboxed viewport that shows the game image (xs x ys)
 // inside the current window size, preserving the aspect ratio.
-static void gl_viewport_geom(int* lx, int* ly, int* vw, int* vh)
+void gl_viewport_geom(int* lx, int* ly, int* vw, int* vh)
 {
 	RECT rc;
 	int winw, winh;
