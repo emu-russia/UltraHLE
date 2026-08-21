@@ -26,7 +26,7 @@ void mem_init(int ramsize)
         flushdisplay();
         exit(3);
     }
-    mem.ram=(uint8_t *)( ((uint32_t)mem.ramalloc+8192) & ~4095 );
+    mem.ram=(uint8_t *)( ((uintptr_t)mem.ramalloc+8192) & ~(uintptr_t)4095 );
 
     // init io pages
     for(i=0;i<IO_MAX;i++)
@@ -134,7 +134,7 @@ void mem_init(int ramsize)
 void mem_mapexternal(uint32_t dst,int rw,void *data)
 {
     uint8_t *b;
-    b=(uint8_t *)( (uint32_t)data - dst );
+    b=(uint8_t *)( (uintptr_t)data - dst );
     switch(rw)
     {
     case MAP_W:
@@ -159,8 +159,8 @@ void mem_mapcopy(uint32_t dst,int rw,uint32_t src)
 {
     uint8_t *br;
     uint8_t *bw;
-    br=(uint8_t *)((uint32_t)mem.lookupr[mempage(src)]-dst+src);
-    bw=(uint8_t *)((uint32_t)mem.lookupw[mempage(src)]-dst+src);
+    br=(uint8_t *)((uintptr_t)mem.lookupr[mempage(src)]-dst+src);
+    bw=(uint8_t *)((uintptr_t)mem.lookupw[mempage(src)]-dst+src);
     switch(rw)
     {
     case MAP_W:
@@ -193,18 +193,18 @@ uint32_t mem_getphysical(uint32_t virtual_addr)
     else return(-1);
 }
 
-uint32_t lookupvalue(uint32_t *x,int i)
+uint32_t lookupvalue(uint8_t **x,int i)
 {
-    uint32_t a;
-    a=(i*4096+x[i])-(uint32_t)mem.ram;
-    if(a>mem.ramsize) return(0xffffffff);
-    return(a);
+    uintptr_t a;
+    a=(uintptr_t)(i*4096)+(uintptr_t)x[i]-(uintptr_t)mem.ram;
+    if(a>(uintptr_t)mem.ramsize) return(0xffffffff);
+    return((uint32_t)a);
 }
 
-void savelookup(uint32_t *x,int cnt,FILE *f1)
+void savelookup(uint8_t **x,int cnt,FILE *f1)
 {
     int i,j,a;
-    uint32_t x0,x1;
+    uintptr_t x0,x1;
     for(i=0;i<cnt;)
     {
         x0=lookupvalue(x,i);
@@ -241,7 +241,7 @@ void savelookup(uint32_t *x,int cnt,FILE *f1)
     }
 }
 
-void loadlookup(uint32_t *x,int cnt,FILE *f1)
+void loadlookup(uint8_t **x,int cnt,FILE *f1)
 {
     int i,a,n;
     for(i=0;i<cnt;)
@@ -254,7 +254,7 @@ void loadlookup(uint32_t *x,int cnt,FILE *f1)
             fread(&a,1,4,f1);
 //            print("- %08X\n",a);
             if(i>cnt) break;
-            if(a!=0xffffffff) x[i]=a+(uint32_t)mem.ram-i*4096;
+            if(a!=0xffffffff) x[i]=(uint8_t *)((uintptr_t)a+(uintptr_t)mem.ram-(uintptr_t)i*4096);
             i++;
             break;
         case 2:
@@ -264,7 +264,7 @@ void loadlookup(uint32_t *x,int cnt,FILE *f1)
             if(i+n>cnt) break;
             while(n-->0)
             {
-                if(a!=0xffffffff) x[i]=a+(uint32_t)mem.ram-i*4096;
+                if(a!=0xffffffff) x[i]=(uint8_t *)((uintptr_t)a+(uintptr_t)mem.ram-(uintptr_t)i*4096);
                 i++;
             }
             break;
@@ -275,7 +275,7 @@ void loadlookup(uint32_t *x,int cnt,FILE *f1)
             if(i+n>cnt) break;
             while(n-->0)
             {
-                if(a!=0xffffffff) x[i]=a+(uint32_t)mem.ram-i*4096;
+                if(a!=0xffffffff) x[i]=(uint8_t *)((uintptr_t)a+(uintptr_t)mem.ram-(uintptr_t)i*4096);
                 a+=4096;
                 i++;
             }
@@ -305,11 +305,11 @@ void mem_save(FILE *f1)
         else lookup=mem.lookupr;
         for(i=0;i<1048576;)
         {
-            m=(i*4096+lookup[i])-(uint32_t)mem.ram;
+            m=(i*4096+lookup[i])-(uintptr_t)mem.ram;
             if(m<0 || m>=mem.ramsize) m=0xffffffff;
             for(j=1;j<30000 && i+j<1048576;j++)
             {
-                m=(i*4096+lookup[i])-(uint32_t)mem.ram;
+                m=(i*4096+lookup[i])-(uintptr_t)mem.ram;
                 n=lookup[i+j]-mem.ram;
                 if(n<0 || n>=mem.ramsize) n=0xffffffff;
                 if(m!=n) break;
@@ -325,8 +325,8 @@ void mem_save(FILE *f1)
     i=0;
     fwrite(&i,1,4,f1);
     fwrite(&mem.ramsize,1,4,f1);
-    savelookup((uint32_t *)mem.lookupw,1048576,f1);
-    savelookup((uint32_t *)mem.lookupr,1048576,f1);
+    savelookup(mem.lookupw,1048576,f1);
+    savelookup(mem.lookupr,1048576,f1);
     // guard byte, simple verification uncompress succeeded
     putc(0xfc,f1);
     #endif
@@ -376,8 +376,8 @@ void mem_load(FILE *f1)
         // new lookup
         new=1;
         fread(&mem.ramsize,1,4,f1);
-        loadlookup((uint32_t *)mem.lookupw,1048576,f1);
-        loadlookup((uint32_t *)mem.lookupr,1048576,f1);
+        loadlookup(mem.lookupw,1048576,f1);
+        loadlookup(mem.lookupr,1048576,f1);
         if(getc(f1)!=0xfc)
         {
             exception("mem_load fatal error (vm)!");
