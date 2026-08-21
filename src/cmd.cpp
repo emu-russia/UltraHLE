@@ -50,9 +50,9 @@ static uint64_t atoq(char *p)
 
 static void setaddress(char *text,uint32_t *addr)
 {
-    int l,a,o;
+    int a,o;
     unsigned int mask;
-    l=strlen(text);
+    size_t l=strlen(text);
     if(l<8) mask=0xffffffffU >> (32-l*4);
     else mask=0xffffffffU;
     sscanf(text,"%X",&a);
@@ -715,8 +715,8 @@ static void cmd_eb(std::vector<std::string>& args)
 static void cmd_ss(std::vector<std::string>& args)
 {
     char* str = param(1, args);
-    int i, j, l, n;
-    l = strlen(str);
+    int i, j, n;
+    size_t l = strlen(str);
     n = RDRAMSIZE - l;
     print("Searching for '%s':\n", str);
     for (i = 0; i < n; i++)
@@ -738,8 +738,8 @@ static void cmd_ss(std::vector<std::string>& args)
 static void cmd_ssmario(std::vector<std::string>& args)
 {
     char* str = param(1, args);
-    int i, j, l, n, flag;
-    l = strlen(str);
+    int i, j, n, flag;
+    size_t l = strlen(str);
     n = RDRAMSIZE - l;
     print("Searching for\n", str);
     for (i = 16; i < n - 16; i++)
@@ -829,8 +829,8 @@ static void cmd_filltst(std::vector<std::string>& args)
 static void cmd_ssr(std::vector<std::string>& args)
 {
     char* str = param(1, args);
-    int i, j, l, n, r0;
-    l = strlen(str);
+    int i, j, n, r0;
+    size_t l = strlen(str);
     n = RDRAMSIZE - l;
     print("Searching for '%s' (relative):\n", str);
     for (i = 0; i < n; i++)
