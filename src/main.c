@@ -397,6 +397,7 @@ void main_startup(void)
             }
             else
             {
+                char *argstart;
                 if(!romname)
                 {
                     // skip '!' if in filename
@@ -411,9 +412,26 @@ void main_startup(void)
                     p=startcmd+strlen(startcmd);
                     *p++=' ';
                 }
+                argstart=p;
                 // add param to p
                 while(*cmd && *cmd>32) *p++=*cmd++;
                 *p++=0;
+                // strip surrounding quotes (e.g. "C:\roms\game.n64")
+                if(*argstart=='"')
+                {
+                    char *q=argstart;
+                    char *d=argstart;
+                    while(*q)
+                    {
+                        if(*q=='"' && (q==argstart || (q[1]==0 || q[1]==' ')))
+                        {
+                            q++;
+                            continue;
+                        }
+                        *d++=*q++;
+                    }
+                    *d=0;
+                }
             }
         }
 

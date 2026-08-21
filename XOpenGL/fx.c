@@ -23,6 +23,65 @@ char *init_name()
 static HDC  gl_hdc = NULL;
 static HGLRC gl_hrc = NULL;
 static HWND gl_hwnd = NULL;
+static volatile LONG gl_resized = 0;	// window size changed (set by x_resize)
+
+// Hide/show the child windows of the window we render into (the emulator's
+// ROM list, status bar, debug output). They are hidden while the display is
+// open so they do not show through the game image, and restored afterwards.
+static void gl_showhide_children(int show)
+{
+	HWND parent = (HWND)g_state[XST].hwnd;
+	HWND child;
+	if (!parent)
+		return;
+	child = GetWindow(parent, GW_CHILD);
+	while (child)
+	{
+		ShowWindow(child, show ? SW_SHOW : SW_HIDE);
+		child = GetWindow(child, GW_HWNDNEXT);
+	}
+}
+
+// Compute the letterboxed viewport that shows the game image (xs x ys)
+// inside the current window size, preserving the aspect ratio.
+static void gl_viewport_geom(int* lx, int* ly, int* vw, int* vh)
+{
+	RECT rc;
+	int winw, winh;
+	float aspect;
+
+	if (gl_hwnd)
+		GetClientRect(gl_hwnd, &rc);
+	else
+	{
+		rc.left = 0;
+		rc.top = 0;
+		rc.right = g_state[XST].xs;
+		rc.bottom = g_state[XST].ys;
+	}
+	winw = rc.right - rc.left;
+	winh = rc.bottom - rc.top;
+	if (winw < 1) winw = 1;
+	if (winh < 1) winh = 1;
+
+	if (g_state[XST].ys <= 0)
+		aspect = 4.0f / 3.0f;
+	else
+		aspect = (float)g_state[XST].xs / (float)g_state[XST].ys;
+
+	if ((float)winw / (float)winh > aspect)
+	{
+		*vh = winh;
+		*vw = (int)(winh * aspect + 0.5f);
+	}
+	else
+	{
+		*vw = winw;
+		*vh = (int)(winw / aspect + 0.5f);
+	}
+	*lx = (winw - *vw) / 2;
+	*ly = (winh - *vh) / 2;
+}
 
 int init_fullscreen(int fullscreen)
 {
@@ -37,7 +96,10 @@ int init_query()
 
 static void gl_setup_view(void)
 {
-	glViewport(0, 0, g_state[XST].xs, g_state[XST].ys);
+	int lx, ly, vw, vh;
+
+	gl_viewport_geom(&lx, &ly, &vw, &vh);
+	glViewport(lx, ly, vw, vh);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	// Depth is the oow value (see fxgeom.c): nearer = larger oow. With
@@ -62,8 +124,12 @@ int init_init()
 	PIXELFORMATDESCRIPTOR pfd;
 	int pf;
 	int ok = 0;
+	HWND parent = (HWND)g_state[XST].hwnd;
 
-	gl_hwnd = (HWND)g_state[XST].hwnd;
+	if (!parent)
+		return -1;
+
+	gl_hwnd = parent;
 	gl_hdc = GetDC(gl_hwnd);
 	if (!gl_hdc)
 	{
@@ -129,6 +195,10 @@ int init_init()
 	g_state[XST].tmus = (glActiveTextureARB && glMultiTexCoord4fARB) ? 2 : 1;
 	x_log("x_open: OpenGL %s (%s) tmus=%i\n",
 		glGetString(GL_VERSION), glGetString(GL_RENDERER), g_state[XST].tmus);
+
+	// The emulator's UI children (ROM list, status bar, debug output) are
+	// hidden while the display is open so they do not paint over the image.
+	gl_showhide_children(0);
 
 	gl_setup_view();
 
@@ -196,6 +266,9 @@ void init_deinit()
 		gl_hdc = NULL;
 	}
 	gl_hwnd = NULL;
+	// restore the emulator's UI children
+	gl_showhide_children(1);
+	InterlockedExchange(&gl_resized, 0);
 }
 
 void init_activate()
@@ -204,12 +277,12 @@ void init_activate()
 
 void init_resize(int xs, int ys)
 {
-	g_state[XST].xs = xs;
-	g_state[XST].ys = ys;
+	// The emulator calls this when the main window is resized: xs/ys is the
+	// new client size. The game resolution (g_state[XST].xs/ys) is kept and
+	// the image is letterboxed into the new window size. The viewport is
+	// re-applied on the emulation thread on the next frame (see init_clear).
 	if (gl_hrc)
-	{
-		gl_setup_view();
-	}
+		InterlockedExchange(&gl_resized, 1);
 }
 
 void init_bufferswap()
@@ -224,17 +297,40 @@ void init_clear(int writecolor, int writedepth, float cr, float cg, float cb)
 
 	x_flush();
 
-	// Limit the clear to the current viewport (like grClipWindow did)
+	// The window may have been resized by the user; re-apply the viewport
+	// (this runs on the emulation thread, which owns the GL context).
+	if (gl_resized)
 	{
-		int cx0 = (int)g_state[XST].view_x0;
-		int cy0 = (int)g_state[XST].view_y0;
-		int cx1 = (int)g_state[XST].view_x1;
-		int cy1 = (int)g_state[XST].view_y1;
+		InterlockedExchange(&gl_resized, 0);
+		if (gl_hrc)
+			gl_setup_view();
+	}
+
+	// Limit the clear to the current viewport (like grClipWindow did).
+	// Map the game-space rectangle through the letterboxed viewport into
+	// window pixels (y up).
+	{
+		int lx, ly, vw, vh;
+		float sx, sy;
+		int cx0, cy0, cx1, cy1;
+		gl_viewport_geom(&lx, &ly, &vw, &vh);
+		sx = (float)vw / (float)g_state[XST].xs;
+		sy = (float)vh / (float)g_state[XST].ys;
+
+		cx0 = (int)g_state[XST].view_x0;
+		cy0 = (int)g_state[XST].view_y0;
+		cx1 = (int)g_state[XST].view_x1;
+		cy1 = (int)g_state[XST].view_y1;
 		if (cx0 < 0) cx0 = 0;
 		if (cy0 < 0) cy0 = 0;
 		if (cx1 >= g_state[XST].xs) cx1 = g_state[XST].xs - 1;
 		if (cy1 >= g_state[XST].ys) cy1 = g_state[XST].ys - 1;
-		glScissor(cx0, cy0, cx1 - cx0 + 1, cy1 - cy0 + 1);
+
+		// game y is top-down, GL scissor y is bottom-up
+		glScissor(lx + (int)(cx0 * sx),
+			ly + (int)((g_state[XST].ys - 1 - cy1) * sy),
+			(int)((cx1 - cx0 + 1) * sx) + 1,
+			(int)((cy1 - cy0 + 1) * sy) + 1);
 		glEnable(GL_SCISSOR_TEST);
 	}
 
@@ -258,21 +354,46 @@ void init_clear(int writecolor, int writedepth, float cr, float cg, float cb)
 		g_state[XST].currentmode.mask & 1 ? GL_TRUE : GL_FALSE);
 }
 
+// Map a game-space rectangle to window pixels (through the letterboxed
+// viewport). x/y are the game coordinates (y from the top), xs/ys the size.
+// wy = the GL row of the FIRST game row (y); the rows below it are at
+// wy - k*sy (GL y grows upwards).
+static void gl_map_game_rect(int x, int y, int xs, int ys, int* wx, int* wy, int* ww, int* wh)
+{
+	int lx, ly, vw, vh;
+	float sx, sy;
+	gl_viewport_geom(&lx, &ly, &vw, &vh);
+	sx = (float)vw / (float)g_state[XST].xs;
+	sy = (float)vh / (float)g_state[XST].ys;
+	*wx = lx + (int)(x * sx);
+	*wy = ly + (int)((g_state[XST].ys - 1 - y) * sy);	// GL y is bottom-up
+	*ww = (int)(xs * sx) + 1;
+	*wh = (int)(ys * sy) + 1;
+}
+
 static void readfb_rgb565(int x, int y, int xs, int ys, char* buffer, int bufrowlen)
 {
 	unsigned char* row;
 	int i, j;
+	int wx, wy, ww, wh;
 
-	row = (unsigned char*)x_allocfast(xs * 4);
+	gl_map_game_rect(x, y, xs, ys, &wx, &wy, &ww, &wh);
+
+	row = (unsigned char*)x_allocfast(ww * 4);
 	for (j = 0; j < ys; j++)
 	{
-		unsigned short* dst = (unsigned short*)(buffer + (ys - 1 - j) * bufrowlen);
-		glReadPixels(x, y + j, xs, 1, GL_RGBA, GL_UNSIGNED_BYTE, row);
+		unsigned short* dst = (unsigned short*)(buffer + j * bufrowlen);
+		// one game row = one band of window rows; read the middle one
+		int gy = wy - (int)((j + 0.5f) * (float)wh / (float)ys);
+		glReadPixels(wx, gy, ww, 1, GL_RGBA, GL_UNSIGNED_BYTE, row);
 		for (i = 0; i < xs; i++)
 		{
-			dst[i] = (unsigned short)(((row[i * 4 + 0] >> 3) << 11) |
-				((row[i * 4 + 1] >> 2) << 5) |
-				(row[i * 4 + 2] >> 3));
+			unsigned short v;
+			int pi = (int)((i + 0.5f) * (float)ww / (float)xs) * 4;
+			v = (unsigned short)(((row[pi + 0] >> 3) << 11) |
+				((row[pi + 1] >> 2) << 5) |
+				(row[pi + 2] >> 3));
+			dst[i] = v;
 		}
 	}
 	x_free(row);
@@ -296,13 +417,36 @@ int init_readfb(int fb, int x, int y, int xs, int ys, char* buffer, int bufrowle
 	else if ((uint8_t)fb == X_FB_RGBA8888)
 	{
 		unsigned char* row;
-		int j;
+		int i, j;
+		int wx, wy, ww, wh;
 		// glReadPixels has y=0 at the bottom, the emulator wants y=0 at the top
-		row = (unsigned char*)x_allocfast(xs * 4);
+		gl_map_game_rect(x, y, xs, ys, &wx, &wy, &ww, &wh);
+		row = (unsigned char*)x_allocfast(ww * 4);
 		for (j = 0; j < ys; j++)
 		{
-			glReadPixels(x, y + j, xs, 1, GL_RGBA, GL_UNSIGNED_BYTE, row);
-			memcpy(buffer + (ys - 1 - j) * bufrowlen, row, xs * 4);
+			int gy = wy - (int)((j + 0.5f) * (float)wh / (float)ys);
+			glReadPixels(wx, gy, ww, 1, GL_RGBA, GL_UNSIGNED_BYTE, row);
+			// resample the (possibly scaled) window row into the game-size row
+			{
+				unsigned char* src = row;
+				unsigned char* dst = (unsigned char*)buffer + j * bufrowlen;
+				if ((float)ww / (float)xs > 1.01f || (float)ww / (float)xs < 0.99f)
+				{
+					// scaled: sample the texel centres
+					for (i = 0; i < xs; i++)
+					{
+						int pi = (int)((i + 0.5f) * (float)ww / (float)xs) * 4;
+						dst[i * 4 + 0] = src[pi + 0];
+						dst[i * 4 + 1] = src[pi + 1];
+						dst[i * 4 + 2] = src[pi + 2];
+						dst[i * 4 + 3] = src[pi + 3];
+					}
+				}
+				else
+				{
+					memcpy(dst, src, xs * 4);
+				}
+			}
 		}
 		x_free(row);
 		return 0;

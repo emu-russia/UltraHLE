@@ -160,6 +160,71 @@ static void draw_cube(void)
 }
 
 /* ------------------------------------------------------------------ */
+/* readback test: renders a vertical gradient, reads it back through    */
+/* x_readfb and checks the orientation + the letterboxed viewport.      */
+/* ------------------------------------------------------------------ */
+
+static void readback_test(void)
+{
+	static unsigned char* fb = 0;
+	unsigned char* data;
+	int y, top, bottom;
+	int bad = 0;
+
+	if (!fb)
+		fb = (unsigned char*)x_alloc(WIN_W * WIN_H * 4);
+
+	/* draw a vertical gradient: top = black, bottom = white */
+	data = (unsigned char*)x_alloc(16 * 16 * 4);
+	for (y = 0; y < 16; y++)
+	{
+		int v = y * 255 / 15;
+		int x;
+		for (x = 0; x < 16; x++)
+		{
+			int i = (y * 16 + x) * 4;
+			data[i + 0] = (unsigned char)v;
+			data[i + 1] = (unsigned char)v;
+			data[i + 2] = (unsigned char)v;
+			data[i + 3] = 255;
+		}
+	}
+	int tex = x_createtexture(X_RGBA5551 | X_CLAMP, 16, 16);
+	x_loadtexturelevel(tex, 0, (char*)data);
+	x_free(data);
+
+	x_clear(1, 1, 0.0f, 0.0f, 0.0f);
+	x_blend(X_ONE, X_ZERO);
+	x_alphatest(1.0f);
+	x_combine(X_TEXTURE);
+	x_texture(tex);
+	x_begin(X_QUADS);
+	x_vxcolor(1.0f, 1.0f, 1.0f);
+	x_vxtex(0, 0); x_vxpos(-1.0f, 1.0f, 1.0f);	/* t=0 = top of the texture */
+	x_vxtex(16, 0); x_vxpos(1.0f, 1.0f, 1.0f);
+	x_vxtex(16, 16); x_vxpos(1.0f, -1.0f, 1.0f);
+	x_vxtex(0, 16); x_vxpos(-1.0f, -1.0f, 1.0f);
+	x_end();
+	x_flush();
+
+	x_readfb(X_FB_BACK | X_FB_RGBA8888, 0, 0, WIN_W, WIN_H, (char*)fb, WIN_W * 4);
+
+	/* top row should be dark, bottom row bright */
+	top = fb[10 * 4] + fb[10 * 4 + 1] + fb[10 * 4 + 2];
+	bottom = fb[(WIN_H - 11) * WIN_W * 4] + fb[(WIN_H - 11) * WIN_W * 4 + 1] + fb[(WIN_H - 11) * WIN_W * 4 + 2];
+	x_log("readback test: top=%i bottom=%i", top, bottom);
+	if (top < bottom && bottom > 500)
+		x_log("readback test: PASS (top dark, bottom bright)");
+	else
+	{
+		x_log("readback test: FAIL");
+		bad = 1;
+	}
+	(void)bad;
+	x_freetexture(tex);
+}
+
+/* ------------------------------------------------------------------ */
 /* main                                                                */
 /* ------------------------------------------------------------------ */
 
@@ -202,6 +267,9 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmd, int show)
 	tex_grad = x_createtexture(X_RGBA8888 | X_CLAMP, 128, 128);
 	x_loadtexturelevel(tex_grad, 0, (char*)buf);
 	x_free(buf);
+
+	/* verify the letterboxed readback (window client is not 4:3) */
+	readback_test();
 
 	while (1)
 	{
