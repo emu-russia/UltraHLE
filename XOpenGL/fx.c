@@ -638,6 +638,8 @@ static void set_combine(int tmu, int rgbmode, int alphamode, int stage)
 	switch (rgbmode)
 	{
 		case X_TEXTURE:			// color = texture
+		case X_DECAL:			// Glide: DECAL_TEXTURE = just the texture
+		case X_TEXTURE_IA:		// texture, alpha handled below
 			fnRGB = GL_REPLACE; s0 = GL_TEXTURE; s1 = srcA; s2 = GL_TEXTURE;
 			break;
 		case X_MUL:				// gouraud * texture
@@ -646,24 +648,24 @@ static void set_combine(int tmu, int rgbmode, int alphamode, int stage)
 		case X_ADD:				// gouraud + texture
 			fnRGB = GL_ADD; s0 = srcA; s1 = GL_TEXTURE; s2 = srcA;
 			break;
-		case X_DECAL:			// blend(gouraud, texture, texturealpha)
-		case X_TEXTUREBLEND:
-			fnRGB = GL_INTERPOLATE; s0 = srcA; s1 = GL_TEXTURE; s2 = GL_TEXTURE;
+		case X_TEXTUREBLEND:	// Glide: blend(texture, iterated, texturealpha)
+			// C = TEXTURE*TA + ITERATED*(1-TA)  (Glide grColorCombine(7,4,0,1,0))
+			fnRGB = GL_INTERPOLATE; s0 = GL_TEXTURE; s1 = srcA; s2 = GL_TEXTURE;
 			break;
-		case X_TEXTUREENVA:		// blend(envcolor, gouraud, texturealpha)
-			fnRGB = GL_INTERPOLATE; s0 = GL_CONSTANT; s1 = srcA; s2 = GL_TEXTURE;
-			break;
-		case X_TEXTUREENVC:		// blend(envcolor, gouraud, texturecolor) - approx: texturealpha
-			fnRGB = GL_INTERPOLATE; s0 = GL_CONSTANT; s1 = srcA; s2 = GL_TEXTURE;
-			break;
-		case X_TEXTUREENVCR:	// blend(gouraud, envcolor, texturecolor) - approx: texturealpha
+		case X_TEXTUREENVA:		// Glide: blend(iterated, envcolor, texturealpha)
+			// C = ITERATED*TA + ENV*(1-TA)  (Glide grColorCombine(7,4,1,0,0))
 			fnRGB = GL_INTERPOLATE; s0 = srcA; s1 = GL_CONSTANT; s2 = GL_TEXTURE;
 			break;
-		case X_SUB:				// gouraud - texture
-			fnRGB = GL_SUBTRACT; s0 = srcA; s1 = GL_TEXTURE; s2 = srcA;
+		case X_TEXTUREENVC:		// Glide: blend(iterated, envcolor, factor) - approx: texturealpha
+			// C = ITERATED*F + ENV*(1-F)  (Glide grColorCombine(7,5,1,0,0))
+			fnRGB = GL_INTERPOLATE; s0 = srcA; s1 = GL_CONSTANT; s2 = GL_TEXTURE;
 			break;
-		case X_TEXTURE_IA:		// texture
-			fnRGB = GL_REPLACE; s0 = GL_TEXTURE; s1 = srcA; s2 = GL_TEXTURE;
+		case X_TEXTUREENVCR:	// Glide: blend(envcolor, iterated, factor) - approx: texturealpha
+			// C = ENV*F + ITERATED*(1-F)  (Glide grColorCombine(7,5,0,2,0))
+			fnRGB = GL_INTERPOLATE; s0 = GL_CONSTANT; s1 = srcA; s2 = GL_TEXTURE;
+			break;
+		case X_SUB:				// Glide: texture - iterated  (grColorCombine(6,8,0,1,0))
+			fnRGB = GL_SUBTRACT; s0 = GL_TEXTURE; s1 = srcA; s2 = srcA;
 			break;
 		case X_MUL_TA:			// gouraud * texture
 		case X_MUL_IA:
@@ -695,7 +697,9 @@ static void set_combine(int tmu, int rgbmode, int alphamode, int stage)
 		case X_MUL_TA:
 			fnA = GL_REPLACE; as0 = GL_TEXTURE;
 			break;
-		case X_MUL:				// alpha = iterated * texture
+		case X_MUL:				// alpha = iterated * texture  (Glide TEXTURE_ALPHA_TIMES_ITERATED_ALPHA)
+			fnA = GL_MODULATE; as0 = srcA;
+			break;
 		case X_MULADD:
 		default:
 			fnA = GL_MODULATE; as0 = srcA;
@@ -713,7 +717,7 @@ static void set_combine(int tmu, int rgbmode, int alphamode, int stage)
 	glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND2_RGB, GL_SRC_ALPHA);
 	glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, fnA);
 	glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_ALPHA, as0);
-	glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_ALPHA, as0);
+	glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_ALPHA, (alphamode == X_MUL) ? GL_TEXTURE : as0);
 	glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE2_ALPHA, as0);
 	glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_ALPHA, GL_SRC_ALPHA);
 	glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_ALPHA, GL_SRC_ALPHA);
@@ -928,7 +932,9 @@ void mode_change()
 					g_state[XST].send |= 3u;
 					break;
 				case X_TEXTURE_IA:
-					g_state[XST].send |= 2u;
+					// Glide: DECAL_TEXTURE + ITERATED_ALPHA -> needs both
+					// the vertex color (for alpha) and the texture.
+					g_state[XST].send |= 3u;
 					break;
 				default:
 					break;
