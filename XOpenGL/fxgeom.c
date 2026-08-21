@@ -947,7 +947,7 @@ int setuprvx(int first, int count)
 				v3[0] = v10 - 786432.0;
 				v3[1] = v3[1] + 786432.0;
 				v3[1] = v3[1] - 786432.0;
-				result = (int *)*((DWORD *)v3 + 8);
+				result = (int *)(uintptr_t)*((DWORD *)v3 + 8);
 				v17 = v3[8];
 				if (g_state[XST].setnew & 0x10)
 				{
@@ -1085,7 +1085,7 @@ int setuprvx(int first, int count)
 		}
 		while (v11);
 	}
-	return (int)result;
+	return (int)(intptr_t)result;
 }
 
 void x_vx(xt_pos* p, xt_data* d)

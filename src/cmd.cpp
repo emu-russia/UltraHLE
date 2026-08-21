@@ -1089,9 +1089,9 @@ static void group_compile(int compile, std::vector<std::string>& args)
     else
     {
         g = mem.group + gi;
-        print(" group %i, len %i, code %08X\n", gi, g->len, g->code);
-        print("grouptable %08X st %08X greg %08X freg %08X\n",
-            mem.group, &st, &st.g[0], &st.f[0]);
+        print(" group %i, len %i, code %p\n", gi, g->len, (void*)g->code);
+        print("grouptable %p st %p greg %p freg %p\n",
+            (void*)mem.group, (void*)&st, (void*)&st.g[0], (void*)&st.f[0]);
         if (g->code)
         {
             uint8_t* code = g->code;
@@ -1102,9 +1102,9 @@ static void group_compile(int compile, std::vector<std::string>& args)
             for (i = 0; i < 1000; i++)
             {
                 if (*code == 0xcc) break; // int 3 marks end
-                print("%08X: " NORMAL "%s\n",
-                    (uint32_t)code,
-                    disasmx86(code, (int)code, &ia));
+                print("%p: " NORMAL "%s\n",
+                    (void*)code,
+                    disasmx86(code, (intptr_t)code, &ia));
                 code += ia;
             }
             ratio = (float)(code - g->code) / (g->len * 4);

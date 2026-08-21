@@ -15,9 +15,9 @@ extern "C" {
 
 int WINAPI WinMain( HINSTANCE, HINSTANCE, LPSTR, int );
 LRESULT CALLBACK WindowFunc( HWND, UINT, WPARAM, LPARAM );
-BOOL CALLBACK AboutDialog( HWND, UINT, WPARAM, LPARAM );
+LRESULT CALLBACK AboutDialog( HWND, UINT, WPARAM, LPARAM );
 int ControllerProperties( void );
-BOOL APIENTRY Controller1Prop( HWND, UINT, UINT, LONG );
+LRESULT APIENTRY Controller1Prop( HWND, UINT, WPARAM, LPARAM );
 
 extern void CreateListView( void );
 extern BOOL UpdateROMList( void );

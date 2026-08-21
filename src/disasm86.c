@@ -288,7 +288,7 @@ char *hex2=""; // ="h";
 
 unsigned char *codepnt;
 unsigned codeseg;
-long codeoff;
+intptr_t codeoff;
 
 static percent(char c, char t);
 
@@ -642,7 +642,7 @@ static floating_point(int e1)
 static percent(char c, char t)
 {
   word32 vofs;
-  long l;
+  intptr_t l;
   int extend = (addrsize == 32) ? 4 : 2;
   switch (c)
   {
@@ -687,10 +687,10 @@ static percent(char c, char t)
       }
       l=vofs+codeoff;
       if(l<0x10000L)
-        uprintf("%s%04lx%s %c", hex1, l, hex2,
+        uprintf("%s%04llX%s %c", hex1, (unsigned long long)l, hex2,
                 (vofs & 0x80000000L) ? 0x18 : 0x19);
       else
-        uprintf("%s%08lX%s %c", hex1, l, hex2,
+        uprintf("%s%08llX%s %c", hex1, (unsigned long long)l, hex2,
                 (vofs & 0x80000000L) ? 0x18 : 0x19);
       break;
     case 'M':
@@ -806,14 +806,14 @@ static char *unasm(int segmentsize)
   return(ubuf);
 }
 
-char *disasmx86(uint8_t *opcode1,int codeoff1,int *len)
+char *disasmx86(uint8_t *opcode1,intptr_t codeoff1,int *len)
 {
     char *res;
     codepnt=opcode1;
     codeseg=0;
     codeoff=codeoff1;
     res=unasm(32);
-    *len=codeoff-codeoff1;
+    *len=(int)(codeoff-codeoff1);
     return(res);
 }
 

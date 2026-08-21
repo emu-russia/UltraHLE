@@ -61,15 +61,15 @@ int cart_map(char *fname)
 {
 //    print("mapping starts (%s)\n",fname); flushdisplay();
 
-    cart.mapfilehandle=(uint32_t)CreateFile(
+    cart.mapfilehandle=CreateFile(
         fname,GENERIC_READ,FILE_SHARE_READ,
         NULL,OPEN_EXISTING,0,NULL);
     if(!cart.mapfilehandle) return(1);
 
 //    print("mapping filehandle=%08X\n",cart.mapfilehandle);
 
-    cart.maphandle=(uint32_t)CreateFileMapping(
-        (HANDLE)cart.mapfilehandle,
+    cart.maphandle=CreateFileMapping(
+        cart.mapfilehandle,
         NULL,
         PAGE_READONLY,
         0,cart.size,
@@ -80,7 +80,7 @@ int cart_map(char *fname)
 //    print("mapping handle=%08X\n",cart.maphandle);
 
     cart.mapped=1;
-    cart.data=MapViewOfFile((HANDLE)cart.maphandle,
+    cart.data=MapViewOfFile(cart.maphandle,
                       FILE_MAP_READ,
                       0,0,
                       cart.size);
@@ -98,8 +98,8 @@ void cart_free(void)
     if(cart.mapped)
     {
         UnmapViewOfFile(cart.data);
-        CloseHandle((HANDLE)cart.maphandle);
-        CloseHandle((HANDLE)cart.mapfilehandle);
+        CloseHandle(cart.maphandle);
+        CloseHandle(cart.mapfilehandle);
     }
     else
     {

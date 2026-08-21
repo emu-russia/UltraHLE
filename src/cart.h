@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <windows.h> // HANDLE (for mapfilehandle/maphandle)
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -11,8 +13,8 @@ typedef struct
     uint8_t* data;
     int    size;
     int    mapped;
-    uint32_t  mapfilehandle;
-    uint32_t  maphandle;
+    HANDLE mapfilehandle;
+    HANDLE maphandle;
     int    fileflip; // original flipstate in file
 
     // cart name and info
