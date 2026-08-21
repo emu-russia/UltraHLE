@@ -2,6 +2,9 @@
 
 #define LOGH if(st.dumphw) logh
 
+/**
+ * Performs frequent hardware checks (interrupts, DMA, pads).
+ */
 void hw_checkoften(void)
 {
     // Frequently used hardware checks here. Probably things like
@@ -16,6 +19,9 @@ void hw_checkoften(void)
     // 3: write DRAM length
 }
 
+/**
+ * Performs seldom hardware checks (SI, SP and VI registers).
+ */
 void hw_checkseldom(void)
 {
     // Seldom used hardware checks here, to avoid spending too much
@@ -93,6 +99,9 @@ void hw_check(void)
     }
 }
 
+/**
+ * Handles PI DMA transfers from the PI registers.
+ */
 /********************************************************************
 ** PI emulation
 */
@@ -138,6 +147,9 @@ void hw_gfxthread(void)
     x_sleep(1); // always sleep a little bit
 }
 
+/**
+ * Finishes SP graphics execution and raises the SP and DP events.
+ */
 void hw_sp_endgfx(void)
 {
     os_event(OS_EVENT_SP);
@@ -150,6 +162,9 @@ void hw_sp_endgfx(void)
     spgfxexecuting=0;
 }
 
+/**
+ * Starts graphics task execution in this or a separate thread.
+ */
 void hw_sp_startgfx(void)
 {
     if(st.graphicsenable<=0)
@@ -171,6 +186,9 @@ void hw_sp_startgfx(void)
     }
 }
 
+/**
+ * Handles an SP yield request from the RSP status register.
+ */
 void hw_sp_yield(void)
 {
     if(!spgfxexecuting)
@@ -197,6 +215,9 @@ void hw_sp_yield(void)
     RSP[4]=spstatus;
 }
 
+/**
+ * Starts the loaded SP task (gfx, audio or Zelda JPEG-DCT).
+ */
 void hw_sp_start(void)
 {
     logh("hw-sp: task %08X (type=%04X,flag=%04X,ucode=%08X/%04X,data=%08X/%04X,boot=%08X/%04X,yield=%08X/%04X)\n",
@@ -246,6 +267,9 @@ void hw_sp_start(void)
     sploaded=0;
 }
 
+/**
+ * Detects finished graphics tasks and ends them.
+ */
 void hw_sp_check(void)
 {
     if(spgfxexecuting==2)
@@ -257,6 +281,9 @@ void hw_sp_check(void)
     }
 }
 
+/**
+ * Handles writes to the SP status register.
+ */
 void hw_sp_statuswrite(void)
 {
     uint32_t status;
@@ -321,6 +348,9 @@ void hw_sp_statuswrite(void)
     RSP[4]=spstatus;
 }
 
+/**
+ * Handles SP DMA writes and detects OSTask structure loads.
+ */
 void hw_sp_dmawrite(void)
 {
     uint32_t from,to,cnt;
@@ -413,6 +443,10 @@ void hw_selectpad(int pad)
 }
 
 
+/**
+ * Performs an SI pad DMA transfer between DRAM and the pad buffer.
+ * @param write Non-zero for an SI write (DRAM to pad buffer), zero for an SI read (pad data to DRAM).
+ */
 void hw_si_pads(int write)
 {
     uint32_t base=WSI[0];

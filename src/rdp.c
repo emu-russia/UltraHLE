@@ -17,6 +17,7 @@ int     showinfo;
 int     showtest;
 int     showtest2;
 
+/** Color scale factor (1/256) used to convert 8-bit colors to the 0..1 range. */
 const float colscale=(1.0/256.0);
 
 static char *fmt[]={"RGBA","YUV","CI","IA","I","?5","?6","?7"};
@@ -166,6 +167,7 @@ static char *cname[32]={
 #define C_MUL(x,y)    ((x)+((y)<<8)+C_MULCASE) // NOTE: C_NEGATE only allowed for x
 #define C_SUB(x,y)    ((x)+((y)<<8)+C_SUBCASE) // NOTE: C_NEGATE only allowed for x
 
+/** Names of the combine styles for debug output. */
 char *stylename[8]={"Ignore","Const","Add","Mul","MulAdd","Blend","Full","Comb"};
 
 // combine styles
@@ -369,6 +371,7 @@ typedef struct
 
 static Vertex rdpdummyvx[MAXRDPVX];
 
+/** Global RDP rendering state. */
 RendState rst;
 
 // publics (used by dlist.c)
@@ -385,6 +388,7 @@ void flushprims(void);
 /* DEBUG screenshot
 */
 
+/** TGA file header written before the screenshot pixel data. */
 unsigned char tgaheader[]={
 0,0,2,0,0,0,0,24,0,0,0,0,
 0,0,
@@ -500,6 +504,10 @@ static void setbuffer(int i,uint32_t c0,uint32_t c1)
     }
 }
 
+/**
+ * Allocates a new vertex from the frame vertex table.
+ * @return Pointer to the new vertex.
+ */
 Vertex *newvx(void)
 {
     int i;
@@ -516,6 +524,10 @@ Vertex *newvx(void)
     return(rst.vxtab+i);
 }
 
+/**
+ * Allocates a new primitive from the frame primitive table.
+ * @return Pointer to the new primitive.
+ */
 Primitive *newpr(void)
 {
     int i;
@@ -548,6 +560,11 @@ static int isoldcbuf(uint32_t addr)
     */
 }
 
+/**
+ * Copies the alpha channel of one color to all channels of another.
+ * @param di Destination color index.
+ * @param si Source color index.
+ */
 void setintensityfromalpha(int di,int si)
 {
     uint8_t *d=rst.col[di];
@@ -599,6 +616,9 @@ static void setcolorintensity(int ci,int a)
     setcolor(ci,*(uint32_t *)col);
 }
 
+/**
+ * Frees all loaded textures and clears the texture memory.
+ */
 void rdp_freetexmem(void)
 {
     int i;
@@ -617,6 +637,7 @@ void rdp_freetexmem(void)
 /* DEBUG Info overlays and other debug stuff
 */
 
+/** Debug marker dots for the framerate graph. */
 struct
 {
     int x,y;
@@ -641,6 +662,10 @@ void rdp_addtestdot(int y)
     i&=1023;
 }
 
+/**
+ * Sets the viewport used for drawing primitives or rectangles.
+ * @param rectmode Non-zero to use the full-screen rect viewport, 0 for the game viewport.
+ */
 void viewport(int rectmode)
 {
     float x0,y0,x1,y1;
@@ -733,6 +758,12 @@ static void drawdot(int x,int y)
     x_end();
 }
 
+/**
+ * Draws one loaded texture at a grid position as a debug overlay.
+ * @param tilepos Grid position of the tile.
+ * @param txti Texture index.
+ * @param size Grid cell size in pixels.
+ */
 void debugdrawtexture(int tilepos,int txti,int size)
 {
     int xhandle=rst.txt[txti].xhandle;
@@ -774,6 +805,9 @@ static void drawmarkers(void)
     }
 }
 
+/**
+ * Draws all textures loaded this frame as a debug overlay grid.
+ */
 void drawtextures(void)
 {
     int i,size;
@@ -792,6 +826,11 @@ void drawtextures(void)
     }
 }
 
+/**
+ * Formats an RGBA color as an 8-digit hex string.
+ * @param c Pointer to the 4-byte color.
+ * @return Pointer to a static hex string buffer.
+ */
 char *colortext(uint8_t *c)
 {
     static char buf[16];
@@ -807,6 +846,11 @@ static uint8_t buf1[256*256*4];
 static uint8_t buf2[256*256*4];
 static uint8_t mbuf[1024*4];
 
+/**
+ * Computes the starting texture cache slot for a tile.
+ * @param t Tile to look up.
+ * @return Cache slot index to start searching from.
+ */
 int txt_findstart(Tile *t)
 {
     uint32_t i;
@@ -814,6 +858,11 @@ int txt_findstart(Tile *t)
     return((int)i);
 }
 
+/**
+ * Finds the oldest nearby texture cache slot for eviction.
+ * @param t Tile to place.
+ * @return Cache slot index to reuse.
+ */
 int txt_findempty(Tile *t)
 {
     int i;
@@ -836,6 +885,11 @@ int txt_findempty(Tile *t)
     return(besti);
 }
 
+/**
+ * Finds a cached texture matching the tile parameters.
+ * @param t Tile to match.
+ * @return Positive slot index on exact match, negative index on address match with CRC mismatch, 0 if not found.
+ */
 int txt_findmatch(Tile *t)
 {
     Texture *txt;
@@ -872,6 +926,17 @@ int txt_findmatch(Tile *t)
     return(0);
 }
 
+/**
+ * Scales a texture image to a new power-of-two size.
+ * @param dst Destination buffer.
+ * @param dx Destination width.
+ * @param dy Destination height.
+ * @param drl Destination row length in pixels.
+ * @param src Source buffer.
+ * @param sx Source width.
+ * @param sy Source height.
+ * @param srl Source row length in pixels.
+ */
 void txt_scale(uint8_t *dst,int dx,int dy,int drl,
                uint8_t *src,int sx,int sy,int srl)
 {
@@ -917,6 +982,13 @@ void txt_scale(uint8_t *dst,int dx,int dy,int drl,
     */
 }
 
+/**
+ * Fills a texture buffer with a single color.
+ * @param dst Destination buffer.
+ * @param dx Buffer width.
+ * @param dy Buffer height.
+ * @param col 32-bit color to fill with.
+ */
 void txt_fill(uint8_t *dst,int dx,int dy,uint32_t col)
 {
     uint32_t *dw=(uint32_t *)dst;
@@ -927,6 +999,13 @@ void txt_fill(uint8_t *dst,int dx,int dy,uint32_t col)
     }
 }
 
+/**
+ * Checks whether any pixel of a texture has low alpha.
+ * @param dst Texture buffer.
+ * @param dx Buffer width.
+ * @param dy Buffer height.
+ * @return 1 if any pixel has alpha below 0xf0, 0 otherwise.
+ */
 int txt_checkalpha(uint8_t *dst,int dx,int dy)
 {
     uint32_t *dw=(uint32_t *)dst;
@@ -940,6 +1019,13 @@ int txt_checkalpha(uint8_t *dst,int dx,int dy)
     return(0);
 }
 
+/**
+ * Draws a one-pixel border of the given color around a texture.
+ * @param dst Texture buffer.
+ * @param dx Buffer width.
+ * @param dy Buffer height.
+ * @param col Border color.
+ */
 void txt_border(uint8_t *dst,int dx,int dy,uint32_t col)
 {
     uint32_t *dw=(uint32_t *)dst;
@@ -960,6 +1046,13 @@ void txt_border(uint8_t *dst,int dx,int dy,uint32_t col)
     }
 }
 
+/**
+ * Mirrors a texture horizontally, doubling its width.
+ * @param dst Destination buffer (twice the source width).
+ * @param dx Source width.
+ * @param dy Texture height.
+ * @param src Source buffer.
+ */
 void txt_mirrorx(uint8_t *dst,int dx,int dy,uint8_t *src)
 {
     uint32_t *dw=(uint32_t *)dst;
@@ -973,6 +1066,13 @@ void txt_mirrorx(uint8_t *dst,int dx,int dy,uint8_t *src)
     }
 }
 
+/**
+ * Mirrors a texture vertically, doubling its height.
+ * @param dst Destination buffer (twice the source height).
+ * @param dx Texture width.
+ * @param dy Source height.
+ * @param src Source buffer.
+ */
 void txt_mirrory(uint8_t *dst,int dx,int dy,uint8_t *src)
 {
     uint32_t *dw=(uint32_t *)dst;
@@ -988,6 +1088,13 @@ void txt_mirrory(uint8_t *dst,int dx,int dy,uint8_t *src)
     }
 }
 
+/**
+ * Computes a sampled CRC over a memory region.
+ * @param addr Start address.
+ * @param size Region size in bytes.
+ * @param samples Number of samples to take, or <=0 to read every word.
+ * @return CRC value.
+ */
 uint32_t crcmem(uint32_t addr,int size,int samples)
 {
     int i,ia;
@@ -1009,6 +1116,11 @@ uint32_t crcmem(uint32_t addr,int size,int samples)
     return(crc);
 }
 
+/**
+ * Returns the row length in bytes of a tile.
+ * @param t Tile.
+ * @return Row length in bytes.
+ */
 int txt_rl(Tile *t)
 {
     int rl;
@@ -1018,6 +1130,11 @@ int txt_rl(Tile *t)
     return(rl);
 }
 
+/**
+ * Computes the texture CRC of a tile, marking it as framebuffer sourced when needed.
+ * @param t Tile.
+ * @return CRC value, or -2 if the tile comes from a color buffer.
+ */
 uint32_t txt_calccrc(Tile *t)
 {
     int    size,rl;
@@ -1050,6 +1167,15 @@ uint32_t txt_calccrc(Tile *t)
     return(crc);
 }
 
+/**
+ * Loads one texture scanline from RDRAM into a byte buffer.
+ * @param mbuf Output buffer.
+ * @param addr RDRAM address of the scanline.
+ * @param y Scanline number.
+ * @param flip Word-swap flag for odd lines.
+ * @param rl2 Row length in bytes times two.
+ * @return Pointer to the filled buffer.
+ */
 uint8_t *txt_loadline(uint8_t *mbuf,uint32_t addr,int y,int flip,int rl2)
 {
     int x,rl;
@@ -1077,6 +1203,12 @@ uint8_t *txt_loadline(uint8_t *mbuf,uint32_t addr,int y,int flip,int rl2)
     return(mbuf);
 }
 
+/**
+ * Loads a palette range from RDRAM into the TLUT.
+ * @param pal First palette entry to load.
+ * @param num Number of entries to load.
+ * @param addr RDRAM address of the TLUT data.
+ */
 void txt_loadtlut(int pal,int num,uint32_t addr)
 {
     int i;
@@ -1100,6 +1232,11 @@ void txt_loadtlut(int pal,int num,uint32_t addr)
     }
 }
 
+/**
+ * Converts one palette entry to 32-bit RGBA.
+ * @param dst Output RGBA buffer.
+ * @param ind Palette index.
+ */
 void txt_paletteread(uint8_t *dst,int ind)
 {
     int a,c,i;
@@ -1125,6 +1262,14 @@ void txt_paletteread(uint8_t *dst,int ind)
     }
 }
 
+/**
+ * Renders the palette as a 16x16 grid into a buffer (debug helper).
+ * @param dst Destination buffer.
+ * @param xs Row length of the buffer.
+ * @param ys Number of rows.
+ * @param palbase First palette index to show.
+ * @param palnum Number of palette entries.
+ */
 void txt_showpal(uint8_t *dst,int xs,int ys,int palbase,int palnum)
 {
     uint32_t *d=(uint32_t *)dst;
@@ -1161,6 +1306,11 @@ void txt_showpal(uint8_t *dst,int xs,int ys,int palbase,int palnum)
     }
 }
 
+/**
+ * Converts a tile from texture memory to 32-bit RGBA.
+ * @param dst0 Output RGBA buffer.
+ * @param t Tile to convert.
+ */
 void txt_convert(uint8_t *dst0,Tile *t)
 { // convert from texmem to 32 bit RGBA
     int    palbase=16*t->palette;
@@ -1516,6 +1666,11 @@ void rdp_grabscreen(void)
     #endif
 }
 
+/**
+ * Copies a texture region from the grabbed framebuffer.
+ * @param buf Output RGBA buffer.
+ * @param t Tile describing the region.
+ */
 void txt_fromfb(uint8_t *buf,Tile *t)
 {
     int x,y,y0,xa,xx;
@@ -1556,6 +1711,11 @@ void txt_fromfb(uint8_t *buf,Tile *t)
     }
 }
 
+/**
+ * Fills a texture buffer with a checkerboard pattern as a placeholder framebuffer copy.
+ * @param buf Output RGBA buffer.
+ * @param t Tile.
+ */
 void txt_fromcbuf(uint8_t *buf,Tile *t)
 {
     int x,y;
@@ -1575,6 +1735,11 @@ void txt_fromcbuf(uint8_t *buf,Tile *t)
 
 #define SWAP(s,d) sd=s,s=d,d=sd
 
+/**
+ * Converts, scales and uploads a tile's texture data into a hardware texture.
+ * @param txt Texture slot to fill.
+ * @param t Tile to load from.
+ */
 void txt_loaddata(Texture *txt,Tile *t)
 {
     int sx,sy;
@@ -1690,6 +1855,10 @@ void txt_loaddata(Texture *txt,Tile *t)
     //if(st.dumpgfx) logd("\n+tile x_create %04X size %ix%i\n",flags,txt->xs,txt->ys);
 }
 
+/**
+ * Computes the texture coordinate transform for a tile.
+ * @param tile Tile number.
+ */
 void txt_setscales(int tile)
 {
     Tile    *t=rst.tile+tile+rst.texturetile;
@@ -1740,6 +1909,10 @@ void txt_setscales(int tile)
         tile,t->texture,rst.txt_uscale,rst.txt_vscale,rst.txt_uadd,rst.txt_vadd,t->memx0,t->memy0);
 }
 
+/**
+ * Selects a tile's texture for rendering and sets its scales.
+ * @param tile Tile number.
+ */
 void txt_select(int tile)
 {
     Tile    *t=rst.tile+tile+rst.texturetile;
@@ -1750,6 +1923,11 @@ void txt_select(int tile)
     txt_setscales(tile);
 }
 
+/**
+ * Selects two textures for dual-texture rendering.
+ * @param tile1 First tile.
+ * @param tile2 Second tile.
+ */
 void txt_select2(int tile1,int tile2)
 {
     Tile    *t;
@@ -1776,6 +1954,10 @@ void txt_select2(int tile1,int tile2)
     x_texture2(xh1,xh2);
 }
 
+/**
+ * Prepares a tile's texture for rendering, loading it into the cache if needed.
+ * @param tile Tile number.
+ */
 void txt_prepare(int tile)
 {
     Tile    *t=rst.tile+tile+rst.texturetile;
@@ -1896,6 +2078,13 @@ static void setfog(int pass)
     }
 }
 
+/**
+ * Returns one combined color component for a combine cycle.
+ * @param j Combine cycle index.
+ * @param r Component role (RDP_X/RDP_Y/RDP_M/RDP_A).
+ * @param i Channel (0-3).
+ * @return Color component in the 0..1 range.
+ */
 float getcolor(int j,int r,int i)
 {
     int a;
@@ -1907,6 +2096,13 @@ float getcolor(int j,int r,int i)
     return(x);
 }
 
+/**
+ * Mixes colors per the combine mode into the given color.
+ * @param d Output color.
+ * @param shade Shade color to apply.
+ * @param col Color combine code.
+ * @param alp Alpha combine code.
+ */
 void mixcolor(float *d,float *shade,int col,int alp)
 {
     int   c,c1,c2;
@@ -1998,6 +2194,12 @@ void mixcolor(float *d,float *shade,int col,int alp)
     }
 }
 
+/**
+ * Draws the collected primitives of one combine pass.
+ * @param p Pass number.
+ * @param i0 First primitive index.
+ * @param i1 One past the last primitive index.
+ */
 void drawprims(int p,int i0,int i1)
 {
     Primitive *pr;
@@ -2118,6 +2320,9 @@ void drawprims(int p,int i0,int i1)
     }
 }
 
+/**
+ * Draws all primitives collected since the last mode change.
+ */
 // draw primitives collected since last modechange
 // update rst.last_prtabi
 void flushprims(void)
@@ -2235,12 +2440,18 @@ void flushprims(void)
     }
 }
 
+/**
+ * Clears the frame vertex and primitive tables.
+ */
 void clearprims(void)
 {
     rst.vxtabi=0;
     rst.prtabi=0;
 }
 
+/**
+ * Draws the collected primitives as a wireframe debug overlay.
+ */
 void wireprims(void)
 {
     static int rcr,rcg,rcb;
@@ -2592,6 +2803,9 @@ void rdp_fogrange(float min,float max)
     rst.foglasttype=-1;
 }
 
+/**
+ * Prints color buffer and viewport info (debug helper).
+ */
 void fillcbuf(void)
 {
     int   xs,ys,rl;
@@ -2662,6 +2876,7 @@ void rdp_newvtx(int first,int num)
 /* Rendering State conversion - Combine
 */
 
+/** Maps raw combine codes to internal color constants. */
 int combmap[32][8]={ // X,Y,M,A, AlphaXYA, AlphaM
 C_COMB  ,C_COMB  ,C_COMB  ,C_COMB  ,C_COMB  ,C_LODF  ,0,0,
 C_TEX0  ,C_TEX0  ,C_TEX0  ,C_TEX0  ,C_TEX0  ,C_TEX0  ,0,0,
@@ -2681,6 +2896,7 @@ C_LODF  ,C_LODF  ,C_LODF  ,C_DUNNO ,C_DUNNO ,C_DUNNO ,0,0,
 C_PLODF ,C_PLODF ,C_PLODF ,C_DUNNO ,C_DUNNO ,C_DUNNO ,0,0,
 C_ZERO  ,C_ZERO  ,C_K5    ,C_DUNNO ,C_DUNNO ,C_DUNNO ,0,0};
 
+/** Describes the bit layout and mapping of the combine words. */
 int combtab[16][8]={ // x0/1,pos,num,map,c2,c1,-,-
 0,20,0x0f,0,RDP_X,0,0,0,  //saC0
 1,28,0x0f,1,RDP_Y,0,0,0,  //sbC0
@@ -2703,6 +2919,12 @@ static Combine comfill;
 static Combine comcopy;
 static int     dump; // for com routines
 
+/**
+ * Formats a single combine input as a name string.
+ * @param buf0 Output buffer.
+ * @param c Combine code.
+ * @return Pointer to the output buffer.
+ */
 char *dump_combinenm(char *buf0,int c)
 {
     char *buf=buf0;
@@ -2730,6 +2952,14 @@ char *dump_combinenm(char *buf0,int c)
     return(buf0);
 }
 
+/**
+ * Formats a combine equation as a text expression.
+ * @param buf0 Output buffer.
+ * @param cx Combine state array.
+ * @param style Combine style.
+ * @param recurse Recursion level.
+ * @return Pointer to the output buffer.
+ */
 char *dump_combineeq(char *buf0,int *cx,int style,int recurse)
 {
     char *x,*y,*m,*a;
@@ -2797,6 +3027,10 @@ char *dump_combineeq(char *buf0,int *cx,int style,int recurse)
     return(buf0);
 }
 
+/**
+ * Dumps the current combine state to the debug log.
+ * @param txt Label prefix for the dump lines.
+ */
 void dumpscombine(char *txt)
 {
     int alp=0,alp0,alp1;
@@ -2830,6 +3064,9 @@ void dumpscombine(char *txt)
     }
 }
 
+/**
+ * Dumps the final combine mapping to the debug log.
+ */
 void dump_combineresult(void)
 {
     int i;
@@ -2855,6 +3092,10 @@ void dump_combineresult(void)
     }
 }
 
+/**
+ * Dumps the combine equations for one color or alpha group.
+ * @param alp 0 for color, 1 for alpha.
+ */
 void dump_combineeqs(int alp)
 {
     char buf1[100];
@@ -2864,6 +3105,11 @@ void dump_combineeqs(int alp)
     logd("[ Cycle1: %s Cycle2: %s ]",buf1,buf2);
 }
 
+/**
+ * Dumps a combine mode to the debug log.
+ * @param x0 Combine cycle 1 word.
+ * @param x1 Combine cycle 2 word.
+ */
 void dump_combine(uint32_t x0,uint32_t x1)
 {
     int  cn=rst.s_cycles;
@@ -2911,6 +3157,14 @@ void dump_combine(uint32_t x0,uint32_t x1)
     }
 }
 
+/**
+ * Finds a cached combine mode matching the given words.
+ * @param x0 Combine cycle 1 word.
+ * @param x1 Combine cycle 2 word.
+ * @param o0 Other-mode word 1.
+ * @param o1 Other-mode word 2.
+ * @return Cache index, or -1 if not found.
+ */
 int mode_findcache(uint32_t x0,uint32_t x1,uint32_t o0,uint32_t o1)
 {
     int ci;
@@ -2928,6 +3182,14 @@ int mode_findcache(uint32_t x0,uint32_t x1,uint32_t o0,uint32_t o1)
     return(-1);
 }
 
+/**
+ * Allocates a new combine cache entry for the given words.
+ * @param x0 Combine cycle 1 word.
+ * @param x1 Combine cycle 2 word.
+ * @param o0 Other-mode word 1.
+ * @param o1 Other-mode word 2.
+ * @return Cache index of the new entry.
+ */
 int mode_newcache(uint32_t x0,uint32_t x1,uint32_t o0,uint32_t o1)
 {
     int ci,a;
@@ -2946,6 +3208,10 @@ int mode_newcache(uint32_t x0,uint32_t x1,uint32_t o0,uint32_t o1)
     return(ci);
 }
 
+/**
+ * Sets a combine state to passthrough of the combined color.
+ * @param i Combine state index.
+ */
 // set combx[i] to passthrough
 void com_setcomb(int i)
 {
@@ -2956,6 +3222,10 @@ void com_setcomb(int i)
     rst.s_combx[i][RDP_A]=C_COMB;
 }
 
+/**
+ * Sets a combine state to zero.
+ * @param i Combine state index.
+ */
 // set combx[i] to passthrough
 void com_setzero(int i)
 {
@@ -2966,6 +3236,11 @@ void com_setzero(int i)
     rst.s_combx[i][RDP_A]=0;
 }
 
+/**
+ * Copies one combine state to another.
+ * @param d Destination index.
+ * @param s Source index.
+ */
 // set combx[i] to passthrough
 void com_setcopy(int d,int s)
 {
@@ -2976,6 +3251,11 @@ void com_setcopy(int d,int s)
     rst.s_combx[d][RDP_A]=rst.s_combx[s][RDP_A];
 }
 
+/**
+ * Converts the raw combine words into the parsed combine state array.
+ * @param x0 Combine cycle 1 word.
+ * @param x1 Combine cycle 2 word.
+ */
 // convert x0,x1 => rst.combine[]/combinebak[] array
 void com_convertcombine(uint32_t x0,uint32_t x1)
 {
@@ -3004,6 +3284,9 @@ void com_convertcombine(uint32_t x0,uint32_t x1)
     rst.s_combinecycles=rst.s_cycles;
 }
 
+/**
+ * Determines the combine style and texture usage of each cycle.
+ */
 // calculate rst.combinestyle,rst.combinetex,rst.combinetexboth
 void com_calculatestyles(void)
 {
@@ -3080,6 +3363,9 @@ void com_calculatestyles(void)
     }
 }
 
+/**
+ * Moves non-color inputs to the X parameter of multiplies and removes trivial *1 terms.
+ */
 // reorder noncolors to X parameter in muls/adds
 // also remove trivial *1
 void com_reorder(void)
@@ -3114,6 +3400,9 @@ void com_reorder(void)
     }
 }
 
+/**
+ * Converts PRIM inputs to PRIM*SHADE for flat shading.
+ */
 // convert PRIM to PRIM*SHADE (flatmode)
 void com_flat(void)
 {
@@ -3130,6 +3419,9 @@ void com_flat(void)
     }
 }
 
+/**
+ * Removes combine states that use the LOD factor, converting them to constants.
+ */
 // remove all states with (X-Y)*LOD+A, convert to A
 void com_removelod(void)
 {
@@ -3180,6 +3472,9 @@ void com_removelod(void)
     }
 }
 
+/**
+ * Converts MULADD combine styles to plain MUL.
+ */
 void com_removemuladd(void)
 {
     int i;
@@ -3194,6 +3489,9 @@ void com_removemuladd(void)
     }
 }
 
+/**
+ * Removes first-cycle tex->tex blends that simplify to a constant.
+ */
 // remove first cycle [tex0->tex1,const] if dual cycle mode
 void com_removetextex2(void)
 {
@@ -3262,6 +3560,12 @@ void com_removetextex2(void)
     }
 }
 
+/**
+ * Returns the average color value of a color, optionally using only alpha.
+ * @param c Color index.
+ * @param i 1 to average only alpha, 0 to average all channels.
+ * @return Average color value in the 0..255 range.
+ */
 int avgcolor(int c,int i)
 {
     int a;
@@ -3277,6 +3581,9 @@ int avgcolor(int c,int i)
     return(a);
 }
 
+/**
+ * Simplifies blends and multiplies whose constant multiplier is fully 0 or 255.
+ */
 // remove blend where blender is PRIM/ENV and it's fully to one way
 // remove also multiplys where multiplier is 1 or 0
 void com_removefullblend(void)
@@ -3341,6 +3648,9 @@ void com_removefullblend(void)
     }
 }
 
+/**
+ * Merges a second-cycle *COLOR multiply into the first cycle when possible.
+ */
 // combine second cycle *COLOR to first cycle colors if possible (set second to passthrough)
 void com_combinemul2(void)
 {
@@ -3405,6 +3715,9 @@ void com_combinemul2(void)
     }
 }
 
+/**
+ * Combines a single-cycle COLOR*COLOR multiply into a constant.
+ */
 // combine single cycle COLOR*COLOR
 void com_combinemul1(void)
 {
@@ -3425,6 +3738,9 @@ void com_combinemul1(void)
     }
 }
 
+/**
+ * Removes *1 multiplies, replacing them with the other operand.
+ */
 // combine single 1*X or X*1
 void com_combinemulone(void)
 {
@@ -3452,6 +3768,9 @@ void com_combinemulone(void)
     }
 }
 
+/**
+ * Converts a dual-cycle mode to single cycle when the first cycle is constant.
+ */
 // convert dual cycle to single cycle if possible (set second to passthrough)
 void com_joincycles(void)
 {
@@ -3475,6 +3794,11 @@ void com_joincycles(void)
     }
 }
 
+/**
+ * Checks whether a combine state can be rendered in a single pass.
+ * @param i Combine state index.
+ * @return 1 if single-pass, 0 otherwise.
+ */
 int  com_issingle(int i)
 {
     if(rst.s_combinecycles<2) return(1);
@@ -3482,6 +3806,10 @@ int  com_issingle(int i)
     return(0);
 }
 
+/**
+ * Forces a single-pass mapping by dropping the second cycle.
+ * @param i Combine state index.
+ */
 void com_forcesingle(int i)
 {
     // need to remove second cycle, for now let's just drop it
@@ -3489,6 +3817,10 @@ void com_forcesingle(int i)
     if(dump) logd(" #droppedC2! ");
 }
 
+/**
+ * Simplifies a combine state to a supported form.
+ * @param i Combine state index.
+ */
 void com_forcesimple(int i)
 {
     // need to simplyfy, just leave A
@@ -3545,6 +3877,10 @@ void com_forcesimple(int i)
     }
 }
 
+/**
+ * Fills the combine mapping with a fallback for unsupported modes.
+ * @param unknown Bitmask of the unsupported color/alpha parts.
+ */
 void com_unknown(int unknown)
 {
     // no supported
@@ -3585,6 +3921,10 @@ void com_unknown(int unknown)
     }
 }
 
+/**
+ * Clears the hardware combine mapping for color or alpha.
+ * @param a 0 for color, 1 for alpha.
+ */
 // clear 3DFX mapping
 void com_clearmapping(int a)
 {
@@ -3607,6 +3947,9 @@ void com_clearmapping(int a)
     COM.passes=0;
 }
 
+/**
+ * Maps all alpha combine inputs to one.
+ */
 void com_alpha1mapping(void)
 {
     int i;
@@ -3617,6 +3960,10 @@ void com_alpha1mapping(void)
     }
 }
 
+/**
+ * Copies the alpha mapping of pass 0 to the other passes.
+ * @param n Number of passes.
+ */
 void com_copyalphan(int n)
 {
     int i;
@@ -3632,6 +3979,12 @@ void com_copyalphan(int n)
     }
 }
 
+/**
+ * Sets a debug combine mode of shade times the given color.
+ * @param r Red component 0-255.
+ * @param g Green component 0-255.
+ * @param b Blue component 0-255.
+ */
 void com_debugcolorshade(int r,int g,int b)
 {
     COM.passes=1;
@@ -3645,6 +3998,12 @@ void com_debugcolorshade(int r,int g,int b)
     setcolor(C_COMB,(r<<24)+(g<<16)+(b<<8)+255);
 }
 
+/**
+ * Sets a debug combine mode of a solid color.
+ * @param r Red component 0-255.
+ * @param g Green component 0-255.
+ * @param b Blue component 0-255.
+ */
 void com_debugcolor(int r,int g,int b)
 {
     COM.passes=1;
@@ -3658,6 +4017,9 @@ void com_debugcolor(int r,int g,int b)
     setcolor(C_COMB,(r<<24)+(g<<16)+(b<<8)+255);
 }
 
+/**
+ * Sets a debug combine mode showing only the shade color.
+ */
 void com_debugshade(void)
 {
     COM.passes=1;
@@ -3672,6 +4034,10 @@ void com_debugshade(void)
     COM.texenable=0;
 }
 
+/**
+ * Sets a debug combine mode showing only a texture.
+ * @param t Texture number (0 or 1).
+ */
 void com_debugtexture(int t)
 {
     COM.passes=1;
@@ -3687,6 +4053,11 @@ void com_debugtexture(int t)
 }
 
 // find a single cycle mapping
+/**
+ * Creates the hardware mapping for a single-cycle combine.
+ * @param a 0 for color, 1 for alpha.
+ * @return 0 on success, 1 if the mode is unsupported.
+ */
 int com_createmapping1(int a)
 {
     int c=COM.passes;
@@ -3876,6 +4247,11 @@ int com_createmapping1(int a)
     return(0);
 }
 
+/**
+ * Creates the hardware mapping for the second cycle.
+ * @param a 0 for color, 1 for alpha.
+ * @return 0 on success, 1 if the mode is unsupported.
+ */
 // find the second cycle mapping
 int com_createmapping2(int a)
 {
@@ -3956,6 +4332,11 @@ int com_createmapping2(int a)
     return(0);
 }
 
+/**
+ * Creates the full hardware mapping for a combine mode.
+ * @param a 0 for color, 1 for alpha.
+ * @return 0 on success, non-zero if the mode is unsupported.
+ */
 // try to create a mode for 3DFX based on N64 mode [final analyze]
 // this is for single cycle modes
 int com_createmapping(int a)
@@ -3977,12 +4358,17 @@ int com_createmapping(int a)
     return(e);
 }
 
+/** Reference combine state used by the Zelda flame patch. */
 int combx_flames[16]={
 C_TEX1,C_PRIM,C_PLODF,C_TEX0, C_TEX1,C_ONE ,C_PLODF,C_TEX0,
 C_PRIM,C_ENV ,C_COMB ,C_ENV , C_COMB,0     ,C_PRIM ,0     };
 // Cycle1: (TEX1-PRIM)*PLODF+TEX0 Cycle2: ENV->PRIM,COMB
 // Cycle1: (TEX1-1)*PLODF+TEX0 Cycle2: COMB*PRIM
 
+/**
+ * Applies hardcoded combine patches for specific games.
+ * @return 1 if a patch was applied, 0 otherwise.
+ */
 // modepatch
 int com_patchedmodes(void)
 {
@@ -4015,6 +4401,11 @@ int com_patchedmodes(void)
     return(0);
 }
 
+/**
+ * Compiles a new combine mode from the raw combine words.
+ * @param x0 Combine cycle 1 word.
+ * @param x1 Combine cycle 2 word.
+ */
 void com_new(uint32_t x0,uint32_t x1)
 {
     int a,oldp,unknown=0;
@@ -4150,6 +4541,9 @@ void com_new(uint32_t x0,uint32_t x1)
     if(unknown) com_unknown(unknown);
 }
 
+/**
+ * Overrides the combine mode with a debug test mode based on showtest.
+ */
 void com_settest(void)
 {
     if(showtest==0)
@@ -4190,6 +4584,13 @@ void com_settest(void)
     }
 }
 
+/**
+ * Applies a combine mode change.
+ * @param x0 Combine cycle 1 word.
+ * @param x1 Combine cycle 2 word.
+ * @param chg0 Change mask of the first other-mode word.
+ * @param chg1 Change mask of the second other-mode word.
+ */
 void change_combine(uint32_t x0,uint32_t x1,uint32_t chg0,uint32_t chg1)
 {
     int ci;
@@ -4237,6 +4638,9 @@ void change_combine(uint32_t x0,uint32_t x1,uint32_t chg0,uint32_t chg1)
     */
 }
 
+/**
+ * Initializes the combine state and static colors.
+ */
 void com_init(void)
 {
     static int flip=0;
@@ -4277,6 +4681,11 @@ void com_init(void)
 /* Rendering State conversion - Other
 */
 
+/**
+ * Dumps the other-mode bits to the debug log.
+ * @param o0 Other-mode word 1.
+ * @param o1 Other-mode word 2.
+ */
 void dump_other(uint32_t o0,uint32_t o1)
 { // doesn't dump blend or redermode
     int a,c,cn,line;
@@ -4564,6 +4973,13 @@ void dump_other(uint32_t o0,uint32_t o1)
     }
 }
 
+/**
+ * Applies an other-mode change to the rendering state.
+ * @param x0 Other-mode word 1.
+ * @param x1 Other-mode word 2.
+ * @param c0 Changed bits of word 1.
+ * @param c1 Changed bits of word 2.
+ */
 void change_other(uint32_t x0,uint32_t x1,uint32_t c0,uint32_t c1)
 {
     if(FIELD(c0,20,3))
@@ -4710,6 +5126,14 @@ void change_other(uint32_t x0,uint32_t x1,uint32_t c0,uint32_t c1)
     }
 }
 
+/**
+ * Computes a debug wireframe color from the current mode words.
+ * @param o0 Other-mode word 1.
+ * @param o1 Other-mode word 2.
+ * @param c0 Combine word 1.
+ * @param c1 Combine word 2.
+ * @return Wireframe color index in the 1..14 range.
+ */
 int findwirecolor(uint32_t o0,uint32_t o1,uint32_t c0,uint32_t c1)
 {
     uint32_t x;
@@ -4731,6 +5155,9 @@ int findwirecolor(uint32_t o0,uint32_t o1,uint32_t c0,uint32_t c1)
     return 7;
 }
 
+/**
+ * Applies all pending mode changes to the rendering state.
+ */
 void newmode(void) // setmode
 {
     uint32_t m0,m1;    // mode bits    (set by IFCHANGED)

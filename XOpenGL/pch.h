@@ -1,3 +1,4 @@
+/** \file pch.h - Precompiled header for the XOpenGL library. */
 #pragma once
 
 #include <stdint.h>

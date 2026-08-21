@@ -144,6 +144,7 @@ typedef struct
 #define BLEND_ALPHAMIX2          5 // 0040
 
 #define TRISTORESIZE 4096
+/** Pending triangle storage for the draw pipe. */
 struct
 {
     xt_pos  vx[3];
@@ -151,23 +152,33 @@ struct
     int     color; // 0=red, 1=green, 2=blue, 3=white
     int     RESERVED;
 } tristore[TRISTORESIZE];
+/** Number of triangles currently stored in tristore. */
 int tristorenum;
 
 xt_data  g_data;
 
 xt_pos   g_pos;
 
+/** Whether the display has been opened. */
 int  opened;
 
+/** Global geometry state used during display list processing. */
 GeomState gst;
 
+/** Stack of pending display list return addresses. */
 uint32_t stack[256];
+/** Display list stack pointer. */
 uint32_t stackp;
+/** Current display list address. */
 uint32_t dlpnt;
+/** Remaining display list depth limit. */
 int   dllimit;
+/** Total number of display list errors encountered. */
 int   errors;
+/** Current display list command words. */
 uint32_t cmd[8]; // current loaded command
 
+/** 4x4 identity matrix. */
 float identity[16]={
  1.0,   0.0,   0.0,   0.0,
  0.0,   1.0,   0.0,   0.0,
@@ -175,6 +186,7 @@ float identity[16]={
  0.0,   0.0,   0.0,   1.0,
 };
 
+/** Orthographic projection matrix. */
 float orthoproj[16]={
  1.0,   0.0,   0.0, -OVLZ,
  0.0,   1.0,   0.0,  OVLZ,
@@ -213,6 +225,11 @@ void setnormal2(float *col,uint32_t a);
 /***********************************************************************/
 // utilities
 
+/**
+ * Converts a packed color word into float components in BGR order.
+ * @param col Output array of four float components.
+ * @param a Packed 32-bit color value.
+ */
 void setcolor(float *col,uint32_t a)
 {
     col[0]=((a>>8 )&255)*(1.0/258.0);
@@ -221,6 +238,11 @@ void setcolor(float *col,uint32_t a)
     col[3]=((a>>0 )&255)*(1.0/258.0);
 }
 
+/**
+ * Converts a packed color word into float components in RGB order.
+ * @param col Output array of four float components.
+ * @param a Packed 32-bit color value.
+ */
 void setcolor2(float *col,uint32_t a)
 {
     col[0]=((a>>24)&255)*(1.0/258.0);
@@ -229,6 +251,11 @@ void setcolor2(float *col,uint32_t a)
     col[3]=((a>>0 )&255)*(1.0/258.0);
 }
 
+/**
+ * Converts a packed word of signed byte components into float components in [-1, 1] in BGR order.
+ * @param col Output array of four float components.
+ * @param a Packed 32-bit value with signed byte components.
+ */
 void setnormal(float *col,uint32_t a)
 {
     col[0]=((char)((a>>8 )&255))*(1.0/128.0);
@@ -237,6 +264,11 @@ void setnormal(float *col,uint32_t a)
     col[3]=((char)((a>>0 )&255))*(1.0/128.0);
 }
 
+/**
+ * Converts a packed word of signed byte components into float components in [-1, 1] in RGB order.
+ * @param col Output array of four float components.
+ * @param a Packed 32-bit value with signed byte components.
+ */
 void setnormal2(float *col,uint32_t a)
 {
     col[0]=((char)((a>>24)&255))*(1.0/128.0);
@@ -245,6 +277,11 @@ void setnormal2(float *col,uint32_t a)
     col[3]=((char)((a>>0 )&255))*(1.0/128.0);
 }
 
+/**
+ * Transposes a 4x4 matrix.
+ * @param m Output transposed matrix.
+ * @param m1 Input matrix.
+ */
 void TransposeMatrix(float *m,float *m1)
 {
     int x,y;
@@ -257,6 +294,12 @@ void TransposeMatrix(float *m,float *m1)
     }
 }
 
+/**
+ * Multiplies two 4x4 matrices into a third.
+ * @param m Output matrix.
+ * @param m1 First input matrix.
+ * @param m2 Second input matrix.
+ */
 void MultMatrix(float *m,float *m1,float *m2)
 {
     int x,y,i;
@@ -276,6 +319,12 @@ void MultMatrix(float *m,float *m1,float *m2)
     }
 }
 
+/**
+ * Multiplies two 4x4 matrices assuming the rightmost column is 0 0 0 1.
+ * @param m Output matrix.
+ * @param m1 First input matrix.
+ * @param m2 Second input matrix.
+ */
 void FastMultMatrix(float *m,float *m1,float *m2)
 { // assume rightmost column is 0 0 0 1
     int x,y;
@@ -295,6 +344,11 @@ void FastMultMatrix(float *m,float *m1,float *m2)
     m[3+3*4]=1.0;
 }
 
+/**
+ * Inverts a 4x4 rigid-body matrix (rotation and translation only).
+ * @param dest Output inverted matrix.
+ * @param m Input matrix.
+ */
 void InvertMatrix(float *dest,float *m)
 {
     float *d,*a;
@@ -327,6 +381,11 @@ void InvertMatrix(float *dest,float *m)
     #undef S
 }
 
+/**
+ * Inverts the 3x3 rotation part of a 4x4 matrix.
+ * @param dest Output matrix with the inverted rotation.
+ * @param m Input matrix.
+ */
 void InvertMatrixRotate(float *dest,float *m)
 {
     float *d,*a;
@@ -352,6 +411,10 @@ void InvertMatrixRotate(float *dest,float *m)
     #undef S
 }
 
+/**
+ * Logs a 4x4 matrix when graphics dumping is enabled.
+ * @param m Matrix to log.
+ */
 void DumpMatrix(float *m)
 {
     int x,y;
@@ -367,6 +430,10 @@ void DumpMatrix(float *m)
     }
 }
 
+/**
+ * Prints a 4x4 matrix to the debug console.
+ * @param m Matrix to print.
+ */
 void PrintMatrix(float *m)
 {
     int x,y;
@@ -381,6 +448,10 @@ void PrintMatrix(float *m)
     }
 }
 
+/**
+ * Prints a 4x4 matrix when graphics dumping is enabled.
+ * @param m Matrix to print.
+ */
 void DumpMatrix2(float *m)
 {
     int x,y;
@@ -396,6 +467,9 @@ void DumpMatrix2(float *m)
     }
 }
 
+/**
+ * Prints the matrix stored at the A0 RSP data address when graphics dumping is enabled.
+ */
 void dlist_showa0matrix(void)
 {
     float m[16];
@@ -415,6 +489,10 @@ void dlist_showa0matrix(void)
 /***********************************************************************/
 // display list geometry commands
 
+/**
+ * Handles the viewport display-list command.
+ * @param pos Memory address of the viewport parameters.
+ */
 void g_viewport(uint32_t pos)
 {
     uint32_t x;
@@ -437,6 +515,10 @@ void g_viewport(uint32_t pos)
     rdp_viewport(xm,ym,xa,ya);
 }
 
+/**
+ * Sets the number of active lights.
+ * @param num Requested light count, clamped to 0-7.
+ */
 void g_lightnum(int num)
 {
     if(num<0) num=0;
@@ -446,6 +528,11 @@ void g_lightnum(int num)
     gst.lightnumchanged=1;
 }
 
+/**
+ * Loads a light from memory into a light slot.
+ * @param li Light slot index.
+ * @param pos Memory address of the light data.
+ */
 void g_loadlight(int li,uint32_t pos)
 {
     Light *l=gst.light+li;
@@ -465,6 +552,9 @@ void g_loadlight(int li,uint32_t pos)
     logd("]");
 }
 
+/**
+ * Transforms all active light directions by the inverse modelview rotation.
+ */
 void g_xformlights(void)
 {
     Light *l;
@@ -512,6 +602,10 @@ void g_xformlights(void)
     }
 }
 
+/**
+ * Initializes a vertex with color, lighting and texture scaling.
+ * @param i Vertex index.
+ */
 void g_initvx(int i)
 {
     Vertex *v;
@@ -580,6 +674,12 @@ void g_initvx(int i)
     rdpvxflag[i]|=VX_INITDONE;
 }
 
+/**
+ * Loads and transforms a block of vertices from memory.
+ * @param addr Memory address of the vertex data.
+ * @param v0 Index of the first vertex slot.
+ * @param vn Number of vertices to load.
+ */
 void g_loadvtx(uint32_t addr,int v0,int vn)
 {
     int     i,flag;
@@ -688,6 +788,12 @@ void g_loadvtx(uint32_t addr,int v0,int vn)
     }
 }
 
+/**
+ * Loads and transforms a block of vertices in the diddly format.
+ * @param addr Memory address of the vertex data.
+ * @param v0 Index of the first vertex slot.
+ * @param vn Number of vertices to load.
+ */
 void g_loadvtx_diddly(uint32_t addr,int v0,int vn)
 {
     int     i,flag;
@@ -761,6 +867,11 @@ void g_loadvtx_diddly(uint32_t addr,int v0,int vn)
     }
 }
 
+/**
+ * Checks a triangle against the current culling mode.
+ * @param vxind Array of three vertex indices.
+ * @return 1 if the triangle is culled, 0 otherwise.
+ */
 int g_culltri(int *vxind)
 {
     float xd1,yd1,zd1;
@@ -804,6 +915,11 @@ int g_culltri(int *vxind)
     return(0);
 }
 
+/**
+ * Submits a triangle after clipping, culling and vertex initialization checks.
+ * @param flag Unused triangle flags.
+ * @param vxind Array of three vertex indices.
+ */
 void g_tri(int flag,int *vxind)
 {
     int clipmask;
@@ -842,6 +958,12 @@ void g_tri(int flag,int *vxind)
     gst.cnt_tri++;
 }
 
+/**
+ * Checks whether a vertex range is fully clipped.
+ * @param v0 First vertex index.
+ * @param vn End vertex index (exclusive).
+ * @return 1 if all vertices in the range are clipped, 0 otherwise.
+ */
 int g_culldl(int v0,int vn)
 {
     int i,m=VX_CLIPALL;
@@ -853,6 +975,9 @@ int g_culldl(int v0,int vn)
 /***********************************************************************/
 // display list matrix commands
 
+/**
+ * Resets both matrix stacks to the identity matrix.
+ */
 void g_resetmtx(void)
 {
     gst.mtxstackp[0]=0;
@@ -861,6 +986,7 @@ void g_resetmtx(void)
     memcpy(gst.mtx[1][0],identity,16*sizeof(float));
 }
 
+/** Test matrix used for debugging. */
 float testmat[16]={
  1.0,   0.0,   0.0,   0.0,
  0.0,  -1.0,   0.0,   0.0,
@@ -868,6 +994,9 @@ float testmat[16]={
 -1.0,   1.0,   0.0, 500.0,
 };
 
+/**
+ * Recomputes the active transform matrix from the matrix stacks.
+ */
 void g_mtxxform(void)
 {
     if(!gst.newmatrices) return;
@@ -926,6 +1055,13 @@ void g_mtxxform(void)
     }
 }
 
+/**
+ * Loads or multiplies a fixed-point matrix into the selected matrix stack.
+ * @param pos Memory address of the 16.16 fixed-point matrix.
+ * @param proj Selects the projection (1) or modelview (0) stack.
+ * @param load 1 to load the matrix, 0 to multiply.
+ * @param push 1 to push the matrix stack first.
+ */
 void g_loadmtx(uint32_t pos,int proj,int load,int push)
 {
     ushort sh[32];
@@ -1004,6 +1140,10 @@ void g_loadmtx(uint32_t pos,int proj,int load,int push)
     }
 }
 
+/**
+ * Pops the modelview matrix stack.
+ * @param num Unused pop parameter.
+ */
 void g_popmtx(int num)
 {
     int proj=0;
@@ -1140,6 +1280,11 @@ static struct
 {0x00,"G_SPNOOP"},
 0,NULL};
 
+/**
+ * Logs the mnemonic of a display list command.
+ * @param addr Unused parameter.
+ * @param cmd Command words to identify.
+ */
 void dumpcmd(uint32_t addr,uint32_t *cmd)
 {
     int j;
@@ -1180,6 +1325,10 @@ static __inline uint32_t address(uint32_t address)
 
 /***********************************************************************/
 
+/**
+ * Logs the current geometry mode settings.
+ * @param x Geometry mode word.
+ */
 void dump_geom(uint32_t x)
 {
     logd("\n*mode geometry: %08X ",x);
@@ -1190,6 +1339,10 @@ void dump_geom(uint32_t x)
     logd(" light(%i)",gst.lightvx);
 }
 
+/**
+ * Parses a geometry mode word into the graphics state settings.
+ * @param x Geometry mode word.
+ */
 void change_geom(uint32_t x)
 {
     if(cart.dlist_zelda==1)
@@ -1217,6 +1370,12 @@ void change_geom(uint32_t x)
 /***********************************************************************/
 // command helpers
 
+/**
+ * Branches to or calls a display list address.
+ * @param a Segment address of the target display list.
+ * @param branch 1 to branch, 0 to call (pushing the return address).
+ * @param limit Display list depth limit.
+ */
 void c_dlbranch(uint32_t a,int branch,int limit)
 {
     uint32_t addr=address(a);
@@ -1234,12 +1393,21 @@ void c_dlbranch(uint32_t a,int branch,int limit)
     }
 }
 
+/**
+ * Returns from the current display list call.
+ */
 void c_dlend(void)
 {
     dlpnt=stack[--stackp];
     logd(" Displaylist end (stackp %i)\n",stackp);
 }
 
+/**
+ * Handles a DMA vertex load command.
+ * @param a Segment address of the vertex data.
+ * @param v0 Index of the first vertex slot.
+ * @param vn Number of vertices to load.
+ */
 void c_dmavtx(uint32_t a,int v0,int vn)
 {
     uint32_t addr=address(a);
@@ -1274,6 +1442,11 @@ void c_dmavtx(uint32_t a,int v0,int vn)
     }
 }
 
+/**
+ * Handles a diddly DMA triangle command.
+ * @param a Segment address of the triangle data.
+ * @param vn Number of triangles to draw.
+ */
 void c_dmatri_diddly(uint32_t a,int vn)
 {
     uint32_t addr=address(a);
@@ -1323,6 +1496,13 @@ void c_dmatri_diddly(uint32_t a,int vn)
 //    logd("\nG_VTX-DMATRI-Range %i..%i",min,max);
 }
 
+/**
+ * Handles a DMA matrix load command.
+ * @param a Segment address of the matrix data.
+ * @param proj Selects the projection or modelview stack.
+ * @param load 1 to load the matrix, 0 to multiply.
+ * @param push 1 to push the matrix stack first.
+ */
 void c_dmamtx(uint32_t a,int proj,int load,int push)
 {
     uint32_t addr=address(a);
@@ -1331,6 +1511,11 @@ void c_dmamtx(uint32_t a,int proj,int load,int push)
     gst.cnt_mtx++;
 }
 
+/**
+ * Handles a diddly DMA matrix load into a fixed stack slot.
+ * @param a Segment address of the matrix data.
+ * @param ind Matrix stack slot index.
+ */
 void c_dmamtx_diddly(uint32_t a,int ind)
 {
     uint32_t addr=address(a);
@@ -1340,6 +1525,11 @@ void c_dmamtx_diddly(uint32_t a,int ind)
     gst.cnt_mtx++;
 }
 
+/**
+ * Applies a geometry mode change to the graphics state.
+ * @param mode Operation: 1 OR, 2 AND, other AND-NOT.
+ * @param bits Geometry mode bits.
+ */
 void c_setgeommode(int mode,uint32_t bits)
 {
     if(mode==2)   gst.gmode&=bits;  // 2=AND
@@ -1353,6 +1543,11 @@ void c_setgeommode(int mode,uint32_t bits)
     }
 }
 
+/**
+ * Handles a set-other-mode command.
+ * @param hi 1 for the high mode word, 0 for the low word.
+ * @param cmd Command words containing the new mode bits.
+ */
 void c_setothermode(int hi,uint32_t *cmd)
 {
     int pos,bits,mask,data;
@@ -1379,6 +1574,11 @@ void c_setothermode(int hi,uint32_t *cmd)
     rdp_cmd(cmd);
 }
 
+/**
+ * Handles a movemem command.
+ * @param ind Index selector.
+ * @param a Segment address of the data.
+ */
 void c_movemem(int ind,uint32_t a)
 {
     uint32_t addr=address(a);
@@ -1403,6 +1603,11 @@ void c_movemem(int ind,uint32_t a)
     }
 }
 
+/**
+ * Handles a Zelda movemem command.
+ * @param ind Index selector.
+ * @param a Segment address of the data.
+ */
 void c_movemem_zelda(int ind,uint32_t a)
 {
     uint32_t addr=address(a);
@@ -1427,6 +1632,12 @@ void c_movemem_zelda(int ind,uint32_t a)
     }
 }
 
+/**
+ * Handles a moveword command.
+ * @param bank Bank selector.
+ * @param index Word index.
+ * @param x New word value.
+ */
 void c_moveword(int bank,int index,uint32_t x)
 {
     logd(" Mem[%i][%02X]=%08X",bank,index,x);
@@ -1482,6 +1693,10 @@ void c_moveword(int bank,int index,uint32_t x)
     }
 }
 
+/**
+ * Handles a texture command.
+ * @param cmd Command words.
+ */
 void c_texture(uint32_t *cmd)
 {
     int bowtie,level,tile,on,s,t;
@@ -1499,6 +1714,10 @@ void c_texture(uint32_t *cmd)
     rdp_texture(on,tile,level);
 }
 
+/**
+ * Handles a Zelda background command.
+ * @param addr Memory address of the background parameters.
+ */
 void c_zeldabackground(uint32_t addr)
 {
     uint32_t wid,hig,base;
@@ -1533,6 +1752,9 @@ void c_zeldabackground(uint32_t addr)
 
 /***********************************************************************/
 
+/**
+ * Counts and logs an unknown display list command.
+ */
 void dlisterror(void)
 {
     int c=(cmd[0]>>24);
@@ -1544,6 +1766,10 @@ void dlisterror(void)
     }
 }
 
+/**
+ * Dispatches a display list command using the standard opcode set.
+ * @param c Command opcode.
+ */
 void rsp_cmd_basic(int c)
 {
     switch(c)
@@ -1770,6 +1996,10 @@ void rsp_cmd_basic(int c)
     }
 }
 
+/**
+ * Dispatches a display list command using the Zelda opcode set.
+ * @param c Command opcode.
+ */
 void rsp_cmd_zelda(int c)
 {
     switch(c)
@@ -1920,6 +2150,9 @@ void rsp_cmd_zelda(int c)
 
 /***********************************************************************/
 
+/**
+ * Aborts the current display list (no-op).
+ */
 void dlist_abort(void)
 {
 }

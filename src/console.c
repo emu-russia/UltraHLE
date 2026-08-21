@@ -3,6 +3,7 @@
 
 #define MAXSTRING 1024
 
+/** State of the console window, its cursor, attributes and output buffer. */
 struct
 {
     // handle
@@ -24,6 +25,12 @@ struct
     CHAR_INFO ci[MAXSTRING];
 } con;
 
+/**
+ * Resizes the console window and screen buffer to the requested size.
+ * @param hConsole Handle to the console.
+ * @param xSize Desired buffer width in characters.
+ * @param ySize Desired buffer height in characters.
+ */
 void ResizeConsole(HANDLE hConsole, SHORT xSize, SHORT ySize)
 {
   CONSOLE_SCREEN_BUFFER_INFO csbi; /* hold current console buffer info */
@@ -53,6 +60,9 @@ void ResizeConsole(HANDLE hConsole, SHORT xSize, SHORT ySize)
   return;
 }
 
+/**
+ * Detaches from the current console and creates a new 80x60 console window.
+ */
 void con_opennew(void)
 {
     FreeConsole();
@@ -297,6 +307,11 @@ void con_printf(char *txt,...)
     con_print(buf);
 }
 
+/**
+ * Reads a single console input event and converts it to a key code.
+ * @param dopeek Non-zero to peek at the event without consuming it.
+ * @return Key code, or 0 when no event is available.
+ */
 int readevent(int dopeek)
 {
     INPUT_RECORD inp;

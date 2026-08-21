@@ -12,6 +12,11 @@ static uint32_t   asm_temp2;
 static uint32_t   asm_temp3;
 static uint32_t   asm_temp4;
 
+/**
+ * Caches the current VM address (ECX) for the given register and offset.
+ * @param reg Register number to cache.
+ * @param off Offset associated with the register.
+ */
 void vmcache_add(int reg,int off)
 {
     r.vmcachei=(r.vmcachei+1)&(VMCACHESIZE-1);
@@ -20,6 +25,12 @@ void vmcache_add(int reg,int off)
     r.vmcache[r.vmcachei].off=off;
 }
 
+/**
+ * Finds a cached VM address matching the register and offset.
+ * @param reg Register number to match.
+ * @param off Offset to match within a tolerance of 120 bytes.
+ * @return Index of the matching cache entry, or -1 if not found.
+ */
 int vmcache_find(int reg,int off)
 {
     int i;
@@ -32,6 +43,11 @@ int vmcache_find(int reg,int off)
     return(-1);
 }
 
+/**
+ * Checks whether the register is used as a memory base in later ops of the current group.
+ * @param reg Register number to check.
+ * @return 1 if the register is reused as a memory base, 0 otherwise.
+ */
 int vmcache_regreused(int reg)
 {
     int i;
@@ -44,6 +60,10 @@ int vmcache_regreused(int reg)
     return(0);
 }
 
+/**
+ * Clears the VM address cache entries for the given register.
+ * @param reg Register to clear, or -1 to reset the entire cache.
+ */
 void vmcache_clear(int reg)
 {
     int i;
@@ -64,6 +84,10 @@ void vmcache_clear(int reg)
     }
 }
 
+/**
+ * Marks an x86 register as written and invalidates its VM cache state.
+ * @param xreg x86 register index that was written.
+ */
 void regwrite(int xreg)
 {
     reg_wr(xreg);
@@ -408,6 +432,12 @@ static void ac_jump(uint32_t opcode,int options)
     }
 }
 
+/**
+ * Compiles a MIPS branch instruction into x86 code.
+ * @param opcode MIPS branch opcode.
+ * @param cmpop Comparison operation to use (CMP_* constants).
+ * @param flags Branch flags (BR_* constants).
+ */
 // generic 2 register arithmetic op
 void ac_branch(uint32_t opcode, int cmpop, int flags)
 {
@@ -852,6 +882,11 @@ static void ac_regmove(int fpureg,int intreg,int tofpu)
     }
 }
 
+/**
+ * Compiles FPU load and store instructions (LWC1, SWC1, LDC1, SDC1).
+ * @param opcode MIPS opcode of the FPU load or store.
+ * @param op Operation number (49, 53, 57 or 61).
+ */
 void ac_fpulwsw(uint32_t opcode,int op)
 {
     int rt=OP_RT(opcode),f;

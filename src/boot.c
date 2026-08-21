@@ -2,6 +2,9 @@
 
 // note: cart must be loaded first
 
+/**
+ * Initializes memory, CPU, RSP and OS emulation and starts the cartridge code.
+ */
 void boot_boot(void)
 {
     int a;

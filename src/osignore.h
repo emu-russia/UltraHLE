@@ -1,3 +1,6 @@
+/**
+ * Names of OS calls excluded from patching; uncommenting an entry disables patching for that call.
+ */
 char *disablepatches[]={
 #if 0
 "osDpGetStatus",

@@ -14,6 +14,9 @@
 
 // Typedefs
 
+/**
+ * ROM entry of the game list, describing a single ROM image.
+ */
 typedef struct _RomList
 {
     char  name[MAX_PATH];                // ROM Name

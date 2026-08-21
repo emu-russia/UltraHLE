@@ -193,6 +193,12 @@ uint32_t mem_getphysical(uint32_t virtual_addr)
     else return(-1);
 }
 
+/**
+ * Computes the physical offset of a lookup table entry.
+ * @param x Lookup table (mem.lookupr or mem.lookupw).
+ * @param i Page index.
+ * @return Physical offset, or 0xffffffff if outside RDRAM.
+ */
 uint32_t lookupvalue(uint8_t **x,int i)
 {
     uintptr_t a;
@@ -201,6 +207,12 @@ uint32_t lookupvalue(uint8_t **x,int i)
     return((uint32_t)a);
 }
 
+/**
+ * Saves a lookup table to a file with simple run-length compression.
+ * @param x Lookup table to save.
+ * @param cnt Number of entries in the table.
+ * @param f1 File to save to.
+ */
 void savelookup(uint8_t **x,int cnt,FILE *f1)
 {
     int i,j,a;
@@ -241,6 +253,12 @@ void savelookup(uint8_t **x,int cnt,FILE *f1)
     }
 }
 
+/**
+ * Loads a lookup table from a file.
+ * @param x Lookup table to fill.
+ * @param cnt Number of entries in the table.
+ * @param f1 File to load from.
+ */
 void loadlookup(uint8_t **x,int cnt,FILE *f1)
 {
     int i,a,n;

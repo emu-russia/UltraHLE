@@ -70,16 +70,24 @@ typedef struct
 
 #pragma pack(pop)
 
+/** Array of emulated OS threads. */
 OSThread thread[MAXTHREAD];
+/** Index of the currently running thread. */
 int    currentthread=0;
+/** Number of threads currently in use. */
 int    threadnum=1;
 
+/** Array of emulated OS message queues. */
 OSQueue  queue[MAXQUEUE];
+/** Number of queues currently in use (0 unused). */
 int    queuenum=1; // 0 unused
 
+/** Array of emulated OS timers. */
 OSTimer  timer[MAXTIMER];
+/** Number of timers currently in use (0 unused). */
 int    timernum=1; // 0 unused
 
+/** Array of emulated OS events. */
 OSEvent  event[MAXEVENTS];
 
 void os_init(void)
@@ -94,6 +102,11 @@ void os_init(void)
     memset(event,0,sizeof(event));
 }
 
+/**
+ * Requests a task switch to the given thread on the next switch check.
+ * @param totask Thread to switch to (0 = highest priority ready thread).
+ * @param nottotask Thread to avoid switching to.
+ */
 void forcetaskswitch(int totask,int nottotask)
 {
     st.bailout=-1; // asap to cpu.c to do a taskswitch
@@ -103,6 +116,10 @@ void forcetaskswitch(int totask,int nottotask)
     st.checkswitch=1;
 }
 
+/**
+ * Blocks the given thread until it is unblocked.
+ * @param i Thread index to block.
+ */
 void blocktask(int i)
 {
     // back up PC to retry call on return to task
@@ -113,6 +130,10 @@ void blocktask(int i)
     forcetaskswitch(0,0);
 }
 
+/**
+ * Unblocks the given thread and forces a switch to it.
+ * @param i Thread index to unblock.
+ */
 void unblocktask(int i)
 {
     thread[i].ready=1;
@@ -161,6 +182,10 @@ void os_timers(void)
 #endif
 }
 
+/**
+ * Switches the emulated CPU to the given thread.
+ * @param id Thread id to switch to.
+ */
 void os_switchthread(uint32_t id)
 {
     int copysize=(&st._boundary_-&st.bailout)*4;
@@ -174,6 +199,10 @@ void os_switchthread(uint32_t id)
     logo("%i:%08X (cputime %i)\n",id,st.pc,(int)st.cputime);
 }
 
+/**
+ * Finds the highest priority ready thread.
+ * @return Index of the thread to run next.
+ */
 int  os_findthread(void)
 {
     int i,t,tp,next;
@@ -324,6 +353,10 @@ void osStartThread(uint32_t m_thread)
 
 /********************************************************/
 
+/**
+ * Writes the queue state back to emulated memory.
+ * @param id Queue id.
+ */
 void os_queuetomem(int id)
 {
     int max,valid;
@@ -335,6 +368,11 @@ void os_queuetomem(int id)
     mem_write32(queue[id].memaddr+16,max);
 }
 
+/**
+ * Checks whether the given queue is still valid in emulated memory.
+ * @param id Queue id.
+ * @return 1 if the queue is unused or corrupted, 0 if valid.
+ */
 int os_queuecheck(int id)
 {
     if(!id || id>=queuenum) return(1);

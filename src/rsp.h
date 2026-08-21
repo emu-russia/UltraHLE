@@ -1,3 +1,8 @@
+/**
+ * \file rsp.h
+ * RSP (Reality Signal Processor) emulation declarations.
+ */
+
 // Everything about RSP emulation is here
 
 #pragma once
@@ -13,6 +18,7 @@ extern "C" {
 #define IMEM_SIZE 0x1000		// bytes
 
 // RSP state
+/** RSP state: the instruction and data memories. */
 typedef struct _SPState
 {
 
@@ -21,8 +27,13 @@ typedef struct _SPState
 
 } SPState;
 
+/** Global RSP state. */
 extern SPState sp;
 
+/**
+ * Initializes the RSP: clears and maps DMEM and IMEM.
+ * @return 0 on success.
+ */
 int rsp_init();
 
 #ifdef __cplusplus

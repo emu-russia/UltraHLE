@@ -1,3 +1,7 @@
+/**
+ * \file ultra.h
+ * Main header of the emulator core, combining all emulation module interfaces and types.
+ */
 /****************************************************************************
 ** UltraHLE (temp.name) - Ultra64 High Level Emulator
 ** Copyright (C) 1998 Epsilon & RealityMan

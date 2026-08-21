@@ -2,6 +2,11 @@
 
 /***********************************************************/
 
+/**
+ * Reads a 32-bit value from SP memory.
+ * @param x Offset into SP memory.
+ * @return The 32-bit value read.
+ */
 uint32_t spmem(int x)
 {
     int d;
@@ -9,6 +14,10 @@ uint32_t spmem(int x)
     return(d);
 }
 
+/**
+ * Logs the NUL-terminated string read from memory at the address.
+ * @param addr Start address of the string.
+ */
 void printmem(uint32_t addr)
 {
     char buf[256];
@@ -23,41 +32,62 @@ void printmem(uint32_t addr)
     logi("Print(%08X) \"%s\"\n",b,buf);
 }
 
+/**
+ * Handles the start_timer OS call.
+ */
 void p_starttimer(void)
 {
     logi("\x01\x09""start_timer(%X,%X,%X,%X)\n",A0.d,A1.d,A2.d,A3.d);
     printmem(A0.d);
 }
 
+/**
+ * Handles the restart_timer OS call.
+ */
 void p_restarttimer(void)
 {
     logi("\x01\x09""restart_timer(%X,%X,%X,%X)\n",A0.d,A1.d,A2.d,A3.d);
     printmem(A0.d);
 }
 
+/**
+ * Handles the unknown dunno1_timer OS call.
+ */
 void p_dunno1timer(void)
 {
     logi("\x01\x09""dunno1_timer(%X,%X,%X,%X)\n",A0.d,A1.d,A2.d,A3.d);
     printmem(A0.d);
 }
 
+/**
+ * Handles the unknown dunno2_timer OS call.
+ */
 void p_dunno2timer(void)
 {
     logi("\x01\x09""dunno2_timer(%X,%X,%X,%X)\n",A0.d,A1.d,A2.d,A3.d);
     printmem(A0.d);
 }
 
+/**
+ * Handles the getnum_timer OS call.
+ */
 void p_gettimernum(void)
 {
     logi("\x01\x09""getnum_timer(%X,%X,%X,%X)\n",A0.d,A1.d,A2.d,A3.d);
     printmem(A0.d);
 }
 
+/**
+ * Logs the osController call at the current program counter.
+ */
 void p_osCont(void)
 {
     logi("\x01\x09""osController at %08X\n",st.pc);
 }
 
+/**
+ * Handles the osGetTime call, returning the 64-bit time in V0:V1.
+ */
 void p_osGetTime(void)
 {
     uint32_t lo,hi;
@@ -66,6 +96,9 @@ void p_osGetTime(void)
     V1.d=lo;
 }
 
+/**
+ * Handles the osGetCount call, returning the low 32 bits of the time in V0.
+ */
 void p_osGetCount(void)
 {
     uint32_t lo,hi;
@@ -73,11 +106,17 @@ void p_osGetCount(void)
     V0.d=lo;
 }
 
+/**
+ * Handles the osCreateMesgQueue call.
+ */
 void p_osCreateMesgQueue(void)
 {
     osCreateMesgQueue(A0.d,A1.d,A2.d);
 }
 
+/**
+ * Logs the readdma call and clears the branch delay so the real routine runs too.
+ */
 void p_readdma(void)
 {
     print("readdma?(%X,%X,%X,%X,%X)\n",
@@ -85,28 +124,43 @@ void p_readdma(void)
     st.branchdelay=0; // do the real routine too
 }
 
+/**
+ * Handles the ReadDma call by forwarding it to osPiStartDma.
+ */
 void p_readdma2(void)
 {
     logi("ReadDma(%X,%X,%X) patched to osPiStartDMA\n",A0.d,A1.d,A2.d);
     osPiStartDma(0,0,0,A0.d,A1.d,A2.d,0);
 }
 
+/**
+ * Handles the osPiStartDma call, reading extra arguments from the stack.
+ */
 void p_osPiStartDma(void)
 {
     V0.d=osPiStartDma(A0.d,A1.d,A2.d,A3.d,
                       spmem(0x10),spmem(0x14),spmem(0x18));
 }
 
+/**
+ * Handles the osEPiStartDma call.
+ */
 void p_osEPiStartDma(void)
 {
     V0.d=osEPiStartDma(A0.d,A1.d,A2.d);
 }
 
+/**
+ * Handles the osSetEventMessage call.
+ */
 void p_osSetEventMessage(void)
 {
     osSetEventMessage(A0.d,A1.d,A2.d);
 }
 
+/**
+ * Handles the osViSetEvent call by installing a retrace event message.
+ */
 void p_osViSetEvent(void)
 {
     // A2.d == 1 ?
@@ -114,6 +168,9 @@ void p_osViSetEvent(void)
     osSetEventMessage(OS_EVENT_RETRACE,A0.d,A1.d);
 }
 
+/**
+ * Swaps the display frame buffer to the address in A0.
+ */
 void p_osViSwapBuffer(void)
 {
     st.fb_next=A0.d;
@@ -121,73 +178,115 @@ void p_osViSwapBuffer(void)
     rdp_swap();
 }
 
+/**
+ * Returns the current frame buffer address in V0.
+ */
 void p_osViGetCurrentFrameBuffer(void)
 {
     V0.d=st.fb_current;
     logo("osViGetCurrentFrameBuffer=%08X (next=%08X) [from %08X]\n",V0.d,st.fb_next,RA.d);
 }
 
+/**
+ * Handles the osAiSetNextBuffer call.
+ */
 void p_osAiSetNextBuffer(void)
 {
     V0.d=osAiSetNextBuffer(A0.d,A1.d);
 }
 
+/**
+ * Handles the osAiSetFrequency call.
+ */
 void p_osAiSetFrequency(void)
 {
     V0.d=osAiSetFrequency(A0.d);
 }
 
+/**
+ * Handles the osAiGetLength call.
+ */
 void p_osAiGetLength(void)
 {
     V0.d=osAiGetLength();
 }
 
+/**
+ * Handles the osSendMesg call.
+ */
 void p_osSendMesg(void)
 {
     V0.d=osSendMesg(A0.d,A1.d,A2.d);
 }
 
+/**
+ * Handles the osRecvMesg call.
+ */
 void p_osRecvMesg(void)
 {
     V0.d=osRecvMesg(A0.d,A1.d,A2.d);
 }
 
+/**
+ * Handles the osCreateThread call, reading extra arguments from the stack.
+ */
 void p_osCreateThread(void)
 {
     osCreateThread(A0.d,A1.d,A2.d,A3.d,spmem(0x10),spmem(0x14));
 }
 
+/**
+ * Handles the osStartThread call.
+ */
 void p_osStartThread(void)
 {
     osStartThread(A0.d);
 }
 
+/**
+ * Handles the osStopCurrentThread call.
+ */
 void p_osStopCurrentThread(void)
 {
     osStopCurrentThread();
 }
 
+/**
+ * Handles the osSetThreadPri call.
+ */
 void p_osSetThreadPri(void)
 {
     osSetThreadPri(A0.d,A1.d);
 }
 
+/**
+ * Handles the osMapTLB call, reading extra arguments from the stack.
+ */
 void p_osMapTLB(void)
 {
     osMapTLB(A0.d,A1.d,A2.d,A3.d,spmem(0x10),spmem(0x14));
 }
 
+/**
+ * Handles the osSetTimer call, reading extra arguments from the stack.
+ */
 void p_osSetTimer(void)
 {
     // note A1.d unused! (register align issue on 64 bit params?)
     V0.d=osSetTimer(A0.d,A2.d,A3.d,spmem(0x10),spmem(0x14),spmem(0x18),spmem(0x1c));
 }
 
+/**
+ * Handles the osStopTimer call.
+ */
 void p_osStopTimer(void)
 {
     osStopTimer(A0.d);
 }
 
+/**
+ * Computes the sine of the value in floating-point register 12.
+ */
 void p_sinf(void)
 {
     float f;
@@ -197,6 +296,9 @@ void p_sinf(void)
         f,st.f[0].f);
 }
 
+/**
+ * Computes the cosine of the value in floating-point register 12.
+ */
 void p_cosf(void)
 {
     float f;
@@ -206,48 +308,75 @@ void p_cosf(void)
         f,st.f[0].f);
 }
 
+/**
+ * Handles the osVirtualToPhysical call.
+ */
 void p_osVirtualToPhysical(void)
 {
     V0.d=osVirtualToPhysical(A0.d);
 //    logi("\x01\x09""osVirtualToPhysical(%08X)=%08X\n",A0.d,V0.d);
 }
 
+/**
+ * Handles the osPhysicalToVirtual call.
+ */
 void p_osPhysicalToVirtual(void)
 {
     V0.d=osPhysicalToVirtual(A0.d);
 }
 
+/**
+ * Handles the osContInit call.
+ */
 void p_osContInit(void)
 {
     V0.d=osContInit(A0.d,A1.d,A2.d);
 }
 
+/**
+ * Handles the osContStartReadData call.
+ */
 void p_osContStartReadData(void)
 {
     V0.d=osContStartReadData(A0.d);
 }
 
+/**
+ * Handles the osContStartQuery call.
+ */
 void p_osContStartQuery(void)
 {
     V0.d=osContStartQuery(A0.d);
 }
 
+/**
+ * Handles the osContGetReadData call.
+ */
 void p_osContGetReadData(void)
 {
     osContGetReadData(A0.d);
 }
 
+/**
+ * Handles the osContGetQuery call.
+ */
 void p_osContGetQuery(void)
 {
     osContGetQuery(A0.d);
 }
 
+/**
+ * Logs the osInvalICache call.
+ */
 void p_osInvalICache(void)
 {
     logo("- osInvalICache(%X,%X)\n",A0.d,A1.d);
 //    asm_clearrange(A0.d,A1.d);
 }
 
+/**
+ * Handles the osSpTaskStartGo call unless a task load is pending.
+ */
 void p_osSpTaskStartGo(void)
 {
     if(!st2.sptaskload)
@@ -257,53 +386,83 @@ void p_osSpTaskStartGo(void)
     }
 }
 
+/**
+ * Handles the osSpTaskYield call.
+ */
 void p_osSpTaskYield(void)
 {
     V0.d=osSpTaskYield();
 }
 
+/**
+ * Handles the osSpTaskYielded call.
+ */
 void p_osSpTaskYielded(void)
 {
     V0.d=osSpTaskYielded(A0.d);
 }
 
+/**
+ * Handles the osSpTaskLoad call and marks the task as loaded.
+ */
 void p_osSpTaskLoad(void)
 {
     osSpTaskStartGo(A0.d);
     st2.sptaskload=1;
 }
 
+/**
+ * Raises the SI event for the patched Zelda controller routine.
+ */
 void p_zeldacont(void)
 {
     os_event(OS_EVENT_SI);
 }
 
+/**
+ * Stub for the Zelda grab-screen routine.
+ */
 void p_zeldagrabscreen(void)
 {
 }
 
+/**
+ * Stub for the create VI manager routine.
+ */
 void p_createvimanager(void)
 {
 //    print("vi manager: %X %X %X\n",A0.d,A1.d,A2.d);
 }
 
+/**
+ * Stub that skips the patched routine call.
+ */
 void p_skip(void)
 {
 //    logi("\x01\x09""- skip(%X,%X,%X,%X)\n",A0.d,A1.d,A2.d,A3.d);
 }
 
+/**
+ * Logs a skipped routine call together with the current symbol.
+ */
 void p_osskip(void)
 {
     logo("- osskip(%X,%X,%X,%X) ",A0.d,A1.d,A2.d,A3.d);
     logo("%s (ra=%08X)\n",sym_find(st.pc),RA.d);
 }
 
+/**
+ * Skips a routine call and returns zero in V0.
+ */
 void p_osskip0(void)
 {
     p_osskip();
     V0.d=0;
 }
 
+/**
+ * Converts the 64-bit integer in A0:A1 to a double in floating-point register 0.
+ */
 void p_long2double(void)
 {
     // A0:A1 -> FP00
@@ -317,6 +476,9 @@ void p_long2double(void)
 //    print("from %08X long2double %08X%08X -> %f\n",RA.d,A0.d,A1.d,d);
 }
 
+/**
+ * Converts the double in floating-point register 12 to a 64-bit integer in V0:V1.
+ */
 void p_double2long(void)
 {
     // FP12 -> A0:A1
@@ -330,6 +492,9 @@ void p_double2long(void)
 //    print("from %08X double2long %f -> %08X%08X\n",RA.d,d,A0.d,A1.d,d);
 }
 
+/**
+ * Converts the 64-bit integer in A0:A1 to a single in floating-point register 0.
+ */
 void p_long2single(void)
 {
     // A0:A1 -> FP00
@@ -342,6 +507,9 @@ void p_long2single(void)
 //    print("from %08X long2single %08X%08X -> %f\n",RA.d,A0.d,A1.d,f);
 }
 
+/**
+ * Converts the single in floating-point register 12 to a 64-bit integer in V0:V1.
+ */
 void p_single2long(void)
 {
     // FP12 -> A0:A1
@@ -374,6 +542,9 @@ void p_single2long(void)
 7000A490:  jr         ra
 7000A494:  Dsra32     v0 = v0>>32
 */
+/**
+ * Returns a pseudo-random value for the GoldenEye random-number routine.
+ */
 void p_golden1(void) // random bit?
 {
 #if 0
@@ -412,6 +583,9 @@ void p_golden1(void) // random bit?
 #endif
 }
 
+/**
+ * Performs an unsigned 64-bit multiply of A0:A1 by A2:A3.
+ */
 void p_dmultu(void)
 {
     qreg a,b,r;
@@ -425,6 +599,9 @@ void p_dmultu(void)
 //    logi("dop: %08X%08X=%08X%08X*%08X%08X\n",A0.d,A1.d,A2.d,A3.d,V0.d,V1.d);
 }
 
+/**
+ * Performs an unsigned 64-bit divide of A0:A1 by A2:A3.
+ */
 void p_ddivu(void)
 {
     qreg a,b,r;
@@ -438,6 +615,9 @@ void p_ddivu(void)
 //    logi("dop: %08X%08X=%08X%08X/%08X%08X (uns)\n",A0.d,A1.d,A2.d,A3.d,V0.d,V1.d);
 }
 
+/**
+ * Performs a signed 64-bit divide of A0:A1 by A2:A3.
+ */
 void p_ddiv(void)
 {
     qreg a,b,r;
@@ -451,6 +631,9 @@ void p_ddiv(void)
 //    logi("dop: %08X%08X=%08X%08X/%08X%08X (sig)\n",A0.d,A1.d,A2.d,A3.d,V0.d,V1.d);
 }
 
+/**
+ * Performs an unsigned 64-bit remainder of A0:A1 divided by A2:A3.
+ */
 void p_drem(void) // _ll_rem and _ull_rem seem to be the same!
 {
     qreg a,b,r;
@@ -464,6 +647,9 @@ void p_drem(void) // _ll_rem and _ull_rem seem to be the same!
 //    logi("dop: %08X%08X=%08X%08X rem %08X%08X\n",A0.d,A1.d,A2.d,A3.d,V0.d,V1.d);
 }
 
+/**
+ * Performs a signed 64-bit remainder of A0:A1 divided by A2:A3.
+ */
 void p_dmod(void)
 {
     qreg a,b,r;
@@ -477,11 +663,17 @@ void p_dmod(void)
 //    logi("dop: %08X%08X=%08X%08X mod %08X%08X\n",A0.d,A1.d,A2.d,A3.d,V0.d,V1.d);
 }
 
+/**
+ * Raises an exception for an unimplemented dword routine.
+ */
 void p_dabort(void)
 {
     exception("unimplemented dword routine");
 }
 
+/**
+ * Handles the patched JALR routine used by Banjo-Kazooie.
+ */
 void p_banjojalr(void)
 {
     inifile_patches(-2);
@@ -491,6 +683,9 @@ void p_banjojalr(void)
     st.branchto=st.pc+4;
 }
 
+/**
+ * Copies 32-bit words from A1 to A0, with the length in bytes in A2.
+ */
 void p_memcpy(void)
 {
     int s,d,c,a;
@@ -508,6 +703,7 @@ void p_memcpy(void)
 }
 
 typedef void (*t_patchroutine)(void);
+/** Table of patched routine handlers indexed by patch number. */
 t_patchroutine patchtable[]={
 // 0
 NULL,

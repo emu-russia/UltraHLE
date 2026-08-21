@@ -30,6 +30,7 @@ typedef struct _OSCall
     char* symname;      // 15=symbol name ptr
 } OSCall;
 
+/** Table of known os-call signatures used to locate os routines in memory. */
 OSCall oscall[MAXOSCALL]={
 #include "oscall.h"
 {0}};
@@ -42,7 +43,9 @@ typedef struct
     uint32_t  original;
 } Sym;
 
+/** Table of symbols, indexed by symbol number. */
 Sym   sym[SYMSIZE];
+/** Number of symbols currently in the sym table. */
 int   symnum;
 
 static int cmp(Sym *a,Sym *b)
@@ -50,11 +53,19 @@ static int cmp(Sym *a,Sym *b)
     return(b->addr-a->addr);
 }
 
+/**
+ * Sorts the symbol table by address (currently disabled).
+ */
 void sortsymbols(void)
 {
 //    qsort(sym,symnum,sizeof(Sym),cmp);
 }
 
+/**
+ * Finds the symbol with the largest address not greater than addr.
+ * @param addr MIPS address to look up.
+ * @return Index of the nearest symbol at or below addr.
+ */
 int findsym(int addr)
 {
     int i,nearesti=0;
@@ -217,6 +228,9 @@ void sym_dump(void)
     print("total %i symbols.\n",symnum);
 }
 
+/**
+ * Assigns patch codes to symbols whose names match an entry in the ospatch list.
+ */
 void sym_patchnames(void)
 {
     int i,j;
@@ -355,6 +369,15 @@ void sym_save(char *file)
 {
 }
 
+/**
+ * Computes the two-part CRC of a routine's instructions.
+ * @param addr Start address of the routine.
+ * @param barrier Offset to a second copy of the routine used to mask out
+ * immediate fields; 0 to compare against a known CRC.
+ * @param xcrc1 Pointer to the first CRC; tested when barrier is 0, filled
+ * when barrier is non-zero, set to -1 on error.
+ * @param xcrc2 Pointer to the second CRC; filled on return, set to -1 on error.
+ */
 void routinecrc2(uint32_t addr,int barrier,uint32_t *xcrc1,uint32_t *xcrc2)
 {
     uint32_t crc,crc1=0,crc2=0;
@@ -628,6 +651,11 @@ void sym_demooscalls(void) // for demo.rom
     sym_findoscalls(cart.codebase,base2-base1,0);
 }
 
+/**
+ * Restores the original memory contents at a patched symbol address.
+ * @param sym Symbol whose patch to undo.
+ * @return 1 if a patch was removed, 0 otherwise.
+ */
 int restorepatch(Sym *sym)
 {
     int address,patch;
@@ -647,6 +675,10 @@ int restorepatch(Sym *sym)
     return(0);
 }
 
+/**
+ * Writes the patch opcode for a symbol into memory, saving the original value.
+ * @param sym Symbol to patch.
+ */
 void putpatch(Sym *sym)
 {
     int address,patch;

@@ -126,8 +126,11 @@ typedef void(APIENTRY* PFNGLMULTITEXCOORD4FARBPROC)(GLenum, GLfloat, GLfloat, GL
 typedef void(APIENTRY* PFNGLCLIENTACTIVETEXTUREARBPROC)(GLenum);
 #endif
 
+/** Extension entry point for glActiveTextureARB (GL_ARB_multitexture). */
 extern PFNGLACTIVETEXTUREARBPROC    glActiveTextureARB;    // active texture unit
+/** Extension entry point for glMultiTexCoord4fARB (GL_ARB_multitexture). */
 extern PFNGLMULTITEXCOORD4FARBPROC  glMultiTexCoord4fARB;  // per-vertex texcoord for unit N
+/** Extension entry point for glClientActiveTextureARB (GL_ARB_multitexture). */
 extern PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB;
 
 // ---------------------------------------------------------------------------
@@ -142,7 +145,9 @@ typedef void(APIENTRY* PFNGLBLENDFUNCSEPARATEEXTPROC)(GLenum, GLenum, GLenum, GL
 typedef void(APIENTRY* PFNGLFOGCOORDFEXTPROC)(GLfloat);
 #endif
 
+/** Extension entry point for glBlendFuncSeparateEXT (GL_EXT_blend_func_separate). */
 extern PFNGLBLENDFUNCSEPARATEEXTPROC glBlendFuncSeparateEXT;
+/** Extension entry point for glFogCoordfEXT (GL_EXT_fog_coord). */
 extern PFNGLFOGCOORDFEXTPROC         glFogCoordfEXT;
 
 // wglSwapIntervalEXT (WGL_EXT_swap_control)
@@ -155,6 +160,10 @@ typedef BOOL(WINAPI* PFNWGLSWAPINTERVALEXTPROC)(int);
 #define GL_TEXTURE1_ARB 0x84c1
 #define GL_TEXTURE2_ARB 0x84c2
 
+/**
+ * Loads all OpenGL extension entry points used by the library.
+ * @return 0 on success.
+ */
 // Load all extension entry points. Returns 0 on success.
 // The GL context must be current when this is called.
 int glcompat_load(void);

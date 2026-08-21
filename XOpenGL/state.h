@@ -28,6 +28,9 @@ typedef struct _xt_rendmode
 	float env[4];		// 313(r), 314(g), 315(b), 316(a)
 } xt_rendmode;
 
+/**
+ * Complete driver state: window, transform and rendering mode settings.
+ */
 typedef struct _xt_state		// 159 dwords
 {
 	int used;		// 159  1: This state is the current state in use

@@ -12,6 +12,7 @@ typedef struct
     uint32_t   zero2;
 } ZData;
 
+/** Global buffer for the Zelda JPEG-DCT task data. */
 ZData zdata;
 
 static int    in[6][64];
@@ -23,6 +24,12 @@ static int    q2[64];
 static int    q3[64];
 
 
+/**
+ * Reads 32-bit words from emulated memory into a buffer.
+ * @param dst Destination buffer.
+ * @param addr Source address in emulated memory.
+ * @param bytes Number of bytes to read.
+ */
 void readdata(void *dst,uint32_t addr,int bytes)
 {
     uint32_t *d=(uint32_t *)dst;
@@ -35,6 +42,12 @@ void readdata(void *dst,uint32_t addr,int bytes)
     }
 }
 
+/**
+ * Reads 16-bit values from emulated memory into a buffer.
+ * @param q Destination buffer.
+ * @param addr Source address in emulated memory.
+ * @param bytes Number of bytes to read.
+ */
 void readshort(int *q,uint32_t addr,int bytes)
 {
     int x,i;
@@ -47,6 +60,12 @@ void readshort(int *q,uint32_t addr,int bytes)
     }
 }
 
+/**
+ * Writes 16-bit values from a buffer into emulated memory.
+ * @param q Source buffer.
+ * @param addr Destination address in emulated memory.
+ * @param bytes Number of bytes to write.
+ */
 void writeshort(int *q,uint32_t addr,int bytes)
 {
     int x,a,b,i;
@@ -60,6 +79,11 @@ void writeshort(int *q,uint32_t addr,int bytes)
     }
 }
 
+/**
+ * Reads a 64-entry quantizer table from emulated memory and scales it.
+ * @param q Destination quantizer table.
+ * @param addr Source address in emulated memory.
+ */
 void readq(int *q,uint32_t addr)
 {
     int i;
@@ -68,6 +92,7 @@ void readq(int *q,uint32_t addr)
     for(i=1;i<64;i++) q[i]*=2;
 }
 
+/** Zigzag order used to reorder JPEG-DCT coefficients. */
 int zigzag[64]={
    0,  1,  5,  6, 14, 15, 27, 28,
    2,  4,  7, 13, 16, 26, 29, 42,
@@ -78,6 +103,7 @@ int zigzag[64]={
   21, 34, 37, 47, 50, 56, 59, 61,
   35, 36, 48, 49, 57, 58, 62, 63};
 
+/** DCT coefficient curve table (overwritten by dctinit). */
 int	curve[8][8]={ // old values, overwritten by dctinit()
 { 16, 16, 16, 16, 16, 16, 16, 16},
 { 15, 13,  8,  3, -3, -8,-13,-15},
@@ -89,6 +115,11 @@ int	curve[8][8]={ // old values, overwritten by dctinit()
 {  3, -8, 13,-15, 15,-13,  8, -3}
 };
 
+/**
+ * Dumps an 8x8 DCT coefficient block to dct.log.
+ * @param in Coefficient block to dump.
+ * @param text Label written before the block.
+ */
 void dctdump(int *in,char *text)
 {
     static FILE *f1;

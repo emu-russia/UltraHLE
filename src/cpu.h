@@ -1,9 +1,15 @@
+/** \file cpu.h
+ * CPU emulation state, register access macros and control functions.
+ */
 #pragma once
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/**
+ * Quadword register, readable as a doubleword or as two words.
+ */
 // quadword register
 typedef union
 {
@@ -12,6 +18,9 @@ typedef union
     uint32_t d2[2];
 } qreg;
 
+/**
+ * Single-precision floating point register; doubles span two consecutive singles.
+ */
 // floating point register (single)
 //   Double registers are stored in two consecutive singles as in R4300 using
 // casts. The register order is luckily same as for X86 double ordering!
@@ -63,6 +72,9 @@ typedef union
 ** Also macros for accessing registers by name
 */
 
+/**
+ * Breakpoint descriptor (type, address and data match criteria).
+ */
 // breakpoint
 typedef struct
 {
@@ -87,8 +99,12 @@ typedef struct
 // or this to disable breakpoint
 #define BREAK_DISABLE    0x1000
 
+/** Text names of breakpoint types, indexed by BREAK_* value. */
 extern char* breakname[]; // table of above defines in text (cpu.c)
 
+/**
+ * Main emulator state, split into thread-specific and shared parts.
+ */
 // The spare RESERVED arrays are meant for maintaining save compatibility.
 // If you need to add new variables to state, put them at the end and
 // decrease RESERVED count by 1. In this way the format of struct remains
@@ -256,6 +272,9 @@ typedef struct
 
 #define DMAHISTORYSIZE 256
 
+/**
+ * Nonsaved emulator state, zeroed at every execution start.
+ */
 // nonsaved state, initialized to zero every time execution starts
 typedef struct
 {
@@ -332,6 +351,9 @@ typedef struct
     int cpuerrorcnt;
 } State2;
 
+/**
+ * Per-frame emulation statistics (CPU, graphics, audio and timing).
+ */
 typedef struct
 {
     int    frame;  // for which frame these stats are
@@ -373,6 +395,9 @@ typedef struct
 } Stats;
 
 #define MAXFILE 1024
+/**
+ * Emulator startup settings from the command line.
+ */
 // Init settings from command line/startup (not loaded)
 typedef struct
 {
@@ -394,13 +419,28 @@ typedef struct
 #define BAILOUTNOW  -100000
 
 // active state
+/**
+ * Active emulator state, saved and restored with savegames.
+ */
 extern State  st;     // in cpu.c
+/**
+ * Nonsaved emulator state, zeroed whenever execution starts.
+ */
 extern State2 st2;    // in cpu.c
+/**
+ * Emulator startup settings, filled from the command line.
+ */
 extern Init   init;   // in cpu.c
 
 #define STATS 16
 #define STATUPDATE 30 // every 30 frames
+/**
+ * Ring buffer of per-frame statistics entries.
+ */
 extern Stats ss[STATS];
+/**
+ * Index of the current statistics entry in ss.
+ */
 extern int   ssi; // index to current stat
 
 #define R0  st.g[0x00]
@@ -446,13 +486,39 @@ extern int   ssi; // index to current stat
 ** Cpu emulation high level control (cpu.c)
 */
 
+/**
+ * Saves the CPU state to a file.
+ * @param f1 File to write the state to.
+ */
 void cpu_save(FILE* f1);    // save state to a file
+/**
+ * Loads the CPU state from a file.
+ * @param f1 File to read the state from.
+ */
 void cpu_load(FILE* f1);    // load state from a file
+/**
+ * Clears all registers and resets the emulator to its initial state.
+ */
 void cpu_init(void);        // clear all regs (entire st struct)
+/**
+ * Stops execution at the next possible point and returns to the console.
+ */
 void cpu_break(void);       // stop execution at next possible point and return to console
+/**
+ * Stops execution at the next idle thread.
+ */
 void cpu_nicebreak(void);   // stop execution at next idle thread
+/**
+ * Changes the program counter.
+ * @param pc New program counter value.
+ */
 void cpu_goto(uint32_t pc);    // change pc
 
+/**
+ * Executes a number of instructions, optionally with fast compiled execution.
+ * @param ops Number of operations to execute; 1 steps a single instruction.
+ * @param fast Request fast compiled execution; breakpoints and traces are disabled.
+ */
 // main 'execute' routine, parameters are number of ops to execute and
 // a flag for requesting fast (compiled) execution. Breakpoints and
 // traces etc don't work in fast mode. Mode can be changed at every
@@ -460,46 +526,148 @@ void cpu_goto(uint32_t pc);    // change pc
 void cpu_exec(uint64_t ops, int fast);
 
 // routines to set breakpoints (see definition of Break above)
+/**
+ * Clears all breakpoints.
+ */
 void cpu_clearbp(void); // clear all breakpoints
+/**
+ * Adds a breakpoint.
+ * @param type Breakpoint type, one of the BREAK_* defines.
+ * @param addr Address matched by the breakpoint.
+ * @param data Data value matched by the breakpoint.
+ */
 void cpu_addbp(int type, uint32_t addr, uint32_t data); // add a breakpoint
+/**
+ * Clears all breakpoints and adds this one.
+ * @param type Breakpoint type, one of the BREAK_* defines.
+ * @param addr Address matched by the breakpoint.
+ * @param data Data value matched by the breakpoint.
+ */
 void cpu_onebp(int type, uint32_t addr, uint32_t data); // clear breakpoints, and add this one
 
 // these used internally by cpu.c for calling the slow emulator (cpuc.c)
+/**
+ * Executes st.bailout instructions with the slow interpreter until the bailout counter expires.
+ */
 void c_exec(void); // execute st.bailout instructions
+/**
+ * Executes a single instruction without any checks and advances the program counter.
+ * @param opcode MIPS opcode to execute.
+ */
 void c_execop(uint32_t opcode); // execute one instruction, no checks
 
 // these used internally by cpu.c for calling the fast compiler (cpua.c)
 // the fast compiler calls the slow emulator (with c_execone) for parts
 // it cannot compile
+/**
+ * Clears the compiled code cache, restoring patched memory and resetting all groups (no-op in the x64 build).
+ */
 void a_clearcodecache(void); // clear compiled code cache
+/**
+ * Reclaims compiled code groups whose opcodes no longer match (no-op in the x64 build).
+ */
 void a_cleardeadgroups(void);
+/**
+ * Prints MIPS-to-X86 compiler statistics to the console (no-op in the x64 build).
+ */
 void a_stats(void); // print stats to console
+/**
+ * Prints compiled opcode usage statistics to the console (no-op in the x64 build).
+ */
 void a_stats2(void); // print stats to console
+/**
+ * Prints the group execution profile to the console (no-op in the x64 build; without EXECPROF, only reports that profiling is not compiled in).
+ */
 void a_stats3(void); // print stats to console
+/**
+ * Executes approximately st.bailout instructions, compiling as needed.
+ */
 void a_exec(void); // execute approximately st.bailout instructions, compile as needed
+/**
+ * Compiles the code group at the given address for testing (no-op in the x64 build).
+ * @param x Address of the code group to compile.
+ */
 void a_compilegroupat(uint32_t x);
 
 // these are used internally for breakpoints
+/**
+ * Handles a triggered breakpoint.
+ * @param i Index of the triggered breakpoint in st.breakpoint.
+ */
 void cpu_breakpoint(int i); // breakpoint triggered (count etc checking could be here)
+/**
+ * Initializes breakpoint data for event breakpoints before execution.
+ */
 void cpu_initbreak(void);   // do breakpoint init for event breakpoints before exec
+/**
+ * Checks thread and frame change event breakpoints.
+ */
 void cpu_checkeventbreak(void);  // check event breakpoints
+/**
+ * Checks a memory access breakpoint.
+ * @param addr Address being accessed.
+ * @param bytes Access size in bytes.
+ * @param iswrite 1 for a write access, 0 for a read.
+ */
 void cpu_checkmembreak(uint32_t addr, int bytes, int iswrite); // check a memory breakpoint
+/**
+ * Checks call, return and forward branch breakpoints.
+ * @param addr Branch target address.
+ * @param type Branch type, one of the BRANCH_* defines.
+ */
 void cpu_checkbranchbreak(uint32_t addr, int type); // check call/ret/branch breakpoint
 
 // these are used internally
+/**
+ * Checks runtime keyboard input.
+ * @param dopad 1 to also send keys to the debug UI as pad input.
+ */
 void cpu_keys(int dopad);   // check runtime keys (used internally)
+/**
+ * Checks keyboard input and updates the display and statistics when due.
+ * @param fast Whether fast compiled execution is active.
+ */
 void cpu_checkui(int fast); // check/update user interface
 
 // these used by cpua.c to notify cpu.c of things. Cpu.c does call
 // tracing and breakpoints based on these calls. Addresses virtual.
 // this slows cpuc down but make enhancing breakpoints/traces more
 // easy and modular. And cpuc it's not used often anyway.
+/**
+ * Notifies the CPU core of a memory read for breakpoints and tracing.
+ * @param addr Address being read.
+ * @param bytes Number of bytes read.
+ */
 void cpu_notify_readmem(uint32_t addr, int bytes);  // read of address
+/**
+ * Notifies the CPU core of a memory write for breakpoints and tracing.
+ * @param addr Address being written.
+ * @param bytes Number of bytes written.
+ */
 void cpu_notify_writemem(uint32_t addr, int bytes); // write of address
+/**
+ * Notifies the CPU core of a branch for breakpoints and tracing.
+ * @param addr Branch target address.
+ * @param type Branch type, one of the BRANCH_* defines.
+ */
 void cpu_notify_branch(uint32_t addr, int type);    // branch to address, type=BRANCH_*
+/**
+ * Notifies the CPU core of execution at an address for breakpoints and tracing.
+ * @param addr Address being executed.
+ */
 void cpu_notify_pc(uint32_t addr);                 // execution at address
+/**
+ * Notifies the CPU core of a message send or receive for breakpoints.
+ * @param queue Message queue identifier.
+ * @param qaddr Message queue address.
+ * @param issend 1 for a send, 0 for a receive.
+ */
 void cpu_notify_msg(int queue, uint32_t qaddr, int issend); // execution at address
 
+/**
+ * Updates the per-frame statistics entry.
+ * @param skip 1 to record the interval since the previous update.
+ */
 void cpu_updatestats(int skip);
 
 #ifdef __cplusplus

@@ -45,21 +45,73 @@ typedef struct _xt_texture
 	int usedsize[X_TEXPARTS];	// used bytes per part
 } xt_texture;
 
+/** Highest used X texture handle (index into g_texture). */
 extern int g_lasttexture;
+/** Texture descriptors indexed by X handle; entry 0 is unused. */
 extern xt_texture g_texture[MAXTEXTURES];		// The 0th entry is not used
 
 // Texture management (fxtext.c)
+/**
+ * Initializes texture management.
+ */
 void text_init();
+/**
+ * Releases all GL texture objects.
+ */
 void text_deinit();
+/**
+ * Returns the texel offset and size of a mip level inside the packed host buffer.
+ * @param txt Texture descriptor.
+ * @param level Mip level index.
+ * @param xsize Receives the level width, or NULL.
+ * @param ysize Receives the level height, or NULL.
+ * @return Texel offset of the level in the packed buffer.
+ */
 int accesstexture(xt_texture* txt, int level, int* xsize, int* ysize);
+/**
+ * Allocates the host-side data buffer for all mip levels.
+ * @param txt Texture descriptor.
+ */
 void text_allocdata(xt_texture* txt);
+/**
+ * Copies one mip level of RGBA8888 data into the host buffer.
+ * @param txt Texture descriptor.
+ * @param level Mip level index.
+ * @param data Source pixel data.
+ * @return Number of texels copied.
+ */
 int text_loadlevel(xt_texture* txt, int level, void* data);
+/**
+ * Frees the host data and GL texture object of a texture.
+ * @param txt Texture descriptor.
+ */
 void text_freedata(xt_texture* txt);
+/**
+ * Deletes all GL texture objects, keeping the host data.
+ */
 void text_cleartexmem();
+/**
+ * Returns a pointer to the host-side texture data.
+ * @param txt Texture descriptor.
+ * @return Pointer to the texture data.
+ */
 void* text_opendata(xt_texture* txt);
+/**
+ * Marks the texture for re-upload and unbinds it from the active slots.
+ * @param txt Texture descriptor.
+ */
 void text_closedata(xt_texture* txt);
+/**
+ * Updates the texture memory statistics at the end of a frame.
+ * @return Always 0.
+ */
 int text_frameend();
 
+/**
+ * Uploads the texture data to an OpenGL texture object.
+ * @param txt Texture descriptor.
+ * @return 0 on success, -1 if the texture is not in use.
+ */
 // Upload a texture to OpenGL (called from fx.c when a texture becomes active).
 // Returns 0 on success.
 int fxuploadtexture(xt_texture* txt);

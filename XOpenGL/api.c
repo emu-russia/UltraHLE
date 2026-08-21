@@ -8,6 +8,7 @@ static float identmatrix[4 * 4] = {
 };
 
 int g_activestateindex;
+/** Pointer to the currently active state. */
 xt_state* g_activestate;
 
 xt_state g_state[X_MAXSTATES];		// The 0th entry is not used

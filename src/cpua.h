@@ -84,15 +84,22 @@ extern "C" {
 ** Only used when compiling.
 */
 
+/**
+ * Describes one MIPS opcode while it is being compiled.
+ */
 typedef struct
 {
     uint32_t  pc;
     uint32_t  x86code;    // offset to mem.code
     char   r[3];       // regs, -1=not present, r[0] is dest, r[1..2]=src
+    /** Memory operand type: 0=none, 1=load, 2=store. */
     char   memop;
     int    RESERVED;
 } MOp;
 
+/**
+ * Global compile state of the compiler; only used while compiling.
+ */
 typedef struct
 {
     // parameters set when compile starts
@@ -102,11 +109,14 @@ typedef struct
 
     // parameters for active instruction
     uint32_t  pc;
+    /** Non-zero if an insert() call was made for the current op. */
     int    inserted;
+    /** Last group jumped to by the compiled code. */
     int    lastjumpto;
 
     // errors
     int    errors;
+    /** Non-zero if the current op uses the FPU. */
     int    fpuused;
 
     // optimization settings
@@ -125,36 +135,53 @@ typedef struct
     int    opt_domemio;
 
     // eaxload
+    /** Register of the last memory load emitted, for load elimination. */
     int    eaxload_reg;
+    /** Base of the last memory load emitted. */
     int    eaxload_base;
+    /** Offset of the last memory load emitted. */
     int    eaxload_offset;
+    /** Code position just after the last emitted load. */
     int    eaxload_codeusedend;
 
     // for slt optimization
+    /** Immediate of a pending slt, for the slt optimization. */
     int    slt_imm;
+    /** Source register rs of a pending slt. */
     int    slt_rs;
+    /** Source register rt of a pending slt. */
     int    slt_rt;
     int    slt_branch; // 1=do slt branch
 
     // other stuff
+    /** MIPS pc of the last memory access, for adjacent access optimization. */
     uint32_t  lastma;
+    /** Register of the last memory access. */
     int    lastmareg;
+    /** Offset of the last memory access. */
     int    lastmaoff;
 
     struct
     {
+        /** MIPS register whose vm lookup is cached. */
         int    reg;
+        /** Cached vm address offset for the register. */
         uint32_t  off;
     } vmcache[VMCACHESIZE];
+    /** Index of the next vmcache entry. */
     int vmcachei;
 
+    /** Non-zero if a compiler test mark was inserted. */
     int    mark;
 
+    /** Compile records for the instructions of the group. */
     MOp    op[MAXGROUP*2];
 
+    /** Obsolete field; unused. */
     int    OBS_regsused;
 } RState;
 
+/** Global compile state of the compiler (defined in cpua.c). */
 extern RState r; // in cpua.c
 
 // values orred to r.error
@@ -173,6 +200,9 @@ extern RState r; // in cpua.c
 ** Compiler statistics (use cmd 'stats' to see these in the debugui)
 */
 
+/**
+ * Compiler statistics counters.
+ */
 typedef struct
 {
     // compiler stats
@@ -193,6 +223,7 @@ typedef struct
     int    used[256];
 } CStats;
 
+/** Compiler statistics counters (defined in cpua.c). */
 extern CStats cstat; // in cpua.c
 
 /***********************************************************************
@@ -213,6 +244,7 @@ extern CStats cstat; // in cpua.c
 ** for direct usage in inline asm (a_fastexec uses them).
 */
 
+/** IP-table used to insert immediate values and offsets into compiled code. */
 extern uint32_t ip[256];
 
 #define IP_PC        0x00 // pc value
@@ -398,44 +430,106 @@ typedef void (*t_asmop)(void);
 #define X86_NOR        0xA001
 #define X86_LUIMOV     0xA002 // not a real opcode
 
+/**
+ * Inserts nothing, but marks that an insert() call was made.
+ */
 void insertnothing(void); // inserts nothing (but sets r.inserted=1)
+/**
+ * Inserts a single byte into the compiled code stream.
+ * @param x Byte value to insert.
+ */
 void insertbyte(int x);   // inserts a single byte
+/**
+ * Inserts a 32-bit dword into the compiled code stream.
+ * @param x Value to insert.
+ */
 void insertdword(int x);  // inserts a dword (32-bit)
 
+/**
+ * Inserts a routine's code into the compiled stream, replacing ip-table references.
+ * @param o Routine to insert.
+ */
 // insert a routine (with ip[] table data replacements)
 void insert(t_asmop o);
 
+/**
+ * Inserts an opcode with a MODRM byte for a single base register.
+ * @param opcode X86 opcode to insert.
+ * @param reg Register for the MODRM reg field.
+ * @param base Base register, or REG_REG for the register-register form,
+ * or REG_NONE for absolute addressing.
+ * @param offset Memory offset to encode, or the second register when base is REG_REG.
+ */
 // generic MODRM inserter. Only supports a single base register
 // and offset, no index register. If possible use the other more
 // specific insert routines below this.
 void insertmodrmopcode(int opcode,int reg,int base,int offset);
 
+/**
+ * Inserts a memory-read opcode: OP dst,[base+offset].
+ * @param opcode X86 opcode to insert.
+ * @param dst Destination register.
+ * @param base Base register, or REG_NONE.
+ * @param offset Memory offset.
+ */
 // inserts a mem opcode:   OP  dst,[base+offset]
 // optimized: offset=0 or base=REG_NONE
 void insertmemropcode(int opcode,int dst,int base,int offset);
 
+/**
+ * Inserts a memory-write opcode: OP [base+offset],src.
+ * @param opcode X86 opcode to insert.
+ * @param base Base register, or REG_NONE.
+ * @param offset Memory offset.
+ * @param src Source register.
+ */
 // inserts a mem write:    OP  [base+offset],src
 // optimized: offset=0 or base=REG_NONE
 void insertmemwopcode(int opcode,int base,int offset,int src);
 
+/**
+ * Inserts a register opcode: OP dst,src.
+ * @param opcode X86 opcode to insert.
+ * @param dst Destination register.
+ * @param src Source register (ignored for some opcodes).
+ */
 // inserts a reg opcode:   OP  dst,src
 // ignores: MOV reg,reg
 // for some opcodes (like NOT) src is ignored
 void insertregopcode(int opcode,int dst,int src);
 
+/**
+ * Inserts an opcode with an immediate operand: OP dst,imm.
+ * @param opcode X86 opcode to insert.
+ * @param dst Destination register.
+ * @param imm Immediate value.
+ */
 // inserts an immediate:   OP  dst,imm
 // optimizes: ADD reg,32bit to ADD reg,8bit if immediate small enough
 void insertimmopcode(int opcode,int dst,int imm);
 
+/**
+ * Inserts a CALL to a naked routine into the compiled code.
+ * @param routine Address of the routine to call.
+ */
 // inserts a call:         CALL routine
 // note that the routine must be naked and note the reg usage etc
 void insertcall(void *routine);
+/**
+ * Inserts a JMP to a naked routine into the compiled code.
+ * @param routine Address of the routine to jump to.
+ */
 void insertjump(void *routine);
 
 /***********************************************************************
 ** Misc utils
 */
 
+/**
+ * Returns the internally used opcode number of a MIPS opcode.
+ * @param opcode MIPS opcode.
+ * @return Internal opcode number.
+ */
 // returns an internally used opcode number from a mips opcode
 int  getop(uint32_t opcode);
 
@@ -443,17 +537,44 @@ int  getop(uint32_t opcode);
 ** Main compile-an-opcode entrypoint
 */
 
+/**
+ * Compiles a group of instructions into X86 code.
+ * @param g Group to compile.
+ */
 // group compiler main routine
 void   ac_compilegroup(Group *g);
 
+/**
+ * Compiles one MIPS opcode and inserts the generated X86 code.
+ * @param pc Address of the opcode to compile.
+ * @return Number of instructions parsed (1, or 2 if the delay slot was parsed too).
+ */
 // call this
 int    ac_compileop(uint32_t pc);
+/**
+ * Compiles one decoded MIPS opcode and inserts the generated X86 code.
+ * @param pc Address of the opcode.
+ * @param opcode The MIPS opcode word.
+ * @param op Internal opcode number from getop.
+ * @return Number of instructions parsed (0 if the opcode was not compiled here, 1, or 2 if the delay slot was parsed too).
+ */
 int    ac_compileopnew(uint32_t pc,uint32_t opcode,int op);
 
+/**
+ * Starts compiling a group, resetting registers and setting the group code pointer.
+ */
 // start/end routines for compiler
 void   ac_compilestartnew(void);
+/**
+ * Finishes compiling a group, flushing registers and inserting the end jump.
+ */
 void   ac_compileendnew(void);
 
+/**
+ * Creates a new group in the mem.group table for an address, or returns an existing one.
+ * @param pc Address of the group.
+ * @return The group for the address.
+ */
 // routine for creating a new group Tthe group is allocated an entry
 // in mem.group table, but it is not compiled before it is executed.
 Group *ac_creategroup(uint32_t pc);
@@ -462,40 +583,145 @@ Group *ac_creategroup(uint32_t pc);
 ** Routines for X86 register allocation
 */
 
+/**
+ * Allocates the given x86 register for a register name.
+ * @param name Register name to allocate.
+ * @param x86 x86 register index to allocate.
+ * @return The allocated x86 register index.
+ */
 // Allocating x86 registers (caller must load the reg!)
 int  reg_alloc(int name,int x86);  // alloc a specific x86 register for 'name'
+/**
+ * Allocates an x86 register for a name, even if it already has one (prefers EDX for RA).
+ * @param name Register name to allocate.
+ * @return The allocated x86 register index.
+ */
 int  reg_allocnew(int name);       // alloc a new register for 'name' (even if it already  has one)
+/**
+ * Returns the least recently used x86 register available for allocation.
+ * @return Index of the x86 register.
+ */
 int  reg_oldest(void);             // find oldest (by lastused) reg for overwriting
 
+/**
+ * Emits code to save the x86 register value back to its MIPS register.
+ * @param x86 x86 register index.
+ */
 // Helpers for loading/saving MIPS regs (reg must be allocated first)
 void reg_save(int x86);            // load value to an x86 register (only works for mips regs)
+/**
+ * Emits code to load the MIPS register value into the x86 register.
+ * @param x86 x86 register index.
+ */
 void reg_load(int x86);            // save value from an x86 register (only works for mips regs)
 
 // Using loaded registers
+/**
+ * Returns the x86 register holding the given name.
+ * @param name Register name to find.
+ * @return x86 register index, or REG_NONE if not loaded.
+ */
 int  reg_find(int name);           // where 'name' is loaded, returns x86 reg (REG_NONE=nowhere)
+/**
+ * Marks an x86 register as changed and updates its last-used time.
+ * @param x86 x86 register index.
+ */
 void reg_wr(int x86);              // mark x86 register changed and increment lastused
+/**
+ * Updates the last-used time of an x86 register.
+ * @param x86 x86 register index.
+ */
 void reg_rd(int x86);              // increment lastused
+/**
+ * Reallocates an x86 register under a new name.
+ * @param x86 x86 register index.
+ * @param name New register name.
+ */
 void reg_rename(int x86,int name); // increment lastused
 
 // Freeing registers for other usage (reg saved using reg_save)
+/**
+ * Frees an x86 register, saving it first if it was changed.
+ * @param x86 x86 register index.
+ */
 void reg_free(int x86);            // make x86 register available
+/**
+ * Frees all x86 registers.
+ */
 void reg_freeall(void);            // make all x86 register unused (saves it)
+/**
+ * Frees all x86 registers except the two given names.
+ * @param name First name to keep allocated.
+ * @param name2 Second name to keep allocated.
+ */
 void reg_freeallbut(int name,int name2);
 
 // Floating point regs
+/**
+ * Creates a new FPU stack top and loads the given register into it.
+ * @param name FPU register name.
+ * @param size FPU operand size in bytes (4 or 8).
+ */
 void freg_push(int name,int size);
+/**
+ * Exchanges FPU stack slot i with st(0).
+ * @param i FPU stack slot index.
+ */
 void freg_xchg(int i); // with st(0)
+/**
+ * Saves FPU stack slot i to memory and pops it.
+ * @param i FPU stack slot index.
+ */
 void freg_save(int i);
+/**
+ * Marks an FPU stack slot as unused without saving it.
+ * @param i FPU stack slot index.
+ */
 void freg_delete(int i);
+/**
+ * Loads the FPU register into a new FPU stack top.
+ * @param name FPU register name.
+ * @param size FPU operand size in bytes (4 or 8).
+ */
 void freg_load(int name,int size);
+/**
+ * Saves and pops all FPU stack slots.
+ */
 void freg_saveall();
+/**
+ * Returns the FPU stack slot holding the given name.
+ * @param name FPU register name.
+ * @return FPU stack slot index, or REG_NONE if not loaded.
+ */
 int  freg_find(int name);          // where 'name' is loaded, returns x86 reg (REG_NONE=nowhere)
+/**
+ * Renames the FPU stack top, removing other copies of the same register.
+ * @param name New FPU register name.
+ * @param size FPU operand size in bytes (4 or 8; 0 marks the entry as not saved).
+ */
 void freg_renametop(int name,int size);
+/**
+ * Pushes a new FPU stack top with the given name and size.
+ * @param name FPU register name.
+ * @param size FPU operand size in bytes (4 or 8).
+ */
 void freg_pushtop(int name,int size);
+/**
+ * Pops the FPU stack top.
+ */
 void freg_poptop(void);
 
+/**
+ * Resets the x86 register allocation tables.
+ */
 void reg_init(void);
+/**
+ * Resets the FPU register allocation tables.
+ */
 void freg_init(void);
+/**
+ * Prints the FPU register stack to the console.
+ */
 void freg_dump(void);
 
 // Register name is 8bit index + one of the constants below
@@ -514,6 +740,9 @@ void freg_dump(void);
 #define XNAME_TYPE    0xf00
 
 // Tables for keeping track what data is in all x86 regs
+/**
+ * Tracks what data is held in one x86 or FPU register.
+ */
 typedef struct
 {
     int    name;      // type (XNAME_*)
@@ -522,11 +751,19 @@ typedef struct
     int    lastused;
 } XReg;
 
+/** Tracks the data held in the eight general x86 registers. */
 extern XReg reg[8];
 
+/** Tracks the data held in the x86 FPU register stack. */
 extern XReg fpreg[16];
 
+/**
+ * Main dispatch loop for executing compiled groups (defined in cpua.c).
+ */
 extern void fastexec_loop(void);
+/**
+ * Dispatch entry that checks for pending memory I/O (defined in cpua.c).
+ */
 extern void fastexec_loopjrra(void);
 
 #ifdef __cplusplus

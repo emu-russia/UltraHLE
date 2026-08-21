@@ -5,6 +5,7 @@ extern char szBuffer[];
 
 #define STATLINES 20
 
+/** Flag set to request the emulator to exit. */
 int exitflag=0;
 
 void exitnow(void)
@@ -18,8 +19,10 @@ void exitnow(void)
 
 static State stlast;
 
+/** Whether the debug view and console are open. */
 int viewopen=0;
 
+/** Help text lines displayed in the help window. */
 char *helptext[]={
 "                                                                               ",
 " A:A       S:Start  C:L-Trig  I J K L:C-Keys  Shift:Walk   Arrows:Analog Stick ",
@@ -42,22 +45,33 @@ typedef struct
     int   writepos;
 } Con;
 
+/** Size and position of the help window. */
 Win w_help;
+/** Size and position of the register window. */
 Win w_regs;
+/** Size and position of the data window. */
 Win w_data;
+/** Size and position of the code window. */
 Win w_code;
+/** Size and position of the console window. */
 Win w_cons;
+/** Size and position of the statistics window. */
 Win w_stat;
 
+/** Buffer holding the console text lines. */
 Con console;
 
+/** Text shown in the status line at the bottom of the console. */
 char statusline[128];
 
 View view;
 
+/** Foreground color of the window title bars. */
 int c_barfg=0x0;
+/** Background color of the window title bars. */
 int c_barbg=0x3;
 
+/** Recomputes window sizes and positions for the current console height. */
 void view_checksize(void)
 {
     int h,y;
@@ -132,6 +146,7 @@ void view_changed(int which)
     view.changed|=which;
 }
 
+/** Draws the register window. */
 void view_regs(void)
 {
     char regname[16];
@@ -263,6 +278,7 @@ void view_regs(void)
     }
 }
 
+/** Draws the help text window. */
 void view_help(void)
 {
     int c_txt  =0x02;
@@ -284,6 +300,7 @@ void view_help(void)
     }
 }
 
+/** Draws the statistics window and updates the status bar. */
 void view_stat(void)
 {
     int c_txt2 =0x0f;
@@ -450,6 +467,7 @@ void view_stat(void)
     }
 }
 
+/** Draws the data memory window. */
 void view_data(void)
 {
     int c_cur  =0x03;
@@ -520,6 +538,7 @@ void view_data(void)
     }
 }
 
+/** Draws the code disassembly window. */
 void view_code(void)
 {
     int c_cur  =0x03;
@@ -587,6 +606,7 @@ void view_code(void)
     }
 }
 
+/** Draws the console window. */
 void view_cons(void)
 {
     int c_cur  =0x03;
@@ -780,6 +800,10 @@ static int  historypos;
 static int  scrolling;
 static void conkey(int a);
 
+/**
+ * Executes a console command line and stores it in the command history.
+ * @param editline Command line to execute.
+ */
 void docommand(char *editline)
 {
     int i;
@@ -815,6 +839,10 @@ void flushdisplay(void)
     view_redraw();
 }
 
+/**
+ * Handles a key press for the data window.
+ * @param a Key code as defined in console.h.
+ */
 void datakey(int a)
 {
     switch(a)
@@ -835,6 +863,10 @@ void datakey(int a)
     view_changed(VIEW_DATA);
 }
 
+/**
+ * Handles a key press for the code window.
+ * @param a Key code as defined in console.h.
+ */
 void codekey(int a)
 {
     switch(a)
@@ -855,6 +887,10 @@ void codekey(int a)
     view_changed(VIEW_CODE);
 }
 
+/**
+ * Handles a key press for the console command line.
+ * @param a Key code as defined in console.h.
+ */
 void conkey(int a)
 {
     int editlen=strlen(editline);
@@ -966,6 +1002,10 @@ void conkey(int a)
     view_changed(VIEW_CONS);
 }
 
+/**
+ * Executes the command bound to a function key.
+ * @param a Key code as defined in console.h.
+ */
 // execute commands bound to a function key (keycodes as in console.h)
 void command_fkey(int a)
 {
@@ -1007,6 +1047,10 @@ void command_fkey(int a)
     }
 }
 
+/**
+ * Dispatches a key press to the active view window.
+ * @param a Key code as defined in console.h.
+ */
 void debugui_key(int a)
 {
     int flag=1;

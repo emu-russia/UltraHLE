@@ -12,6 +12,11 @@ extern int  rdp_gfxactive(void);
    // ST: emulator thread; basically calls main.c which returns
    // if debugui is ever exited with 'x'.
 
+   /**
+    * Emulator thread entry point; runs main_thread and closes the main window when it returns.
+    * @param value Unused thread parameter.
+    * @return 0.
+    */
    int emuthread(int value)
    {
        main_thread();
