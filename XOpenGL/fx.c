@@ -660,9 +660,13 @@ static void set_combine(int tmu, int rgbmode, int alphamode, int stage)
 			// C = ITERATED*F + ENV*(1-F)  (Glide grColorCombine(7,5,1,0,0))
 			fnRGB = GL_INTERPOLATE; s0 = srcA; s1 = GL_CONSTANT; s2 = GL_TEXTURE;
 			break;
-		case X_TEXTUREENVCR:	// Glide: blend(envcolor, iterated, factor) - approx: texturealpha
-			// C = ENV*F + ITERATED*(1-F)  (Glide grColorCombine(7,5,0,2,0))
-			fnRGB = GL_INTERPOLATE; s0 = GL_CONSTANT; s1 = srcA; s2 = GL_TEXTURE;
+		case X_TEXTUREENVCR:	// Glide: blend(envcolor, iterated, factor)
+			// C = ITERATED*TA + ENV*(1-TA): the vertex (gouraud) color must
+			// dominate for opaque textures (Mario 64's head in the menu).
+			// XGLIDE used LOD_FRACTION as the blend factor here; GL has no
+			// LOD factor in the fixed pipeline, so the texture alpha is used
+			// and the iterated color is kept on the "TA" side, same as ENVC.
+			fnRGB = GL_INTERPOLATE; s0 = srcA; s1 = GL_CONSTANT; s2 = GL_TEXTURE;
 			break;
 		case X_SUB:				// Glide: texture - iterated  (grColorCombine(6,8,0,1,0))
 			fnRGB = GL_SUBTRACT; s0 = GL_TEXTURE; s1 = srcA; s2 = srcA;
