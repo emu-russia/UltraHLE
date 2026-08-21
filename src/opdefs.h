@@ -1,3 +1,7 @@
+/**
+ * \file opdefs.h
+ * MIPS R4300 opcode definitions.
+ */
 // Filename  : opdefs.h
 // File Desc : Opcode Definitions
 

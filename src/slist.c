@@ -143,6 +143,11 @@ static Cmdname zelda_cmdnames[]={
 
 /*************************************************************************/
 
+/**
+ * Prints a scaled curve point to the log.
+ * @param x Value to plot.
+ * @param scale Divisor applied to x.
+ */
 void printcurve(int x,int scale)
 {
     static char space[101]={"                                                                                                    "};
@@ -156,6 +161,10 @@ void printcurve(int x,int scale)
     loga(">\n");
 }
 
+/**
+ * Prints 32 bytes of command data from memory to the log.
+ * @param cmd Command words containing the data address.
+ */
 void printdata(uint32_t *cmd)
 {
     int i,x;
@@ -167,6 +176,10 @@ void printdata(uint32_t *cmd)
     }
 }
 
+/**
+ * Prints 0x80 bytes of command data from memory to the log.
+ * @param cmd Command words containing the data address.
+ */
 void printdata2(uint32_t *cmd)
 {
     int i,x;
@@ -179,6 +192,11 @@ void printdata2(uint32_t *cmd)
     }
 }
 
+/**
+ * Prints curve data read from memory to the log.
+ * @param addr Memory address of the curve data.
+ * @param len Length of the curve data in bytes.
+ */
 void printcurvedata(uint32_t addr,int len)
 {
     int i,x;
@@ -190,6 +208,11 @@ void printcurvedata(uint32_t addr,int len)
     }
 }
 
+/**
+ * Prints curve data from the sound state buffer to the log.
+ * @param src Byte offset of the curve data in the sound state buffer.
+ * @param len Length of the curve data in bytes.
+ */
 void printlocalcurvedata(int src,int len)
 {
     int i,x;
@@ -204,6 +227,12 @@ void printlocalcurvedata(int src,int len)
 
 /*************************************************************************/
 
+/**
+ * Loads 32-bit memory words as pairs of shorts into dst.
+ * @param dst Destination short array.
+ * @param addr Source memory address.
+ * @param cnt Number of bytes to load.
+ */
 void loadshort(short *dst,uint32_t addr,int cnt)
 {
     int i,a;
@@ -215,6 +244,12 @@ void loadshort(short *dst,uint32_t addr,int cnt)
     }
 }
 
+/**
+ * Copies memory contents into the sound state buffer.
+ * @param dst Byte offset in the sound state buffer.
+ * @param addr Source memory address.
+ * @param cnt Number of bytes to copy.
+ */
 void loadmem(uint32_t dst,uint32_t addr,int cnt)
 {
     int i,a;
@@ -236,6 +271,12 @@ void loadmem(uint32_t dst,uint32_t addr,int cnt)
     }
 }
 
+/**
+ * Copies sound state buffer contents back to memory.
+ * @param dst Byte offset in the sound state buffer.
+ * @param addr Destination memory address.
+ * @param cnt Number of bytes to copy.
+ */
 void savemem(uint32_t dst,uint32_t addr,int cnt)
 {
     int i,a;
@@ -256,6 +297,12 @@ void savemem(uint32_t dst,uint32_t addr,int cnt)
     }
 }
 
+/**
+ * Copies a block within the sound state buffer.
+ * @param out Byte offset of the destination block.
+ * @param in Byte offset of the source block.
+ * @param cnt Number of bytes to copy.
+ */
 void movemem(int out,int in,int cnt)
 {
     if(in>=4096 || out>=4096 || in+cnt>4096 || out+cnt>4096)
@@ -269,6 +316,11 @@ void movemem(int out,int in,int cnt)
     memcpy(sst.mem+out,sst.mem+in,cnt);
 }
 
+/**
+ * Zeroes a block of the sound state buffer.
+ * @param out Byte offset of the block.
+ * @param cnt Number of bytes to zero.
+ */
 void zeromem(int out,int cnt)
 {
     if(out>=4096 || out+cnt>4096)
@@ -284,6 +336,12 @@ void zeromem(int out,int cnt)
 /*************************************************************************/
 // ADPCM decompress
 
+/**
+ * Loads the ADPCM decoder state block according to flags.
+ * @param dst Byte offset of the state block in the sound state buffer.
+ * @param m_state Memory address of the stored state.
+ * @param flags Bit 0 initializes, bit 1 loads the loop state.
+ */
 void loadsamplestate(int dst,uint32_t m_state,int flags)
 {
     // load state
@@ -307,15 +365,32 @@ void loadsamplestate(int dst,uint32_t m_state,int flags)
     }
 }
 
+/**
+ * Saves the ADPCM decoder state block to memory.
+ * @param dst Byte offset of the state block in the sound state buffer.
+ * @param m_state Destination memory address.
+ * @param flags Unused state flags.
+ */
 void savesamplestate(int dst,uint32_t m_state,int flags)
 {
     savemem(dst,m_state,32);
 }
 
+/**
+ * Initializes the ADPCM codebook tables (currently a no-op).
+ */
 void adpcm_inittables(void)
 {
 }
 
+/**
+ * Decodes one block of 16 ADPCM samples.
+ * @param out Output sample buffer.
+ * @param last Previous 16 samples used as decoder history.
+ * @param src Byte offset of the encoded data in the sound state buffer.
+ * @param book ADPCM codebook.
+ * @param bits ADPCM bits per sample (4 or 2).
+ */
 // handles a block of 16 samples
 void adpcm_block(short *out,short *last,int src,short *book,int bits)
 {
@@ -441,6 +516,14 @@ void adpcm_block(short *out,short *last,int src,short *book,int bits)
     }
 }
 
+/**
+ * Decodes an ADPCM stream into the sound state buffer.
+ * @param m_state Memory address of the decoder state.
+ * @param src Byte offset of the encoded data in the sound state buffer.
+ * @param dst Byte offset of the decoded samples in the sound state buffer.
+ * @param cnt Size of the encoded data in bytes.
+ * @param flags Bit 0 initializes, bit 1 loads the loop state, bit 2 selects 2-bit mode.
+ */
 void adpcm(uint32_t m_state,int src,int dst,int cnt,int flags)
 {
     int src0;
@@ -566,6 +649,15 @@ void adpcm(uint32_t m_state,int src,int dst,int cnt,int flags)
     */
 }
 
+/**
+ * Resamples an audio block with linear interpolation.
+ * @param m_state Memory address of the resampler state.
+ * @param src Byte offset of the source samples in the sound state buffer.
+ * @param dst Byte offset of the resampled samples in the sound state buffer.
+ * @param cnt Number of bytes of source data.
+ * @param flags Bit 0 resets the resampler state.
+ * @param speed Fixed-point resampling rate.
+ */
 void resample(uint32_t m_state,int src,int dst,int cnt,int flags,int speed)
 {
     int subpos,a,b,r;
@@ -715,6 +807,11 @@ void resample(uint32_t m_state,int src,int dst,int cnt,int flags,int speed)
     }
 }
 
+/**
+ * Applies an 8-tap FIR filter to a block of samples.
+ * @param dst Byte offset of the block in the sound state buffer.
+ * @param coef Array of 8 filter coefficients.
+ */
 void filter_block(int dst,short *coef)
 {
     int i,j,s;
@@ -741,6 +838,14 @@ void filter_block(int dst,short *coef)
     }
 }
 
+/**
+ * Applies the filter command to a block (currently ignored).
+ * @param dst Byte offset of the block in the sound state buffer.
+ * @param cnt Number of bytes to filter.
+ * @param m_coef Memory address of the filter coefficients.
+ * @param m_state Memory address of the filter state.
+ * @param flags Filter flags.
+ */
 void filter(int dst,int cnt,int m_coef,int m_state,int flags)
 {
     short coef[8];
@@ -786,6 +891,15 @@ void filter(int dst,int cnt,int m_coef,int m_state,int flags)
     savesamplestate(2048,m_state,flags&1);
 }
 
+/**
+ * Mixes a block with volume and effect for the Zelda envelope mixer.
+ * @param src Byte offset of the source samples.
+ * @param dst1 Byte offset of the left output buffer.
+ * @param dst2 Byte offset of the right output buffer.
+ * @param eff1 Byte offset of the left effect buffer.
+ * @param eff2 Byte offset of the right effect buffer.
+ * @param cnt Number of bytes to mix.
+ */
 void envmix_zelda(int src,int dst1,int dst2,int eff1,int eff2,int cnt)
 {
     int i,j,jn,lx,rx;
@@ -911,6 +1025,12 @@ void envmix_zelda(int src,int dst1,int dst2,int eff1,int eff2,int cnt)
     }
 }
 
+/**
+ * Replicates a 128-byte loop entry across the sound state buffer.
+ * @param out Byte offset of the destination block.
+ * @param in Byte offset of the loop entry.
+ * @param count Size of the destination block in bytes.
+ */
 void moveloop(int out,int in,int count) // 128 byte loop entries
 {
     int i,j;
@@ -926,6 +1046,12 @@ void moveloop(int out,int in,int count) // 128 byte loop entries
     }
 }
 
+/**
+ * Copies every second sample into the sound state buffer.
+ * @param out Byte offset of the destination block.
+ * @param in Byte offset of the source block.
+ * @param count Size of the source block in bytes.
+ */
 void movehalve(int out,int in,int count)
 {
     int i;
@@ -938,6 +1064,15 @@ void movehalve(int out,int in,int count)
     }
 }
 
+/**
+ * Mixes a block with volume ramping and effect for the Mario envelope mixer.
+ * @param src Byte offset of the source samples.
+ * @param dst1 Byte offset of the left output buffer.
+ * @param dst2 Byte offset of the right output buffer.
+ * @param eff1 Byte offset of the left effect buffer.
+ * @param eff2 Byte offset of the right effect buffer.
+ * @param cnt Number of bytes to mix.
+ */
 void envmix_mario(int src,int dst1,int dst2,int eff1,int eff2,int cnt)
 {
     int i,j,jn;
@@ -1074,6 +1209,13 @@ void envmix_mario(int src,int dst1,int dst2,int eff1,int eff2,int cnt)
     sst.env_rttar=rttar>>1;
 }
 
+/**
+ * Interleaves left and right samples into a stereo buffer and queues it for playback.
+ * @param dst Byte offset of the stereo output in the sound state buffer.
+ * @param left Byte offset of the left channel samples.
+ * @param right Byte offset of the right channel samples.
+ * @param cnt Number of bytes per channel.
+ */
 void interleave(int dst,int left,int right,int cnt)
 {
     int i,a;
@@ -1113,6 +1255,13 @@ void interleave(int dst,int left,int right,int cnt)
     //logi("sound: added %04X bytes\n",cnt*2*2);
 }
 
+/**
+ * Adds a gain-scaled source block to the destination block.
+ * @param dst Byte offset of the destination block.
+ * @param src Byte offset of the source block.
+ * @param cnt Number of bytes to mix.
+ * @param gain Signed gain factor.
+ */
 void mixer(int dst,int src,int cnt,int gain)
 {
     int i,r;
@@ -1130,6 +1279,12 @@ void mixer(int dst,int src,int cnt,int gain)
     }
 }
 
+/**
+ * Scales a buffer block by a gain factor.
+ * @param dst Byte offset of the block in the sound state buffer.
+ * @param cnt Number of bytes to scale.
+ * @param gain Gain factor.
+ */
 void boost(int dst,int cnt,int gain)
 {
     int i,r;
@@ -1145,6 +1300,10 @@ void boost(int dst,int cnt,int gain)
     }
 }
 
+/**
+ * Loads the envelope mixer parameters from memory.
+ * @param addr Memory address of the parameter block.
+ */
 void envmix_loadstate(uint32_t addr)
 {
     sst.env_ltvol=mem_read32p(addr+ 0);
@@ -1157,6 +1316,10 @@ void envmix_loadstate(uint32_t addr)
     sst.env_rttar=mem_read32p(addr+28);
 }
 
+/**
+ * Saves the envelope mixer parameters to memory.
+ * @param addr Memory address of the parameter block.
+ */
 void envmix_savestate(uint32_t addr)
 {
     mem_write32(addr+ 0,sst.env_ltvol);
@@ -1169,6 +1332,9 @@ void envmix_savestate(uint32_t addr)
     mem_write32(addr+28,sst.env_rttar);
 }
 
+/**
+ * Clears the envelope mixer parameters.
+ */
 void envmix_clearstate(void)
 {
     sst.env_lteff=0;
@@ -1181,6 +1347,9 @@ void envmix_clearstate(void)
     sst.env_rtvol=0;
 }
 
+/**
+ * Resets the envelope mixer to a simple default state.
+ */
 void envmix_simplestate(void)
 {
     sst.env_lteff=0;
@@ -1198,6 +1367,9 @@ void envmix_simplestate(void)
 static int adpcmcnt=0;
 static int cmdcnt=0;
 
+/**
+ * Dumps the audio memory to a file for debugging.
+ */
 void saveaudiomem(void)
 {
     static int done=0;
@@ -1217,6 +1389,10 @@ static __inline uint32_t address(uint32_t address)
     return( (address&0xffffff) + sst.segment );
 }
 
+/**
+ * Executes a Banjo sound list.
+ * @param task Audio task containing the sound list data.
+ */
 void slist_banjo(OSTask_t *task)
 {
     int cmdnum,c,lastc;
@@ -1477,6 +1653,10 @@ default:
 }
 
 
+/**
+ * Executes a Mario sound list.
+ * @param task Audio task containing the sound list data.
+ */
 void slist_mario(OSTask_t *task)
 {
     int cmdnum,c,lastc;
@@ -1710,6 +1890,10 @@ void slist_mario(OSTask_t *task)
     }
 }
 
+/**
+ * Executes a Zelda sound list.
+ * @param task Audio task containing the sound list data.
+ */
 void slist_zelda(OSTask_t *task)
 {
     int cmdnum,c;

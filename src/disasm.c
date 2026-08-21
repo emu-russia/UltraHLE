@@ -235,6 +235,7 @@ static char *op_special[65]={
 "Dsra32 %rd = %rt>>%s3",
 ""};
 
+/** Format strings for the CPU regimm opcode class, indexed by the rt field. */
 char *op_regimm[33]={
 // 0
 "bltz %rs<0 -->%ir",
@@ -484,6 +485,12 @@ static char *op_rpc[65]={ // <-FUNC
 "*77",
 ""};
 
+/**
+ * Returns the name of a coprocessor register.
+ * @param x Instruction word carrying the coprocessor number.
+ * @param reg Register number.
+ * @return Register name from the tables or from a static buffer.
+ */
 char *copreg(uint32_t x,int reg)
 {
     int cop=OP_OP(x)&3;
@@ -530,6 +537,13 @@ char *copreg(uint32_t x,int reg)
     }
 }
 
+/**
+ * Expands a format token (e.g. %rs, %im) into text for the current instruction.
+ * @param d0 Pointer to the output buffer pointer, advanced past the emitted text.
+ * @param p Format token string.
+ * @param x Instruction word.
+ * @param pos Address of the instruction.
+ */
 void format(char **d0,char *p,uint32_t x,uint32_t pos)
 {
     int a=-1,b;
@@ -745,6 +759,12 @@ void format(char **d0,char *p,uint32_t x,uint32_t pos)
     *d0=d;
 }
 
+/**
+ * Disassembles a single instruction into a static buffer.
+ * @param pos Address of the instruction.
+ * @param x Instruction word.
+ * @return Disassembled instruction text in a static buffer.
+ */
 char *disasmmain(uint32_t pos,uint32_t x)
 {
     static char buf[256];

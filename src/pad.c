@@ -38,26 +38,41 @@ typedef struct
     char sticky;
 } PadStructData;
 
+/** Current controller state (buttons and stick position). */
 PadStructData mypad;
+/** Button state from the previous frame. */
 uint16_t          lastbutton;
+/** Non-zero when the keyboard stick range is narrowed. */
 int           xnarrow;
+/** Keyboard stick X direction input. */
 int           xcenter;
+/** Keyboard stick Y direction input. */
 int           ycenter;
 int           joyactive;
+/** Currently selected controller index. */
 int           selectpad;
 
 int           mouseactive;
 int           mousedisablecnt;
 
+/** Joystick button state from the previous poll. */
 int           lastjoybuttons;
 
+/** Debug flag. */
 int  wire=0;
+/** Debug flag. */
 int  info=0;
 
 #define AVERAGE 2
 
 #define MM_PADSTRUCTDATA 0x8033afa8
 
+/**
+ * Reads the current joystick position and buttons.
+ * @param xpos Receives the joystick X position.
+ * @param ypos Receives the joystick Y position.
+ * @param buttons Receives the button state.
+ */
 void readjoystick(int *xpos,int *ypos,int *buttons)
 {
     JOYINFO joy;
@@ -75,6 +90,9 @@ void pad_enablejoy(int enable)
     if(enable) joyactive=1;
 }
 
+/**
+ * Reads keyboard button presses into the pad button state.
+ */
 void pad_buttons(void)
 {
     int a,k;
@@ -96,6 +114,10 @@ void pad_buttons(void)
     k='V'; a=R_TRIG;   if(GetAsyncKeyState(k)<0) mypad.button|=a;
 }
 
+/**
+ * Reads keyboard stick input and smooths the stick position.
+ * @param readasync Non-zero to read the cursor keys as stick input.
+ */
 void pad_keyboard(int readasync)
 {
     static int lastx,lasty;
@@ -149,6 +171,9 @@ void pad_keyboard(int readasync)
     lasty=y;
 }
 
+/**
+ * Reads joystick input into the pad state when the joystick is active.
+ */
 void pad_joy(void)
 {
     int x,y,b,bc;
@@ -197,6 +222,9 @@ void pad_joy(void)
     lastjoybuttons=b;
 }
 
+/**
+ * Reads mouse movement and buttons into the pad state.
+ */
 void pad_mouse(void)
 {
     static float xhistory[AVERAGE];

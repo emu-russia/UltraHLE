@@ -41,6 +41,7 @@
 	1-8 - group number, esc value, etc
 */
 
+/** Primary x86 opcode table, indexed by the opcode byte. */
 char *opmap1[] = {
 /* 0 */
   "add %Eb,%Gb", "add %Ev,%Gv", "add %Gb,%Eb", "add %Gv,%Ev",
@@ -129,6 +130,7 @@ char *opmap1[] = {
   "cld", "std", "%g4", "%g5"
   };
 
+/** Opcode table for two-byte (0F-prefixed) instructions, indexed by the second byte. */
 char *second[] = {
 /* 0 */
   "%g6", "%g7", "lar %Gv,%Ew", "lsl %Gv,%Ew", 0, 0, "clts", 0,
@@ -182,6 +184,7 @@ char *second[] = {
   0, 0, 0, 0, 0, 0, 0, 0,
   };
 
+/** Format strings for the modrm group operations, indexed by group number and reg field. */
 char *groups[][8] = {   /* group 0 is group 3 for %Ev set */
   { "test %Ev,%Iv", "test %Ev,%Iv,", "not %Ev", "neg %Ev",
     "mul %eax,%Ev", "imul %eax,%Ev", "div %eax,%Ev", "idiv %eax,%Ev" },
@@ -199,40 +202,69 @@ char *groups[][8] = {   /* group 0 is group 3 for %Ev set */
   { 0, 0, 0, 0, "bt", "bts", "btr", "btc" }
   };
 
+/** Float opcode table for escapes 0-7 (all entries invalid). */
 /* zero here means invalid.  If first entry starts with '*', use st(i) */
 /* no assumed %EFs here.  Indexed by rm(modrm()) */
 char *f0[] = {0, 0, 0, 0, 0, 0, 0, 0};
+/** Float opcode table for escape 9 (fxch). */
 char *fop_9[]  = { "*fxch st,%GF" };
+/** Float opcode table for escape 10 (fnop). */
 char *fop_10[] = { "fnop", 0, 0, 0, 0, 0, 0, 0 };
+/** Float opcode table for escape 12 (fchs, fabs, ftst, fxam). */
 char *fop_12[] = { "fchs", "fabs", 0, 0, "ftst", "fxam", 0, 0 };
+/** Float opcode table for escape 13 (fld1 ... fldz). */
 char *fop_13[] = { "fld1", "fldl2t", "fldl2e", "fldpi",
                    "fldlg2", "fldln2", "fldz", 0 };
+/** Float opcode table for escape 14 (f2xm1 ... fincstp). */
 char *fop_14[] = { "f2xm1", "fyl2x", "fptan", "fpatan",
                    "fxtract", "fprem1", "fdecstp", "fincstp" };
+/** Float opcode table for escape 15 (fprem ... fcos). */
 char *fop_15[] = { "fprem", "fyl2xp1", "fsqrt", "fsincos",
                    "frndint", "fscale", "fsin", "fcos" };
+/** Float opcode table for escape 21 (fucompp). */
 char *fop_21[] = { 0, "fucompp", 0, 0, 0, 0, 0, 0 };
+/** Float opcode table for escape 28 (fclex, finit). */
 char *fop_28[] = { 0, 0, "fclex", "finit", 0, 0, 0, 0 };
+/** Float opcode table for escape 32 (fadd). */
 char *fop_32[] = { "*fadd %GF,st" };
+/** Float opcode table for escape 33 (fmul). */
 char *fop_33[] = { "*fmul %GF,st" };
+/** Float opcode table for escape 36 (fsubr). */
 char *fop_36[] = { "*fsubr %GF,st" };
+/** Float opcode table for escape 37 (fsub). */
 char *fop_37[] = { "*fsub %GF,st" };
+/** Float opcode table for escape 38 (fdivr). */
 char *fop_38[] = { "*fdivr %GF,st" };
+/** Float opcode table for escape 39 (fdiv). */
 char *fop_39[] = { "*fdiv %GF,st" };
+/** Float opcode table for escape 40 (ffree). */
 char *fop_40[] = { "*ffree %GF" };
+/** Float opcode table for escape 42 (fst). */
 char *fop_42[] = { "*fst %GF" };
+/** Float opcode table for escape 43 (fstp). */
 char *fop_43[] = { "*fstp %GF" };
+/** Float opcode table for escape 44 (fucom). */
 char *fop_44[] = { "*fucom %GF" };
+/** Float opcode table for escape 45 (fucomp). */
 char *fop_45[] = { "*fucomp %GF" };
+/** Float opcode table for escape 48 (faddp). */
 char *fop_48[] = { "*faddp %GF,st" };
+/** Float opcode table for escape 49 (fmulp). */
 char *fop_49[] = { "*fmulp %GF,st" };
+/** Float opcode table for escape 51 (fcompp). */
 char *fop_51[] = { 0, "fcompp", 0, 0, 0, 0, 0, 0 };
+/** Float opcode table for escape 52 (fsubrp). */
 char *fop_52[] = { "*fsubrp %GF,st" };
+/** Float opcode table for escape 53 (fsubp). */
 char *fop_53[] = { "*fsubp %GF,st" };
+/** Float opcode table for escape 54 (fdivrp). */
 char *fop_54[] = { "*fdivrp %GF,st" };
+/** Float opcode table for escape 55 (fdivp). */
 char *fop_55[] = { "*fdivp %GF,st" };
+/** Float opcode table for escape 60 (fstsw). */
 char *fop_60[] = { "fstsw ax", 0, 0, 0, 0, 0, 0, 0 };
 
+/** Float opcode tables indexed by the escape value (0-63); NULL marks unused escapes. */
 char **fspecial[] = { /* 0=use st(i), 1=undefined 0 in fop_* means undefined */
   0, 0, 0, 0, 0, 0, 0, 0,
   0, fop_9, fop_10, 0, fop_12, fop_13, fop_14, fop_15,
@@ -244,6 +276,7 @@ char **fspecial[] = { /* 0=use st(i), 1=undefined 0 in fop_* means undefined */
   f0, f0, f0, f0, fop_60, f0, f0, f0,
   };
 
+/** Float opcode names for the memory-operand forms (mod field != 3), indexed by escape. */
 char *floatops[] = { /* assumed " %EF" at end of each.  mod != 3 only */
 /*00*/ "fadd", "fmul", "fcom", "fcomp",
        "fsub", "fsubr", "fdiv", "fdivr",
@@ -275,6 +308,7 @@ typedef signed long int32;
 typedef signed short int16;
 typedef signed char int8;
 
+/** Segment size in bits (16 or 32) used for the disassembly. */
 int seg_size=32;
 
 static word8 buf[20];
@@ -283,15 +317,25 @@ static int bufp, bufe;
 static char ubuf[100], *ubufp, *ubufp2, *ubufp2end;
 static col;
 
+/** Prefix string prepended to hexadecimal values in the output. */
 char *hex1=""; // ="0x";
+/** Suffix string appended to hexadecimal values in the output. */
 char *hex2=""; // ="h";
 
+/** Pointer to the next byte of the opcode stream being disassembled. */
 unsigned char *codepnt;
+/** Code segment value of the instruction being disassembled. */
 unsigned codeseg;
+/** Current code offset, advanced as opcode bytes are consumed. */
 intptr_t codeoff;
 
 static percent(char c, char t);
 
+/**
+ * Formats text into the disassembly output buffer.
+ * @param s Format string.
+ * @param ... Format arguments.
+ */
 void uprintf(char *s,...)
 {
 	va_list va;
@@ -363,6 +407,11 @@ static sib()
 #define indx(a)	(((a)>>3)&7)
 #define base(a)	((a)&7)
 
+/**
+ * Returns the size in bytes of a size character.
+ * @param c Size character ('b', 'w', 'd' or 'v').
+ * @return Size in bytes.
+ */
 int bytes(char c)
 {
   switch (c)
@@ -467,6 +516,11 @@ static char *reg_names[3][8]={
   "ax","cx","dx","bx","sp","bp","si","di",
   "eax","ecx","edx","ebx","esp","ebp","esi","edi" };
 
+/**
+ * Prints the name of a register to the disassembly output buffer.
+ * @param which Register number (0-7).
+ * @param size Size or type character ('b', 'v', 'd', 'F', ...).
+ */
 void reg_name(int which, char size)
 {
   if (size == 'F')
@@ -490,6 +544,9 @@ void reg_name(int which, char size)
   }
 }
 
+/**
+ * Prints the SIB (scale-index-base) addressing operand of the current instruction.
+ */
 do_sib(m)
 {
   int s, i, b;
@@ -536,6 +593,10 @@ do_sib(m)
     }
 }
 
+/**
+ * Prints the operand addressed by the current ModRM byte.
+ * @param t Size or type character.
+ */
 void do_modrm(char t)
 {
   int m = mod(modrm());

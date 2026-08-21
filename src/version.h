@@ -1,3 +1,8 @@
+/**
+ * \file version.h
+ * Application name, title, copyright and version number macros.
+ */
+
 ////////////////////////////////////////////////////////////////////////////////
 // UltraHLE, Copyright Epsilon and RealityMan, 1998
 // version.h

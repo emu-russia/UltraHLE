@@ -3,7 +3,11 @@
 extern HWND hwndMain;
 
 // startup settings
+/**
+ * Commands from the command line to execute at startup.
+ */
 char  startcmd[1024];
+/** ROM file name given on the command line. */
 char  startrom[256];
 
 static HANDLE emuthreadhandle;
@@ -32,6 +36,10 @@ static char cmdret[MAXRET];
 static int  cmdretcnt;
 static int  cmderrs;
 
+/**
+ * Adds a line to the debug list view, suppressing repeated identical lines.
+ * @param txt Text to display, or NULL to clear the debug list.
+ */
 void debugmessage(char *txt)
 {
     static char last[256];
@@ -262,6 +270,14 @@ void main_show3dfx(void)
     }
 }
 
+/**
+ * Window procedure of the hidden emulator thread window.
+ * @param hwnd Window handle.
+ * @param iMsg Window message.
+ * @param wParam Message parameter.
+ * @param lParam Message parameter.
+ * @return Message result.
+ */
 LRESULT CALLBACK thread_window_proc (HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 {
      switch (iMsg)
@@ -288,6 +304,9 @@ LRESULT CALLBACK thread_window_proc (HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM
      return DefWindowProc (hwnd, iMsg, wParam, lParam) ;
 }
 
+/**
+ * Shows a message box with the command line usage in non-release builds.
+ */
 void help(void)
 {
     if(!RELEASE)

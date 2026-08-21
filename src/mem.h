@@ -1,3 +1,7 @@
+/**
+ * \file mem.h
+ * Memory management: hybrid implementation of the RCP arbiter and CPU TLB.
+ */
 // Memory management. Represents a hybrid implementation of the RCP arbiter and the TLB of the CPU.
 
 #pragma once
@@ -8,6 +12,9 @@ extern "C" {
 
 #define IO_MAX 32
 
+/**
+ * Compiled instruction group for the dynamic recompiler.
+ */
 // compiler compiles instructions in groups, groups always end
 // at next jump/branch/call instruction's delay slot. In fast
 // mode one group is executed at a time, either with cpua or cpuc.
@@ -27,6 +34,9 @@ typedef struct
 #define GROUP_FAST  2   // analysed, use fast cpua (in this case .code set)
 #define GROUP_PATCH 3   // analysed, use slow cpuc (patch)
 
+/**
+ * Memory state of the emulator, saved and loaded with savestates.
+ */
 // Memory state (saved/loaded)
 typedef struct
 {
@@ -62,6 +72,7 @@ typedef struct
 // opcode 0x70707070 = PATCH(0x7070) which generates 'execution at null page'
 #define NULLFILL   0x70707070
 
+/** Global memory state of the emulator. */
 extern Mem mem; // mem.c
 
 // indices to mem.io
@@ -134,15 +145,42 @@ extern Mem mem; // mem.c
 #define memdatar(x) ((uint32_t *)( mem.lookupr[mempage(x)]+x ))
 #define memdataw(x) ((uint32_t *)( mem.lookupw[mempage(x)]+x ))
 
+/**
+ * Allocates and initializes the memory system.
+ * @param ramsize Size of RDRAM in bytes.
+ */
 // sim.c
 void    mem_init(int ramsize);          // allocates memory and initializes memory system
+/**
+ * Translates a virtual address to a physical address.
+ * @param virtual_addr Virtual address to translate.
+ * @return Physical address, or -1 if the address has no physical backing.
+ */
 uint32_t   mem_getphysical(uint32_t virtual_addr); // virtual->physical address (-1=no physical for that address!)
 
 // map page[dst] to external 4K array (external data NOT saved!)
 // map page[dst] to physical address src
 // map page[dst] to where page[src] points to
+/**
+ * Maps page[dst] to where page[src] points to.
+ * @param dst Virtual page address to map.
+ * @param rw Access mode (MAP_*).
+ * @param src Virtual page address whose mapping is reused.
+ */
 void    mem_mapcopy(uint32_t dst, int rw, uint32_t src);
+/**
+ * Maps page[dst] to physical address src.
+ * @param dst Virtual page address to map.
+ * @param rw Access mode (MAP_*).
+ * @param src Physical address the page maps to.
+ */
 void    mem_mapphysical(uint32_t dst, int rw, uint32_t src);
+/**
+ * Maps page[dst] to an external 4K array (external data NOT saved).
+ * @param dst Virtual page address to map.
+ * @param rw Access mode (MAP_*).
+ * @param data Pointer to the external array.
+ */
 void    mem_mapexternal(uint32_t dst, int rw, void* data);
 
 // rw parameter values for mapping (WTHENR only works for mapexternal)
@@ -151,30 +189,85 @@ void    mem_mapexternal(uint32_t dst, int rw, void* data);
 #define MAP_RW      2  // map page for both
 #define MAP_WTHENR  3  // map page for CPU write, and other page at data+4096 to CPU read
 
+/**
+ * Returns the group index for the group located at the address.
+ * @param addr Address of the group.
+ * @return Group index, or -1 if no group matches.
+ */
 int mem_groupat(uint32_t addr);
 
+/**
+ * Reads an 8-bit value from emulated memory.
+ * @param addr Virtual address to read.
+ * @return The 8-bit value read.
+ */
 // routines to access memory. 32-bit accesses are macros and quite fast,
 // 8 and 16 bit accesses are routines are slower.
 uint32_t   mem_read8(uint32_t addr);
+/**
+ * Reads a 16-bit value from emulated memory.
+ * @param addr Virtual address to read (must be 16-bit aligned).
+ * @return The 16-bit value read.
+ */
 uint32_t   mem_read16(uint32_t addr);
 #define mem_read32(addr) (*memdatar(addr))
 #define mem_read32p(addr) (*(uint32_t *)( mem.ram+ (addr&(RDRAMSIZE-1)) ) )
+/**
+ * Writes an 8-bit value to emulated memory.
+ * @param addr Virtual address to write.
+ * @param data Value to write.
+ */
 void    mem_write8(uint32_t addr, uint32_t data);
+/**
+ * Writes a 16-bit value to emulated memory.
+ * @param addr Virtual address to write (must be 16-bit aligned).
+ * @param data Value to write.
+ */
 void    mem_write16(uint32_t addr, uint32_t data);
 #define mem_write32(addr,data) (*memdataw(addr))=(data)
 
+/**
+ * Reads an opcode, replacing GROUP(x) opcodes with the original group opcode.
+ * @param addr Address of the opcode.
+ * @return The decoded opcode.
+ */
 // special routine to read an opcode. This routine replaces
 // GROUP(x) opcodes with original opcodes from mem.group table
 uint32_t   mem_readop(uint32_t addr);
+/**
+ * Returns a static string describing the group type of the opcode at the address.
+ * @param addr Address of the opcode.
+ * @return Static group-type string.
+ */
 // read type of group for debugui view module (returns static string)
 char* mem_readoptype(uint32_t addr);
 
+/**
+ * Copies a range of emulated memory into a buffer (addresses must be dword aligned).
+ * @param addr Virtual address to read from.
+ * @param bytes Number of bytes to copy.
+ * @param data Destination buffer.
+ */
 // copying a lot of data (addr MUST be dword aligned)
 void    mem_readrangeraw(uint32_t addr, int bytes, char* data);
+/**
+ * Copies a buffer into a range of emulated memory (addresses must be dword aligned).
+ * @param addr Virtual address to write to.
+ * @param bytes Number of bytes to copy.
+ * @param data Source buffer.
+ */
 void    mem_writerangeraw(uint32_t addr, int bytes, char* data);
 
 
+/**
+ * Saves the memory state (lookup tables and RDRAM) to a file.
+ * @param f1 File to save to.
+ */
 void    mem_save(FILE* f1);
+/**
+ * Loads the memory state (lookup tables and RDRAM) from a file.
+ * @param f1 File to load from.
+ */
 void    mem_load(FILE* f1);
 
 #ifdef __cplusplus

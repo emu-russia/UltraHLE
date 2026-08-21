@@ -26,6 +26,9 @@ void sync_init(void)
 
 // These sync_* routines called from the main thread
 
+/**
+ * Checks and adjusts sound-related synchronization, enabling audio playback when requested.
+ */
 void sync_audio(void)
 {
     int a,b,bufsize;

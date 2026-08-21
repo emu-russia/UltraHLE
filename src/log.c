@@ -1,5 +1,9 @@
 #include "ultra.h"
 
+/**
+ * Writes a text string to the console window and the log file.
+ * @param txt Text to write, or NULL to flush the log.
+ */
 void printtxt(char *txt)
 {
     static FILE *logfile;

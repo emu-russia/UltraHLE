@@ -116,6 +116,9 @@ void cpu_updatestats(int skip)
 }
 
 
+/**
+ * Stops active sound and pending tasks, then clears the nonsaved state.
+ */
 /********************************************************************/
 
 void cpu_clearstate2(void)
@@ -309,6 +312,11 @@ void cpu_checkui(int fast)
     }
 }
 
+/**
+ * Prints a call or return trace line when tracing is enabled.
+ * @param isret 1 for a return trace, 0 for a call trace.
+ * @param addr Call or return target address.
+ */
 void cpu_dumptrace(int isret,uint32_t addr)
 {
     static char line[30]="------------------------------";

@@ -43,6 +43,9 @@ typedef unsigned int    uint;
 ** public structs
 */
 
+/**
+ * Per-vertex input data for the geometry pipe.
+ */
 // input to geometry pipe
 
 typedef struct
@@ -53,8 +56,12 @@ typedef struct
     float t2s,t2t,t2w;
 } xt_data;
 
+/**
+ * Vertex position passed to the geometry pipe.
+ */
 typedef struct
 {
+    /** Position accessible as x, y, z or as an array v[3]. */
     union
     {
         struct
@@ -65,10 +72,15 @@ typedef struct
     };
 } xt_pos;
 
+/**
+ * Transformed vertex position produced by the transform pipeline.
+ */
 typedef struct
 {
     float x,y,z;
+    /** Reciprocal of the view-space depth (w). */
     float invz;
+    /** Clip flags (X_CLIP* mask) for this vertex. */
     int   clip;
 } xt_xfpos;
 
@@ -79,11 +91,17 @@ typedef struct
 #define X_CLIPZ1   0x00001000
 #define X_CLIPZ2   0x00002000
 
+/**
+ * Texture coordinate pair.
+ */
 typedef struct
 {
     float s,t;
 } xt_tex;
 
+/**
+ * Matrix type used by the matrix and vector routines.
+ */
 // types for matrix/vector (xm_, xv_) routines
 
 typedef struct
@@ -92,14 +110,21 @@ typedef struct
     float  xay,yay,zay,  y;
     float  xaz,yaz,zaz,  z;
     float  r1 ,r2 ,r3 , r4;
+    /** Matrix type (X_MATRIX_IDENT, X_MATRIX_XFORM or X_MATRIX_4X4). */
     int    type;
 } xt_matrix;
 #define X_MATRIX_IDENT 0
 #define X_MATRIX_XFORM 1
 #define X_MATRIX_4X4   2
 
+/**
+ * Alias of xt_pos used by matrix and vector routines.
+ */
 typedef xt_pos xt_vector;
 
+/**
+ * Performance and usage statistics for the library.
+ */
 typedef struct
 {
     // timing

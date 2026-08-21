@@ -1,6 +1,18 @@
+/**
+ * Wildcard flag per ospatch[] entry, set when the pattern name ends with '*'.
+ */
 int   ospatchwild[MAXOSCALL];
+/**
+ * Length of the name part of each ospatch[] pattern.
+ */
 int   ospatchlen[MAXOSCALL];
+/**
+ * Patch numbers reserved for ospatch[] entries.
+ */
 int   ospatchnum[MAXOSCALL];
+/**
+ * Symbol patch patterns of the form "name #patch" or "name* #patch".
+ */
 char *ospatch[MAXOSCALL]={
 #ifndef NOSPPATCH
 "osSpTaskLoad #39",

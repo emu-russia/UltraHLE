@@ -16,6 +16,9 @@ uint32_t  ip[256];
 ** Routines for compiling a new group
 */
 
+/**
+ * Selects the optimization settings for the compiler.
+ */
 // select optimization settings
 void a_optimizesetup(void)
 {
@@ -68,6 +71,10 @@ int ac_compileop(uint32_t pc)
     return ac_compileopnew(pc,opcode,op);
 }
 
+/**
+ * Determines the instruction length of a group, ending at a branch.
+ * @param g Group to size.
+ */
 void ac_sizegroup(Group *g)
 { // determine length of group
     int i,branch;
@@ -300,6 +307,12 @@ typedef struct
     int  RESERVED;
 } GCnt;
 
+/**
+ * Compares two group counters by execution count, for qsort.
+ * @param a0 First counter to compare.
+ * @param b0 Second counter to compare.
+ * @return Difference of the two execution counts.
+ */
 int gcntcmp(const void *a0,const void *b0)
 {
     GCnt *a=(GCnt *)a0;
@@ -354,6 +367,9 @@ static int fpucw;
 static int originalfpucw=0;
 static int fastgroupinitdone=0;
 
+/**
+ * Initializes the FPU control word used when executing compiled groups.
+ */
 void a_fastgroupinit(void)
 {
     fastgroupinitdone=1;
@@ -371,6 +387,9 @@ void a_fastgroupinit(void)
     _asm fstcw [originalfpucw]
 }
 
+/**
+ * Dispatch entry that checks for pending memory I/O before executing groups.
+ */
 PUBLICRBEGIN(fastexec_loopjrra)
         mov    esi,[ebx+STMEMIODET]
         xor    eax,eax
@@ -460,6 +479,10 @@ jmp finish
         ret
 PUBLICREND
 
+/**
+ * Executes one or more compiled groups, starting from a given group.
+ * @param g Group to start executing from.
+ */
 void a_fastgroup(Group *g)
 {
     uint32_t stptr=(uint32_t)&st;
@@ -495,6 +518,10 @@ void a_fastgroup(Group *g)
 ** Executing a noncompiled group
 */
 
+/**
+ * Executes a group of instructions with the slow interpreter.
+ * @param g Group to execute.
+ */
 void a_slowgroup(Group *g)
 { // execute with cpuc
     uint32_t pcmin,pcmax;

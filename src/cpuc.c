@@ -177,6 +177,12 @@ static void op_ddiv(int reg1,int reg2)
     }
 }
 
+/**
+ * Performs a 64-bit shift on a register pair.
+ * @param opcode The instruction opcode.
+ * @param type Shift type: 0 left, 1 logical right, 2 arithmetic right.
+ * @param amount Shift amount, or -1 to take it from the RS register.
+ */
 void op_shift64(uint32_t opcode,int type,int amount)
 {
     uint32_t *s,*d;
@@ -236,6 +242,12 @@ void op_shift64(uint32_t opcode,int type,int amount)
     d[1]=t[1];
 }
 
+/**
+ * Adds two 64-bit values stored as 32-bit word pairs.
+ * @param d Destination word pair.
+ * @param a First operand word pair.
+ * @param b Second operand word pair.
+ */
 void addi64(uint32_t *d,uint32_t *a,uint32_t *b)
 {
     op_64bitexpand();
@@ -252,6 +264,12 @@ void addi64(uint32_t *d,uint32_t *a,uint32_t *b)
             a[1],a[0],b[1],b[0],d[1],d[0]);
     }
 }
+
+/**
+ * Computes the effective memory address from the opcode immediate and RS register.
+ * @param opcode The instruction opcode.
+ * @return The sign-extended effective memory address.
+ */
 
 //----
 
@@ -500,6 +518,11 @@ static void op_branch(uint32_t opcode,int doit,int likely,int link)
     }
 }
 
+/**
+ * Reads a double-precision value from two consecutive FPU registers.
+ * @param reg Index of the first FPU register.
+ * @return The double value stored in the register pair.
+ */
 double readdouble(int reg)
 {
     uint32_t x[2];
@@ -508,6 +531,11 @@ double readdouble(int reg)
     return(*(double *)x);
 }
 
+/**
+ * Writes a double-precision value into two consecutive FPU registers.
+ * @param reg Index of the first FPU register.
+ * @param value The double value to store.
+ */
 void writedouble(int reg,double value)
 {
     uint32_t x[2];
