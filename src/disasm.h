@@ -18,7 +18,7 @@ char* disasm(uint32_t pos, uint32_t x);
 char* disasmrsp(uint32_t pos, uint32_t x);
 
 // unassemble X86 code
-char* disasmx86(uint8_t* opcode, int codeoff, int* len);
+char* disasmx86(uint8_t* opcode, intptr_t codeoff, int* len);
 
 // dump memory range into a file (two ranges; one for code, one for data)
 void  disasm_dumpcode(char* filename, uint32_t addr, int size, uint32_t dataaddr, int datasize);

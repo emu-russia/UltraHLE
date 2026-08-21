@@ -695,8 +695,8 @@ extern int  rdp_gfxactive(void);
 
    // About UltraHLE Dialog
 
-   BOOL CALLBACK AboutDialog( HWND hdwnd, UINT message,
-                              WPARAM wParam, LPARAM lParam )
+   LRESULT CALLBACK AboutDialog( HWND hdwnd, UINT message,
+                                 WPARAM wParam, LPARAM lParam )
    {
       switch( message )
       {
@@ -761,8 +761,8 @@ extern int  rdp_gfxactive(void);
 
    // Controller 1 Configuration Tabbed Dialog
 
-   BOOL APIENTRY Controller1Prop( HWND hDlg, UINT message, 
-                                  UINT wParam, LONG lParam )
+   LRESULT APIENTRY Controller1Prop( HWND hDlg, UINT message,
+                                     WPARAM wParam, LPARAM lParam )
    {
       static PROPSHEETPAGE *ps;        // Pointer to Property Sheet Information
 
