@@ -27,3 +27,18 @@ x86 build uses the recompiler (JIT). x64 build works in interpreter mode only: t
 The X library no longer requires Glide: it has been ported to OpenGL (compatibility profile). No Glide wrapper is needed anymore.
 
 The original Glide 2.0 graphics API is only referenced by the historical XGLIDE_Decompile sources, which are kept for reference.
+
+## Documentation
+
+Doxygen is used to document `src` and `XOpenGL`. Run from the repository root:
+
+    doxygen Doxyfile
+
+Output:
+
+- HTML documentation — `docs/html`
+- LaTeX sources — `docs/latex`; build the PDF with:
+
+      make -C docs/latex
+
+The PDF is written to `docs/latex/refman.pdf`.

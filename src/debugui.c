@@ -295,11 +295,11 @@ void view_stat(void)
     y=w_stat.y;
     con_gotoxy(0,y++);
     con_attr2(c_barfg,c_barbg);
-    con_tabto('Ä',5);
+    con_tabto('\xc4',5);
     con_printf("F1");
-    con_tabto('Ä',16);
-    con_printf("StatsÄÄÄNewÄ>OldÄÄÄ(values for a single frame)ÄÄÄ");
-    con_tabto('Ä',256);
+    con_tabto('\xc4',16);
+    con_printf("Stats\xc4\xc4\xc4New\xc4>Old\xc4\xc4\xc4(values for a single frame)\xc4\xc4\xc4");
+    con_tabto('\xc4',256);
 
     yi=0;
     while(y<w_stat.y+w_stat.sy )
@@ -465,11 +465,11 @@ void view_data(void)
     con_gotoxy(0,y++);
     con_attr2(c_barfg,c_barbg);
     if(view.active==WIN_DATA) con_print("\x1f\x1f\x1f\x1f");
-    con_tabto('Ä',5);
+    con_tabto('\xc4',5);
     con_printf("F2");
-    con_tabto('Ä',16);
+    con_tabto('\xc4',16);
     con_printf("Data: %08X",view.database);
-    con_tabto('Ä',256);
+    con_tabto('\xc4',256);
 
     if(!mem.ram) return;
 
@@ -539,11 +539,11 @@ void view_code(void)
     con_gotoxy(0,y++);
     con_attr2(c_barfg,c_barbg);
     if(view.active==WIN_CODE) con_print("\x1f\x1f\x1f\x1f");
-    con_tabto('Ä',5);
+    con_tabto('\xc4',5);
     con_printf("F3");
-    con_tabto('Ä',16);
-    con_printf("Code: %08X ÄÄÄ PC: %s",view.codebase,sym_find(st.pc));
-    con_tabto('Ä',256);
+    con_tabto('\xc4',16);
+    con_printf("Code: %08X \xc4\xc4\xc4 PC: %s",view.codebase,sym_find(st.pc));
+    con_tabto('\xc4',256);
 
     if(!mem.ram) return;
 
@@ -598,9 +598,9 @@ void view_cons(void)
     con_gotoxy(0,y++);
     con_attr2(c_barfg,c_barbg);
     if(view.active==WIN_CONS) con_print("\x1f\x1f\x1f\x1f");
-    con_tabto('Ä',5);
+    con_tabto('\xc4',5);
     con_printf("F4");
-    con_tabto('Ä',256);
+    con_tabto('\xc4',256);
 
     i=view.consolerow+w_cons.sy-2;
     while(y<w_cons.y+w_cons.sy)

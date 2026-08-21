@@ -1,0 +1,89 @@
+# Doxyfile for UltraHLE
+#
+# Run from the repository root:
+#
+#     doxygen Doxyfile
+#
+# Output:
+#   - HTML documentation  -> docs/html
+#   - LaTeX sources       -> docs/latex   (for PDF, see below)
+#
+# Getting a PDF from the LaTeX output:
+#
+#     make -C docs/latex
+#
+# or, using latexmk directly:
+#
+#     latexmk -pdf -outdir=docs/latex docs/latex/refman.tex
+#
+# The PDF is written to docs/latex/refman.pdf.
+
+#---------------------------------------------------------------------------
+# Project related configuration options
+#---------------------------------------------------------------------------
+
+PROJECT_NAME           = "UltraHLE"
+PROJECT_NUMBER         = "1.0.0"
+PROJECT_BRIEF          = "Ultra64 High Level Emulator (Nintendo 64 emulator)"
+OUTPUT_DIRECTORY       = docs
+
+#---------------------------------------------------------------------------
+# Input: document the emulator core (src) and the X library (XOpenGL)
+#---------------------------------------------------------------------------
+
+INPUT                  = src XOpenGL Readme.md
+INPUT_ENCODING         = UTF-8
+FILE_PATTERNS          = *.c *.cc *.cxx *.cpp *.h *.hh *.hpp *.hxx *.inl *.md
+RECURSIVE              = YES
+EXCLUDE_PATTERNS       = */resources/*
+USE_MDFILE_AS_MAINPAGE = Readme.md
+
+#---------------------------------------------------------------------------
+# Extraction: the sources have few Doxygen comments, so document everything
+#---------------------------------------------------------------------------
+
+EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = YES
+EXTRACT_STATIC         = YES
+EXTRACT_LOCAL_CLASSES  = YES
+WARN_IF_UNDOCUMENTED   = NO
+WARN_IF_DOC_ERROR      = YES
+QUIET                  = YES
+
+#---------------------------------------------------------------------------
+# HTML output
+#---------------------------------------------------------------------------
+
+GENERATE_HTML          = YES
+HTML_OUTPUT            = html
+SOURCE_BROWSER         = YES
+
+#---------------------------------------------------------------------------
+# LaTeX output (option to obtain LaTeX sources for building a PDF)
+#---------------------------------------------------------------------------
+
+GENERATE_LATEX         = YES
+LATEX_OUTPUT           = latex
+LATEX_CMD_NAME         = pdflatex
+MAKEINDEX_CMD_NAME     = makeindex
+COMPACT_LATEX          = NO
+PAPER_TYPE             = a4
+PDF_HYPERLINKS         = YES
+USE_PDFLATEX           = YES
+LATEX_BATCHMODE        = YES
+
+#---------------------------------------------------------------------------
+# Other output formats: disabled
+#---------------------------------------------------------------------------
+
+GENERATE_RTF           = NO
+GENERATE_MAN           = NO
+GENERATE_XML           = NO
+GENERATE_DOCBOOK       = NO
+GENERATE_AUTOGEN_DEF   = NO
+
+#---------------------------------------------------------------------------
+# Diagrams require the Graphviz "dot" tool; keep them optional
+#---------------------------------------------------------------------------
+
+HAVE_DOT               = NO

@@ -12,7 +12,7 @@ extern "C" {
 // at next jump/branch/call instruction's delay slot. In fast
 // mode one group is executed at a time, either with cpua or cpuc.
 // when compiling, the first opcode of each groups is replaced
-// with a special GROUP(x) opcode.††
+// with a special GROUP(x) opcode.
 typedef struct
 {
     uint8_t* code;        // ptr to compiled code (NULL=not compiled)

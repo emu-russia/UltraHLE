@@ -83,7 +83,7 @@ void inifile_patches(int dmanum)
                 vmmap[j].size);
             if(vmmap[j].phys>=0x10000000)
             {
-                // †† MEMORY WILL BE LOST HERE, MUST ADD FREEING
+                //  MEMORY WILL BE LOST HERE, MUST ADD FREEING
                 // IF ROM CHANGES OR SOMETHING!!
                 char *tmpdata;
                 int s;

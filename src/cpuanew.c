@@ -980,7 +980,7 @@ freg_saveall(); //required to get rid of accuarcy problems :(
         i=freg_find(OP_RD(opcode));
         if(0 && i!=REG_NONE && op==13 && fmt==16)
         {
-            //†† doesn't work
+            // doesn't work
             ok=1;
             freg_xchg(i);
             insert(o_cvt_s2wopt);

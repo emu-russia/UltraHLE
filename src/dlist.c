@@ -1197,7 +1197,7 @@ void change_geom(uint32_t x)
         gst.cull   =(x>>9)&3;
         gst.lightvx=(x&0x20000)?1:0; // 10000
         gst.texgen =0;
-        gst.flat   =(x&0x80000)?1:0; //††
+        gst.flat   =(x&0x80000)?1:0; //
         if(!(x&4)) gst.flat=0;
         rdp_flat(gst.flat);
     }
@@ -1582,7 +1582,7 @@ void rsp_cmd_basic(int c)
                 logd(" #(%i,%i,%f) ",a,b,(float)b/(float)a);
                 */
                 v0=0;
-                vn=((cmd[0]&0xfff)-8)/18+1; //††
+                vn=((cmd[0]&0xfff)-8)/18+1; //
                 if(vn>64) vn=64;
             }
             else if(!cart.dlist_wavevx)
