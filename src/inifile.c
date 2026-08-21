@@ -225,6 +225,14 @@ void inifile_command(char *cmd)
         int i=atoi(param);
         st.memiosp=i;
     }
+    else IFIS(cmd,"iszelda")
+    {
+        cart.iszelda=atoi(param);
+    }
+    else IFIS(cmd,"ismario")
+    {
+        cart.ismario=atoi(param);
+    }
     else IFIS(cmd,"osrange")
     {
         dword beg,end;

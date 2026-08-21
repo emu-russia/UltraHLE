@@ -17,8 +17,8 @@
 
 		// Load Image Filter
 
-		LPCTSTR szFilterI = "N64 Rom Images (bin,mov,n64,rom,u64,v64)\0"
-				              "*.bin;*.mov;*.n64;*.rom;*.u64;*.v64\0"
+		LPCTSTR szFilterI = "N64 Rom Images (bin,mov,n64,rom,u64,v64,z64)\0"
+				              "*.bin;*.mov;*.n64;*.rom;*.u64;*.v64;*.z64\0"
 					           "All Files (*.*)\0"
 						        "*.*\0\0";
 
@@ -91,7 +91,7 @@
          if( loadType ) // Load Image
          {
              SetCursor(LoadCursor(NULL,IDC_WAIT));
-             main_command("rom %s",OpenFileName.lpstrFile);
+             main_command("rom \"%s\"",OpenFileName.lpstrFile);
              SetCursor(LoadCursor(NULL,IDC_ARROW));
          }
          else // Load State

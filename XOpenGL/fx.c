@@ -405,9 +405,25 @@ static void readfb_rgb565(int x, int y, int xs, int ys, char* buffer, int bufrow
 int init_readfb(int fb, int x, int y, int xs, int ys, char* buffer, int bufrowlen)
 {
 	GLenum srcbuf;
+	HDC  save_hdc = NULL;
+	HGLRC save_hrc = NULL;
+	int  need_restore = 0;
+	int  result = 1;
 
 	if (!gl_hrc)
 		return 1;
+
+	// The 'screen' command runs on the GUI thread while the GL context is
+	// current in the emulation thread. Make the context current here so
+	// glReadPixels works, then restore the previous binding.
+	if (wglGetCurrentContext() != gl_hrc)
+	{
+		save_hdc = wglGetCurrentDC();
+		save_hrc = wglGetCurrentContext();
+		if (!wglMakeCurrent(gl_hdc, gl_hrc))
+			return 1;
+		need_restore = 1;
+	}
 
 	srcbuf = (fb & X_FB_FRONT) ? GL_FRONT : GL_BACK;
 	glReadBuffer(srcbuf);
@@ -415,7 +431,7 @@ int init_readfb(int fb, int x, int y, int xs, int ys, char* buffer, int bufrowle
 	if ((uint8_t)fb == X_FB_RGB565)
 	{
 		readfb_rgb565(x, y, xs, ys, buffer, bufrowlen);
-		return 0;
+		result = 0;
 	}
 	else if ((uint8_t)fb == X_FB_RGBA8888)
 	{
@@ -452,9 +468,13 @@ int init_readfb(int fb, int x, int y, int xs, int ys, char* buffer, int bufrowle
 			}
 		}
 		x_free(row);
-		return 0;
+		result = 0;
 	}
-	return 1;
+
+	if (need_restore)
+		wglMakeCurrent(save_hdc, save_hrc);
+
+	return result;
 }
 
 int init_writefb(int fb, int x, int y, int xs, int ys, char* buffer, int bufrowlen)

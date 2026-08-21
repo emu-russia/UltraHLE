@@ -130,8 +130,8 @@
 
       // Known N64 ROM Image Extensions
 
-      int filterCount = 5;
-      LPCTSTR szFilter = "*.bin\0*.mov\0*.n64\0*.rom\0*.u64\0*.v64\0";
+      int filterCount = 6;
+      LPCTSTR szFilter = "*.bin\0*.mov\0*.n64\0*.rom\0*.u64\0*.v64\0*.z64\0";
 
       // Initialise ROM Count
 

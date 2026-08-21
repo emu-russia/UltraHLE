@@ -473,8 +473,11 @@ extern int  rdp_gfxactive(void);
 
 					case IDM_OPTIONS_SCREENSHOT:
 
-                        // S: Call Screenshot Command
-                        main_command("screen");
+                        // Run the command inside the emulation thread via
+                        // breakcommand: the debugui loop picks it up while
+                        // the GL context is current, so the framebuffer
+                        // readback works, then 'go' resumes the game.
+                        breakcommand("screen;go");
 
 						break;
 
@@ -624,7 +627,7 @@ extern int  rdp_gfxactive(void);
                                         MAX_PATH );
 
                   SetCursor(LoadCursor(NULL,IDC_WAIT));
-                  main_command("rom %s",szBuffer);
+                  main_command("rom \"%s\"",szBuffer);
                   SetCursor(LoadCursor(NULL,IDC_ARROW));
 
                   if(main_commanderrors()>1)
