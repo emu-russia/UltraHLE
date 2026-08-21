@@ -484,7 +484,7 @@ static char *op_rpc[65]={ // <-FUNC
 "*77",
 ""};
 
-char *copreg(dword x,int reg)
+char *copreg(uint32_t x,int reg)
 {
     int cop=OP_OP(x)&3;
     static char buf[32];
@@ -530,7 +530,7 @@ char *copreg(dword x,int reg)
     }
 }
 
-void format(char **d0,char *p,dword x,dword pos)
+void format(char **d0,char *p,uint32_t x,uint32_t pos)
 {
     int a=-1,b;
     char *d=*d0;
@@ -745,7 +745,7 @@ void format(char **d0,char *p,dword x,dword pos)
     *d0=d;
 }
 
-char *disasmmain(dword pos,dword x)
+char *disasmmain(uint32_t pos,uint32_t x)
 {
     static char buf[256];
     char *p,*d;
@@ -830,22 +830,22 @@ char *disasmmain(dword pos,dword x)
     return(buf);
 }
 
-char *disasmrsp(dword pos,dword x)
+char *disasmrsp(uint32_t pos,uint32_t x)
 {
     rsp=1;
     return(disasmmain(pos,x));
 }
 
-char *disasm(dword pos,dword x)
+char *disasm(uint32_t pos,uint32_t x)
 {
     rsp=0;
     return(disasmmain(pos,x));
 }
 
-void disasm_dumpucode(char *filename,dword addr,int size,dword dataaddr,int datasize,int rspoffset)
+void disasm_dumpucode(char *filename,uint32_t addr,int size,uint32_t dataaddr,int datasize,int rspoffset)
 {
     int i;
-    dword x;
+    uint32_t x;
     char *p;
     FILE *f1;
     f1=fopen(filename,"wb");
@@ -875,10 +875,10 @@ void disasm_dumpucode(char *filename,dword addr,int size,dword dataaddr,int data
     fclose(f1);
 }
 
-void disasm_dumpcode(char *filename,dword addr,int size,dword dataaddr,int datasize)
+void disasm_dumpcode(char *filename,uint32_t addr,int size,uint32_t dataaddr,int datasize)
 {
     int i;
-    dword x;
+    uint32_t x;
     char *p;
     FILE *f1;
     f1=fopen(filename,"wb");

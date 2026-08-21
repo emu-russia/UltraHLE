@@ -15,10 +15,10 @@ extern "C" {
 // with a special GROUP(x) opcode.††
 typedef struct
 {
-    byte* code;        // ptr to compiled code (NULL=not compiled)
-    dword  addr;        // address of group
-    dword  opcode;      // original first opcode (which was overwritten)
-    word   len;         // length in mips instructions
+    uint8_t* code;        // ptr to compiled code (NULL=not compiled)
+    uint32_t  addr;        // address of group
+    uint32_t  opcode;      // original first opcode (which was overwritten)
+    uint16_t   len;         // length in mips instructions
     char   type;        // GROUP_*
     char   ratio;       // appr. length in x86 bytes is len*ratio/4
 } Group; // 16 bytes size (SIZE USED IN INLINE ASM, a_fastgroup in cpua.c!)
@@ -31,21 +31,21 @@ typedef struct
 typedef struct
 {
     // VMM page lookup table (4GB lookup = 4MB table)
-    byte* lookupr[1048576];  // for reads
-    byte* lookupw[1048576];  // for writes
+    uint8_t* lookupr[1048576];  // for reads
+    uint8_t* lookupw[1048576];  // for writes
 
     // memory mapped io (first index from IO_ defines)
     // 32 special pages, 17 used, separate page for READ and WRITE
     // write pages initialized with NULLFILL, read pages with 0
     // use R* and W* macros to access. Note that addresses are
     // DWORD addresses since io's type is DWORD.
-    dword  io[IO_MAX][2][1024];
+    uint32_t  io[IO_MAX][2][1024];
 
     // stuff for the compiler (cpua.c)
     Group* group;       // table for compiled groups
     int    groupnum;    // used entries
     int    groupmax;    // max size
-    byte* code;        // code compiled to this array
+    uint8_t* code;        // code compiled to this array
     int    codeused;    // used bytes
     int    codemax;     // max size
 
@@ -53,9 +53,9 @@ typedef struct
     int* groupcnt;
 
     // Main RDRAM memory (mapped through lookup)
-    byte* ram;         // ram data (dynamic alloc at BASE-4096!!)
+    uint8_t* ram;         // ram data (dynamic alloc at BASE-4096!!)
     int    ramsize;     // size of ram data
-    byte* ramalloc;    // ram data (dynamic alloc at BASE-4096!!)
+    uint8_t* ramalloc;    // ram data (dynamic alloc at BASE-4096!!)
 } Mem;
 
 // Magic filler for nullpages and io-write pages for write detection:
@@ -129,21 +129,21 @@ extern Mem mem; // mem.c
 #define RPIF    mem.io[IO_PIF][IO_R]
 
 // macros for calculating mem addresses (used internally)
-#define mempage(x)  ((dword)( (unsigned)(x             ) >> 12    ) )
-#define memoffs(x)  ((dword)( (unsigned)(x & 0xfff     )          ) )
-#define memdatar(x) ((dword *)( mem.lookupr[mempage(x)]+x ))
-#define memdataw(x) ((dword *)( mem.lookupw[mempage(x)]+x ))
+#define mempage(x)  ((uint32_t)( (unsigned)(x             ) >> 12    ) )
+#define memoffs(x)  ((uint32_t)( (unsigned)(x & 0xfff     )          ) )
+#define memdatar(x) ((uint32_t *)( mem.lookupr[mempage(x)]+x ))
+#define memdataw(x) ((uint32_t *)( mem.lookupw[mempage(x)]+x ))
 
 // sim.c
 void    mem_init(int ramsize);          // allocates memory and initializes memory system
-dword   mem_getphysical(dword virtual_addr); // virtual->physical address (-1=no physical for that address!)
+uint32_t   mem_getphysical(uint32_t virtual_addr); // virtual->physical address (-1=no physical for that address!)
 
 // map page[dst] to external 4K array (external data NOT saved!)
 // map page[dst] to physical address src
 // map page[dst] to where page[src] points to
-void    mem_mapcopy(dword dst, int rw, dword src);
-void    mem_mapphysical(dword dst, int rw, dword src);
-void    mem_mapexternal(dword dst, int rw, void* data);
+void    mem_mapcopy(uint32_t dst, int rw, uint32_t src);
+void    mem_mapphysical(uint32_t dst, int rw, uint32_t src);
+void    mem_mapexternal(uint32_t dst, int rw, void* data);
 
 // rw parameter values for mapping (WTHENR only works for mapexternal)
 #define MAP_W       0  // map page for CPU write
@@ -151,27 +151,27 @@ void    mem_mapexternal(dword dst, int rw, void* data);
 #define MAP_RW      2  // map page for both
 #define MAP_WTHENR  3  // map page for CPU write, and other page at data+4096 to CPU read
 
-int mem_groupat(dword addr);
+int mem_groupat(uint32_t addr);
 
 // routines to access memory. 32-bit accesses are macros and quite fast,
 // 8 and 16 bit accesses are routines are slower.
-dword   mem_read8(dword addr);
-dword   mem_read16(dword addr);
+uint32_t   mem_read8(uint32_t addr);
+uint32_t   mem_read16(uint32_t addr);
 #define mem_read32(addr) (*memdatar(addr))
-#define mem_read32p(addr) (*(dword *)( mem.ram+ (addr&(RDRAMSIZE-1)) ) )
-void    mem_write8(dword addr, dword data);
-void    mem_write16(dword addr, dword data);
+#define mem_read32p(addr) (*(uint32_t *)( mem.ram+ (addr&(RDRAMSIZE-1)) ) )
+void    mem_write8(uint32_t addr, uint32_t data);
+void    mem_write16(uint32_t addr, uint32_t data);
 #define mem_write32(addr,data) (*memdataw(addr))=(data)
 
 // special routine to read an opcode. This routine replaces
 // GROUP(x) opcodes with original opcodes from mem.group table
-dword   mem_readop(dword addr);
+uint32_t   mem_readop(uint32_t addr);
 // read type of group for debugui view module (returns static string)
-char* mem_readoptype(dword addr);
+char* mem_readoptype(uint32_t addr);
 
 // copying a lot of data (addr MUST be dword aligned)
-void    mem_readrangeraw(dword addr, int bytes, char* data);
-void    mem_writerangeraw(dword addr, int bytes, char* data);
+void    mem_readrangeraw(uint32_t addr, int bytes, char* data);
+void    mem_writerangeraw(uint32_t addr, int bytes, char* data);
 
 
 void    mem_save(FILE* f1);

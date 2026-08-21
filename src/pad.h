@@ -7,8 +7,8 @@ extern "C" {
 #endif
 
 void  pad_frame(void);           // call this every frame (pad centering and stuff)
-dword pad_getdata(int pad);
-void  pad_writedata(dword addr); // write pad state to a memory location
+uint32_t pad_getdata(int pad);
+void  pad_writedata(uint32_t addr); // write pad state to a memory location
 void  pad_drawframe(void);
 
 void  pad_enablejoy(int enable);

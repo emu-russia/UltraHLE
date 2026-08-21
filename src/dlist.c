@@ -20,7 +20,7 @@
 
 typedef struct
 {
-    dword   memaddr; // memaddress and contents crc for topleftmost pixel was loaded from (updated by createtexture)
+    uint32_t   memaddr; // memaddress and contents crc for topleftmost pixel was loaded from (updated by createtexture)
     int     tmembase;
     int     tmemrl;  // rowlen
     int     memrl;  //memory rowlen
@@ -47,7 +47,7 @@ typedef struct
 
 typedef struct
 {
-    dword   data[4];
+    uint32_t   data[4];
     float   col[3];
     float   dir[4];
     float   xfdir[4];
@@ -56,7 +56,7 @@ typedef struct
 typedef struct
 {
     // memory
-    dword   segment[16];
+    uint32_t   segment[16];
     // matrices
     float   mtx[2][16][16];
     float   xform[16]; // active full transform
@@ -74,7 +74,7 @@ typedef struct
     int     projection;     // PROJ_*
     int     lastframehadbackground;
     int     framehadbackground;
-    dword   loadrspdata;
+    uint32_t   loadrspdata;
     // what has changed (checked at startdrawing())
     int     newsettings;
     int     newtexture;
@@ -83,9 +83,9 @@ typedef struct
     int     newvertices_lo;
     int     newvertices_hi;
     // raw modebits (omode just sent to RDP after changes)
-    dword   gmode,lastgmode;
-    dword   omodel;
-    dword   omodeh;
+    uint32_t   gmode,lastgmode;
+    uint32_t   omodel;
+    uint32_t   omodeh;
     // parsed geometry mode
     int     lightvx;
     int     flat;
@@ -161,12 +161,12 @@ int  opened;
 
 GeomState gst;
 
-dword stack[256];
-dword stackp;
-dword dlpnt;
+uint32_t stack[256];
+uint32_t stackp;
+uint32_t dlpnt;
 int   dllimit;
 int   errors;
-dword cmd[8]; // current loaded command
+uint32_t cmd[8]; // current loaded command
 
 float identity[16]={
  1.0,   0.0,   0.0,   0.0,
@@ -202,10 +202,10 @@ void reloadsettings(void);
 
 void t_selecttexture(int t,int txt);
 
-void setcolor(float *col,dword a);
-void setcolor2(float *col,dword a);
-void setnormal(float *col,dword a);
-void setnormal2(float *col,dword a);
+void setcolor(float *col,uint32_t a);
+void setcolor2(float *col,uint32_t a);
+void setnormal(float *col,uint32_t a);
+void setnormal2(float *col,uint32_t a);
 
 /***********************************************************************/
 // logging
@@ -213,7 +213,7 @@ void setnormal2(float *col,dword a);
 /***********************************************************************/
 // utilities
 
-void setcolor(float *col,dword a)
+void setcolor(float *col,uint32_t a)
 {
     col[0]=((a>>8 )&255)*(1.0/258.0);
     col[1]=((a>>16)&255)*(1.0/258.0);
@@ -221,7 +221,7 @@ void setcolor(float *col,dword a)
     col[3]=((a>>0 )&255)*(1.0/258.0);
 }
 
-void setcolor2(float *col,dword a)
+void setcolor2(float *col,uint32_t a)
 {
     col[0]=((a>>24)&255)*(1.0/258.0);
     col[1]=((a>>16)&255)*(1.0/258.0);
@@ -229,7 +229,7 @@ void setcolor2(float *col,dword a)
     col[3]=((a>>0 )&255)*(1.0/258.0);
 }
 
-void setnormal(float *col,dword a)
+void setnormal(float *col,uint32_t a)
 {
     col[0]=((char)((a>>8 )&255))*(1.0/128.0);
     col[1]=((char)((a>>16)&255))*(1.0/128.0);
@@ -237,7 +237,7 @@ void setnormal(float *col,dword a)
     col[3]=((char)((a>>0 )&255))*(1.0/128.0);
 }
 
-void setnormal2(float *col,dword a)
+void setnormal2(float *col,uint32_t a)
 {
     col[0]=((char)((a>>24)&255))*(1.0/128.0);
     col[1]=((char)((a>>16)&255))*(1.0/128.0);
@@ -415,9 +415,9 @@ void dlist_showa0matrix(void)
 /***********************************************************************/
 // display list geometry commands
 
-void g_viewport(dword pos)
+void g_viewport(uint32_t pos)
 {
-    dword x;
+    uint32_t x;
     float xm,ym,xa,ya,zm;
 
     x=mem_read32p(pos);
@@ -446,7 +446,7 @@ void g_lightnum(int num)
     gst.lightnumchanged=1;
 }
 
-void g_loadlight(int li,dword pos)
+void g_loadlight(int li,uint32_t pos)
 {
     Light *l=gst.light+li;
     int i;
@@ -580,7 +580,7 @@ void g_initvx(int i)
     rdpvxflag[i]|=VX_INITDONE;
 }
 
-void g_loadvtx(dword addr,int v0,int vn)
+void g_loadvtx(uint32_t addr,int v0,int vn)
 {
     int     i,flag;
     int     itex,ipos1,ipos2;
@@ -688,7 +688,7 @@ void g_loadvtx(dword addr,int v0,int vn)
     }
 }
 
-void g_loadvtx_diddly(dword addr,int v0,int vn)
+void g_loadvtx_diddly(uint32_t addr,int v0,int vn)
 {
     int     i,flag;
     int     itex,ipos1,ipos2;
@@ -926,7 +926,7 @@ void g_mtxxform(void)
     }
 }
 
-void g_loadmtx(dword pos,int proj,int load,int push)
+void g_loadmtx(uint32_t pos,int proj,int load,int push)
 {
     ushort sh[32];
     float  m[16],m2[16];
@@ -1140,7 +1140,7 @@ static struct
 {0x00,"G_SPNOOP"},
 0,NULL};
 
-void dumpcmd(dword addr,dword *cmd)
+void dumpcmd(uint32_t addr,uint32_t *cmd)
 {
     int j;
     int c=cmd[0]>>24;
@@ -1166,7 +1166,7 @@ void dumpcmd(dword addr,dword *cmd)
 
 /***********************************************************************/
 
-static __inline dword address(dword address)
+static __inline uint32_t address(uint32_t address)
 { // segment convert to physical address
     int seg=(address>>24)&0x3f;
     if(seg>15)
@@ -1180,7 +1180,7 @@ static __inline dword address(dword address)
 
 /***********************************************************************/
 
-void dump_geom(dword x)
+void dump_geom(uint32_t x)
 {
     logd("\n*mode geometry: %08X ",x);
 
@@ -1190,7 +1190,7 @@ void dump_geom(dword x)
     logd(" light(%i)",gst.lightvx);
 }
 
-void change_geom(dword x)
+void change_geom(uint32_t x)
 {
     if(cart.dlist_zelda==1)
     {
@@ -1217,9 +1217,9 @@ void change_geom(dword x)
 /***********************************************************************/
 // command helpers
 
-void c_dlbranch(dword a,int branch,int limit)
+void c_dlbranch(uint32_t a,int branch,int limit)
 {
-    dword addr=address(a);
+    uint32_t addr=address(a);
     if(limit) dllimit=limit+1;
     logd(" Displaylist at %08X (stackp %i, limit %i)",addr,stackp,limit);
     if(branch)
@@ -1240,9 +1240,9 @@ void c_dlend(void)
     logd(" Displaylist end (stackp %i)\n",stackp);
 }
 
-void c_dmavtx(dword a,int v0,int vn)
+void c_dmavtx(uint32_t a,int v0,int vn)
 {
-    dword addr=address(a);
+    uint32_t addr=address(a);
 
     logd(" Vertex %02i..%02i at %08X",v0,v0+vn-1,addr);
     if(v0+vn>MAXVX || vn>MAXVX)
@@ -1274,9 +1274,9 @@ void c_dmavtx(dword a,int v0,int vn)
     }
 }
 
-void c_dmatri_diddly(dword a,int vn)
+void c_dmatri_diddly(uint32_t a,int vn)
 {
-    dword addr=address(a);
+    uint32_t addr=address(a);
     int min=999,max=-999;
 
     gst.texenable=1;
@@ -1286,7 +1286,7 @@ void c_dmatri_diddly(dword a,int vn)
     logd(" Triangles %i at %08X",vn,addr);
     while(vn-->0)
     {
-        dword iw;
+        uint32_t iw;
         int vxind[3];
         iw=mem_read32(addr+0);
         vxind[2]=(iw>>0)&255;
@@ -1323,24 +1323,24 @@ void c_dmatri_diddly(dword a,int vn)
 //    logd("\nG_VTX-DMATRI-Range %i..%i",min,max);
 }
 
-void c_dmamtx(dword a,int proj,int load,int push)
+void c_dmamtx(uint32_t a,int proj,int load,int push)
 {
-    dword addr=address(a);
+    uint32_t addr=address(a);
     logd(" {Matrix} at %08X ",addr);
     g_loadmtx(addr,proj,load,push);
     gst.cnt_mtx++;
 }
 
-void c_dmamtx_diddly(dword a,int ind)
+void c_dmamtx_diddly(uint32_t a,int ind)
 {
-    dword addr=address(a);
+    uint32_t addr=address(a);
     logd(" {Matrix} at %08X ind %i ",addr,ind);
     gst.mtxstackp[0]=ind;
     g_loadmtx(addr,0,1,0);
     gst.cnt_mtx++;
 }
 
-void c_setgeommode(int mode,dword bits)
+void c_setgeommode(int mode,uint32_t bits)
 {
     if(mode==2)   gst.gmode&=bits;  // 2=AND
     else if(mode) gst.gmode|=bits;  // 1=OR
@@ -1353,7 +1353,7 @@ void c_setgeommode(int mode,dword bits)
     }
 }
 
-void c_setothermode(int hi,dword *cmd)
+void c_setothermode(int hi,uint32_t *cmd)
 {
     int pos,bits,mask,data;
 
@@ -1379,9 +1379,9 @@ void c_setothermode(int hi,dword *cmd)
     rdp_cmd(cmd);
 }
 
-void c_movemem(int ind,dword a)
+void c_movemem(int ind,uint32_t a)
 {
-    dword addr=address(a);
+    uint32_t addr=address(a);
     int i;
 
     logd(" Movemem[%04X] <- %08X",ind,a);
@@ -1403,9 +1403,9 @@ void c_movemem(int ind,dword a)
     }
 }
 
-void c_movemem_zelda(int ind,dword a)
+void c_movemem_zelda(int ind,uint32_t a)
 {
-    dword addr=address(a);
+    uint32_t addr=address(a);
     int i;
 
     logd(" Movemem[%04X] <- %08X",ind,a);
@@ -1427,7 +1427,7 @@ void c_movemem_zelda(int ind,dword a)
     }
 }
 
-void c_moveword(int bank,int index,dword x)
+void c_moveword(int bank,int index,uint32_t x)
 {
     logd(" Mem[%i][%02X]=%08X",bank,index,x);
     index>>=2;
@@ -1482,7 +1482,7 @@ void c_moveword(int bank,int index,dword x)
     }
 }
 
-void c_texture(dword *cmd)
+void c_texture(uint32_t *cmd)
 {
     int bowtie,level,tile,on,s,t;
     bowtie=FIELD(cmd[0],16,8);
@@ -1499,9 +1499,9 @@ void c_texture(dword *cmd)
     rdp_texture(on,tile,level);
 }
 
-void c_zeldabackground(dword addr)
+void c_zeldabackground(uint32_t addr)
 {
-    dword wid,hig,base;
+    uint32_t wid,hig,base;
     static int saved=0;
     wid=mem_read32p(addr)/4;
     hig=mem_read32p(addr+8)/4;

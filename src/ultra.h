@@ -243,13 +243,8 @@ More notes intermixed with the definitions, read on.
 ** Basic types
 */
 
-// TODO: Change all types to stdint, for better readability/portability of the code
-
-typedef          __int64    qint;
-typedef unsigned __int64    qword;
-typedef unsigned int        dword;
-typedef unsigned short      word;
-typedef unsigned char       byte;
+// Fixed-width types from <stdint.h> (included above):
+//   int64_t, uint64_t, uint32_t, uint16_t, uint8_t
 
 #include "os.h"
 #include "timer.h"

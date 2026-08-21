@@ -137,8 +137,8 @@ static void op_ddivu(int reg1,int reg2)
     }
     else
     {
-        st.mlo.q=(unsigned __int64)a.q/(unsigned __int64)b.q;
-        st.mhi.q=(unsigned __int64)a.q%(unsigned __int64)b.q;
+        st.mlo.q=(uint64_t)a.q/(uint64_t)b.q;
+        st.mhi.q=(uint64_t)a.q%(uint64_t)b.q;
     }
     if(DUMP64)
     {
@@ -163,8 +163,8 @@ static void op_ddiv(int reg1,int reg2)
     }
     else
     {
-        st.mlo.q=(__int64)a.q/(__int64)b.q;
-        st.mhi.q=(__int64)a.q%(__int64)b.q;
+        st.mlo.q=(int64_t)a.q/(int64_t)b.q;
+        st.mhi.q=(int64_t)a.q%(int64_t)b.q;
     }
     if(DUMP64)
     {
@@ -177,10 +177,10 @@ static void op_ddiv(int reg1,int reg2)
     }
 }
 
-void op_shift64(dword opcode,int type,int amount)
+void op_shift64(uint32_t opcode,int type,int amount)
 {
-    dword *s,*d;
-    dword t[2];
+    uint32_t *s,*d;
+    uint32_t t[2];
 
     if(amount==-1)
     {
@@ -202,26 +202,26 @@ void op_shift64(dword opcode,int type,int amount)
     {
     case 0: // left
         {
-            unsigned __int64 v = ((unsigned __int64)t[1] << 32) | t[0];
+            uint64_t v = ((uint64_t)t[1] << 32) | t[0];
             v <<= (amount & 63);
-            t[0]=(dword)v;
-            t[1]=(dword)(v >> 32);
+            t[0]=(uint32_t)v;
+            t[1]=(uint32_t)(v >> 32);
         }
         break;
     case 1: // right (logical)
         {
-            unsigned __int64 v = ((unsigned __int64)t[1] << 32) | t[0];
+            uint64_t v = ((uint64_t)t[1] << 32) | t[0];
             v >>= (amount & 63);
-            t[0]=(dword)v;
-            t[1]=(dword)(v >> 32);
+            t[0]=(uint32_t)v;
+            t[1]=(uint32_t)(v >> 32);
         }
         break;
     case 2: // right arithmetic
         {
-            __int64 v = ((__int64)t[1] << 32) | t[0];
+            int64_t v = ((int64_t)t[1] << 32) | t[0];
             v >>= (amount & 63);
-            t[0]=(dword)v;
-            t[1]=(dword)(v >> 32);
+            t[0]=(uint32_t)v;
+            t[1]=(uint32_t)(v >> 32);
         }
         break;
     }
@@ -236,12 +236,12 @@ void op_shift64(dword opcode,int type,int amount)
     d[1]=t[1];
 }
 
-void addi64(dword *d,dword *a,dword *b)
+void addi64(uint32_t *d,uint32_t *a,uint32_t *b)
 {
     op_64bitexpand();
     {
-        dword lo = a[0] + b[0];
-        dword hi = a[1] + b[1] + (lo < a[0] ? 1 : 0);
+        uint32_t lo = a[0] + b[0];
+        uint32_t hi = a[1] + b[1] + (lo < a[0] ? 1 : 0);
         d[0] = lo;
         d[1] = hi;
     }
@@ -255,16 +255,16 @@ void addi64(dword *d,dword *a,dword *b)
 
 //----
 
-__inline dword op_memaddr(dword opcode)
+__inline uint32_t op_memaddr(uint32_t opcode)
 {
-    dword a;
+    uint32_t a;
     a = OP_IMM(opcode);
     a = SIGNEXT16(a);
     a+= st.g[OP_RS(opcode)].d;
     return(a);
 }
 
-static void op_readmem(dword opcode,int bytes)
+static void op_readmem(uint32_t opcode,int bytes)
 {
     int a,x,*d;
     a=op_memaddr(opcode);
@@ -311,7 +311,7 @@ static void op_readmem(dword opcode,int bytes)
     }
 }
 
-static void op_writemem(dword opcode,int bytes)
+static void op_writemem(uint32_t opcode,int bytes)
 {
     int a,*d;
     a=op_memaddr(opcode);
@@ -345,9 +345,9 @@ static void op_writemem(dword opcode,int bytes)
     cpu_notify_writemem(a,bytes);
 }
 
-static void op_rwmemrl(dword opcode,int write,int right)
+static void op_rwmemrl(uint32_t opcode,int write,int right)
 {
-    dword x,y,a,s,m;
+    uint32_t x,y,a,s,m;
     a=op_memaddr(opcode);
     s=a&3;
     a&=~3;
@@ -395,9 +395,9 @@ static void op_rwmemrl(dword opcode,int write,int right)
 static void op_mult(int a,int b)
 {
     int lo,hi;
-    __int64 r = (__int64)a * (__int64)b;
-    lo = (int)(dword)r;
-    hi = (int)(dword)((unsigned __int64)r >> 32);
+    int64_t r = (int64_t)a * (int64_t)b;
+    lo = (int)(uint32_t)r;
+    hi = (int)(uint32_t)((uint64_t)r >> 32);
     st.mlo.d=lo;
     st.mhi.d=hi;
 }
@@ -405,9 +405,9 @@ static void op_mult(int a,int b)
 static void op_multu(int a,int b)
 {
     int lo,hi;
-    unsigned __int64 r = (unsigned __int64)(dword)a * (unsigned __int64)(dword)b;
-    lo = (int)(dword)r;
-    hi = (int)(dword)(r >> 32);
+    uint64_t r = (uint64_t)(uint32_t)a * (uint64_t)(uint32_t)b;
+    lo = (int)(uint32_t)r;
+    hi = (int)(uint32_t)(r >> 32);
     st.mlo.d=lo;
     st.mhi.d=hi;
 }
@@ -438,13 +438,13 @@ static void op_divu(int a,int b)
         st.mhi.d=0;
         return;
     }
-    lo = (int)((dword)a / (dword)b);
-    hi = (int)((dword)a % (dword)b);
+    lo = (int)((uint32_t)a / (uint32_t)b);
+    hi = (int)((uint32_t)a % (uint32_t)b);
     st.mlo.d=lo;
     st.mhi.d=hi;
 }
 
-static void op_jump(dword opcode,int link,int reg)
+static void op_jump(uint32_t opcode,int link,int reg)
 {
     int to;
 
@@ -475,7 +475,7 @@ static void op_jump(dword opcode,int link,int reg)
     st.branchto=to;
 }
 
-static void op_branch(dword opcode,int doit,int likely,int link)
+static void op_branch(uint32_t opcode,int doit,int likely,int link)
 {
     if(doit)
     {
@@ -502,7 +502,7 @@ static void op_branch(dword opcode,int doit,int likely,int link)
 
 double readdouble(int reg)
 {
-    dword x[2];
+    uint32_t x[2];
     x[0]=st.f[reg+0].d;
     x[1]=st.f[reg+1].d;
     return(*(double *)x);
@@ -510,13 +510,13 @@ double readdouble(int reg)
 
 void writedouble(int reg,double value)
 {
-    dword x[2];
+    uint32_t x[2];
     *(double *)x=value;
     st.f[reg+0].d=x[0];
     st.f[reg+1].d=x[1];
 }
 
-static void op_scc( dword opcode )
+static void op_scc( uint32_t opcode )
 {
 #define  MF           0  // Move From Coprocessor (COPx Sub OpCode)
 #define  MT           4  // Move to Coprocessor (COPx Sub OpCode)
@@ -611,7 +611,7 @@ static void op_scc( dword opcode )
    }
 }
 
-static void op_fpu(dword opcode)
+static void op_fpu(uint32_t opcode)
 {
     int fmt=OP_RS(opcode);
     int op=OP_FUNC(opcode);
@@ -754,7 +754,7 @@ static void op_fpu(dword opcode)
             {
                 qreg v;
                 storer=0;
-                v.q=(qint)a;
+                v.q=(int64_t)a;
                 st.f[OP_SHAMT(opcode)+0].d=v.d2[1];
                 st.f[OP_SHAMT(opcode)+1].d=v.d2[0];
             }
@@ -776,7 +776,7 @@ static void op_fpu(dword opcode)
             if(fmt==20)      st.f[OP_SHAMT(opcode)].f=st.f[OP_RD(opcode)].d;
             else if(fmt==21)
             {
-                st.f[OP_SHAMT(opcode)].f=*(qint *)&st.f[OP_RD(opcode)].d;
+                st.f[OP_SHAMT(opcode)].f=*(int64_t *)&st.f[OP_RD(opcode)].d;
             }
             else if(fmt==17) st.f[OP_SHAMT(opcode)].f=readdouble(OP_RD(opcode));
             else
@@ -793,8 +793,8 @@ static void op_fpu(dword opcode)
                 // [used in goldeneye]
                 qreg x;
                 double d;
-                x.q=*(qint *)&st.f[OP_RD(opcode)].d;
-                d=(qint)x.q;
+                x.q=*(int64_t *)&st.f[OP_RD(opcode)].d;
+                d=(int64_t)x.q;
                 writedouble(OP_SHAMT(opcode),d);
             }
             else if(fmt==16) writedouble(OP_SHAMT(opcode),st.f[OP_RD(opcode)].f);
@@ -835,7 +835,7 @@ static void op_fpu(dword opcode)
 
 }
 
-static void op_main(dword opcode)
+static void op_main(uint32_t opcode)
 {
     int op,flag;
     int *rs,*rt,*rd,imm[2];
@@ -1222,7 +1222,7 @@ static void op_main(dword opcode)
     }
 }
 
-void c_execop(dword opcode)
+void c_execop(uint32_t opcode)
 {
     op_main(opcode);
 

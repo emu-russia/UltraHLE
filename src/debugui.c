@@ -138,7 +138,7 @@ void view_regs(void)
     int x,y,r;
     int vnow,vlast,vnowhi;
     int printq,printdec;
-    qword vnowq;
+    uint64_t vnowq;
     char *vname;
     int c_reg=0x03;
     int c_num=0x07;
@@ -231,7 +231,7 @@ void view_regs(void)
                 if(vnow!=vlast) con_attr(c_chg);
                 if(printq)
                 {
-                    dword lo,hi;
+                    uint32_t lo,hi;
                     lo=vnowq&0xffffffff;
                     hi=(vnowq>>32)&0xffff;
                     con_printf("%04X%08X  ",hi,lo);
@@ -531,7 +531,7 @@ void view_code(void)
     int c_bg2  =0x01;
     int y,b;
     char *optype;
-    dword opcode;
+    uint32_t opcode;
 
     view.codebase&=~3;
 

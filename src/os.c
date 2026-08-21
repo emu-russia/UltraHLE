@@ -21,51 +21,51 @@
 
 typedef struct
 {
-    dword  memaddr;
-    dword  id;
+    uint32_t  memaddr;
+    uint32_t  id;
     int32_t realpriority;
-    dword  flags;
-    dword  active; // 1 for any created threads
-    dword  ready;  // 1=ok to execute (0=waiting)
+    uint32_t  flags;
+    uint32_t  active; // 1 for any created threads
+    uint32_t  ready;  // 1=ok to execute (0=waiting)
     State  st;
     // blocking queues
-    dword  sendblock;
-    dword  recvblock;
+    uint32_t  sendblock;
+    uint32_t  recvblock;
     int32_t priority;
-    dword  RESERVED[15];
+    uint32_t  RESERVED[15];
 } OSThread;
 
 typedef struct
 {
-    dword  memaddr;
+    uint32_t  memaddr;
     int32_t size; // total size of queue
     int32_t pos;  // position in queue
     int32_t num;  // messages in queue
     int32_t totalmsgs;
     int32_t fullerrors;
-    dword  RESERVED[15];
-    dword  data[MAXQUEUESIZE];
+    uint32_t  RESERVED[15];
+    uint32_t  data[MAXQUEUESIZE];
 } OSQueue;
 
 typedef struct
 {
     int32_t queueid; // 0=no queue
-    dword  mesg;
+    uint32_t  mesg;
     int32_t count;
-    dword  RESERVED[16];
+    uint32_t  RESERVED[16];
 } OSEvent;
 
 typedef struct
 {
-    dword  memaddr;
+    uint32_t  memaddr;
     int32_t active;
     int32_t timerid; // 0=unused
-    dword  m_queue;
-    dword  m_mesg;
+    uint32_t  m_queue;
+    uint32_t  m_mesg;
     int32_t queueid;
     int32_t count; // us
     int32_t interval; // us
-    dword  RESERVED[16];
+    uint32_t  RESERVED[16];
 } OSTimer;
 
 #pragma pack(pop)
@@ -161,7 +161,7 @@ void os_timers(void)
 #endif
 }
 
-void os_switchthread(dword id)
+void os_switchthread(uint32_t id)
 {
     int copysize=(&st._boundary_-&st.bailout)*4;
 
@@ -230,8 +230,8 @@ void os_switchcheck(void)
     if(thread[t].priority==0) st.nextswitch=st.cputime;
 }
 
-void osCreateThread(dword m_thread,dword id, dword m_routine,
-                    dword m_param,dword m_stack,dword priority)
+void osCreateThread(uint32_t m_thread,uint32_t id, uint32_t m_routine,
+                    uint32_t m_param,uint32_t m_stack,uint32_t priority)
 {
     int a,i;
     logo(BLUE"osCreateThread(%08X/%i,...) stack:%08X code:%08X pri:%i\n",
@@ -288,7 +288,7 @@ void osStopCurrentThread(void)
     forcetaskswitch(0,0);
 }
 
-void osSetThreadPri(dword m_thread,int pri)
+void osSetThreadPri(uint32_t m_thread,int pri)
 {
     int id;
     if(!m_thread) id=st.thread;
@@ -306,9 +306,9 @@ void osSetThreadPri(dword m_thread,int pri)
     forcetaskswitch(id,0);
 }
 
-void osStartThread(dword m_thread)
+void osStartThread(uint32_t m_thread)
 {
-    dword id=mem_read32(m_thread);
+    uint32_t id=mem_read32(m_thread);
     logo(BLUE"osStartThread(%08X/%i)\n",m_thread,id);
     if(id>=MAXTHREAD)
     {
@@ -343,7 +343,7 @@ int os_queuecheck(int id)
     return(0);
 }
 
-void  osCreateMesgQueue(dword m_queue,dword m_mesg,dword size)
+void  osCreateMesgQueue(uint32_t m_queue,uint32_t m_mesg,uint32_t size)
 {
     int id,i;
 
@@ -393,9 +393,9 @@ void  osCreateMesgQueue(dword m_queue,dword m_mesg,dword size)
     os_queuetomem(id);
 }
 
-dword osSendMesg(dword m_queue,dword m_mesg,int block)
+uint32_t osSendMesg(uint32_t m_queue,uint32_t m_mesg,int block)
 {
-    dword id=mem_read32(m_queue);
+    uint32_t id=mem_read32(m_queue);
     OSQueue *q=queue+id;
     int i;
     if(!id || id>=queuenum)
@@ -469,9 +469,9 @@ dword osSendMesg(dword m_queue,dword m_mesg,int block)
     return(0);
 }
 
-dword osRecvMesg(dword m_queue,dword mm_mesg,int block)
+uint32_t osRecvMesg(uint32_t m_queue,uint32_t mm_mesg,int block)
 {
-    dword id=mem_read32(m_queue);
+    uint32_t id=mem_read32(m_queue);
     OSQueue *q=queue+id;
     int i,m_mesg,pos;
 
@@ -561,7 +561,7 @@ dword osRecvMesg(dword m_queue,dword mm_mesg,int block)
     return(0);
 }
 
-void os_stuffqueue(dword id,dword msg)
+void os_stuffqueue(uint32_t id,uint32_t msg)
 {
     if(!id || id>=queuenum)
     {
@@ -573,7 +573,7 @@ void os_stuffqueue(dword id,dword msg)
 
 /********************************************************/
 
-void osSetEventMessage(dword ev,dword m_queue,dword mesg)
+void osSetEventMessage(uint32_t ev,uint32_t m_queue,uint32_t mesg)
 {
     int queueid=mem_read32(m_queue);
     if(queueid>=queuenum)
@@ -589,7 +589,7 @@ void osSetEventMessage(dword ev,dword m_queue,dword mesg)
     event[ev].mesg=mesg;
 }
 
-void os_event(dword ev)
+void os_event(uint32_t ev)
 {
     int qid,limit;
     if(ev>=MAXEVENTS)
@@ -613,7 +613,7 @@ void os_event(dword ev)
     }
 }
 
-int os_eventqueuefree(dword ev)
+int os_eventqueuefree(uint32_t ev)
 {
     if(ev>=MAXEVENTS)
     {
@@ -677,10 +677,10 @@ void os_dumpinfo(void) // osinfo
     }
 
     {
-        qword  tmp;
+        uint64_t  tmp;
         int    x;
         double f;
-        __int64 lli;
+        int64_t lli;
         tmp=thread[1].st.cputime;
         if(!tmp) tmp=1;
         tmp=100*thread[1].st.threadtime/tmp;
@@ -697,23 +697,23 @@ void os_dumpinfo(void) // osinfo
 
 double os_gettimeus(void)
 {
-    qint q;
+    int64_t q;
     double d;
-    q=(qint)st.retraces*(CLOCKRATE/60);  // total frames
+    q=(int64_t)st.retraces*(CLOCKRATE/60);  // total frames
     q+=(st.cputime-st2.retracetime); // within frame
     d=q*(1000000.0/CLOCKRATE);
     return(d);
 }
 
-void osGetTime(dword *lo,dword *hi)
+void osGetTime(uint32_t *lo,uint32_t *hi)
 {
     qreg x;
     double d;
-    x.q=(qint)st.retraces*(CLOCKRATE/60);  // total frames
+    x.q=(int64_t)st.retraces*(CLOCKRATE/60);  // total frames
     x.q+=(st.cputime-st2.retracetime); // within frame
     if(0)
     {
-        d=(double)(qint)x.q / CLOCKRATE;
+        d=(double)(int64_t)x.q / CLOCKRATE;
         print("retraces %i, time %.4f sec\n",st.retraces,d);
     }
     *lo=x.d2[0];
@@ -722,12 +722,12 @@ void osGetTime(dword *lo,dword *hi)
 
 /**************/
 
-void osMapMem(dword virt,dword phys,int size)
+void osMapMem(uint32_t virt,uint32_t phys,int size)
 {
-    dword srcmin=phys;
-    dword srcmax=phys+size;
-    dword srcsize=srcmax-srcmin;
-    dword pagebase=virt;
+    uint32_t srcmin=phys;
+    uint32_t srcmax=phys+size;
+    uint32_t srcsize=srcmax-srcmin;
+    uint32_t pagebase=virt;
     int i;
 
     logo(BLUE"- map %08X..%08X (size %08X)",srcmin,srcmax,srcsize);
@@ -739,11 +739,11 @@ void osMapMem(dword virt,dword phys,int size)
     }
 }
 
-void osMapTLB(dword x,dword pagemask, dword m_ptr, dword a,dword b,dword c)
+void osMapTLB(uint32_t x,uint32_t pagemask, uint32_t m_ptr, uint32_t a,uint32_t b,uint32_t c)
 {
-    dword pagesize,pagebase;
-    dword srcmin,srcmax,srcsize;
-    dword i;
+    uint32_t pagesize,pagebase;
+    uint32_t srcmin,srcmax,srcsize;
+    uint32_t i;
 
     logo(BLUE"MapTLB(%X,mask:%X,mem:%X,%X,%X,%X) [called at %08X]\n",
         x,pagemask,m_ptr,a,b,c,st.pc);
@@ -852,9 +852,9 @@ void os_load(FILE *f1)
     }
 }
 
-dword osVirtualToPhysical(dword addr)
+uint32_t osVirtualToPhysical(uint32_t addr)
 {
-    dword x;
+    uint32_t x;
     x=mem_getphysical(addr);
     if(RA.d==0x80043300)
     {
@@ -868,15 +868,15 @@ dword osVirtualToPhysical(dword addr)
     return(x);
 }
 
-dword osPhysicalToVirtual(dword addr)
+uint32_t osPhysicalToVirtual(uint32_t addr)
 {
-    dword x;
+    uint32_t x;
     x=addr|0x80000000;
     logo(BLUE"osPhysicalToVirtual(%08X)=%08X",addr,x);
     return(x);
 }
 
-int os_finddmasource(dword addr)
+int os_finddmasource(uint32_t addr)
 {
     int i;
     for(i=0;i<DMAHISTORYSIZE;i++)
@@ -890,10 +890,10 @@ int os_finddmasource(dword addr)
     return(-1);
 }
 
-int osPiStartDma(dword m_iomsg, int priority, int direction,
-                 dword devaddr, dword vaddr, int nbytes, dword m_msgqueue)
+int osPiStartDma(uint32_t m_iomsg, int priority, int direction,
+                 uint32_t devaddr, uint32_t vaddr, int nbytes, uint32_t m_msgqueue)
 {
-    dword orgdevaddr=devaddr;
+    uint32_t orgdevaddr=devaddr;
     int save[2],saved,i;
 
     devaddr&=64*1024*1024-1;
@@ -994,7 +994,7 @@ if(devaddr>=0x8CBAA0 && devaddr<=0x944605)
     if(devaddr&2)
     {
         int i;
-        dword a,x;
+        uint32_t a,x;
         //print(WHITE"Shortaligned source (%08X->%08X)",devaddr,vaddr);
         for(i=0;i<nbytes;i+=4)
         {
@@ -1030,9 +1030,9 @@ if(devaddr>=0x8CBAA0 && devaddr<=0x944605)
     return(0);
 }
 
-int osEPiStartDma(dword m_pihandle,dword m_iomesg,dword flag)
+int osEPiStartDma(uint32_t m_pihandle,uint32_t m_iomesg,uint32_t flag)
 {
-    dword type,dram,dev,count,queue,handle;
+    uint32_t type,dram,dev,count,queue,handle;
     // flag=block?
     //
     // OS_MESG_TYPE_BASE	(10)
@@ -1093,7 +1093,7 @@ int osEPiStartDma(dword m_pihandle,dword m_iomesg,dword flag)
     return(0);
 }
 
-int osContInit(dword m_queue,dword m_bitpattern, dword m_status)
+int osContInit(uint32_t m_queue,uint32_t m_bitpattern, uint32_t m_status)
 {
     int i;
 
@@ -1119,7 +1119,7 @@ int osContInit(dword m_queue,dword m_bitpattern, dword m_status)
     return(0);
 }
 
-int osContStartReadData(dword m_queue)
+int osContStartReadData(uint32_t m_queue)
 {
     logo(BLUE"osContStartReadData\n");
     //print(BLUE"osContStartReadData\n");
@@ -1127,14 +1127,14 @@ int osContStartReadData(dword m_queue)
     return(0);
 }
 
-void osContGetReadData(dword m_data)
+void osContGetReadData(uint32_t m_data)
 {
     logo(BLUE"osContGetReadData(%08X)\n",m_data);
     //print(BLUE"osContGetReadData(%08X)\n",m_data);
     pad_writedata(m_data);
 }
 
-int osContStartQuery(dword m_queue)
+int osContStartQuery(uint32_t m_queue)
 {
     static int cnt;
     logo(BLUE"osContStartQuery\n");
@@ -1154,7 +1154,7 @@ int osContStartQuery(dword m_queue)
     return(0);
 }
 
-void osContGetQuery(dword m_data)
+void osContGetQuery(uint32_t m_data)
 {
     logo(BLUE"osContGetQuery(%08X)\n",m_data);
     //print(BLUE"osContGetQuery(%08X)\n",m_data);
@@ -1167,13 +1167,13 @@ int osSpTaskYield(void)
     return(0);
 }
 
-int osSpTaskYielded(dword m_task)
+int osSpTaskYielded(uint32_t m_task)
 {
     logo(BLUE"osSpTaskYielded(%08X) (ra=%08X)\n",A0.d,RA.d);
     return(1); // OS_TASK_YIELDED;
 }
 
-void osSpTaskStartGo(dword pos)
+void osSpTaskStartGo(uint32_t pos)
 {
     OSTask_t task;
 
@@ -1210,7 +1210,7 @@ void osSpTaskStartGo(dword pos)
     }
 }
 
-int osAiSetNextBuffer(dword m_addr,int bytes)
+int osAiSetNextBuffer(uint32_t m_addr,int bytes)
 {
     return(slist_nextbuffer(m_addr,bytes));
 }
@@ -1220,7 +1220,7 @@ int osAiGetLength(void)
     return(slist_getlength());
 }
 
-int osAiSetFrequency(dword frequency)
+int osAiSetFrequency(uint32_t frequency)
 {
     int org=frequency;
     if(frequency==26800)
@@ -1236,12 +1236,12 @@ int osAiSetFrequency(dword frequency)
 
 /***/
 
-int osSetTimer(dword m_ostimer,dword count_hi,dword count_lo,
-               dword interval_hi,dword interval_lo,
-               dword m_queue,dword m_mesg)
+int osSetTimer(uint32_t m_ostimer,uint32_t count_hi,uint32_t count_lo,
+               uint32_t interval_hi,uint32_t interval_lo,
+               uint32_t m_queue,uint32_t m_mesg)
 {
-    dword id=mem_read32(m_ostimer);
-    dword check=mem_read32(m_ostimer+4);
+    uint32_t id=mem_read32(m_ostimer);
+    uint32_t check=mem_read32(m_ostimer+4);
     int count,interval,i;
     qreg q;
 
@@ -1308,9 +1308,9 @@ int osSetTimer(dword m_ostimer,dword count_hi,dword count_lo,
     return(0);
 }
 
-void osStopTimer(dword m_ostimer)
+void osStopTimer(uint32_t m_ostimer)
 {
-    dword id=mem_read32(m_ostimer);
+    uint32_t id=mem_read32(m_ostimer);
     logo(BLUE"osStopTimer(%08X,...)\n",m_ostimer);
     if(!id)
     {
