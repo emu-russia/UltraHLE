@@ -321,7 +321,7 @@ void adpcm_block(short *out,short *last,int src,short *book,int bits)
 {
     int a,s,r,i,j,d,n;
     int bookbase,magnitude;
-    int last1,last2,mul1,mul2;
+    int last1,last2,mul1=0,mul2=0;
     int downshift=11;
     unsigned char buf[16];
 

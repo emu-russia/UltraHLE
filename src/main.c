@@ -352,8 +352,17 @@ void main_startup(void)
 
     if(!RELEASE)
     {
-        // skip name of executable
-        while(*cmd && *cmd>32) cmd++;
+        // skip name of executable (may be quoted)
+        if(*cmd=='"')
+        {
+            cmd++;
+            while(*cmd && *cmd!='"') cmd++;
+            if(*cmd=='"') cmd++;
+        }
+        else
+        {
+            while(*cmd && *cmd>32) cmd++;
+        }
 
         // command line options
         while(*cmd)
@@ -394,8 +403,15 @@ void main_startup(void)
             }
             else
             {
-                char *argstart;
-                if(!romname)
+                // copy one command line argument. Quoted arguments may
+                // contain spaces (e.g. "C:\roms\my game.z64") and are
+                // handled as a single token.
+                int isrom;
+                int quoted;
+
+                isrom = !romname;
+
+                if(isrom)
                 {
                     // skip '!' if in filename
                     if(*cmd=='!') cmd++;
@@ -409,26 +425,44 @@ void main_startup(void)
                     p=startcmd+strlen(startcmd);
                     *p++=' ';
                 }
-                argstart=p;
-                // add param to p
-                while(*cmd && *cmd>32) *p++=*cmd++;
-                *p++=0;
-                // strip surrounding quotes (e.g. "C:\roms\game.n64")
-                if(*argstart=='"')
+
+                // copy argument (possibly quoted)
+                quoted=(*cmd=='"');
+                if(quoted)
                 {
-                    char *q=argstart;
-                    char *d=argstart;
-                    while(*q)
+                    if(isrom)
                     {
-                        if(*q=='"' && (q==argstart || (q[1]==0 || q[1]==' ')))
+                        // romfile name: strip the surrounding quotes but
+                        // keep the spaces inside the name
+                        cmd++;
+                        while(*cmd && *cmd!='"')
                         {
-                            q++;
-                            continue;
+                            *p++=*cmd++;
                         }
-                        *d++=*q++;
+                        if(*cmd=='"') cmd++;
                     }
-                    *d=0;
+                    else
+                    {
+                        // startup command: keep the quotes so the command
+                        // parser can re-tokenize arguments with spaces
+                        *p++='"';
+                        cmd++;
+                        while(*cmd && *cmd!='"')
+                        {
+                            *p++=*cmd++;
+                        }
+                        if(*cmd=='"')
+                        {
+                            *p++='"';
+                            cmd++;
+                        }
+                    }
                 }
+                else
+                {
+                    while(*cmd && *cmd>32) *p++=*cmd++;
+                }
+                *p=0;
             }
         }
 
@@ -441,8 +475,17 @@ void main_startup(void)
     }
     else
     {
-        // skip name of executable
-        while(*cmd && *cmd>32) cmd++;
+        // skip name of executable (may be quoted)
+        if(*cmd=='"')
+        {
+            cmd++;
+            while(*cmd && *cmd!='"') cmd++;
+            if(*cmd=='"') cmd++;
+        }
+        else
+        {
+            while(*cmd && *cmd>32) cmd++;
+        }
 
         // command line options
         while(*cmd)
