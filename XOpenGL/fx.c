@@ -294,6 +294,9 @@ void init_bufferswap()
 void init_clear(int writecolor, int writedepth, float cr, float cg, float cb)
 {
 	GLbitfield mask = 0;
+	int lx, ly, vw, vh;
+	float sx, sy;
+	int cx0, cy0, cx1, cy1;
 
 	x_flush();
 
@@ -306,33 +309,20 @@ void init_clear(int writecolor, int writedepth, float cr, float cg, float cb)
 			gl_setup_view();
 	}
 
-	// Limit the clear to the current viewport (like grClipWindow did).
-	// Map the game-space rectangle through the letterboxed viewport into
-	// window pixels (y up).
-	{
-		int lx, ly, vw, vh;
-		float sx, sy;
-		int cx0, cy0, cx1, cy1;
-		gl_viewport_geom(&lx, &ly, &vw, &vh);
-		sx = (float)vw / (float)g_state[XST].xs;
-		sy = (float)vh / (float)g_state[XST].ys;
+	// Map the game-space viewport rectangle through the letterboxed viewport
+	// into window pixels (y up) for the scissor test.
+	gl_viewport_geom(&lx, &ly, &vw, &vh);
+	sx = (float)vw / (float)g_state[XST].xs;
+	sy = (float)vh / (float)g_state[XST].ys;
 
-		cx0 = (int)g_state[XST].view_x0;
-		cy0 = (int)g_state[XST].view_y0;
-		cx1 = (int)g_state[XST].view_x1;
-		cy1 = (int)g_state[XST].view_y1;
-		if (cx0 < 0) cx0 = 0;
-		if (cy0 < 0) cy0 = 0;
-		if (cx1 >= g_state[XST].xs) cx1 = g_state[XST].xs - 1;
-		if (cy1 >= g_state[XST].ys) cy1 = g_state[XST].ys - 1;
-
-		// game y is top-down, GL scissor y is bottom-up
-		glScissor(lx + (int)(cx0 * sx),
-			ly + (int)((g_state[XST].ys - 1 - cy1) * sy),
-			(int)((cx1 - cx0 + 1) * sx) + 1,
-			(int)((cy1 - cy0 + 1) * sy) + 1);
-		glEnable(GL_SCISSOR_TEST);
-	}
+	cx0 = (int)g_state[XST].view_x0;
+	cy0 = (int)g_state[XST].view_y0;
+	cx1 = (int)g_state[XST].view_x1;
+	cy1 = (int)g_state[XST].view_y1;
+	if (cx0 < 0) cx0 = 0;
+	if (cy0 < 0) cy0 = 0;
+	if (cx1 >= g_state[XST].xs) cx1 = g_state[XST].xs - 1;
+	if (cy1 >= g_state[XST].ys) cy1 = g_state[XST].ys - 1;
 
 	glColorMask(writecolor >= 1 ? GL_TRUE : GL_FALSE,
 		writecolor >= 1 ? GL_TRUE : GL_FALSE,
@@ -342,9 +332,22 @@ void init_clear(int writecolor, int writedepth, float cr, float cg, float cb)
 
 	glClearColor(cr, cg, cb, 1.0f);
 	glClearDepth(1.0);
+
+	// Clear the WHOLE window (including the letterbox bars around the
+	// letterboxed viewport), then limit the actual drawing to the game
+	// viewport with the scissor test.
+	glDisable(GL_SCISSOR_TEST);
 	if (writecolor) mask |= GL_COLOR_BUFFER_BIT;
 	if (writedepth) mask |= GL_DEPTH_BUFFER_BIT;
 	glClear(mask);
+
+	// re-enable the scissor for the game area draws (game y is top-down,
+	// GL scissor y is bottom-up)
+	glScissor(lx + (int)(cx0 * sx),
+		ly + (int)((g_state[XST].ys - 1 - cy1) * sy),
+		(int)((cx1 - cx0 + 1) * sx) + 1,
+		(int)((cy1 - cy0 + 1) * sy) + 1);
+	glEnable(GL_SCISSOR_TEST);
 
 	// restore mask state
 	glDepthMask((g_state[XST].currentmode.mask & 2u) ? GL_TRUE : GL_FALSE);

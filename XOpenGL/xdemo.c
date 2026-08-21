@@ -283,6 +283,26 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmd, int show)
 
 		x_clear(1, 1, 0.02f, 0.02f, 0.06f);
 
+		if ((frame & 64) != 0)
+		{
+			/* every other 64 frames: full-frame gradient (letterbox check) */
+			x_blend(X_ONE, X_ZERO);
+			x_alphatest(1.0f);
+			x_combine(X_TEXTURE);
+			x_texture(tex_grad);
+			x_begin(X_QUADS);
+			x_vxcolor(1.0f, 1.0f, 1.0f);
+			x_vxtex(0, 0); x_vxpos(-1.0f, 1.0f, 1.0f);
+			x_vxtex(128, 0); x_vxpos(1.0f, 1.0f, 1.0f);
+			x_vxtex(128, 128); x_vxpos(1.0f, -1.0f, 1.0f);
+			x_vxtex(0, 128); x_vxpos(-1.0f, -1.0f, 1.0f);
+			x_end();
+			x_flush();
+			x_finish();
+			frame++;
+			continue;
+		}
+
 		/* ---- 3D: textured cube (z-buffered) ---- */
 		x_viewport(0, 0, (float)WIN_W - 1, (float)WIN_H - 1);
 		x_projmatrix(NULL);
