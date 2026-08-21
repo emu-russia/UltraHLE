@@ -106,7 +106,7 @@ OEND
 OBEGIN(o_mult)
     mov  ecx,edx
     mov  eax,[ebx+A(IP_RS)]
-    imul uint32_t ptr [ebx+A(IP_RT)]
+    imul dword ptr [ebx+A(IP_RT)]
     mov  [ebx+A(IP_P1)],eax
     mov  [ebx+A(IP_P2)],edx
     mov  edx,ecx
@@ -115,7 +115,7 @@ OEND
 OBEGIN(o_multu)
     mov  ecx,edx
     mov  eax,[ebx+A(IP_RS)]
-    mul  uint32_t ptr [ebx+A(IP_RT)]
+    mul  dword ptr [ebx+A(IP_RT)]
     mov  [ebx+A(IP_P1)],eax
     mov  [ebx+A(IP_P2)],edx
     mov  edx,ecx
@@ -123,7 +123,7 @@ OEND
 
 OBEGIN(o_div1)
     mov  eax,[ebx+A(IP_RS)]
-    mov  ecx,uint32_t ptr [ebx+A(IP_RT)]
+    mov  ecx,dword ptr [ebx+A(IP_RT)]
 OEND
 RBEGIN(or_div)
     test ecx,ecx
@@ -717,67 +717,67 @@ void ac_branch(uint32_t opcode, int cmpop, int flags)
 static float floatconst05=-0.4999f;
 
 OBEGIN(o_cvt_w2s)
-    fild  uint32_t ptr [ebx+A(IP_FS1)]
-    fstp  uint32_t ptr [ebx+A(IP_FD)]
+    fild  dword ptr [ebx+A(IP_FS1)]
+    fstp  dword ptr [ebx+A(IP_FD)]
 OEND
 
 OBEGIN(o_cvt_w2d)
-    fild  uint32_t ptr [ebx+A(IP_FS1)]
-    fstp  uint64_t ptr [ebx+A(IP_FD)]
+    fild  dword ptr [ebx+A(IP_FS1)]
+    fstp  qword ptr [ebx+A(IP_FD)]
 OEND
 
 OBEGIN(o_cvt_s2w)
-    fld   uint32_t ptr [ebx+A(IP_FS1)]
+    fld   dword ptr [ebx+A(IP_FS1)]
 //    fadd  dword ptr floatconst05
-    fistp uint32_t ptr [ebx+A(IP_FD)]
+    fistp dword ptr [ebx+A(IP_FD)]
 OEND
 
 OBEGIN(o_cvt_s2wopt)
-    fistp uint32_t ptr [ebx+A(IP_FD)]
+    fistp dword ptr [ebx+A(IP_FD)]
 OEND
 
 OBEGIN(o_cvt_s2d)
-    fld   uint32_t ptr [ebx+A(IP_FS1)]
-    fstp  uint64_t ptr [ebx+A(IP_FD)]
+    fld   dword ptr [ebx+A(IP_FS1)]
+    fstp  qword ptr [ebx+A(IP_FD)]
 OEND
 
 OBEGIN(o_cvt_d2w)
-    fld   uint64_t ptr [ebx+A(IP_FS1)]
+    fld   qword ptr [ebx+A(IP_FS1)]
 //    fadd  dword ptr floatconst05
-    fistp uint32_t ptr [ebx+A(IP_FD)]
+    fistp dword ptr [ebx+A(IP_FD)]
 OEND
 
 OBEGIN(o_cvt_d2s)
-    fld   uint64_t ptr [ebx+A(IP_FS1)]
-    fstp  uint32_t ptr [ebx+A(IP_FD)]
+    fld   qword ptr [ebx+A(IP_FS1)]
+    fstp  dword ptr [ebx+A(IP_FD)]
 OEND
 
 // routines to load/store fpu temps
 
 OBEGIN(o_fpu_ls)
-    fld  uint32_t ptr [ebx+A(IP_FS1)]
-    fld  uint32_t ptr [ebx+A(IP_FS2)]
+    fld  dword ptr [ebx+A(IP_FS1)]
+    fld  dword ptr [ebx+A(IP_FS2)]
 OEND
 
 OBEGIN(o_fpu_ls1)
-    fld  uint32_t ptr [ebx+A(IP_FS1)]
+    fld  dword ptr [ebx+A(IP_FS1)]
 OEND
 
 OBEGIN(o_fpu_ss)
-    fstp uint32_t ptr [ebx+A(IP_FD)]
+    fstp dword ptr [ebx+A(IP_FD)]
 OEND
 
 OBEGIN(o_fpu_ld)
-    fld  uint64_t ptr [ebx+A(IP_FS1)]
-    fld  uint64_t ptr [ebx+A(IP_FS2)]
+    fld  qword ptr [ebx+A(IP_FS1)]
+    fld  qword ptr [ebx+A(IP_FS2)]
 OEND
 
 OBEGIN(o_fpu_ld1)
-    fld  uint64_t ptr [ebx+A(IP_FS1)]
+    fld  qword ptr [ebx+A(IP_FS1)]
 OEND
 
 OBEGIN(o_fpu_sd)
-    fstp uint64_t ptr [ebx+A(IP_FD)]
+    fstp qword ptr [ebx+A(IP_FD)]
 OEND
 
 OBEGIN(o_fpu_cmp)
@@ -787,16 +787,16 @@ OBEGIN(o_fpu_cmp)
 OEND
 
 OBEGIN(o_fpu4_cmp)
-    fld    uint32_t ptr [ebx+A(IP_FS1)]
-    fcomp  uint32_t ptr [ebx+A(IP_FS2)]
+    fld    dword ptr [ebx+A(IP_FS1)]
+    fcomp  dword ptr [ebx+A(IP_FS2)]
     fstsw ax
     and eax,A(IP_P1)
     mov [ebx+A(IP_P2)],eax
 OEND
 
 OBEGIN(o_fpu8_cmp)
-    fld    uint64_t ptr [ebx+A(IP_FS1)]
-    fcomp  uint64_t ptr [ebx+A(IP_FS2)]
+    fld    qword ptr [ebx+A(IP_FS1)]
+    fcomp  qword ptr [ebx+A(IP_FS2)]
     fstsw ax
     and eax,A(IP_P1)
     mov [ebx+A(IP_P2)],eax
@@ -1256,14 +1256,14 @@ OEND
 OBEGIN(o_lhu1)
 {
     xor  ecx,2
-    movzx eax,uint16_t ptr [ecx]
+    movzx eax,word ptr [ecx]
 }
 OEND
 
 OBEGIN(o_lh1)
 {
     xor  ecx,2
-    movsx eax,uint16_t ptr [ecx]
+    movsx eax,word ptr [ecx]
 }
 OEND
 
@@ -1277,14 +1277,14 @@ OEND
 OBEGIN(o_lbu1)
 {
     xor  ecx,3
-    movzx eax,uint8_t ptr [ecx]
+    movzx eax,byte ptr [ecx]
 }
 OEND
 
 OBEGIN(o_lb1)
 {
     xor  ecx,3
-    movsx eax,uint8_t ptr [ecx]
+    movsx eax,byte ptr [ecx]
 }
 OEND
 
