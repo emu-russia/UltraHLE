@@ -625,8 +625,11 @@ void cpu_exec(qword ops0,int fast)
             if(ops<CYCLES_BURST) num=ops; else num=CYCLES_BURST;
 
             st.bailout=num;
+#ifndef _M_X64 
             if(fast) a_exec();
-            else c_exec();
+            else
+#endif
+                c_exec();
 
             if(st.bailout<=BAILOUTNOW) num=1;
             else num=num-st.bailout; // how many were really executed
@@ -677,4 +680,17 @@ print("break!\n");
     view_status("ready");
     flushdisplay();
 }
+
+#ifdef _M_X64
+// The dynamic recompiler (cpua.c / cpuanew.c / cpuautil.c) emits x86 machine
+// code and is excluded from the x64 build (see UltraHLE.vcxproj). On x64 the
+// emulator uses the portable C interpreter (cpuc.c), so these JIT hooks are
+// no-ops here.
+void a_clearcodecache(void) { }
+void a_cleardeadgroups(void) { }
+void a_stats(void) { }
+void a_stats2(void) { }
+void a_stats3(void) { }
+void a_compilegroupat(dword x) { (void)x; }
+#endif
 

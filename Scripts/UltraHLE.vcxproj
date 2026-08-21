@@ -102,9 +102,18 @@
     <ClCompile Include="..\src\cmd.cpp" />
     <ClCompile Include="..\src\console.c" />
     <ClCompile Include="..\src\cpu.c" />
-    <ClCompile Include="..\src\cpua.c" />
-    <ClCompile Include="..\src\cpuanew.c" />
-    <ClCompile Include="..\src\cpuautil.c" />
+    <ClCompile Include="..\src\cpua.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\cpuanew.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\cpuautil.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\src\cpuc.c" />
     <ClCompile Include="..\src\debugui.c" />
     <ClCompile Include="..\src\disasm.c" />

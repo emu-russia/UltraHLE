@@ -201,57 +201,27 @@ void op_shift64(dword opcode,int type,int amount)
     switch(type)
     {
     case 0: // left
-        _asm
         {
-            mov   ecx,amount
-            mov   eax,t[0]
-            mov   edx,t[4]
-            cmp   ecx,32
-            jb    g1
-            mov   edx,eax
-            xor   eax,eax
-            and   ecx,31
-            jz    g2
-        g1: shld  edx,eax,cl
-            shl   eax,cl
-        g4: mov   t[0],eax
-            mov   t[4],edx
+            unsigned __int64 v = ((unsigned __int64)t[1] << 32) | t[0];
+            v <<= (amount & 63);
+            t[0]=(dword)v;
+            t[1]=(dword)(v >> 32);
         }
         break;
-    case 1: // right
-        _asm
+    case 1: // right (logical)
         {
-            mov   ecx,amount
-            mov   eax,t[0]
-            mov   edx,t[4]
-            cmp   ecx,32
-            jb    g2
-            mov   eax,edx
-            xor   edx,edx
-            and   ecx,31
-            jz    g5
-        g2: shrd  eax,edx,cl
-            shr   edx,cl
-        g5: mov   t[0],eax
-            mov   t[4],edx
+            unsigned __int64 v = ((unsigned __int64)t[1] << 32) | t[0];
+            v >>= (amount & 63);
+            t[0]=(dword)v;
+            t[1]=(dword)(v >> 32);
         }
         break;
     case 2: // right arithmetic
-        _asm
         {
-            mov   ecx,amount
-            mov   eax,t[0]
-            mov   edx,t[4]
-            cmp   ecx,32
-            jb    g3
-            mov   eax,edx
-            xor   edx,edx
-            and   ecx,31
-            jz    g6
-        g3: shrd  eax,edx,cl
-            sar   edx,cl
-        g6: mov   t[0],eax
-            mov   t[4],edx
+            __int64 v = ((__int64)t[1] << 32) | t[0];
+            v >>= (amount & 63);
+            t[0]=(dword)v;
+            t[1]=(dword)(v >> 32);
         }
         break;
     }
@@ -269,17 +239,11 @@ void op_shift64(dword opcode,int type,int amount)
 void addi64(dword *d,dword *a,dword *b)
 {
     op_64bitexpand();
-    _asm
     {
-        mov ebx,a
-        mov ecx,b
-        mov eax,[ebx+0]
-        mov edx,[ebx+4]
-        add eax,[ecx+0]
-        adc edx,[ecx+4]
-        mov ebx,d
-        mov [ebx+0],eax
-        mov [ebx+4],edx
+        dword lo = a[0] + b[0];
+        dword hi = a[1] + b[1] + (lo < a[0] ? 1 : 0);
+        d[0] = lo;
+        d[1] = hi;
     }
     if(DUMP64)
     {
@@ -431,14 +395,9 @@ static void op_rwmemrl(dword opcode,int write,int right)
 static void op_mult(int a,int b)
 {
     int lo,hi;
-    _asm
-    {
-        mov  eax,a
-        mov  edx,b
-        imul edx
-        mov  lo,eax
-        mov  hi,edx
-    }
+    __int64 r = (__int64)a * (__int64)b;
+    lo = (int)(dword)r;
+    hi = (int)(dword)((unsigned __int64)r >> 32);
     st.mlo.d=lo;
     st.mhi.d=hi;
 }
@@ -446,14 +405,9 @@ static void op_mult(int a,int b)
 static void op_multu(int a,int b)
 {
     int lo,hi;
-    _asm
-    {
-        mov  eax,a
-        mov  edx,b
-        mul  edx
-        mov  lo,eax
-        mov  hi,edx
-    }
+    unsigned __int64 r = (unsigned __int64)(dword)a * (unsigned __int64)(dword)b;
+    lo = (int)(dword)r;
+    hi = (int)(dword)(r >> 32);
     st.mlo.d=lo;
     st.mhi.d=hi;
 }
@@ -468,15 +422,8 @@ static void op_div(int a,int b)
         st.mhi.d=0;
         return;
     }
-    _asm
-    {
-        mov  eax,a
-        cdq
-        mov  ecx,b
-        idiv ecx
-        mov  lo,eax
-        mov  hi,edx
-    }
+    lo = a / b;
+    hi = a % b;
     st.mlo.d=lo;
     st.mhi.d=hi;
 }
@@ -491,15 +438,8 @@ static void op_divu(int a,int b)
         st.mhi.d=0;
         return;
     }
-    _asm
-    {
-        mov  eax,a
-        xor  edx,edx
-        mov  ecx,b
-        div  ecx
-        mov  lo,eax
-        mov  hi,edx
-    }
+    lo = (int)((dword)a / (dword)b);
+    hi = (int)((dword)a % (dword)b);
     st.mlo.d=lo;
     st.mhi.d=hi;
 }
