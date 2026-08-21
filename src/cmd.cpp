@@ -4,7 +4,7 @@
 #include <string>
 #include <map>
 
-static byte *snap;          // Temporary storage for RDRAM dump
+static uint8_t *snap;          // Temporary storage for RDRAM dump
 
 typedef void (*cmd_handler)(std::vector<std::string>& args);
 static std::map<std::string, cmd_handler> cmds;
@@ -21,10 +21,10 @@ static char* param(int n, std::vector<std::string>& args)
     return buf;
 }
 
-static qword atoq(char *p)
+static uint64_t atoq(char *p)
 {
-    qword res=0;
-    dword x;
+    uint64_t res=0;
+    uint32_t x;
     // skip space
     while(*p<=32 && *p) p++;
     // check for hex
@@ -383,7 +383,7 @@ static void cmd_sgo(std::vector<std::string>& args)
 
 static void cmd_skip(std::vector<std::string>& args)
 {
-    qword cnt;
+    uint64_t cnt;
     char* p = param(1, args);
     cnt = atoq(p);
     if (cnt < 1) cnt = 1;
@@ -401,7 +401,7 @@ static void cmd_goto(std::vector<std::string>& args)
 
 static void cmd_s(std::vector<std::string>& args)
 {
-    qword cnt;
+    uint64_t cnt;
     char* p = param(1, args);
     cnt = atoq(p);
     if (cnt < 1) cnt = 1;
@@ -411,7 +411,7 @@ static void cmd_s(std::vector<std::string>& args)
 
 static void cmd_f(std::vector<std::string>& args)
 {
-    qword cnt;
+    uint64_t cnt;
     char* p = param(1, args);
     cnt = atoq(p);
     if (cnt < 1) cnt = 1;
@@ -694,7 +694,7 @@ static void cmd_d(std::vector<std::string>& args)
 
 static void cmd_e(std::vector<std::string>& args)
 {
-    dword addr, data;
+    uint32_t addr, data;
     setaddress(param(1, args), &addr);
     char *p = param(2, args);
     data = atoq(p);
@@ -704,7 +704,7 @@ static void cmd_e(std::vector<std::string>& args)
 
 static void cmd_eb(std::vector<std::string>& args)
 {
-    dword addr, data;
+    uint32_t addr, data;
     setaddress(param(1, args), &addr);
     char* p = param(2, args);
     data = atoq(p);
@@ -765,7 +765,7 @@ static void cmd_snap(std::vector<std::string>& args)
 {
     if (!snap)
     {
-        snap = (byte*)malloc(RDRAMSIZE);
+        snap = (uint8_t*)malloc(RDRAMSIZE);
     }
     memcpy(snap, mem.ram, RDRAMSIZE);
     print("Snapshot taken\n");
@@ -1040,8 +1040,8 @@ static void cmd_boot(std::vector<std::string>& args)
     int i;
     for (i = 0; i < 1024; i++)
     {
-        WSPD[i] = ((dword*)cart.data)[i];
-        RSPD[i] = ((dword*)cart.data)[i];
+        WSPD[i] = ((uint32_t*)cart.data)[i];
+        RSPD[i] = ((uint32_t*)cart.data)[i];
     }
     cpu_goto(DMEM_ADDRESS + 0x40);
 }
@@ -1053,7 +1053,7 @@ static void cmd_memory(std::vector<std::string>& args)
 
 static void group_compile(int compile, std::vector<std::string>& args)
 {
-    dword  x;
+    uint32_t  x;
     float  ratio = 0.0;
     int    gi;
     Group* g;
@@ -1094,16 +1094,16 @@ static void group_compile(int compile, std::vector<std::string>& args)
             mem.group, &st, &st.g[0], &st.f[0]);
         if (g->code)
         {
-            byte* code = g->code;
+            uint8_t* code = g->code;
             print("Prefixed DWORDS: pc:%08X j1:%08X j2:%08X\n",
-                *(dword*)(code - 14),
-                *(dword*)(code - 8),
-                *(dword*)(code - 4));
+                *(uint32_t*)(code - 14),
+                *(uint32_t*)(code - 8),
+                *(uint32_t*)(code - 4));
             for (i = 0; i < 1000; i++)
             {
                 if (*code == 0xcc) break; // int 3 marks end
                 print("%08X: " NORMAL "%s\n",
-                    (dword)code,
+                    (uint32_t)code,
                     disasmx86(code, (int)code, &ia));
                 code += ia;
             }
@@ -1127,7 +1127,7 @@ static void cmd_compile(std::vector<std::string>& args)
 static void cmd_disasm(std::vector<std::string>& args)
 {
     char  file[256];
-    dword base, cnt;
+    uint32_t base, cnt;
     char* p;
     p = param(1, args);
     strcpy(file, p);
@@ -1150,7 +1150,7 @@ static void cmd_disasm(std::vector<std::string>& args)
 static void cmd_disasmrsp(std::vector<std::string>& args)
 {
     char  file[256];
-    dword base, cnt;
+    uint32_t base, cnt;
     char* p;
     p = param(1, args);
     strcpy(file, p);
@@ -1173,7 +1173,7 @@ static void cmd_disasmrsp(std::vector<std::string>& args)
 static void cmd_savemem(std::vector<std::string>& args)
 {
     char  file[256];
-    dword base, cnt;
+    uint32_t base, cnt;
     char* p;
     p = param(1, args);
     strcpy(file, p);
@@ -1190,7 +1190,7 @@ static void cmd_savemem(std::vector<std::string>& args)
         if (f1)
         {
             int i;
-            dword x;
+            uint32_t x;
             for (i = 0; i < cnt; i += 4)
             {
                 x = mem_read32(base + i);

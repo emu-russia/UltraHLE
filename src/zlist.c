@@ -2,14 +2,14 @@
 
 typedef struct
 {
-    dword   m_pic;
+    uint32_t   m_pic;
     int     wid;
     int     hig;
-    dword   m_q1;
-    dword   m_q2;
-    dword   m_q3;
-    dword   zero1;
-    dword   zero2;
+    uint32_t   m_q1;
+    uint32_t   m_q2;
+    uint32_t   m_q3;
+    uint32_t   zero1;
+    uint32_t   zero2;
 } ZData;
 
 ZData zdata;
@@ -23,9 +23,9 @@ static int    q2[64];
 static int    q3[64];
 
 
-void readdata(void *dst,dword addr,int bytes)
+void readdata(void *dst,uint32_t addr,int bytes)
 {
-    dword *d=(dword *)dst;
+    uint32_t *d=(uint32_t *)dst;
     int i,x;
     bytes>>=2;
     for(i=0;i<bytes;i++)
@@ -35,7 +35,7 @@ void readdata(void *dst,dword addr,int bytes)
     }
 }
 
-void readshort(int *q,dword addr,int bytes)
+void readshort(int *q,uint32_t addr,int bytes)
 {
     int x,i;
     bytes>>=1;
@@ -47,7 +47,7 @@ void readshort(int *q,dword addr,int bytes)
     }
 }
 
-void writeshort(int *q,dword addr,int bytes)
+void writeshort(int *q,uint32_t addr,int bytes)
 {
     int x,a,b,i;
     bytes>>=1;
@@ -60,7 +60,7 @@ void writeshort(int *q,dword addr,int bytes)
     }
 }
 
-void readq(int *q,dword addr)
+void readq(int *q,uint32_t addr)
 {
     int i;
     readshort(q,addr,64*2);

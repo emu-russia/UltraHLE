@@ -221,7 +221,7 @@ void cpu_nicebreak(void)
     st.nicebreak=1; // out of cpu.c
 }
 
-void cpu_goto(dword pc)
+void cpu_goto(uint32_t pc)
 {
     st.pc=pc;
     st.branchdelay=0;
@@ -253,7 +253,7 @@ void cpu_keys(int dopad)
 
 void cpu_checkui(int fast)
 {
-    static qword  lastupdate;
+    static uint64_t  lastupdate;
     static int    lastvidframe=-9;
     static int    laststatframe=-99;
     int    update;
@@ -309,7 +309,7 @@ void cpu_checkui(int fast)
     }
 }
 
-void cpu_dumptrace(int isret,dword addr)
+void cpu_dumptrace(int isret,uint32_t addr)
 {
     static char line[30]="------------------------------";
 
@@ -339,7 +339,7 @@ void cpu_clearbp(void)
     st.breakpoints=0;
 }
 
-void cpu_addbp(int type,dword addr,dword data)
+void cpu_addbp(int type,uint32_t addr,uint32_t data)
 {
     Break *bp;
     if(st.breakpoints==16)
@@ -353,13 +353,13 @@ void cpu_addbp(int type,dword addr,dword data)
     bp->data=data;
 }
 
-void cpu_onebp(int type,dword addr,dword data)
+void cpu_onebp(int type,uint32_t addr,uint32_t data)
 {
     cpu_clearbp();
     cpu_addbp(type,addr,data);
 }
 
-void cpu_notify_readmem(dword addr,int bytes)
+void cpu_notify_readmem(uint32_t addr,int bytes)
 {
     if(memdatar(addr)==RNULL)
     {
@@ -368,7 +368,7 @@ void cpu_notify_readmem(dword addr,int bytes)
     if(st.breakpoints) cpu_checkmembreak(addr,bytes,0);
 }
 
-void cpu_notify_writemem(dword addr,int bytes)
+void cpu_notify_writemem(uint32_t addr,int bytes)
 {
     /*
     if((addr&0xffff0000)==0xa4600000)
@@ -383,7 +383,7 @@ void cpu_notify_writemem(dword addr,int bytes)
     if(st.breakpoints) cpu_checkmembreak(addr,bytes,1);
 }
 
-void cpu_notify_branch(dword addr,int type)
+void cpu_notify_branch(uint32_t addr,int type)
 {
     int isret=(type==BRANCH_RET || type==BRANCH_PATCHRET);
     cpu_checkbranchbreak(addr,type);
@@ -395,13 +395,13 @@ void cpu_notify_branch(dword addr,int type)
     if(isret) st.callnest--;
 }
 
-void cpu_notify_pc(dword addr)
+void cpu_notify_pc(uint32_t addr)
 {
     int i;
 
     if(st.dumpops)
     {
-        dword x;
+        uint32_t x;
         x=mem_read32(addr);
         print(GRAY"/%08X: <%08X>  %s\n",addr,x,disasm(addr,x));
     }
@@ -416,7 +416,7 @@ void cpu_notify_pc(dword addr)
     }
 }
 
-void cpu_notify_msg(int queue,dword qaddr,int issend)
+void cpu_notify_msg(int queue,uint32_t qaddr,int issend)
 {
     int i;
 
@@ -485,7 +485,7 @@ void cpu_checkeventbreak(void)
     }
 }
 
-void cpu_checkmembreak(dword addr,int bytes,int iswrite)
+void cpu_checkmembreak(uint32_t addr,int bytes,int iswrite)
 {
     int i;
     // check memory breakpoint. Bytes is ignored currently.
@@ -510,7 +510,7 @@ if(mem_read32(st.breakpoint[i].addr)!=0xc6fa0000) break;
     }
 }
 
-void cpu_checkbranchbreak(dword addr,int type)
+void cpu_checkbranchbreak(uint32_t addr,int type)
 {
     int i;
     // check memory breakpoint. Bytes is ignored currently.
@@ -541,14 +541,14 @@ void cpu_checkbranchbreak(dword addr,int type)
     }
 }
 
-void cpu_exec(qword ops0,int fast)
+void cpu_exec(uint64_t ops0,int fast)
 {
     int   hwcheckcnt=CYCLES_BURST;
     int   uicheckcnt=CYCLES_CHECKUI;
     int   breakpointnum;
     int   num,starttime;
-    qint  ops=ops0;
-    qint  tmpq;
+    int64_t  ops=ops0;
+    int64_t  tmpq;
 
     st.executing=1;
 
@@ -691,6 +691,6 @@ void a_cleardeadgroups(void) { }
 void a_stats(void) { }
 void a_stats2(void) { }
 void a_stats3(void) { }
-void a_compilegroupat(dword x) { (void)x; }
+void a_compilegroupat(uint32_t x) { (void)x; }
 #endif
 

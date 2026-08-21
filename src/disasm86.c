@@ -806,7 +806,7 @@ static char *unasm(int segmentsize)
   return(ubuf);
 }
 
-char *disasmx86(byte *opcode1,int codeoff1,int *len)
+char *disasmx86(uint8_t *opcode1,int codeoff1,int *len)
 {
     char *res;
     codepnt=opcode1;

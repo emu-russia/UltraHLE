@@ -49,12 +49,12 @@ void  sym_findfirstos(void);
 // patching related routines
 void  sym_addpatches(void);  // put patch opcodes into memory for patched symbols
 void  sym_removepatches(void);  // put patch opcodes into memory for patched symbols
-void  sym_findoscalls(dword base, dword bytes, int cont); // search memory for os-calls and add symbols for them
+void  sym_findoscalls(uint32_t base, uint32_t bytes, int cont); // search memory for os-calls and add symbols for them
 void  sym_dumposcalls(void); // print list of found os routines to console
 void  sym_demooscalls(void); // create list of oscalls from DEMO.ROM (which must be loaded)
 
-void  symfind_saveroutine(dword addr, char* name);
-char* symfind_matchroutine(dword addr);
+void  symfind_saveroutine(uint32_t addr, char* name);
+char* symfind_matchroutine(uint32_t addr);
 
 #ifdef __cplusplus
 };

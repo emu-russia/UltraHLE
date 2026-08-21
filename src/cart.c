@@ -61,14 +61,14 @@ int cart_map(char *fname)
 {
 //    print("mapping starts (%s)\n",fname); flushdisplay();
 
-    cart.mapfilehandle=(dword)CreateFile(
+    cart.mapfilehandle=(uint32_t)CreateFile(
         fname,GENERIC_READ,FILE_SHARE_READ,
         NULL,OPEN_EXISTING,0,NULL);
     if(!cart.mapfilehandle) return(1);
 
 //    print("mapping filehandle=%08X\n",cart.mapfilehandle);
 
-    cart.maphandle=(dword)CreateFileMapping(
+    cart.maphandle=(uint32_t)CreateFileMapping(
         (HANDLE)cart.mapfilehandle,
         NULL,
         PAGE_READONLY,
@@ -134,7 +134,7 @@ void cart_dummy(void)
 void cart_flip(int flip)
 {
     int f[4],x;
-    byte *s,*send;
+    uint8_t *s,*send;
     int  *d;
 
     if(flip==0x0123) return;
@@ -161,10 +161,10 @@ void cart_flip(int flip)
 void cart_flipheader(char *header)
 {
     int f[4],x;
-    byte *s,*send;
+    uint8_t *s,*send;
     int  *d,flip,a;
 
-    a=*(dword *)header;
+    a=*(uint32_t *)header;
     flip=0x0123;
     if(a==0x80371240) flip=0x0123;
     if(a==0x37804012) flip=0x1032;

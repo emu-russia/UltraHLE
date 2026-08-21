@@ -12,7 +12,7 @@ void insertnothing(void)
 
 void insertbyte(int x)
 {
-    byte *d;
+    uint8_t *d;
     r.inserted=1;
     d=mem.code+mem.codeused;
     *d=x;
@@ -21,16 +21,16 @@ void insertbyte(int x)
 
 void insertdword(int x)
 {
-    dword *dd;
+    uint32_t *dd;
     r.inserted=1;
-    dd=(dword *)(mem.code+mem.codeused);
+    dd=(uint32_t *)(mem.code+mem.codeused);
     *dd=x;
     mem.codeused+=4;
 }
 
 void insertmodrmopcode(int opcode,int reg,int base,int offset)
 {
-    byte *d,*d0;
+    uint8_t *d,*d0;
     int modrm,mod,offsz=0;
     r.inserted=1;
     d=d0=mem.code+mem.codeused;
@@ -71,7 +71,7 @@ void insertmodrmopcode(int opcode,int reg,int base,int offset)
     {
         // convert to direct address
         base=REG_NONE;
-        offset+=((dword)&st)+STOFFSET;
+        offset+=((uint32_t)&st)+STOFFSET;
     }
 
     if(base==REG_REG)
@@ -178,30 +178,30 @@ void insertimmopcode(int opcode,int xrs,int imm)
 
 void insertcall(void *routine)
 {
-    dword x=(dword)routine;
-    dword y=(dword)(mem.code+mem.codeused+5);
+    uint32_t x=(uint32_t)routine;
+    uint32_t y=(uint32_t)(mem.code+mem.codeused+5);
     insertbyte(0xE8); // CALL
     insertdword(x-y);
 }
 
 void insertjump(void *routine)
 {
-    dword x=(dword)routine;
-    dword y=(dword)(mem.code+mem.codeused+5);
+    uint32_t x=(uint32_t)routine;
+    uint32_t y=(uint32_t)(mem.code+mem.codeused+5);
     insertbyte(0xE9); // JMP
     insertdword(x-y);
 }
 
 void insert(t_asmop o)
 {
-    byte *d,*s;
+    uint8_t *d,*s;
     int   i;
 
     r.inserted=1;
 
     r.lastjumpto=0;
 
-    s=(byte *)o;
+    s=(uint8_t *)o;
     if(*s!=0x90) s+=5+*(int *)(s+1);
     s++;
 
@@ -219,7 +219,7 @@ void insert(t_asmop o)
         }
         else if(s[0]==0xfa && s[1]==0xfb && s[2]==0xfc)
         { // end marker
-            dword x;
+            uint32_t x;
             x=ip[s[3]];
             s+=4;
             *d++=(x>> 0)&255;
@@ -240,7 +240,7 @@ void insert(t_asmop o)
 ** Misc utilities
 */
 
-int getop(dword opcode)
+int getop(uint32_t opcode)
 {
     int op;
     op=OP_OP(opcode);
@@ -253,10 +253,10 @@ int getop(dword opcode)
 ** Group utilities
 */
 
-Group *ac_creategroup(dword pc)
+Group *ac_creategroup(uint32_t pc)
 { // if group exists, it will be returned
     Group *g;
-    dword  op;
+    uint32_t  op;
     if(mem.groupnum>=mem.groupmax)
     {
         a_clearcodecache();
@@ -283,7 +283,7 @@ Group *ac_creategroup(dword pc)
 void a_cleardeadgroups(void)
 {
     int i,n,cnt=0;
-    dword x;
+    uint32_t x;
     Group *g;
     static int f=0;
 
@@ -319,7 +319,7 @@ void a_clearcodecache(void)
     int    i;
     int    cnt=0;
     int    cnt2=0;
-    dword  x;
+    uint32_t  x;
     Group *g;
     int    clears=cstat.clears+1;
 
@@ -392,7 +392,7 @@ static int useregs[]={REG_ESI,REG_EDI,REG_EBP,REG_EDX,-1};
 int reg_oldest(void)
 {
     int i,j;
-    dword best,besti;
+    uint32_t best,besti;
     besti=0;
     best=0xffffffff;
     for(j=0;useregs[j]>=0;j++)

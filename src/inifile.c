@@ -15,15 +15,15 @@ typedef struct
 {
     int    type;
     int    dma;
-    dword  addr;
-    dword  data;
+    uint32_t  addr;
+    uint32_t  data;
 } IniPatch;
 
 typedef struct
 {
-    dword  virt;
-    dword  phys;
-    dword  size;
+    uint32_t  virt;
+    uint32_t  phys;
+    uint32_t  size;
 } IniMap;
 
 static IniMap   vmmap[MAXPATCH];
@@ -37,7 +37,7 @@ static int      tempread;
 
 static void applypatch(int i)
 {
-    dword beg,end,d;
+    uint32_t beg,end,d;
     //print(WHITE"patch: %i,%08X,%i,%08X\n",patch[i].dma,patch[i].addr,patch[i].type,patch[i].data);
     switch(patch[i].type)
     {
@@ -73,7 +73,7 @@ void inifile_patches(int dmanum)
     if(dmanum==0)
     {
         int i,j;
-        dword v,p;
+        uint32_t v,p;
         // apply memmaps
         for(j=0;j<vmmapnum;j++)
         {
@@ -235,14 +235,14 @@ void inifile_command(char *cmd)
     }
     else IFIS(cmd,"osrange")
     {
-        dword beg,end;
+        uint32_t beg,end;
         sscanf(param,"%X,%X",&beg,&end);
         cart.osrangestart=beg;
         cart.osrangeend=end;
     }
     else IFIS(cmd,"mapmem")
     {
-        dword to,phys,size;
+        uint32_t to,phys,size;
         sscanf(param,"%X,%X,%X",&to,&phys,&size);
         vmmap[vmmapnum].phys=phys;
         vmmap[vmmapnum].virt=to;
@@ -252,9 +252,9 @@ void inifile_command(char *cmd)
     else IFIS(cmd,"patch")
     {
         int   dma;
-        dword addr;
+        uint32_t addr;
         char  patchtype[64];
-        dword data;
+        uint32_t data;
         int   type;
 
         *patchtype=0;

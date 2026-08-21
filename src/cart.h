@@ -8,11 +8,11 @@ extern "C" {
 
 typedef struct
 {
-    byte* data;
+    uint8_t* data;
     int    size;
     int    mapped;
-    dword  mapfilehandle;
-    dword  maphandle;
+    uint32_t  mapfilehandle;
+    uint32_t  maphandle;
     int    fileflip; // original flipstate in file
 
     // cart name and info
@@ -21,12 +21,12 @@ typedef struct
     char   title[32];     // title from rom header (0x20)
 
     // bootloader info
-    dword  codebase;
-    dword  codesize;
+    uint32_t  codebase;
+    uint32_t  codesize;
 
     // optional hints for os detection
-    dword  osrangestart;
-    dword  osrangeend;
+    uint32_t  osrangestart;
+    uint32_t  osrangeend;
 
     // modeflags
     int    simplegfx;

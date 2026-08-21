@@ -7,9 +7,9 @@ extern "C" {
 // quadword register
 typedef union
 {
-    qword q;
-    dword d;
-    dword d2[2];
+    uint64_t q;
+    uint32_t d;
+    uint32_t d2[2];
 } qreg;
 
 // floating point register (single)
@@ -67,8 +67,8 @@ typedef union
 typedef struct
 {
     int    type;
-    dword  addr;
-    dword  data;
+    uint32_t  addr;
+    uint32_t  data;
     int    RESERVED;
 } Break;
 
@@ -106,27 +106,27 @@ typedef struct
     // instructions left before bailing out to cpu.c
     int    bailout;     // if <0 please return to cpu.c
     // cpu state
-    dword  pc;          // program counter
+    uint32_t  pc;          // program counter
     qreg   g[32];       // general registers
     qreg   mhi;         // MHI mul/div result reg
     qreg   mlo;         // MLO mul/div result reg
     // branching state (cpuc.c only, cpua.c never breaks when branchdelay>0)
     int    branchdelay; // when goes from 1->0 branch to branchto
-    dword  branchto;    // address to branch to
+    uint32_t  branchto;    // address to branch to
     int    branchtype;  // BRANCH_*
     int    expanded64bit;
     int    memiodetected;
-    dword  RESERVED1[2];
+    uint32_t  RESERVED1[2];
     // mmu state
     qreg   mmu[32];     // mmu registers
-    dword  RESERVED2[4];
+    uint32_t  RESERVED2[4];
     // fpu state
     freg   f[32];       // cop1 (fpu) registers
-    qword  fputmp;      // temporary used by cpua.c in generated code
+    uint64_t  fputmp;      // temporary used by cpua.c in generated code
     int    fputrue;     // fpu compare result true/false
-    dword  RESERVED3[3];
+    uint32_t  RESERVED3[3];
     // thread state (os.c)
-    qword  threadtime;  // instructions executed
+    uint64_t  threadtime;  // instructions executed
     int    thread;      // active thread
     int    callnest;    // nesting in calls (for tracing)
     int    RESERVED4[16];
@@ -137,22 +137,22 @@ typedef struct
     int    breakout;
 
     // timekeeping
-    qword  cputime;       // instructions executed
-    qword  synctime;      // instructions executed when last framesync done
-    qword  exectime;      // instructions executed when last cpu_exec call started
+    uint64_t  cputime;       // instructions executed
+    uint64_t  synctime;      // instructions executed when last framesync done
+    uint64_t  exectime;      // instructions executed when last cpu_exec call started
     int    frames;        // frames drawn (used for some timings)
 
     // os-emulation and threading
     int    trythread;   // prefer switch to this thread next
-    qword  nextswitch;  // cputime for next task switch
+    uint64_t  nextswitch;  // cputime for next task switch
     int    doframesync;
     int    avoidthread;
     int    hackcount;
 
     // patch tracking
-    dword  firstpatch;
-    dword  lastpatch;
-    dword  patches;
+    uint32_t  firstpatch;
+    uint32_t  lastpatch;
+    uint32_t  patches;
 
     // breakpoints (do not work for cpua.c)
     // pretty versatile, but ui doesn't have a good interface to these yet
@@ -200,13 +200,13 @@ typedef struct
     int    OBS_compiledinfpu;
 
     // framebuffer state
-    dword  fb_current;
-    dword  fb_next;
-    dword  fb_nextcurrent;
+    uint32_t  fb_current;
+    uint32_t  fb_next;
+    uint32_t  fb_nextcurrent;
 
     // misc
     int    framesync;      // framerate (fps) syncronization target speed (hz)
-    dword  padstate;       // pad state (for showing in debugui)
+    uint32_t  padstate;       // pad state (for showing in debugui)
     int    OBS_idlepercentage; // percentage of idle thread execution (os.c)
 
     // dma tracking for automatic codecache clears (tmp)
@@ -274,7 +274,7 @@ typedef struct
 
     // frame timing (based on audio)
     int      frameus;
-    qword    retracetime; // cputime at last retrace
+    uint64_t    retracetime; // cputime at last retrace
 
     // os timers
     Timer    ostimer;
@@ -315,15 +315,15 @@ typedef struct
     int      gfxfinishpending;
     int      gfxdpsyncpending;
 
-    qword    lastretracecputime;
+    uint64_t    lastretracecputime;
 
     int      pendingretraces;
 
     // last dma transfers (for debugging)
     struct
     {
-        dword  cart;
-        dword  addr;
+        uint32_t  cart;
+        uint32_t  addr;
         int    size;
         int    RESERVED;
     } dmahistory[DMAHISTORYSIZE];
@@ -337,7 +337,7 @@ typedef struct
     int    frame;  // for which frame these stats are
     // cpu info
     int    ops;    // ops this frame
-    qword  cputime;
+    uint64_t  cputime;
     int    fastops;
     int    slowops;
     // gfx info
@@ -451,22 +451,22 @@ void cpu_load(FILE* f1);    // load state from a file
 void cpu_init(void);        // clear all regs (entire st struct)
 void cpu_break(void);       // stop execution at next possible point and return to console
 void cpu_nicebreak(void);   // stop execution at next idle thread
-void cpu_goto(dword pc);    // change pc
+void cpu_goto(uint32_t pc);    // change pc
 
 // main 'execute' routine, parameters are number of ops to execute and
 // a flag for requesting fast (compiled) execution. Breakpoints and
 // traces etc don't work in fast mode. Mode can be changed at every
 // cpu_exec call if so desired. Singlestep with ops=1.
-void cpu_exec(qword ops, int fast);
+void cpu_exec(uint64_t ops, int fast);
 
 // routines to set breakpoints (see definition of Break above)
 void cpu_clearbp(void); // clear all breakpoints
-void cpu_addbp(int type, dword addr, dword data); // add a breakpoint
-void cpu_onebp(int type, dword addr, dword data); // clear breakpoints, and add this one
+void cpu_addbp(int type, uint32_t addr, uint32_t data); // add a breakpoint
+void cpu_onebp(int type, uint32_t addr, uint32_t data); // clear breakpoints, and add this one
 
 // these used internally by cpu.c for calling the slow emulator (cpuc.c)
 void c_exec(void); // execute st.bailout instructions
-void c_execop(dword opcode); // execute one instruction, no checks
+void c_execop(uint32_t opcode); // execute one instruction, no checks
 
 // these used internally by cpu.c for calling the fast compiler (cpua.c)
 // the fast compiler calls the slow emulator (with c_execone) for parts
@@ -477,14 +477,14 @@ void a_stats(void); // print stats to console
 void a_stats2(void); // print stats to console
 void a_stats3(void); // print stats to console
 void a_exec(void); // execute approximately st.bailout instructions, compile as needed
-void a_compilegroupat(dword x);
+void a_compilegroupat(uint32_t x);
 
 // these are used internally for breakpoints
 void cpu_breakpoint(int i); // breakpoint triggered (count etc checking could be here)
 void cpu_initbreak(void);   // do breakpoint init for event breakpoints before exec
 void cpu_checkeventbreak(void);  // check event breakpoints
-void cpu_checkmembreak(dword addr, int bytes, int iswrite); // check a memory breakpoint
-void cpu_checkbranchbreak(dword addr, int type); // check call/ret/branch breakpoint
+void cpu_checkmembreak(uint32_t addr, int bytes, int iswrite); // check a memory breakpoint
+void cpu_checkbranchbreak(uint32_t addr, int type); // check call/ret/branch breakpoint
 
 // these are used internally
 void cpu_keys(int dopad);   // check runtime keys (used internally)
@@ -494,11 +494,11 @@ void cpu_checkui(int fast); // check/update user interface
 // tracing and breakpoints based on these calls. Addresses virtual.
 // this slows cpuc down but make enhancing breakpoints/traces more
 // easy and modular. And cpuc it's not used often anyway.
-void cpu_notify_readmem(dword addr, int bytes);  // read of address
-void cpu_notify_writemem(dword addr, int bytes); // write of address
-void cpu_notify_branch(dword addr, int type);    // branch to address, type=BRANCH_*
-void cpu_notify_pc(dword addr);                 // execution at address
-void cpu_notify_msg(int queue, dword qaddr, int issend); // execution at address
+void cpu_notify_readmem(uint32_t addr, int bytes);  // read of address
+void cpu_notify_writemem(uint32_t addr, int bytes); // write of address
+void cpu_notify_branch(uint32_t addr, int type);    // branch to address, type=BRANCH_*
+void cpu_notify_pc(uint32_t addr);                 // execution at address
+void cpu_notify_msg(int queue, uint32_t qaddr, int issend); // execution at address
 
 void cpu_updatestats(int skip);
 

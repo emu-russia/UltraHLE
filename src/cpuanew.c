@@ -2,20 +2,20 @@
 #include "ultra.h"
 #include "cpua.h"
 
-static void ac_regsma(dword opcode,int type,int size,int fpu);
+static void ac_regsma(uint32_t opcode,int type,int size,int fpu);
 
 // globals used temporarily in asm:
-static dword   asm_vmcache[VMCACHESIZE];
-static dword   asm_groupto;
-static dword   asm_temp1;
-static dword   asm_temp2;
-static dword   asm_temp3;
-static dword   asm_temp4;
+static uint32_t   asm_vmcache[VMCACHESIZE];
+static uint32_t   asm_groupto;
+static uint32_t   asm_temp1;
+static uint32_t   asm_temp2;
+static uint32_t   asm_temp3;
+static uint32_t   asm_temp4;
 
 void vmcache_add(int reg,int off)
 {
     r.vmcachei=(r.vmcachei+1)&(VMCACHESIZE-1);
-    insertmemwopcode(X86_MOV,REG_NONE,(dword)(asm_vmcache+r.vmcachei),REG_ECX);
+    insertmemwopcode(X86_MOV,REG_NONE,(uint32_t)(asm_vmcache+r.vmcachei),REG_ECX);
     r.vmcache[r.vmcachei].reg=reg;
     r.vmcache[r.vmcachei].off=off;
 }
@@ -352,10 +352,10 @@ static void ac_jumptoreg(int x86reg,int isret)
     r.inserted=99;
 }
 
-static void ac_jumpto(dword addr)
+static void ac_jumpto(uint32_t addr)
 {
-    dword ng;
-    ng=(dword)ac_creategroup(addr);
+    uint32_t ng;
+    ng=(uint32_t)ac_creategroup(addr);
     insertimmopcode(X86_IMMMOV,REG_EAX,ng);
     ac_jumptogroup(REG_EAX);
 }
@@ -364,7 +364,7 @@ static void ac_jumpto(dword addr)
 ** Compilers for JUMPS and BRANCHES
 */
 
-static void ac_jump(dword opcode,int options)
+static void ac_jump(uint32_t opcode,int options)
 {
     int   rs,imm,xrs;
 
@@ -409,14 +409,14 @@ static void ac_jump(dword opcode,int options)
 }
 
 // generic 2 register arithmetic op
-void ac_branch(dword opcode, int cmpop, int flags)
+void ac_branch(uint32_t opcode, int cmpop, int flags)
 {
     int rs,rt;
     int xrs,xrt,xrd,xcm;
     int imm,slt_flip=0;
     int nodelayslot=0;
-    dword truepc,falsepc;
-    dword jumptrue,jumpfalse;
+    uint32_t truepc,falsepc;
+    uint32_t jumptrue,jumpfalse;
     static XReg regbak[8];
 
     imm=SIGNEXT16(OP_IMM(opcode));
@@ -441,13 +441,13 @@ void ac_branch(dword opcode, int cmpop, int flags)
     
     truepc   =r.pc+4+imm*4;
     falsepc  =r.pc+8;
-    jumptrue =(dword)ac_creategroup(truepc);
-    jumpfalse=(dword)ac_creategroup(falsepc);
+    jumptrue =(uint32_t)ac_creategroup(truepc);
+    jumpfalse=(uint32_t)ac_creategroup(falsepc);
 //    print("\n#cmp true %08X (%08X) false %08X (%08X)\n",truepc,jumptrue,falsepc,jumpfalse);
 
     if(flags&BR_LIKELY)
     {
-        dword delay,drs,drt;
+        uint32_t delay,drs,drt;
         int op;
 
         // flush regs not used by delay slot
@@ -585,7 +585,7 @@ void ac_branch(dword opcode, int cmpop, int flags)
 
     if(flags&BR_LIKELY)
     {
-        byte *fixup;
+        uint8_t *fixup;
         int   offset;
 
         // - jxx OVER
@@ -620,7 +620,7 @@ void ac_branch(dword opcode, int cmpop, int flags)
         //---- branch false
 
         // set jxx offset (max 127 bytes!)
-        offset=(dword)(mem.code+mem.codeused)-((dword)fixup+1);
+        offset=(uint32_t)(mem.code+mem.codeused)-((uint32_t)fixup+1);
         *fixup=offset;
         if(offset>127)
         {
@@ -685,7 +685,7 @@ void ac_branch(dword opcode, int cmpop, int flags)
         }
         else
         {
-            dword *d=(dword *)(r.g->code-8);
+            uint32_t *d=(uint32_t *)(r.g->code-8);
 
             if(reg[REG_EDX].name!=XNAME_TEMP+1)
             {
@@ -696,7 +696,7 @@ void ac_branch(dword opcode, int cmpop, int flags)
             insertbyte(0x8B);
             insertbyte(0x04);
             insertbyte(0x95);
-            insertdword((dword)d);
+            insertdword((uint32_t)d);
 
             // write the true/false addresses
             d[0]=jumpfalse;
@@ -852,7 +852,7 @@ static void ac_regmove(int fpureg,int intreg,int tofpu)
     }
 }
 
-void ac_fpulwsw(dword opcode,int op)
+void ac_fpulwsw(uint32_t opcode,int op)
 {
     int rt=OP_RT(opcode),f;
     switch(op)
@@ -914,7 +914,7 @@ void ac_fpulwsw(dword opcode,int op)
     }
 }
 
-static int ac_fpu(dword opcode)
+static int ac_fpu(uint32_t opcode)
 {
     int fmt=OP_RS(opcode);
     int op=OP_FUNC(opcode);
@@ -1300,7 +1300,7 @@ OEND
 // 2=load FPU double reg 0 at offset 4
 // 3=load FPU double reg 1 at offset 0
 // size=0 means just calc address to ECX
-static void ac_regsma(dword opcode,int type,int size,int fpu)
+static void ac_regsma(uint32_t opcode,int type,int size,int fpu)
 {
     int rs,rd;
     int xrs,xrd;
@@ -1384,12 +1384,12 @@ static void ac_regsma(dword opcode,int type,int size,int fpu)
         // mask to ramsize
         insertimmopcode(X86_IMMAND,REG_ECX,mem.ramsize-1);
         // add immediate and lookup base
-        insertimmopcode(X86_IMMADD,REG_ECX,imm+(dword)mem.ram);
+        insertimmopcode(X86_IMMADD,REG_ECX,imm+(uint32_t)mem.ram);
     }
     else if(r.opt_vmcache && (i=vmcache_find(rs,imm))>=0)
     {
         cstat.inmasimple++;
-        insertmemropcode(X86_MOV,REG_ECX,REG_NONE,(dword)(asm_vmcache+i));
+        insertmemropcode(X86_MOV,REG_ECX,REG_NONE,(uint32_t)(asm_vmcache+i));
         addecx=imm-r.vmcache[i].off;
 //        print("vmcache %i at %08X reg r%02i+%-8i (last r%02i+%-8i) addecx=%i\n",
 //            i,r.pc,rs,imm,r.vmcache[i].reg,r.vmcache[i].off,addecx);
@@ -1558,7 +1558,7 @@ static void ac_regsma(dword opcode,int type,int size,int fpu)
 }
 
 // shift ops
-static void ac_regssh(dword opcode,int x86op,int fromreg)
+static void ac_regssh(uint32_t opcode,int x86op,int fromreg)
 {
     int rs,rt,rd;
     int xrs,xrt,xrd;
@@ -1626,7 +1626,7 @@ static void ac_regssh(dword opcode,int x86op,int fromreg)
 }
 
 // slti ops (returns ops compiled)
-static int ac_regsslt(dword opcode,int fromreg,int unsignedcmp)
+static int ac_regsslt(uint32_t opcode,int fromreg,int unsignedcmp)
 {
     int rs,rt,rd;
     int xrs,xrt,xrd;
@@ -1650,7 +1650,7 @@ static int ac_regsslt(dword opcode,int fromreg,int unsignedcmp)
     r.slt_branch=0;
     if(r.opt_slt && rd==1)
     { // rd=1=AT
-        dword nextop=mem_readop(r.pc+4);
+        uint32_t nextop=mem_readop(r.pc+4);
         if(OP_RS(nextop)==1 && OP_RT(nextop)==0 && r.pc!=r.pc0+4*r.len-4)
         { // cmp at,r0
             r.slt_imm=imm;
@@ -1721,7 +1721,7 @@ static int ac_regsslt(dword opcode,int fromreg,int unsignedcmp)
 }
 
 // generic 3 register arithmetic op
-static void ac_regs3(dword opcode,int x86op)
+static void ac_regs3(uint32_t opcode,int x86op)
 {
     int rs,rt,rd,a;
     int xrs,xrt,xrd;
@@ -1820,7 +1820,7 @@ static void ac_regs3(dword opcode,int x86op)
 }
 
 // generic 2 register 1 immediate arithmetic op
-static void ac_regs2(dword opcode,int x86op,int signextend)
+static void ac_regs2(uint32_t opcode,int x86op,int signextend)
 {
     int rs,rd;
     int xrs,xrd;
@@ -1884,7 +1884,7 @@ static void ac_regs2(dword opcode,int x86op,int signextend)
     regwrite(xrd);
 }
 
-static void preparemuldiv(dword opcode)
+static void preparemuldiv(uint32_t opcode)
 {
     int xrs,xrt,rs,rt;
     rs=OP_RS(opcode);
@@ -1903,7 +1903,7 @@ static void preparemuldiv(dword opcode)
     }
 }
 
-int ac_compileopnew(dword pc,dword opcode,int op)
+int ac_compileopnew(uint32_t pc,uint32_t opcode,int op)
 {
     int ret=1; // return 2 if delay slot also parsed
 
@@ -2170,7 +2170,7 @@ int ac_compileopnew(dword pc,dword opcode,int op)
 static void a_analyzeops(void)
 {
     int i,op;
-    dword opcode,a;
+    uint32_t opcode,a;
     for(i=0;i<r.len;i++)
     {
         a=i*4+r.pc0;

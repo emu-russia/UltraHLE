@@ -10,7 +10,7 @@ typedef struct
 {
     // (24) set by dlist
     float   pos[3]; // clip coordinates
-    dword   icol;   // original color/normal
+    uint32_t   icol;   // original color/normal
     float   tex[2];
     // (16) set by dlist at first usage
     float   col[4]; // shade color, range 0..255, [r,g,b,a]
@@ -51,12 +51,12 @@ typedef struct
 } TexRect;
 
 // segments not really handled in rdp, but this rdp supports them too
-void rdp_segment(int seg,dword base);
+void rdp_segment(int seg,uint32_t base);
 
 // main execute command. Returns 0 if command processed, -1 if unknown,
 // >=0 if that many more following opcodes needed
 // (regardless of their command code, used for texrect)
-int  rdp_cmd(dword *cmd);
+int  rdp_cmd(uint32_t *cmd);
 
 // drawing (draw commands C0..CF,E4,E5 *not* interpreted with rdp_cmd)
 void rdp_fillrect(TexRect *tr);
@@ -76,7 +76,7 @@ void rdp_screenshot(char *file); // TGA 24bit
 void rdp_addtestdot(int y);
 void rdp_grabscreen(void);
 void rdp_swap(void);
-void rdp_copybackground(dword base,int wid,int hig);
+void rdp_copybackground(uint32_t base,int wid,int hig);
 
 extern int showwire;
 extern int showinfo;

@@ -37,13 +37,13 @@ typedef struct
     int     x0full,y0full;
     int     palette;
     // from preceding settimg
-    dword   membase;
+    uint32_t   membase;
     int     memrl;
-    dword   memx0;
-    dword   memy0;
-    dword   memfmt;
-    dword   membpp;
-    dword   crc;
+    uint32_t   memx0;
+    uint32_t   memy0;
+    uint32_t   memfmt;
+    uint32_t   membpp;
+    uint32_t   crc;
     // mapped to where
     int     texture;
     int     fromfb;
@@ -55,13 +55,13 @@ typedef struct
 {
     // info on what loaded
     int     fromfb;
-    dword   membase;
-    dword   memx0;
-    dword   memy0;
-    dword   mempal;
-    dword   memfmt;
-    dword   membpp;
-    dword   memcrc;
+    uint32_t   membase;
+    uint32_t   memx0;
+    uint32_t   memy0;
+    uint32_t   mempal;
+    uint32_t   memfmt;
+    uint32_t   membpp;
+    uint32_t   memcrc;
     int     memxs,memys;
     // when loaded/used
     int     creation_vidframe;
@@ -182,8 +182,8 @@ char *stylename[8]={"Ignore","Const","Add","Mul","MulAdd","Blend","Full","Comb"}
 typedef struct
 {
     // original mode for this description
-    dword   combine0,combine1;
-    dword   other0,other1;
+    uint32_t   combine0,combine1;
+    uint32_t   other0,other1;
     int     dualtxt;     // second X_MODE, txt[1] used.
     // parsed combine state
     int     passes;      // 1 or 2
@@ -207,10 +207,10 @@ typedef struct
     int       vxtabinited[MAXVX];
     Primitive prtab[MAXPR];
     xt_pos    vxpos[MAXVX];
-    dword     tmemsrc[4096/8*2]; // where textures loaded to tmem
-    dword     tmemrl [4096/8*2]; // where textures loaded to tmem
-    dword     tmemx0 [4096/8*2]; // where textures loaded to tmem
-    dword     tmemy0 [4096/8*2]; // where textures loaded to tmem
+    uint32_t     tmemsrc[4096/8*2]; // where textures loaded to tmem
+    uint32_t     tmemrl [4096/8*2]; // where textures loaded to tmem
+    uint32_t     tmemx0 [4096/8*2]; // where textures loaded to tmem
+    uint32_t     tmemy0 [4096/8*2]; // where textures loaded to tmem
     int       txtload[MAXLOAD];
     Texture   txt[MAXTXT]; // 0 not used
     Tile      tile[8];
@@ -226,7 +226,7 @@ typedef struct
 
     int       rectmode;
 
-    dword     rawfillcolor;
+    uint32_t     rawfillcolor;
 
     // initdone?
     int       opened;
@@ -263,7 +263,7 @@ typedef struct
     int       foglasttype;
 
     // framebuffer texturing detection
-    dword     lastcbufs[8];
+    uint32_t     lastcbufs[8];
     int       lastcbufi;
     char     *framegrab;
 
@@ -274,20 +274,20 @@ typedef struct
     int       view_y1;
 
     // active colors
-    byte      col[C_NUM][4];
+    uint8_t      col[C_NUM][4];
     float     colf[C_NUM][4];
     // memory segmenets
-    dword     segment[16];
+    uint32_t     segment[16];
     // buffers [txt,z,c]
-    dword     bufbase[3];
-    dword     buffmt[3];
-    dword     bufbpp[3];
-    dword     bufwid[3];
+    uint32_t     bufbase[3];
+    uint32_t     buffmt[3];
+    uint32_t     bufbpp[3];
+    uint32_t     bufwid[3];
     // last tlut load
-    dword     tlut_base;
+    uint32_t     tlut_base;
     int       tlut_palbase;
     int       tlut_num;
-    dword     tlut_lastbase;
+    uint32_t     tlut_lastbase;
     int       tlut_lastpalbase;
     int       tlut_lastnum;
 
@@ -309,12 +309,12 @@ typedef struct
     int       txtchange;
     int       lastusedtile;
     int       last_prtabi;            // the last mode spans from this to current tritabi
-    dword     texture1[3];
-    dword     texture2[3];
-    dword     other0[3];
-    dword     other1[3];
-    dword     combine0[3];
-    dword     combine1[3];
+    uint32_t     texture1[3];
+    uint32_t     texture2[3];
+    uint32_t     other0[3];
+    uint32_t     other1[3];
+    uint32_t     combine0[3];
+    uint32_t     combine1[3];
 
     int       flat; // from dlist.c
     int       setflat; // from dlist.c
@@ -459,7 +459,7 @@ void rdp_screenshot(char *name0)
 /* Helper routines for setting state
 */
 
-static __inline dword address(dword address)
+static __inline uint32_t address(uint32_t address)
 { // segment convert to physical address
     int seg=(address>>24)&0x3f;
     if(seg>15)
@@ -470,9 +470,9 @@ static __inline dword address(dword address)
     return( (address&0xffffff) + rst.segment[seg] );
 }
 
-static void setbuffer(int i,dword c0,dword c1)
+static void setbuffer(int i,uint32_t c0,uint32_t c1)
 {
-    dword addr=address(c1);
+    uint32_t addr=address(c1);
 
     rst.bufbase[i]=addr;
     rst.buffmt [i]=FIELD(c0,21,3);
@@ -529,7 +529,7 @@ Primitive *newpr(void)
 }
 
 // returns 1 if address is contained in a lately used color buffer
-static int isoldcbuf(dword addr)
+static int isoldcbuf(uint32_t addr)
 {
     int cnt=0;
     if(mem_read32(addr+0)==0xefefffef) cnt++;
@@ -550,8 +550,8 @@ static int isoldcbuf(dword addr)
 
 void setintensityfromalpha(int di,int si)
 {
-    byte *d=rst.col[di];
-    byte *s=rst.col[si];
+    uint8_t *d=rst.col[di];
+    uint8_t *s=rst.col[si];
     float *df=rst.colf[di];
     float *sf=rst.colf[si];
     d[0]=s[3];
@@ -564,9 +564,9 @@ void setintensityfromalpha(int di,int si)
     df[3]=sf[3];
 }
 
-static __inline void setcolor(int ci,dword a)
+static __inline void setcolor(int ci,uint32_t a)
 {
-    byte *col=rst.col[ci];
+    uint8_t *col=rst.col[ci];
     float *colf=rst.colf[ci];
     col[3]=a; a>>=8;
     col[2]=a; a>>=8;
@@ -578,25 +578,25 @@ static __inline void setcolor(int ci,dword a)
     colf[3]=colscale*col[3];
 }
 
-static void setfillcolor(int ci,dword c)
+static void setfillcolor(int ci,uint32_t c)
 {
-    byte col[4];
+    uint8_t col[4];
     int a;
     a=FIELD(c,11,5); col[3]=8*a+(a>>2);
     a=FIELD(c, 6,5); col[2]=8*a+(a>>2);
     a=FIELD(c, 1,5); col[1]=8*a+(a>>2);
     a=FIELD(c, 0,1); col[0]=255;
-    setcolor(ci,*(dword *)col);
+    setcolor(ci,*(uint32_t *)col);
 }
 
 static void setcolorintensity(int ci,int a)
 {
-    byte col[4];
+    uint8_t col[4];
     col[0]=a;
     col[1]=a;
     col[2]=a;
     col[3]=a;
-    setcolor(ci,*(dword *)col);
+    setcolor(ci,*(uint32_t *)col);
 }
 
 void rdp_freetexmem(void)
@@ -792,7 +792,7 @@ void drawtextures(void)
     }
 }
 
-char *colortext(byte *c)
+char *colortext(uint8_t *c)
 {
     static char buf[16];
     sprintf(buf,"%02X%02X%02X%02X",c[0],c[1],c[2],c[3]);
@@ -803,13 +803,13 @@ char *colortext(byte *c)
 ** Textures
 */
 
-static byte buf1[256*256*4];
-static byte buf2[256*256*4];
-static byte mbuf[1024*4];
+static uint8_t buf1[256*256*4];
+static uint8_t buf2[256*256*4];
+static uint8_t mbuf[1024*4];
 
 int txt_findstart(Tile *t)
 {
-    dword i;
+    uint32_t i;
     i=(((t->membase+(t->y0<<8))&0xffffff)/17)%(MAXTXT-4)+1;
     return((int)i);
 }
@@ -872,14 +872,14 @@ int txt_findmatch(Tile *t)
     return(0);
 }
 
-void txt_scale(byte *dst,int dx,int dy,int drl,
-               byte *src,int sx,int sy,int srl)
+void txt_scale(uint8_t *dst,int dx,int dy,int drl,
+               uint8_t *src,int sx,int sy,int srl)
 {
     int x,y,x1,y1;
     int xmul=16384*sx/dx;
     int ymul=16384*sy/dy;
-    dword *dw=(dword *)dst;
-    dword *sw=(dword *)src;
+    uint32_t *dw=(uint32_t *)dst;
+    uint32_t *sw=(uint32_t *)src;
 
     if(st.dumpgfx) logd("\n+tile scale (%i,%i,%i)->(%i,%i,%i) mul (%04X,%04X) "
         ,sx,sy,srl,dx,dy,drl,xmul,ymul);
@@ -917,9 +917,9 @@ void txt_scale(byte *dst,int dx,int dy,int drl,
     */
 }
 
-void txt_fill(byte *dst,int dx,int dy,dword col)
+void txt_fill(uint8_t *dst,int dx,int dy,uint32_t col)
 {
-    dword *dw=(dword *)dst;
+    uint32_t *dw=(uint32_t *)dst;
     int    x,y;
     for(y=0;y<dy;y++) for(x=0;x<dx;x++)
     {
@@ -927,11 +927,11 @@ void txt_fill(byte *dst,int dx,int dy,dword col)
     }
 }
 
-int txt_checkalpha(byte *dst,int dx,int dy)
+int txt_checkalpha(uint8_t *dst,int dx,int dy)
 {
-    dword *dw=(dword *)dst;
+    uint32_t *dw=(uint32_t *)dst;
     int    x,y;
-    dword  a;
+    uint32_t  a;
     for(y=0;y<dy;y++) for(x=0;x<dx;x++)
     {
         a=dw[x+y*dx];
@@ -940,9 +940,9 @@ int txt_checkalpha(byte *dst,int dx,int dy)
     return(0);
 }
 
-void txt_border(byte *dst,int dx,int dy,dword col)
+void txt_border(uint8_t *dst,int dx,int dy,uint32_t col)
 {
-    dword *dw=(dword *)dst;
+    uint32_t *dw=(uint32_t *)dst;
     int    x,y;
     for(y=0;y<dy;y++)
     {
@@ -960,10 +960,10 @@ void txt_border(byte *dst,int dx,int dy,dword col)
     }
 }
 
-void txt_mirrorx(byte *dst,int dx,int dy,byte *src)
+void txt_mirrorx(uint8_t *dst,int dx,int dy,uint8_t *src)
 {
-    dword *dw=(dword *)dst;
-    dword *ds=(dword *)src;
+    uint32_t *dw=(uint32_t *)dst;
+    uint32_t *ds=(uint32_t *)src;
     int    rl=dx*2;
     int    x,y;
     for(y=dy-1;y>=0;y--)
@@ -973,10 +973,10 @@ void txt_mirrorx(byte *dst,int dx,int dy,byte *src)
     }
 }
 
-void txt_mirrory(byte *dst,int dx,int dy,byte *src)
+void txt_mirrory(uint8_t *dst,int dx,int dy,uint8_t *src)
 {
-    dword *dw=(dword *)dst;
-    dword *ds=(dword *)src;
+    uint32_t *dw=(uint32_t *)dst;
+    uint32_t *ds=(uint32_t *)src;
     int    y;
     for(y=0;y<dy;y++)
     {
@@ -988,10 +988,10 @@ void txt_mirrory(byte *dst,int dx,int dy,byte *src)
     }
 }
 
-dword crcmem(dword addr,int size,int samples)
+uint32_t crcmem(uint32_t addr,int size,int samples)
 {
     int i,ia;
-    dword crc=0;
+    uint32_t crc=0;
 
     if(samples<=0) ia=4;
     else
@@ -1018,10 +1018,10 @@ int txt_rl(Tile *t)
     return(rl);
 }
 
-dword txt_calccrc(Tile *t)
+uint32_t txt_calccrc(Tile *t)
 {
     int    size,rl;
-    dword  crc,madd,addr;
+    uint32_t  crc,madd,addr;
     int    realbpp=4<<t->bpp;
 
     if(isoldcbuf(t->membase))
@@ -1050,10 +1050,10 @@ dword txt_calccrc(Tile *t)
     return(crc);
 }
 
-byte *txt_loadline(byte *mbuf,dword addr,int y,int flip,int rl2)
+uint8_t *txt_loadline(uint8_t *mbuf,uint32_t addr,int y,int flip,int rl2)
 {
     int x,rl;
-    dword a;
+    uint32_t a;
     addr+=y*rl2/2;
     rl=((rl2>>1)+3)/4;
     if(!(y&1)) flip=0;
@@ -1071,16 +1071,16 @@ byte *txt_loadline(byte *mbuf,dword addr,int y,int flip,int rl2)
             a=mem_read32p(addr);
             a=FLIP32(a);
         }
-        *(dword *)(mbuf+(x^flip)*4)=a;
+        *(uint32_t *)(mbuf+(x^flip)*4)=a;
         addr+=4;
     }
     return(mbuf);
 }
 
-void txt_loadtlut(int pal,int num,dword addr)
+void txt_loadtlut(int pal,int num,uint32_t addr)
 {
     int i;
-    dword x;
+    uint32_t x;
 
     pal*=16;
     logd("\n+tile loadtlut %08X pal=%i num=%i ",
@@ -1100,7 +1100,7 @@ void txt_loadtlut(int pal,int num,dword addr)
     }
 }
 
-void txt_paletteread(byte *dst,int ind)
+void txt_paletteread(uint8_t *dst,int ind)
 {
     int a,c,i;
 
@@ -1125,9 +1125,9 @@ void txt_paletteread(byte *dst,int ind)
     }
 }
 
-void txt_showpal(byte *dst,int xs,int ys,int palbase,int palnum)
+void txt_showpal(uint8_t *dst,int xs,int ys,int palbase,int palnum)
 {
-    dword *d=(dword *)dst;
+    uint32_t *d=(uint32_t *)dst;
     int x,y;
     if(0)
     {
@@ -1145,7 +1145,7 @@ void txt_showpal(byte *dst,int xs,int ys,int palbase,int palnum)
         {
             for(x=0;x<16;x++)
             {
-                txt_paletteread((byte *)(d+x+y*xs),palbase+x+y*16);
+                txt_paletteread((uint8_t *)(d+x+y*xs),palbase+x+y*16);
             }
         }
     }
@@ -1155,13 +1155,13 @@ void txt_showpal(byte *dst,int xs,int ys,int palbase,int palnum)
         {
             for(x=0;x<16;x++)
             {
-                txt_paletteread((byte *)(d+x+y*xs),palbase+(x>>2)+(y>>2)*16);
+                txt_paletteread((uint8_t *)(d+x+y*xs),palbase+(x>>2)+(y>>2)*16);
             }
         }
     }
 }
 
-void txt_convert(byte *dst0,Tile *t)
+void txt_convert(uint8_t *dst0,Tile *t)
 { // convert from texmem to 32 bit RGBA
     int    palbase=16*t->palette;
     int    bpp=t->bpp;
@@ -1169,8 +1169,8 @@ void txt_convert(byte *dst0,Tile *t)
     int    xs=t->xs;
     int    ys=t->ys;
     int    x,y,rl2,i,j,a;
-    dword  c,addr;
-    byte  *m,*dst=dst0;
+    uint32_t  c,addr;
+    uint8_t  *m,*dst=dst0;
     int    realbpp;
     int    madd,flip;
 
@@ -1455,7 +1455,7 @@ if(bpp==1 && fmt==0) fmt=2;
 
     if(0 && flip)
     {
-        dword *d=(dword *)dst0,a;
+        uint32_t *d=(uint32_t *)dst0,a;
         for(y=0;y<ys;y++)
         {
             if(!(y&1))
@@ -1516,14 +1516,14 @@ void rdp_grabscreen(void)
     #endif
 }
 
-void txt_fromfb(byte *buf,Tile *t)
+void txt_fromfb(uint8_t *buf,Tile *t)
 {
     int x,y,y0,xa,xx;
-    dword *s,*d;
+    uint32_t *s,*d;
 
     if(!rst.framegrab)
     {
-        d=(dword *)buf;
+        d=(uint32_t *)buf;
         for(y=0;y<t->ys;y++)
         {
             for(x=0;x<t->xs;x++)
@@ -1534,7 +1534,7 @@ void txt_fromfb(byte *buf,Tile *t)
         return;
     }
 
-    d=(dword *)buf;
+    d=(uint32_t *)buf;
     xa=4096*init.gfxwid/t->xs;
     y0=t->memy0;
 
@@ -1544,7 +1544,7 @@ void txt_fromfb(byte *buf,Tile *t)
 
     for(y=0;y<t->ys;y++)
     {
-        s=(dword *)rst.framegrab;
+        s=(uint32_t *)rst.framegrab;
         s+=init.gfxwid*((y+y0)*init.gfxhig/240);
         xx=0;
         for(x=0;x<t->xs;x++)
@@ -1556,14 +1556,14 @@ void txt_fromfb(byte *buf,Tile *t)
     }
 }
 
-void txt_fromcbuf(byte *buf,Tile *t)
+void txt_fromcbuf(uint8_t *buf,Tile *t)
 {
     int x,y;
-    dword *d;
-    dword cols[4]={0xff000000,0xff101010,
+    uint32_t *d;
+    uint32_t cols[4]={0xff000000,0xff101010,
                    0xff101010,0xff000000};
 
-    d=(dword *)buf;
+    d=(uint32_t *)buf;
     for(y=0;y<t->ys;y++)
     {
         for(x=0;x<t->xs;x++)
@@ -1580,7 +1580,7 @@ void txt_loaddata(Texture *txt,Tile *t)
     int sx,sy;
     int limit,flags;
     int hasalpha;
-    byte *s,*d,*sd;
+    uint8_t *s,*d,*sd;
 
     if((t->xs&1) && t->bpp==0) t->xs--;
 
@@ -2595,7 +2595,7 @@ void rdp_fogrange(float min,float max)
 void fillcbuf(void)
 {
     int   xs,ys,rl;
-    dword addr;
+    uint32_t addr;
 
     addr=rst.bufbase[RDP_BUF_C];
     rl  =rst.bufwid [RDP_BUF_C]*2;
@@ -2864,7 +2864,7 @@ void dump_combineeqs(int alp)
     logd("[ Cycle1: %s Cycle2: %s ]",buf1,buf2);
 }
 
-void dump_combine(dword x0,dword x1)
+void dump_combine(uint32_t x0,uint32_t x1)
 {
     int  cn=rst.s_cycles;
     char buf1[100];
@@ -2911,7 +2911,7 @@ void dump_combine(dword x0,dword x1)
     }
 }
 
-int mode_findcache(dword x0,dword x1,dword o0,dword o1)
+int mode_findcache(uint32_t x0,uint32_t x1,uint32_t o0,uint32_t o1)
 {
     int ci;
     for(ci=0;ci<rst.combcacheused;ci++)
@@ -2928,7 +2928,7 @@ int mode_findcache(dword x0,dword x1,dword o0,dword o1)
     return(-1);
 }
 
-int mode_newcache(dword x0,dword x1,dword o0,dword o1)
+int mode_newcache(uint32_t x0,uint32_t x1,uint32_t o0,uint32_t o1)
 {
     int ci,a;
 
@@ -2977,7 +2977,7 @@ void com_setcopy(int d,int s)
 }
 
 // convert x0,x1 => rst.combine[]/combinebak[] array
-void com_convertcombine(dword x0,dword x1)
+void com_convertcombine(uint32_t x0,uint32_t x1)
 {
     int c,i,i1,i2,a,v,x,pos,msk,map,c1,c2;
     for(c=0;c<2;c++)
@@ -4015,7 +4015,7 @@ int com_patchedmodes(void)
     return(0);
 }
 
-void com_new(dword x0,dword x1)
+void com_new(uint32_t x0,uint32_t x1)
 {
     int a,oldp,unknown=0;
 
@@ -4190,7 +4190,7 @@ void com_settest(void)
     }
 }
 
-void change_combine(dword x0,dword x1,dword chg0,dword chg1)
+void change_combine(uint32_t x0,uint32_t x1,uint32_t chg0,uint32_t chg1)
 {
     int ci;
 
@@ -4277,10 +4277,10 @@ void com_init(void)
 /* Rendering State conversion - Other
 */
 
-void dump_other(dword o0,dword o1)
+void dump_other(uint32_t o0,uint32_t o1)
 { // doesn't dump blend or redermode
     int a,c,cn,line;
-    dword x;
+    uint32_t x;
 
     for(line=0;line<6;line++)
     {
@@ -4564,7 +4564,7 @@ void dump_other(dword o0,dword o1)
     }
 }
 
-void change_other(dword x0,dword x1,dword c0,dword c1)
+void change_other(uint32_t x0,uint32_t x1,uint32_t c0,uint32_t c1)
 {
     if(FIELD(c0,20,3))
     {
@@ -4620,7 +4620,7 @@ void change_other(dword x0,dword x1,dword c0,dword c1)
     }
     if(c1&0xffff0000)
     {
-        dword x;
+        uint32_t x;
         int b1,b2;
 
         x=x1>>16;
@@ -4710,9 +4710,9 @@ void change_other(dword x0,dword x1,dword c0,dword c1)
     }
 }
 
-int findwirecolor(dword o0,dword o1,dword c0,dword c1)
+int findwirecolor(uint32_t o0,uint32_t o1,uint32_t c0,uint32_t c1)
 {
-    dword x;
+    uint32_t x;
 
     if(1)
     {
@@ -4733,8 +4733,8 @@ int findwirecolor(dword o0,dword o1,dword c0,dword c1)
 
 void newmode(void) // setmode
 {
-    dword m0,m1;    // mode bits    (set by IFCHANGED)
-    dword m0c,m1c;  // bits changed (set by IFCHANGED)
+    uint32_t m0,m1;    // mode bits    (set by IFCHANGED)
+    uint32_t m0c,m1c;  // bits changed (set by IFCHANGED)
 
     if(st.dumpgfx)
     {
@@ -4874,7 +4874,7 @@ static void closedisplay(void)
 /* Public Entrypoints
 */
 
-void rdp_segment(int seg,dword base)
+void rdp_segment(int seg,uint32_t base)
 {
     if(seg>15)
     {
@@ -4884,7 +4884,7 @@ void rdp_segment(int seg,dword base)
     rst.segment[seg]=base;
 }
 
-int rdp_cmd(dword *cmd)
+int rdp_cmd(uint32_t *cmd)
 {
     int c=cmd[0]>>24,last;
     static int last0;
@@ -5457,7 +5457,7 @@ void rdp_frameend(void)
     st.ops_fast=0;
     st.ops_slow=0;
 
-    logd("\nSwap - Cputime:%08X <{([+*#*+])}>\n\n",(dword)st.cputime);
+    logd("\nSwap - Cputime:%08X <{([+*#*+])}>\n\n",(uint32_t)st.cputime);
 
     rst.myframe++;
 }
@@ -5467,14 +5467,14 @@ void rdp_swap(void)
     rst.swapflag=1;
 }
 
-void rdp_copybackground(dword base,int wid,int hig)
+void rdp_copybackground(uint32_t base,int wid,int hig)
 {
     static int    xhandle[2];
     static char   buf[256*256][4];
-    static dword  lastcrc;
+    static uint32_t  lastcrc;
     int i,x,y,t;
     float x0,y0,x1,y1;
-    dword d,crc;
+    uint32_t d,crc;
 
     if(!xhandle[0])
     {

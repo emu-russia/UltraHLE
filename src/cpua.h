@@ -86,8 +86,8 @@ extern "C" {
 
 typedef struct
 {
-    dword  pc;
-    dword  x86code;    // offset to mem.code
+    uint32_t  pc;
+    uint32_t  x86code;    // offset to mem.code
     char   r[3];       // regs, -1=not present, r[0] is dest, r[1..2]=src
     char   memop;
     int    RESERVED;
@@ -98,10 +98,10 @@ typedef struct
     // parameters set when compile starts
     Group *g; // group we are compiling
     int    len;
-    dword  pc0;
+    uint32_t  pc0;
 
     // parameters for active instruction
-    dword  pc;
+    uint32_t  pc;
     int    inserted;
     int    lastjumpto;
 
@@ -137,14 +137,14 @@ typedef struct
     int    slt_branch; // 1=do slt branch
 
     // other stuff
-    dword  lastma;
+    uint32_t  lastma;
     int    lastmareg;
     int    lastmaoff;
 
     struct
     {
         int    reg;
-        dword  off;
+        uint32_t  off;
     } vmcache[VMCACHESIZE];
     int vmcachei;
 
@@ -213,7 +213,7 @@ extern CStats cstat; // in cpua.c
 ** for direct usage in inline asm (a_fastexec uses them).
 */
 
-extern dword ip[256];
+extern uint32_t ip[256];
 
 #define IP_PC        0x00 // pc value
 #define IP_D         0x01 // destination reg STADDR
@@ -246,8 +246,8 @@ extern dword ip[256];
 #define STMEMIODET   (296-STOFFSET)
 
 // macro to calculate offset for any filed (not usable directly in inline asm)
-#define STADDR(x)   ((dword)&(x) - (dword)&(st) - STOFFSET)
-#define STADDR0(x)  ((dword)&(x))
+#define STADDR(x)   ((uint32_t)&(x) - (uint32_t)&(st) - STOFFSET)
+#define STADDR0(x)  ((uint32_t)&(x))
 
 /***********************************************************************
 ** Macros for generating insertable inline routines
@@ -437,7 +437,7 @@ void insertjump(void *routine);
 */
 
 // returns an internally used opcode number from a mips opcode
-int  getop(dword opcode);
+int  getop(uint32_t opcode);
 
 /***********************************************************************
 ** Main compile-an-opcode entrypoint
@@ -447,8 +447,8 @@ int  getop(dword opcode);
 void   ac_compilegroup(Group *g);
 
 // call this
-int    ac_compileop(dword pc);
-int    ac_compileopnew(dword pc,dword opcode,int op);
+int    ac_compileop(uint32_t pc);
+int    ac_compileopnew(uint32_t pc,uint32_t opcode,int op);
 
 // start/end routines for compiler
 void   ac_compilestartnew(void);
@@ -456,7 +456,7 @@ void   ac_compileendnew(void);
 
 // routine for creating a new group Tthe group is allocated an entry
 // in mem.group table, but it is not compiled before it is executed.
-Group *ac_creategroup(dword pc);
+Group *ac_creategroup(uint32_t pc);
 
 /***********************************************************************
 ** Routines for X86 register allocation

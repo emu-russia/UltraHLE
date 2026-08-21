@@ -15,7 +15,7 @@ void mem_init(int ramsize)
     }
     // have 4K extra around mem to avoid access violations when
     // asm optimization code accesses a bit outside memory
-    mem.ramalloc=(byte *)malloc(mem.ramsize+16384);
+    mem.ramalloc=(uint8_t *)malloc(mem.ramsize+16384);
     if(mem.ramalloc)
     {
         memset(mem.ramalloc,0,mem.ramsize+16384);
@@ -26,7 +26,7 @@ void mem_init(int ramsize)
         flushdisplay();
         exit(3);
     }
-    mem.ram=(byte *)( ((dword)mem.ramalloc+8192) & ~4095 );
+    mem.ram=(uint8_t *)( ((uintptr_t)mem.ramalloc+8192) & ~(uintptr_t)4095 );
 
     // init io pages
     for(i=0;i<IO_MAX;i++)
@@ -131,10 +131,10 @@ void mem_init(int ramsize)
 
 // map page[dst] to external 4K array (external data NOT saved!)
 // also used by mapphysical internally
-void mem_mapexternal(dword dst,int rw,void *data)
+void mem_mapexternal(uint32_t dst,int rw,void *data)
 {
-    byte *b;
-    b=(byte *)( (dword)data - dst );
+    uint8_t *b;
+    b=(uint8_t *)( (uintptr_t)data - dst );
     switch(rw)
     {
     case MAP_W:
@@ -155,12 +155,12 @@ void mem_mapexternal(dword dst,int rw,void *data)
 }
 
 // map page[dst] to where page[src] points to
-void mem_mapcopy(dword dst,int rw,dword src)
+void mem_mapcopy(uint32_t dst,int rw,uint32_t src)
 {
-    byte *br;
-    byte *bw;
-    br=(byte *)((dword)mem.lookupr[mempage(src)]-dst+src);
-    bw=(byte *)((dword)mem.lookupw[mempage(src)]-dst+src);
+    uint8_t *br;
+    uint8_t *bw;
+    br=(uint8_t *)((uintptr_t)mem.lookupr[mempage(src)]-dst+src);
+    bw=(uint8_t *)((uintptr_t)mem.lookupw[mempage(src)]-dst+src);
     switch(rw)
     {
     case MAP_W:
@@ -177,15 +177,15 @@ void mem_mapcopy(dword dst,int rw,dword src)
 }
 
 // map page[dst] to physical address src
-void mem_mapphysical(dword dst,int rw,dword src)
+void mem_mapphysical(uint32_t dst,int rw,uint32_t src)
 {
     mem_mapexternal(dst,rw,mem.ram+src);
 }
 
 // physical is based on write mapping
-dword mem_getphysical(dword virtual_addr)
+uint32_t mem_getphysical(uint32_t virtual_addr)
 {
-    byte *raw=(byte *)memdatar(virtual_addr);
+    uint8_t *raw=(uint8_t *)memdatar(virtual_addr);
     if(raw>=mem.ram && raw<mem.ram+mem.ramsize)
     {
         return(raw-mem.ram);
@@ -193,18 +193,18 @@ dword mem_getphysical(dword virtual_addr)
     else return(-1);
 }
 
-dword lookupvalue(dword *x,int i)
+uint32_t lookupvalue(uint8_t **x,int i)
 {
-    dword a;
-    a=(i*4096+x[i])-(dword)mem.ram;
-    if(a>mem.ramsize) return(0xffffffff);
-    return(a);
+    uintptr_t a;
+    a=(uintptr_t)(i*4096)+(uintptr_t)x[i]-(uintptr_t)mem.ram;
+    if(a>(uintptr_t)mem.ramsize) return(0xffffffff);
+    return((uint32_t)a);
 }
 
-void savelookup(dword *x,int cnt,FILE *f1)
+void savelookup(uint8_t **x,int cnt,FILE *f1)
 {
     int i,j,a;
-    dword x0,x1;
+    uintptr_t x0,x1;
     for(i=0;i<cnt;)
     {
         x0=lookupvalue(x,i);
@@ -241,7 +241,7 @@ void savelookup(dword *x,int cnt,FILE *f1)
     }
 }
 
-void loadlookup(dword *x,int cnt,FILE *f1)
+void loadlookup(uint8_t **x,int cnt,FILE *f1)
 {
     int i,a,n;
     for(i=0;i<cnt;)
@@ -254,7 +254,7 @@ void loadlookup(dword *x,int cnt,FILE *f1)
             fread(&a,1,4,f1);
 //            print("- %08X\n",a);
             if(i>cnt) break;
-            if(a!=0xffffffff) x[i]=a+(dword)mem.ram-i*4096;
+            if(a!=0xffffffff) x[i]=(uint8_t *)((uintptr_t)a+(uintptr_t)mem.ram-(uintptr_t)i*4096);
             i++;
             break;
         case 2:
@@ -264,7 +264,7 @@ void loadlookup(dword *x,int cnt,FILE *f1)
             if(i+n>cnt) break;
             while(n-->0)
             {
-                if(a!=0xffffffff) x[i]=a+(dword)mem.ram-i*4096;
+                if(a!=0xffffffff) x[i]=(uint8_t *)((uintptr_t)a+(uintptr_t)mem.ram-(uintptr_t)i*4096);
                 i++;
             }
             break;
@@ -275,7 +275,7 @@ void loadlookup(dword *x,int cnt,FILE *f1)
             if(i+n>cnt) break;
             while(n-->0)
             {
-                if(a!=0xffffffff) x[i]=a+(dword)mem.ram-i*4096;
+                if(a!=0xffffffff) x[i]=(uint8_t *)((uintptr_t)a+(uintptr_t)mem.ram-(uintptr_t)i*4096);
                 a+=4096;
                 i++;
             }
@@ -292,11 +292,11 @@ void mem_save(FILE *f1)
 {
     int i,j;
     int ramsize2;
-    dword *ram,x;
+    uint32_t *ram,x;
     // save lookups (simple compression)
     #if 0
     int rw,n,m;
-    byte **lookup;
+    uint8_t **lookup;
     fwrite(&mem.ramsize,1,4,f1);
     // old
     for(rw=0;rw<2;rw++)
@@ -305,11 +305,11 @@ void mem_save(FILE *f1)
         else lookup=mem.lookupr;
         for(i=0;i<1048576;)
         {
-            m=(i*4096+lookup[i])-(dword)mem.ram;
+            m=(i*4096+lookup[i])-(uintptr_t)mem.ram;
             if(m<0 || m>=mem.ramsize) m=0xffffffff;
             for(j=1;j<30000 && i+j<1048576;j++)
             {
-                m=(i*4096+lookup[i])-(dword)mem.ram;
+                m=(i*4096+lookup[i])-(uintptr_t)mem.ram;
                 n=lookup[i+j]-mem.ram;
                 if(n<0 || n>=mem.ramsize) n=0xffffffff;
                 if(m!=n) break;
@@ -325,14 +325,14 @@ void mem_save(FILE *f1)
     i=0;
     fwrite(&i,1,4,f1);
     fwrite(&mem.ramsize,1,4,f1);
-    savelookup((dword *)mem.lookupw,1048576,f1);
-    savelookup((dword *)mem.lookupr,1048576,f1);
+    savelookup(mem.lookupw,1048576,f1);
+    savelookup(mem.lookupr,1048576,f1);
     // guard byte, simple verification uncompress succeeded
     putc(0xfc,f1);
     #endif
     // save memory (simple runlength compression)
     j=0;
-    ram=(dword *)mem.ram;
+    ram=(uint32_t *)mem.ram;
     ramsize2=mem.ramsize>>2;
     for(i=0;i<ramsize2;)
     {
@@ -368,16 +368,16 @@ void mem_load(FILE *f1)
     int i,n,j,m,rw;
     int ramsize2;
     int new=0;
-    byte **lookup;
-    dword *ram,x;
+    uint8_t **lookup;
+    uint32_t *ram,x;
     fread(&mem.ramsize,1,4,f1);
     if(!mem.ramsize)
     {
         // new lookup
         new=1;
         fread(&mem.ramsize,1,4,f1);
-        loadlookup((dword *)mem.lookupw,1048576,f1);
-        loadlookup((dword *)mem.lookupr,1048576,f1);
+        loadlookup(mem.lookupw,1048576,f1);
+        loadlookup(mem.lookupr,1048576,f1);
         if(getc(f1)!=0xfc)
         {
             exception("mem_load fatal error (vm)!");
@@ -420,7 +420,7 @@ void mem_load(FILE *f1)
     }
 
     ramsize2=mem.ramsize>>2;
-    ram=(dword *)mem.ram;
+    ram=(uint32_t *)mem.ram;
     for(i=0;i<ramsize2;)
     {
         n=getc(f1);
@@ -452,18 +452,18 @@ void mem_load(FILE *f1)
 
 // memory access
 
-dword mem_read8(dword addr)
+uint32_t mem_read8(uint32_t addr)
 {
-    dword a=addr&~3;
-    dword x=*memdatar(a);
-    dword b=((byte *)&x)[3-(addr&3)];
+    uint32_t a=addr&~3;
+    uint32_t x=*memdatar(a);
+    uint32_t b=((uint8_t *)&x)[3-(addr&3)];
     return(b);
 }
 
-dword mem_read16(dword addr)
+uint32_t mem_read16(uint32_t addr)
 {
-    dword a=addr&~3;
-    dword b;
+    uint32_t a=addr&~3;
+    uint32_t b;
     if(addr&1) error("mem_read16: address align");
     else
     {
@@ -473,9 +473,9 @@ dword mem_read16(dword addr)
     return(b);
 }
 
-dword mem_readop(dword addr)
+uint32_t mem_readop(uint32_t addr)
 {
-    dword x;
+    uint32_t x;
     x=mem_read32(addr);
     if(OP_OP(x)==OP_GROUP)
     { // group opcode
@@ -486,10 +486,10 @@ dword mem_readop(dword addr)
     return(x);
 }
 
-char *mem_readoptype(dword addr)
+char *mem_readoptype(uint32_t addr)
 {
     static char buf[40];
-    dword x,t,l;
+    uint32_t x,t,l;
     x=mem_read32(addr);
     if(OP_OP(x)!=29)
     {
@@ -527,7 +527,7 @@ char *mem_readoptype(dword addr)
     return(buf);
 }
 
-int mem_groupat(dword addr)
+int mem_groupat(uint32_t addr)
 {
     int gi;
     gi=mem_read32(addr)&0xffff;
@@ -538,17 +538,17 @@ int mem_groupat(dword addr)
     return(-1);
 }
 
-void mem_write8(dword addr,dword data)
+void mem_write8(uint32_t addr,uint32_t data)
 {
-    dword a=addr&~3;
-    dword x=*memdataw(a);
-    ((byte *)&x)[3-(addr&3)]=data;
+    uint32_t a=addr&~3;
+    uint32_t x=*memdataw(a);
+    ((uint8_t *)&x)[3-(addr&3)]=data;
     *memdataw(a)=x;
 }
 
-void mem_write16(dword addr,dword data)
+void mem_write16(uint32_t addr,uint32_t data)
 {
-    dword a=addr&~3;
+    uint32_t a=addr&~3;
     if(addr&1) error("mem_read16: address align");
     else
     {
@@ -559,9 +559,9 @@ void mem_write16(dword addr,dword data)
 
 // copying a lot of data (addr MUST be dword aligned)
 
-void  mem_readrangeraw(dword addr,int bytes,char *data)
+void  mem_readrangeraw(uint32_t addr,int bytes,char *data)
 {
-    dword *m;
+    uint32_t *m;
     int    num,i;
 
     if((addr&3) || (bytes&3)) exception("mem_readrangeraw: align error (%i bytes at %08X)",bytes,addr);
@@ -584,9 +584,9 @@ void  mem_readrangeraw(dword addr,int bytes,char *data)
     }
 }
 
-void  mem_writerangeraw(dword addr,int bytes,char *data)
+void  mem_writerangeraw(uint32_t addr,int bytes,char *data)
 {
-    dword *m;
+    uint32_t *m;
     int    num;
 
     if((addr&3) || (bytes&3)) exception("mem_writerangeraw: align error (%i bytes at %08X)",bytes,addr);

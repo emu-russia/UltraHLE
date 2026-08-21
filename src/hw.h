@@ -16,7 +16,7 @@ void    hw_gfxframedone(void);
 void    hw_rspcheck(void);
 
 void    hw_memio(void);
-int     hw_ismemiorange(dword addr);
+int     hw_ismemiorange(uint32_t addr);
 
 void    hw_gfxthread(void);
 

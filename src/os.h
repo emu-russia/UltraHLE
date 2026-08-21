@@ -10,29 +10,29 @@ extern "C" {
 
 // This structure must be packed in order to make the formats compatible with the Ultra SDK
 typedef struct {
-	dword	type;
-	dword	flags;
+	uint32_t	type;
+	uint32_t	flags;
 
-	dword   m_ucode_boot;
-	dword	ucode_boot_size;
+	uint32_t   m_ucode_boot;
+	uint32_t	ucode_boot_size;
 
-	dword   m_ucode;
-	dword	ucode_size;
+	uint32_t   m_ucode;
+	uint32_t	ucode_size;
 
-	dword   m_ucode_data;
-	dword	ucode_data_size;
+	uint32_t   m_ucode_data;
+	uint32_t	ucode_data_size;
 
-	dword   m_dram_stack;
-	dword	dram_stack_size;
+	uint32_t   m_dram_stack;
+	uint32_t	dram_stack_size;
 
-	dword   m_output_buff;
-	dword   m_output_buff_size;
+	uint32_t   m_output_buff;
+	uint32_t   m_output_buff_size;
 
-	dword   m_data_ptr;
-	dword	data_size;
+	uint32_t   m_data_ptr;
+	uint32_t	data_size;
 
-	dword   m_yield_data_ptr;
-	dword	yield_data_size;
+	uint32_t   m_yield_data_ptr;
+	uint32_t	yield_data_size;
 } OSTask_t;
 
 #pragma pack(pop)
@@ -54,73 +54,73 @@ typedef struct {
 #define OS_EVENT_PRENMI           14    /* Pre NMI interrupt */
 #define OS_EVENT_RETRACE          15    /* Retrace (actually not an OS event but a VI event) */
 
-void osCreateThread(dword m_thread,dword id, dword m_routine,
-                    dword m_dunno,dword m_stack,dword priority);
+void osCreateThread(uint32_t m_thread,uint32_t id, uint32_t m_routine,
+                    uint32_t m_dunno,uint32_t m_stack,uint32_t priority);
 
-void osStartThread(dword m_thread);
-void osSetThreadPri(dword m_thread,int pri);
+void osStartThread(uint32_t m_thread);
+void osSetThreadPri(uint32_t m_thread,int pri);
 
-void  osCreateMesgQueue(dword m_queue,dword m_mesg,dword size);
-dword osSendMesg(dword m_queue,dword m_mesg,int block);
-dword osRecvMesg(dword m_queue,dword mm_mesg,int block);
+void  osCreateMesgQueue(uint32_t m_queue,uint32_t m_mesg,uint32_t size);
+uint32_t osSendMesg(uint32_t m_queue,uint32_t m_mesg,int block);
+uint32_t osRecvMesg(uint32_t m_queue,uint32_t mm_mesg,int block);
 
-void osGetTime(dword *lo,dword *hi);
+void osGetTime(uint32_t *lo,uint32_t *hi);
 
-void osSetEventMessage(dword ev,dword m_queue,dword mesg);
-void os_event(dword ev);
-void os_stuffqueue(dword qid,dword msg);
+void osSetEventMessage(uint32_t ev,uint32_t m_queue,uint32_t mesg);
+void os_event(uint32_t ev);
+void os_stuffqueue(uint32_t qid,uint32_t msg);
 void os_switchcheck(void);
 
-void osMapTLB(dword x,dword pagemask, dword m_ptr, dword a,dword b,dword c);
+void osMapTLB(uint32_t x,uint32_t pagemask, uint32_t m_ptr, uint32_t a,uint32_t b,uint32_t c);
 
 void os_dumpinfo(void);
 
 void  os_save(FILE *f1);
 void  os_load(FILE *f1);
 
-dword osVirtualToPhysical(dword addr);
-dword osPhysicalToVirtual(dword addr);
+uint32_t osVirtualToPhysical(uint32_t addr);
+uint32_t osPhysicalToVirtual(uint32_t addr);
 
-int osPiStartDma(dword m_iomsg, int priority, int direction,
-                 dword devaddr, dword vaddr, int nbytes, dword m_msgqueue);
+int osPiStartDma(uint32_t m_iomsg, int priority, int direction,
+                 uint32_t devaddr, uint32_t vaddr, int nbytes, uint32_t m_msgqueue);
 
-int osEPiStartDma(dword m_pihandle,dword m_iomesg,dword flag);
+int osEPiStartDma(uint32_t m_pihandle,uint32_t m_iomesg,uint32_t flag);
 
 void os_framesync(void);
 void os_framewait(void);
 
-void osSkip(dword pc,dword a,dword b,dword c,dword d);
+void osSkip(uint32_t pc,uint32_t a,uint32_t b,uint32_t c,uint32_t d);
 
-int osAiSetFrequency(dword frequency);
+int osAiSetFrequency(uint32_t frequency);
 int osAiGetLength(void);
-int osAiSetNextBuffer(dword m_addr,int bytes);
+int osAiSetNextBuffer(uint32_t m_addr,int bytes);
 
-void osStopTimer(dword m_ostimer);
+void osStopTimer(uint32_t m_ostimer);
 
-int osSetTimer(dword m_ostimer,dword count_hi,dword count_lo,
-               dword interval_hi,dword interval_lo,
-               dword m_queue,dword m_mesg);
+int osSetTimer(uint32_t m_ostimer,uint32_t count_hi,uint32_t count_lo,
+               uint32_t interval_hi,uint32_t interval_lo,
+               uint32_t m_queue,uint32_t m_mesg);
 
-int  osContStartReadData(dword m_queue);
-void osContGetReadData(dword m_data);
-int  osContInit(dword m_queue,dword m_bitpattern, dword m_status);
-int  osContStartQuery(dword m_data);
-void osContGetQuery(dword m_data);
+int  osContStartReadData(uint32_t m_queue);
+void osContGetReadData(uint32_t m_data);
+int  osContInit(uint32_t m_queue,uint32_t m_bitpattern, uint32_t m_status);
+int  osContStartQuery(uint32_t m_data);
+void osContGetQuery(uint32_t m_data);
 
 void os_updatestats(int skip);
 
 int  os_nonidlethread(void);
 
 int  osSpTaskYield(void);
-int  osSpTaskYielded(dword m_task);
-void osSpTaskStartGo(dword pos);
+int  osSpTaskYielded(uint32_t m_task);
+void osSpTaskStartGo(uint32_t pos);
 
 // game specific hacks (called internally)
 void os_taskhacks(int idling);
 
-int os_eventqueuefree(dword ev);
+int os_eventqueuefree(uint32_t ev);
 
-int os_finddmasource(dword addr);
+int os_finddmasource(uint32_t addr);
 
 void osStopCurrentThread(void);
 
@@ -133,7 +133,7 @@ void os_timers(void);
 
 void os_init(void);
 
-void osMapMem(dword virt,dword phys,int size);
+void osMapMem(uint32_t virt,uint32_t phys,int size);
 double os_gettimeus(void);
 
 #ifdef __cplusplus

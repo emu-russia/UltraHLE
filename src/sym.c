@@ -36,10 +36,10 @@ OSCall oscall[MAXOSCALL]={
 
 typedef struct
 {
-    dword  addr;
+    uint32_t  addr;
     char  *text;
     int    patch;
-    dword  original;
+    uint32_t  original;
 } Sym;
 
 Sym   sym[SYMSIZE];
@@ -58,7 +58,7 @@ void sortsymbols(void)
 int findsym(int addr)
 {
     int i,nearesti=0;
-    dword nearest=0;
+    uint32_t nearest=0;
     for(i=0;i<symnum;i++)
     {
         if(addr==sym[i].addr)
@@ -292,7 +292,7 @@ void sym_load(char *file)
         while(!feof(f1))
         {
             char  buf[256];
-            dword addr;
+            uint32_t addr;
             char *text=buf+9;
             char *patch=text;
             int   patchcode;
@@ -355,10 +355,10 @@ void sym_save(char *file)
 {
 }
 
-void routinecrc2(dword addr,int barrier,dword *xcrc1,dword *xcrc2)
+void routinecrc2(uint32_t addr,int barrier,uint32_t *xcrc1,uint32_t *xcrc2)
 {
-    dword crc,crc1=0,crc2=0;
-    dword x1,x2;
+    uint32_t crc,crc1=0,crc2=0;
+    uint32_t x1,x2;
     int i,in,errorsaid=0;
     int dump=0;
 
@@ -487,11 +487,11 @@ void routinecrc2(dword addr,int barrier,dword *xcrc1,dword *xcrc2)
 void sym_demooscalls(void) // for demo.rom
 {
     int i,j,k,l,n,jm;
-    dword x,y,a;
+    uint32_t x,y,a;
     char *p;
     FILE *f1;
-    dword base1;
-    dword base2;
+    uint32_t base1;
+    uint32_t base2;
 
     sym_removepatches();
 
@@ -631,7 +631,7 @@ void sym_demooscalls(void) // for demo.rom
 int restorepatch(Sym *sym)
 {
     int address,patch;
-    dword old;
+    uint32_t old;
 
     address=sym->addr;
     patch=sym->patch;
@@ -651,7 +651,7 @@ void putpatch(Sym *sym)
 {
     int address,patch;
     int x;
-    dword old;
+    uint32_t old;
 
     address=sym->addr;
     patch=sym->patch;
@@ -751,7 +751,7 @@ void sym_dumposcalls(void)
     }
 }
 
-void sym_findoscalls(dword base,dword bytes,int cont)
+void sym_findoscalls(uint32_t base,uint32_t bytes,int cont)
 {
     int i,j,k,cl,end,x0,x,y,found,class;
     int cnt=0,total=0,cnt2=0,total2=0;

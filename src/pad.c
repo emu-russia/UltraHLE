@@ -33,13 +33,13 @@
 
 typedef struct
 {
-    word button;
+    uint16_t button;
     char stickx;
     char sticky;
 } PadStructData;
 
 PadStructData mypad;
-word          lastbutton;
+uint16_t          lastbutton;
 int           xnarrow;
 int           xcenter;
 int           ycenter;
@@ -307,19 +307,19 @@ void pad_frame(void)
 {
 }
 
-dword pad_getdata(int pad)
+uint32_t pad_getdata(int pad)
 {
-    dword state;
-    if(pad==0) state=*(dword *)&mypad;
+    uint32_t state;
+    if(pad==0) state=*(uint32_t *)&mypad;
     else state=0;
     if(!pad) st.padstate=state;
     state=FLIP32(state);
     return(state);
 }
 
-void pad_writedata(dword addr)
+void pad_writedata(uint32_t addr)
 {
-    dword state=pad_getdata(0);
+    uint32_t state=pad_getdata(0);
     mem_write32(addr,state);
 }
 

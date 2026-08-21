@@ -2,14 +2,14 @@
 
 /***********************************************************/
 
-dword spmem(int x)
+uint32_t spmem(int x)
 {
     int d;
     d=mem_read32(SP.d+x);
     return(d);
 }
 
-void printmem(dword addr)
+void printmem(uint32_t addr)
 {
     char buf[256];
     int i,b=addr;
@@ -60,7 +60,7 @@ void p_osCont(void)
 
 void p_osGetTime(void)
 {
-    dword lo,hi;
+    uint32_t lo,hi;
     osGetTime(&lo,&hi);
     V0.d=hi;
     V1.d=lo;
@@ -68,7 +68,7 @@ void p_osGetTime(void)
 
 void p_osGetCount(void)
 {
-    dword lo,hi;
+    uint32_t lo,hi;
     osGetTime(&lo,&hi);
     V0.d=lo;
 }
@@ -311,9 +311,9 @@ void p_long2double(void)
     double d;
     a.d2[0]=A1.d;
     a.d2[1]=A0.d;
-    d=(qint)a.q;
-    st.f[0].d=*((dword *)&d+0);
-    st.f[1].d=*((dword *)&d+1);
+    d=(int64_t)a.q;
+    st.f[0].d=*((uint32_t *)&d+0);
+    st.f[1].d=*((uint32_t *)&d+1);
 //    print("from %08X long2double %08X%08X -> %f\n",RA.d,A0.d,A1.d,d);
 }
 
@@ -324,7 +324,7 @@ void p_double2long(void)
     double d;
     d=*(double *)&st.f[12].f;
     d+=rand()*1e8;
-    a.q=(qint)d;
+    a.q=(int64_t)d;
     V1.d=a.d2[0];
     V0.d=a.d2[1];
 //    print("from %08X double2long %f -> %08X%08X\n",RA.d,d,A0.d,A1.d,d);
@@ -337,7 +337,7 @@ void p_long2single(void)
     float f;
     a.d2[0]=A1.d;
     a.d2[1]=A0.d;
-    f=(qint)a.q;
+    f=(int64_t)a.q;
     st.f[0].f=f;
 //    print("from %08X long2single %08X%08X -> %f\n",RA.d,A0.d,A1.d,f);
 }
@@ -348,7 +348,7 @@ void p_single2long(void)
     qreg a;
     float f;
     f=st.f[12].f;
-    a.q=(qint)f;
+    a.q=(int64_t)f;
     V1.d=a.d2[0];
     V0.d=a.d2[1];
 //    print("from %08X single2long %f -> %08X%08X\n",RA.d,f,A0.d,A1.d,f);
@@ -378,7 +378,7 @@ void p_golden1(void) // random bit?
 {
 #if 0
     qreg x;
-    qword a0,a1,a2,v0;
+    uint64_t a0,a1,a2,v0;
     x.d2[1]=mem_read32(0x80024460);
     x.d2[0]=mem_read32(0x80024464);
 
@@ -401,9 +401,9 @@ void p_golden1(void) // random bit?
 //    print("%08X%08X\n",x.d2[1],x.d2[0]);
     mem_write32(0x80024460,x.d2[1]);
     mem_write32(0x80024464,x.d2[0]);
-    V0.d=(qint)v0>>32;
+    V0.d=(int64_t)v0>>32;
 #else
-    dword x;
+    uint32_t x;
     x=rand();
     x<<=16;
     x|=rand();
@@ -419,7 +419,7 @@ void p_dmultu(void)
     a.d2[1]=A0.d;
     b.d2[0]=A3.d;
     b.d2[1]=A2.d;
-    r.q=(unsigned __int64)a.q*(unsigned __int64)b.q;
+    r.q=(uint64_t)a.q*(uint64_t)b.q;
     V1.d=r.d2[0];
     V0.d=r.d2[1];
 //    logi("dop: %08X%08X=%08X%08X*%08X%08X\n",A0.d,A1.d,A2.d,A3.d,V0.d,V1.d);
@@ -432,7 +432,7 @@ void p_ddivu(void)
     a.d2[1]=A0.d;
     b.d2[0]=A3.d;
     b.d2[1]=A2.d;
-    r.q=(unsigned __int64)a.q/(unsigned __int64)b.q;
+    r.q=(uint64_t)a.q/(uint64_t)b.q;
     V1.d=r.d2[0];
     V0.d=r.d2[1];
 //    logi("dop: %08X%08X=%08X%08X/%08X%08X (uns)\n",A0.d,A1.d,A2.d,A3.d,V0.d,V1.d);
@@ -445,7 +445,7 @@ void p_ddiv(void)
     a.d2[1]=A0.d;
     b.d2[0]=A3.d;
     b.d2[1]=A2.d;
-    r.q=(__int64)a.q/(__int64)b.q;
+    r.q=(int64_t)a.q/(int64_t)b.q;
     V1.d=r.d2[0];
     V0.d=r.d2[1];
 //    logi("dop: %08X%08X=%08X%08X/%08X%08X (sig)\n",A0.d,A1.d,A2.d,A3.d,V0.d,V1.d);
@@ -458,7 +458,7 @@ void p_drem(void) // _ll_rem and _ull_rem seem to be the same!
     a.d2[1]=A0.d;
     b.d2[0]=A3.d;
     b.d2[1]=A2.d;
-    r.q=(unsigned __int64)a.q%(unsigned __int64)b.q;
+    r.q=(uint64_t)a.q%(uint64_t)b.q;
     V1.d=r.d2[0];
     V0.d=r.d2[1];
 //    logi("dop: %08X%08X=%08X%08X rem %08X%08X\n",A0.d,A1.d,A2.d,A3.d,V0.d,V1.d);
@@ -471,7 +471,7 @@ void p_dmod(void)
     a.d2[1]=A0.d;
     b.d2[0]=A3.d;
     b.d2[1]=A2.d;
-    r.q=(__int64)a.q%(__int64)b.q;
+    r.q=(int64_t)a.q%(int64_t)b.q;
     V1.d=r.d2[0];
     V0.d=r.d2[1];
 //    logi("dop: %08X%08X=%08X%08X mod %08X%08X\n",A0.d,A1.d,A2.d,A3.d,V0.d,V1.d);

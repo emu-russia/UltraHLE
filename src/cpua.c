@@ -10,7 +10,7 @@
 // it had to be splitted. Well so it goes.
 RState r;
 CStats cstat;
-dword  ip[256];
+uint32_t  ip[256];
 
 /**************************************************************************
 ** Routines for compiling a new group
@@ -53,9 +53,9 @@ void a_optimizesetup(void)
 
 // called to compile one opcode and insert the compiled data into
 // x86 instruction stream.
-int ac_compileop(dword pc)
+int ac_compileop(uint32_t pc)
 {
-    dword opcode=mem_readop(pc);
+    uint32_t opcode=mem_readop(pc);
     int op;
 
     op=getop(opcode);
@@ -72,7 +72,7 @@ void ac_sizegroup(Group *g)
 { // determine length of group
     int i,branch;
     int allnops=1;
-    dword x,op;
+    uint32_t x,op;
     x=g->opcode;
     for(i=0;i<MAXGROUP;)
     {
@@ -113,8 +113,8 @@ void ac_sizegroup(Group *g)
 void ac_compilegroup(Group *g) // main
 {
     int   i,l;
-    dword lastcodepos;
-    dword alignedcodepos;
+    uint32_t lastcodepos;
+    uint32_t alignedcodepos;
 
     // init r to zero
     memset(&r,0,sizeof(r));
@@ -213,7 +213,7 @@ else          g->ratio=2;
 }
 
 // public routine for compiling a group for testing purposes
-void a_compilegroupat(dword x)
+void a_compilegroupat(uint32_t x)
 {
     Group *g;
     g=ac_creategroup(x);
@@ -462,7 +462,7 @@ PUBLICREND
 
 void a_fastgroup(Group *g)
 {
-    dword stptr=(dword)&st;
+    uint32_t stptr=(uint32_t)&st;
     stptr+=STOFFSET;
     // will execute multiple groups as long as bailout is positibe
     // and groups remain compiled
@@ -497,7 +497,7 @@ void a_fastgroup(Group *g)
 
 void a_slowgroup(Group *g)
 { // execute with cpuc
-    dword pcmin,pcmax;
+    uint32_t pcmin,pcmax;
 
     pcmin=g->addr;
     pcmax=g->addr+g->len*4;
@@ -528,7 +528,7 @@ void a_exec(void)
 {
     int    startbail=st.bailout;
     int    slowcnt=0;
-    dword  opcode;
+    uint32_t  opcode;
     Group *g;
 
     if(!fastgroupinitdone) a_fastgroupinit();

@@ -68,9 +68,9 @@ void hw_checkseldom(void)
 
 void hw_check(void)
 {
-    static qword lastcheck=0;
-    static qword nextcheck1=0;
-    static qword nextcheck2=0;
+    static uint64_t lastcheck=0;
+    static uint64_t nextcheck1=0;
+    static uint64_t nextcheck2=0;
 
     if(st.cputime<lastcheck)
     {
@@ -112,7 +112,7 @@ void hw_pi_dma(void)
 ** SP emulation
 */
 
-static dword    sptaskpos;
+static uint32_t    sptaskpos;
 static OSTask_t sptask;
 static int      spstatus;
 static int      sploaded;
@@ -259,7 +259,7 @@ void hw_sp_check(void)
 
 void hw_sp_statuswrite(void)
 {
-    dword status;
+    uint32_t status;
     int   go;
 
     status=WSP[4];
@@ -323,7 +323,7 @@ void hw_sp_statuswrite(void)
 
 void hw_sp_dmawrite(void)
 {
-    dword from,to,cnt;
+    uint32_t from,to,cnt;
 
     to  =WSP[0];
     from=WSP[1];
@@ -415,7 +415,7 @@ void hw_selectpad(int pad)
 
 void hw_si_pads(int write)
 {
-    dword base=WSI[0];
+    uint32_t base=WSI[0];
     int i;
 
     logh("hw-si: dma %08X (write=%i)\n",base,write);
@@ -504,7 +504,7 @@ void hw_memio(void)
 // to hw_memio when LUI loads it. This is called from cpuc.c and
 // from cpua.c when compiling. It is not called when executing compiled
 // code, so speed is not that important here.
-int hw_ismemiorange(dword addr)
+int hw_ismemiorange(uint32_t addr)
 {
     addr&=0x1fff0000;
     if(addr==0x04040000) return(1); // SP registers are handled

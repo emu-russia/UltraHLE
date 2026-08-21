@@ -26,7 +26,7 @@ typedef struct
     // 2048: codebook (256 bytes available)
     short    mem[2048+256];
     //
-    dword    segment;
+    uint32_t    segment;
     // last SETBUFF vars
     int      out;
     int      in;
@@ -35,7 +35,7 @@ typedef struct
     int      aux2;
     int      aux3;
     //
-    dword    m_adpcmloopdata;
+    uint32_t    m_adpcmloopdata;
     // envmix params
     int      env_lteff;
     int      env_rteff;
@@ -156,7 +156,7 @@ void printcurve(int x,int scale)
     loga(">\n");
 }
 
-void printdata(dword *cmd)
+void printdata(uint32_t *cmd)
 {
     int i,x;
     loga("\n+data%08X@%08X: ",cmd[0],cmd[1]);
@@ -167,7 +167,7 @@ void printdata(dword *cmd)
     }
 }
 
-void printdata2(dword *cmd)
+void printdata2(uint32_t *cmd)
 {
     int i,x;
     loga("\n+data%08X@%08X:",cmd[0],cmd[1]);
@@ -179,7 +179,7 @@ void printdata2(dword *cmd)
     }
 }
 
-void printcurvedata(dword addr,int len)
+void printcurvedata(uint32_t addr,int len)
 {
     int i,x;
     loga("\n");
@@ -204,7 +204,7 @@ void printlocalcurvedata(int src,int len)
 
 /*************************************************************************/
 
-void loadshort(short *dst,dword addr,int cnt)
+void loadshort(short *dst,uint32_t addr,int cnt)
 {
     int i,a;
     for(i=0;i<cnt;i+=4)
@@ -215,7 +215,7 @@ void loadshort(short *dst,dword addr,int cnt)
     }
 }
 
-void loadmem(dword dst,dword addr,int cnt)
+void loadmem(uint32_t dst,uint32_t addr,int cnt)
 {
     int i,a;
     cnt=(cnt+3)&~3; // round to 4 bytes
@@ -236,7 +236,7 @@ void loadmem(dword dst,dword addr,int cnt)
     }
 }
 
-void savemem(dword dst,dword addr,int cnt)
+void savemem(uint32_t dst,uint32_t addr,int cnt)
 {
     int i,a;
     cnt=(cnt+3)&~3; // round to 4 bytes
@@ -284,7 +284,7 @@ void zeromem(int out,int cnt)
 /*************************************************************************/
 // ADPCM decompress
 
-void loadsamplestate(int dst,dword m_state,int flags)
+void loadsamplestate(int dst,uint32_t m_state,int flags)
 {
     // load state
     if(flags&1)
@@ -307,7 +307,7 @@ void loadsamplestate(int dst,dword m_state,int flags)
     }
 }
 
-void savesamplestate(int dst,dword m_state,int flags)
+void savesamplestate(int dst,uint32_t m_state,int flags)
 {
     savemem(dst,m_state,32);
 }
@@ -441,7 +441,7 @@ void adpcm_block(short *out,short *last,int src,short *book,int bits)
     }
 }
 
-void adpcm(dword m_state,int src,int dst,int cnt,int flags)
+void adpcm(uint32_t m_state,int src,int dst,int cnt,int flags)
 {
     int src0;
     int dst0;
@@ -566,7 +566,7 @@ void adpcm(dword m_state,int src,int dst,int cnt,int flags)
     */
 }
 
-void resample(dword m_state,int src,int dst,int cnt,int flags,int speed)
+void resample(uint32_t m_state,int src,int dst,int cnt,int flags,int speed)
 {
     int subpos,a,b,r;
     int dst0,cnt0,src0;
@@ -1145,7 +1145,7 @@ void boost(int dst,int cnt,int gain)
     }
 }
 
-void envmix_loadstate(dword addr)
+void envmix_loadstate(uint32_t addr)
 {
     sst.env_ltvol=mem_read32p(addr+ 0);
     sst.env_rtvol=mem_read32p(addr+ 4);
@@ -1157,7 +1157,7 @@ void envmix_loadstate(dword addr)
     sst.env_rttar=mem_read32p(addr+28);
 }
 
-void envmix_savestate(dword addr)
+void envmix_savestate(uint32_t addr)
 {
     mem_write32(addr+ 0,sst.env_ltvol);
     mem_write32(addr+ 4,sst.env_rtvol);
@@ -1212,7 +1212,7 @@ void saveaudiomem(void)
     }
 }
 
-static __inline dword address(dword address)
+static __inline uint32_t address(uint32_t address)
 { // segment convert to physical address
     return( (address&0xffffff) + sst.segment );
 }
@@ -1220,7 +1220,7 @@ static __inline dword address(dword address)
 void slist_banjo(OSTask_t *task)
 {
     int cmdnum,c,lastc;
-    dword cmd[8],dlpnt;
+    uint32_t cmd[8],dlpnt;
 
     cmdcnt=0;
     sst.segment=0;
@@ -1315,7 +1315,7 @@ case 0xF: // SETLOOP
     } break;
 case 0xB: // LOADADPCM
     {
-        dword addr=cmd[1]+sst.segment;
+        uint32_t addr=cmd[1]+sst.segment;
         int   len =FIELD(cmd[0],0,12);
         loadmem(4096,addr,len);
         sst.lastcodebook=addr;
@@ -1324,7 +1324,7 @@ case 0x4: // LOADBUFF
     {
         int dst=FIELD(cmd[0],0,12);
         int len=FIELD(cmd[0],12,12);
-        dword addr=cmd[1]+sst.segment;
+        uint32_t addr=cmd[1]+sst.segment;
         if(st.dumpsnd) loga("%04X (%03X) <- %08X",dst,len,addr);
         loadmem(dst,addr,len);
         sst.lastloadb_from=cmd[1];
@@ -1335,7 +1335,7 @@ case 0x6: // SAVEBUFF
     {
         int dst=FIELD(cmd[0],0,12);
         int len=FIELD(cmd[0],12,12);
-        dword addr=cmd[1]+sst.segment;
+        uint32_t addr=cmd[1]+sst.segment;
         if(st.dumpsnd) loga("%04X (%03X) -> %08X",dst,len,addr);
         savemem(dst,addr,len);
         if(KOE && lastc==0xD) print("--interleave %08X\n",cmd[1]);
@@ -1480,7 +1480,7 @@ default:
 void slist_mario(OSTask_t *task)
 {
     int cmdnum,c,lastc;
-    dword cmd[8],dlpnt;
+    uint32_t cmd[8],dlpnt;
 
     cmdcnt=0;
     sst.segment=0;
@@ -1570,7 +1570,7 @@ void slist_mario(OSTask_t *task)
                 int flags=FIELD(cmd[0],16,8);
                 int dst=sst.in;
                 int len=sst.cnt;
-                dword addr=cmd[1]+sst.segment;
+                uint32_t addr=cmd[1]+sst.segment;
                 if(st.dumpsnd) loga("%04X (%03X) <- %08X",dst,len,addr);
                 loadmem(dst,addr,len);
                 sst.lastloadb_from=cmd[1];
@@ -1583,7 +1583,7 @@ void slist_mario(OSTask_t *task)
             } break;
         case 0xB: // LOADADPCM
             {
-                dword addr=cmd[1]+sst.segment;
+                uint32_t addr=cmd[1]+sst.segment;
                 int   len =FIELD(cmd[0],0,12);
                 loadmem(4096,addr,len);
                 sst.lastcodebook=addr;
@@ -1593,7 +1593,7 @@ void slist_mario(OSTask_t *task)
                 int flags=FIELD(cmd[0],16,8);
                 int dst=sst.out;
                 int len=sst.cnt;
-                dword addr=cmd[1]+sst.segment;
+                uint32_t addr=cmd[1]+sst.segment;
                 if(st.dumpsnd) loga("%04X (%03X) -> %08X",dst,len,addr);
                 savemem(dst,addr,len);
                 if(KOE && lastc==0xD) print("--interleave %08X\n",cmd[1]);
@@ -1713,7 +1713,7 @@ void slist_mario(OSTask_t *task)
 void slist_zelda(OSTask_t *task)
 {
     int cmdnum,c;
-    dword cmd[8],dlpnt;
+    uint32_t cmd[8],dlpnt;
 
     cmdcnt=0;
 
@@ -1806,7 +1806,7 @@ void slist_zelda(OSTask_t *task)
             } break;
         case 0x14: // LOADBUFF
             {
-                dword addr=cmd[1]+sst.segment;
+                uint32_t addr=cmd[1]+sst.segment;
                 int   len =FIELD(cmd[0],12,12);
                 int   dst =FIELD(cmd[0],0,12);
                 if(st.dumpsnd) loga("%04X (%03X) <- %08X",dst,len,addr);
@@ -1817,7 +1817,7 @@ void slist_zelda(OSTask_t *task)
             } break;
         case 0x15: // SAVEBUFF
             {
-                dword addr=cmd[1]+sst.segment;
+                uint32_t addr=cmd[1]+sst.segment;
                 int   len =FIELD(cmd[0],12,12);
                 int   dst =FIELD(cmd[0],0,12);
                 if(st.dumpsnd) loga("%04X (%03X) -> %08X",dst,len,addr);
@@ -1837,7 +1837,7 @@ void slist_zelda(OSTask_t *task)
             } break;
         case 0xB: // ADPCMCODEB
             {
-                dword addr=cmd[1]+sst.segment;
+                uint32_t addr=cmd[1]+sst.segment;
                 int   len =FIELD(cmd[0],0,12);
                 if(st.dumpsnd) loga("code (%03X) <- %08X",len,addr);
                 loadmem(4096,addr,len);
@@ -2034,7 +2034,7 @@ void slist_execute(OSTask_t *task)
     st.us_audio+=starttime;
 }
 
-int slist_nextbuffer(dword m_addr,int bytes)
+int slist_nextbuffer(uint32_t m_addr,int bytes)
 {
     static short buf[16384];
     int ret;
