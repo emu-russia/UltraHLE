@@ -631,6 +631,10 @@ static void set_combine(int tmu, int rgbmode, int alphamode, int stage)
 	GLenum fnRGB, fnA;
 	GLenum s0, s1, s2;
 	GLenum as0;
+	// Blend factor for the RGB channel: X_TEXTUREENVC/X_TEXTUREENVCR blend
+	// with the texture COLOR (per x.h: "blend(envcolor,gouraud,texturecolor)"),
+	// all other interpolate modes use the texture alpha.
+	GLenum op2 = GL_SRC_ALPHA;
 
 	if (alphamode == 0)
 		alphamode = rgbmode;
@@ -656,17 +660,20 @@ static void set_combine(int tmu, int rgbmode, int alphamode, int stage)
 			// C = ITERATED*TA + ENV*(1-TA)  (Glide grColorCombine(7,4,1,0,0))
 			fnRGB = GL_INTERPOLATE; s0 = srcA; s1 = GL_CONSTANT; s2 = GL_TEXTURE;
 			break;
-		case X_TEXTUREENVC:		// Glide: blend(iterated, envcolor, factor) - approx: texturealpha
-			// C = ITERATED*F + ENV*(1-F)  (Glide grColorCombine(7,5,1,0,0))
+		case X_TEXTUREENVC:		// Glide: blend(iterated, envcolor, texturecolor)
+			// C = ITERATED*TEXCOLOR + ENV*(1-TEXCOLOR)  (Glide grColorCombine(7,4,1,0,0))
 			fnRGB = GL_INTERPOLATE; s0 = srcA; s1 = GL_CONSTANT; s2 = GL_TEXTURE;
+			op2 = GL_SRC_COLOR;
 			break;
-		case X_TEXTUREENVCR:	// Glide: blend(envcolor, iterated, factor)
-			// C = ITERATED*TA + ENV*(1-TA): the vertex (gouraud) color must
-			// dominate for opaque textures (Mario 64's head in the menu).
-			// XGLIDE used LOD_FRACTION as the blend factor here; GL has no
-			// LOD factor in the fixed pipeline, so the texture alpha is used
-			// and the iterated color is kept on the "TA" side, same as ENVC.
+		case X_TEXTUREENVCR:	// Glide: blend(envcolor, iterated, texturecolor)
+			// C = ITERATED*TEXCOLOR + ENV*(1-TEXCOLOR): the vertex (gouraud)
+			// color must dominate for opaque textures (Mario 64's head in the
+			// menu). XGLIDE used LOD_FRACTION as the blend factor here; GL has
+			// no LOD factor in the fixed pipeline, so the texture color is
+			// used and the iterated color is kept on the factor side, same as
+			// ENVC.
 			fnRGB = GL_INTERPOLATE; s0 = srcA; s1 = GL_CONSTANT; s2 = GL_TEXTURE;
+			op2 = GL_SRC_COLOR;
 			break;
 		case X_SUB:				// Glide: texture - iterated  (grColorCombine(6,8,0,1,0))
 			fnRGB = GL_SUBTRACT; s0 = GL_TEXTURE; s1 = srcA; s2 = srcA;
@@ -718,7 +725,7 @@ static void set_combine(int tmu, int rgbmode, int alphamode, int stage)
 	glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE2_RGB, s2);
 	glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB, GL_SRC_COLOR);
 	glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_RGB, GL_SRC_COLOR);
-	glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND2_RGB, GL_SRC_ALPHA);
+	glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND2_RGB, op2);
 	glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, fnA);
 	glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_ALPHA, as0);
 	glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_ALPHA, (alphamode == X_MUL) ? GL_TEXTURE : as0);
