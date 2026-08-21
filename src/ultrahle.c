@@ -5,6 +5,10 @@
 
 #include "ultrahle.h"
 
+// X library (XOpenGL) entry point used on window resizes
+extern void x_resize(int width, int height);
+extern int  rdp_gfxactive(void);
+
    // ST: emulator thread; basically calls main.c which returns
    // if debugui is ever exited with 'x'.
 
@@ -66,7 +70,7 @@
 
       hwnd = CreateWindow( APPNAME,
                            szBuffer,
-                           WS_OVERLAPPEDWINDOW,
+                           WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN,
                            50, 50, 600, 450,
                            HWND_DESKTOP,
                            NULL,
@@ -574,6 +578,19 @@
             SendMessage( hwndStatus, SB_SETTEXT, 5, (LPARAM)"IDLE" );
             SendMessage( hwndStatus, SB_SETTEXT, 6, (LPARAM)"FPS" );
 
+            // Keep the OpenGL view sized to the client area (it letterboxes
+            // the game image itself, preserving the aspect ratio).
+            x_resize( rcl.right - rcl.left, rcl.bottom - rcl.top );
+
+            break;
+
+         // When the OpenGL display is active it covers the whole client
+         // area; do not let the default background erase paint over it.
+
+         case WM_ERASEBKGND:
+
+            if(rdp_gfxactive()) return(1);
+
             break;
 
          // Terminate the Application
@@ -805,19 +822,19 @@
                      pad_enablejoy(0);
                   }
 
-                  SetWindowLong( hDlg, DWL_MSGRESULT, TRUE );
+                  SetWindowLong( hDlg, DWLP_MSGRESULT, TRUE );
 
                   break;
 
                case PSN_KILLACTIVE:
 
-                  SetWindowLong( hDlg, DWL_MSGRESULT, FALSE );
+                  SetWindowLong( hDlg, DWLP_MSGRESULT, FALSE );
                   return( 1 );
                   break;
 
                case PSN_RESET:
 
-                  SetWindowLong( hDlg, DWL_MSGRESULT, FALSE );
+                  SetWindowLong( hDlg, DWLP_MSGRESULT, FALSE );
                   break;
 
                default:

@@ -1,0 +1,13 @@
+.vs
+packages
+Debug
+Release
+x64
+xdemo\Debug
+xdemo\Release
+xdemo\x64
+XOpenGL\Debug
+XOpenGL\Release
+XOpenGL\x64
+*.vcxproj.user
+*.bin
