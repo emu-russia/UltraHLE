@@ -681,19 +681,20 @@ static void set_combine(int tmu, int rgbmode, int alphamode, int stage)
 			fnRGB = GL_INTERPOLATE; s0 = srcA; s1 = GL_CONSTANT; s2 = GL_TEXTURE;
 			break;
 		case X_TEXTUREENVC:		// Glide: blend(iterated, envcolor, texturecolor)
-			// C = ITERATED*TEXCOLOR + ENV*(1-TEXCOLOR)  (Glide grColorCombine(7,4,1,0,0))
+			// C = ITERATED*TEXCOLOR + ENV*(1-TEXCOLOR): the blend factor is the
+			// texture COLOR. Needed for IA8 textures whose detail (e.g. the
+			// craters of the Zelda title moon) lives in the intensity channel
+			// while alpha is just the opaque disc.
 			fnRGB = GL_INTERPOLATE; s0 = srcA; s1 = GL_CONSTANT; s2 = GL_TEXTURE;
 			op2 = GL_SRC_COLOR;
 			break;
-		case X_TEXTUREENVCR:	// Glide: blend(envcolor, iterated, texturecolor)
-			// C = ITERATED*TEXCOLOR + ENV*(1-TEXCOLOR): the vertex (gouraud)
-			// color must dominate for opaque textures (Mario 64's head in the
-			// menu). XGLIDE used LOD_FRACTION as the blend factor here; GL has
-			// no LOD factor in the fixed pipeline, so the texture color is
-			// used and the iterated color is kept on the factor side, same as
-			// ENVC.
+		case X_TEXTUREENVCR:	// Glide: blend(envcolor, iterated, factor)
+			// C = ITERATED*TA + ENV*(1-TA): the vertex (gouraud) color must
+			// dominate for opaque textures (Mario 64's head in the menu), so
+			// the texture ALPHA is the blend factor here (opaque texels give a
+			// pure iterated result).
 			fnRGB = GL_INTERPOLATE; s0 = srcA; s1 = GL_CONSTANT; s2 = GL_TEXTURE;
-			op2 = GL_SRC_COLOR;
+			op2 = GL_SRC_ALPHA;
 			break;
 		case X_SUB:				// Glide: texture - iterated  (grColorCombine(6,8,0,1,0))
 			fnRGB = GL_SUBTRACT; s0 = GL_TEXTURE; s1 = srcA; s2 = srcA;
